@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-@export var camera_follow_delay : float = 0.05
+@export var camera_follow_delay : float = 0.1
 
 #jump
 @export var jump_height : float = 2.25
@@ -13,12 +13,13 @@ extends CharacterBody3D
 
 @export var base_speed: float = 5.0
 @export var run_speed: float = 8.0
-@export var stop_speed: float = 8.0
+@export var stop_speed: float = 15.0
+@export var acceleration: float = 0.1
+var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
 
 
 func _physics_process(delta: float) -> void:
-	#velocity = Vector3(movement_input.x, 0, movement_input.y) * base_speed
 	move_logic(delta)
 	jump_logic(delta)
 	move_and_slide()
@@ -29,16 +30,13 @@ func _physics_process(delta: float) -> void:
 func move_logic(delta):
 	movement_input = Input.get_vector('left',"right", "up", "down")
 	var velocity_2d = Vector2(velocity.x, velocity.z)
-	var speed
-	if Input.is_action_pressed("run"):
-		speed = run_speed
-		print('running')
-	else: 
-		speed = base_speed
-		print('walking')
+	var is_airborne = not is_on_floor()
+	var current_speed = air_speed if is_airborne else (run_speed if Input.is_action_pressed("run") else base_speed)
+	
 	if movement_input != Vector2.ZERO:
-		velocity_2d += movement_input * speed * delta
-		velocity_2d = velocity_2d.limit_length(speed)
+		velocity_2d = velocity_2d.lerp(movement_input * current_speed, acceleration)
+		#velocity_2d += movement_input * speed * delta
+		#velocity_2d = velocity_2d.limit_length(speed)
 	else:
 		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
 		
@@ -50,5 +48,6 @@ func move_logic(delta):
 func jump_logic(delta):
 	if Input.is_action_just_pressed('jump') and is_on_floor():
 		velocity.y = -jump_velocity
+		air_speed = Vector2(velocity.x, velocity.z).length()
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta

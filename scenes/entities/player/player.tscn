@@ -1,8 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://scenes/entities/player/player.gd" id="1_1hmtu"]
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_yel1f"]
+[ext_resource type="PackedScene" uid="uid://bubi8xvb7hlr5" path="res://scenes/character/character.blend" id="2_635qg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
 
@@ -12,9 +11,7 @@ floor_constant_speed = true
 platform_on_leave = 1
 script = ExtResource("1_1hmtu")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_yel1f")
+[node name="character" parent="." instance=ExtResource("2_635qg")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
