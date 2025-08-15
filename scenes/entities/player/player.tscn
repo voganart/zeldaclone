@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://c364awakh0qqj"]
+
+[ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://scenes/entities/player/player.gd" id="1_1hmtu"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_yel1f"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
+
+[node name="Player" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000904083, -0.0158243, 0.00977516)
+floor_constant_speed = true
+platform_on_leave = 1
+script = ExtResource("1_1hmtu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_yel1f")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_yel1f")
+
+[node name="CameraController" type="Node3D" parent="."]
+top_level = true
+
+[node name="CameraTarget" type="Node3D" parent="CameraController"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 9.23205, 8.06218)
+
+[node name="Camera3D" type="Camera3D" parent="CameraController/CameraTarget"]
+current = true
+fov = 50.0
