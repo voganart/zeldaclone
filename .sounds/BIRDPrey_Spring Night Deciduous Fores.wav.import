@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ye6ht4v4oe4e"
+path="res://.godot/imported/BIRDPrey_Spring Night Deciduous Fores.wav-50d8bf5d44a5c745bd1e61dda1fe52d0.sample"
+
+[deps]
+
+source_file="res://sounds/BIRDPrey_Spring Night Deciduous Fores.wav"
+dest_files=["res://.godot/imported/BIRDPrey_Spring Night Deciduous Fores.wav-50d8bf5d44a5c745bd1e61dda1fe52d0.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dlgcny2b28sof"
+path="res://.godot/imported/HMNBrth_Human, Adult, Male, Breath.wav-339420d0a1f871d0ea74897293a3f244.sample"
+
+[deps]
+
+source_file="res://sounds/HMNBrth_Human, Adult, Male, Breath.wav"
+dest_files=["res://.godot/imported/HMNBrth_Human, Adult, Male, Breath.wav-339420d0a1f871d0ea74897293a3f244.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -63,7 +63,7 @@ directional_shadow_blend_splits = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0.160087, 9, 2.78164)
+transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0, 9, 2.782)
 current = true
 fov = 50.0
 
@@ -74,7 +74,7 @@ script = ExtResource("3_ppgk2")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
-transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0.160087, 9, 2.78164)
+transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0, 9, 2.782)
 top_level = true
 script = ExtResource("4_2r41h")
 follow_mode = 2
@@ -92,28 +92,7 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 [node name="Entities" type="Node3D" parent="."]
 
 [node name="Player" parent="Entities" instance=ExtResource("1_2q6dc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.160087, 2, -3.21836)
-jump_height = 1.5
-jump_time_to_peak = 0.5
-air_control = 0.8
-acceleration = 0.09
-rot_speed = 5.0
-
-[node name="CSGBox3D" type="RigidBody3D" parent="Entities"]
-transform = Transform3D(0.925335, -0.196465, -0.324279, 0.0415374, 0.902658, -0.428349, 0.376868, 0.382896, 0.843422, -3, 2.90355, 0)
-collision_layer = 2
-mass = 10.0
-physics_material_override = SubResource("PhysicsMaterial_2q6dc")
-gravity_scale = 8.0
-continuous_cd = true
-linear_damp = 1.0
-angular_damp = 5.0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Entities/CSGBox3D"]
-shape = SubResource("BoxShape3D_2q6dc")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Entities/CSGBox3D"]
-mesh = SubResource("BoxMesh_w7c3h")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -3.218)
 
 [node name="Environment" type="Node3D" parent="."]
 
@@ -168,3 +147,17 @@ size = Vector3(10, 10, 1)
 
 [node name="CSGBox3D8" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.54186, 0.525763, 0.522964)
+
+[node name="CSGBox3D10" type="RigidBody3D" parent="Environment/CSGCombiner3D"]
+transform = Transform3D(0.925335, -0.196465, -0.324279, 0.0415374, 0.902658, -0.428349, 0.376868, 0.382896, 0.843422, -3, 2.90355, 0)
+physics_material_override = SubResource("PhysicsMaterial_2q6dc")
+continuous_cd = true
+linear_damp = 1.0
+angular_damp = 5.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Environment/CSGCombiner3D/CSGBox3D10"]
+shape = SubResource("BoxShape3D_2q6dc")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Environment/CSGCombiner3D/CSGBox3D10"]
+mesh = SubResource("BoxMesh_w7c3h")
+skeleton = NodePath("../../CSGBox3D10")
