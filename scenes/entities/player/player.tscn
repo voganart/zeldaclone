@@ -10,6 +10,11 @@ radius = 0.316145
 floor_constant_speed = true
 platform_on_leave = 1
 script = ExtResource("1_1hmtu")
+base_speed = 4.0
+run_speed = 6.0
+stop_speed = 0.01
+rot_speed = 0.1
+run_toggle_mode = false
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 

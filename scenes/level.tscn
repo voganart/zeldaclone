@@ -74,7 +74,7 @@ directional_shadow_blend_splits = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0, 7, 6)
+transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0.160087, 9, 2.78164)
 current = true
 fov = 50.0
 
@@ -85,7 +85,7 @@ script = ExtResource("3_ppgk2")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
-transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0, 7, 6)
+transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0.160087, 9, 2.78164)
 top_level = true
 script = ExtResource("4_2r41h")
 follow_mode = 2
@@ -103,12 +103,14 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 [node name="Entities" type="Node3D" parent="."]
 
 [node name="Player" parent="Entities" instance=ExtResource("1_2q6dc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.160087, 2, -3.21836)
 jump_height = 1.5
 jump_time_to_peak = 0.5
 jump_time_to_descent = 0.28
 air_control = 0.8
-base_speed = 4.0
-run_speed = 6.0
+stop_speed = 10.0
+acceleration = 0.09
+rot_speed = 8.0
 
 [node name="CSGBox3D" type="RigidBody3D" parent="Entities"]
 transform = Transform3D(0.925335, -0.196465, -0.324279, 0.0415374, 0.902658, -0.428349, 0.376868, 0.382896, 0.843422, -3, 2.90355, 0)
@@ -128,47 +130,55 @@ mesh = SubResource("BoxMesh_w7c3h")
 
 [node name="Environment" type="Node3D" parent="."]
 
-[node name="Floor" type="CSGBox3D" parent="Environment"]
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="Environment"]
+use_collision = true
+
+[node name="Floor" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(2.84561, 0, 0, 0, 1, 0, 0, 0, 2.84561, 0, -0.5, 0)
 material_override = SubResource("StandardMaterial3D_w8frs")
 use_collision = true
 size = Vector3(20, 1, 20)
 material = SubResource("StandardMaterial3D_2q6dc")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 0, 0, -6)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D9" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 3.2, 0, 0, -3)
+use_collision = true
+size = Vector3(10, 10, 1)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, -15.9883, 2, -6)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D3" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D3" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -15.9883, 4.42104, -15.0815)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D4" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D4" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -29.4344, 4.42104, -15.1606)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D5" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D5" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -39.0839, 6.00595, -26.243)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D6" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D6" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -27.9346, 7.58504, -27.2717)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D7" type="CSGBox3D" parent="Environment"]
+[node name="CSGBox3D7" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -17.0694, 9.84195, -27.9444)
 use_collision = true
 size = Vector3(10, 10, 1)
 
-[node name="CSGBox3D" type="CSGBox3D" parent="."]
+[node name="CSGBox3D8" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.54186, 0.525763, 0.522964)
