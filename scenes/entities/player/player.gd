@@ -17,7 +17,8 @@ extends CharacterBody3D
 @export var rot_speed: float = 10.0
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
-
+var is_running: bool = false
+@export var run_toggle_mode: bool = true
 
 func _physics_process(delta: float) -> void:
 	move_logic(delta)
@@ -26,13 +27,25 @@ func _physics_process(delta: float) -> void:
 	animation_player()
 	move_and_slide()
 	
-
+func _input(event):
+	if event.is_action_pressed("run"):
+		if run_toggle_mode:
+			is_running = !is_running    # переключатель
+		else:
+			is_running = true           # удерживаем
+	if event.is_action_released("run") and not run_toggle_mode:
+		is_running = false
+		
 func move_logic(delta):
 	movement_input = Input.get_vector('left',"right", "up", "down")
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	var is_airborne = not is_on_floor()
 	var control = 1.0 if is_on_floor() else air_control
-	var current_speed = air_speed if is_airborne else (run_speed if Input.is_action_pressed("run") else base_speed)
+	
+	if movement_input == Vector2.ZERO:
+		is_running = false
+		
+	var current_speed = air_speed if is_airborne else (run_speed if is_running else base_speed)
 	
 	if movement_input != Vector2.ZERO:
 		velocity_2d = velocity_2d.lerp(movement_input * current_speed, acceleration * control)
@@ -41,6 +54,7 @@ func move_logic(delta):
 
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y	
+	
 func jump_logic(delta):
 	if Input.is_action_just_pressed('jump') and is_on_floor():
 		velocity.y = -jump_velocity
