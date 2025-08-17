@@ -1,10 +1,10 @@
-[gd_scene load_steps=15 format=3 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=13 format=3 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="PackedScene" uid="uid://c364awakh0qqj" path="res://scenes/entities/player/player.tscn" id="1_2q6dc"]
-[ext_resource type="Texture2D" uid="uid://4bi6720rxkam" path="res://scenes/character/UVgridTexture.png" id="2_w7c3h"]
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="3_ppgk2"]
 [ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_2r41h"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_klq6b"]
+[ext_resource type="Material" uid="uid://cbwth4d32mm7k" path="res://scenes/level/floor_mat.tres" id="5_ppgk2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_51e2h"]
 sky_top_color = Color(0.171174, 0.517774, 1, 1)
@@ -46,17 +46,6 @@ bounce = 0.1
 [sub_resource type="BoxShape3D" id="BoxShape3D_2q6dc"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_w7c3h"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w8frs"]
-albedo_texture = ExtResource("2_w7c3h")
-uv1_scale = Vector3(0.031, 0.031, 0.031)
-uv1_triplanar = true
-uv1_world_triplanar = true
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2q6dc"]
-albedo_color = Color(0.0464497, 0.377804, 0.0600971, 1)
-metallic_specular = 0.31
-roughness = 0.9
 
 [node name="Level" type="Node3D"]
 
@@ -106,11 +95,9 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.160087, 2, -3.21836)
 jump_height = 1.5
 jump_time_to_peak = 0.5
-jump_time_to_descent = 0.28
 air_control = 0.8
-stop_speed = 10.0
 acceleration = 0.09
-rot_speed = 8.0
+rot_speed = 5.0
 
 [node name="CSGBox3D" type="RigidBody3D" parent="Entities"]
 transform = Transform3D(0.925335, -0.196465, -0.324279, 0.0415374, 0.902658, -0.428349, 0.376868, 0.382896, 0.843422, -3, 2.90355, 0)
@@ -135,10 +122,9 @@ use_collision = true
 
 [node name="Floor" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(2.84561, 0, 0, 0, 1, 0, 0, 0, 2.84561, 0, -0.5, 0)
-material_override = SubResource("StandardMaterial3D_w8frs")
 use_collision = true
 size = Vector3(20, 1, 20)
-material = SubResource("StandardMaterial3D_2q6dc")
+material = ExtResource("5_ppgk2")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 0, 0, -6)

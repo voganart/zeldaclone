@@ -8,6 +8,7 @@ extends CharacterBody3D
 @onready var jump_velocity : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity : float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
+var jump_phase := ""  # '' / 'start' / 'mid'
 
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
 @export var base_speed: float = 5.0
@@ -30,9 +31,9 @@ func _physics_process(delta: float) -> void:
 func _input(event):
 	if event.is_action_pressed("run"):
 		if run_toggle_mode:
-			is_running = !is_running    # переключатель
+			is_running = !is_running
 		else:
-			is_running = true           # удерживаем
+			is_running = true
 	if event.is_action_released("run") and not run_toggle_mode:
 		is_running = false
 		
@@ -53,7 +54,7 @@ func move_logic(delta):
 		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
 
 	velocity.x = velocity_2d.x
-	velocity.z = velocity_2d.y	
+	velocity.z = velocity_2d.y
 	
 func jump_logic(delta):
 	if Input.is_action_just_pressed('jump') and is_on_floor():
@@ -65,14 +66,44 @@ func jump_logic(delta):
 func rot_char(delta):
 	var vel_2d = Vector2(velocity.x, -velocity.z)
 	if vel_2d.length_squared() > 0.001:
-		var target_angle = vel_2d.angle() + PI / 2 # угол в 2D
+		var target_angle = vel_2d.angle() + PI / 2
+		var is_sprinting = is_running and is_on_floor()
 		rotation.y = lerp_angle(rotation.y, target_angle, rot_speed * delta)
 
+var is_stopping := false   # флаг состояния торможения
+
 func animation_player():
-	var current_velocity := velocity.length()
-	if current_velocity > base_speed + 1.5:
-		anim_player.play('Boy_run', 1.0, lerp(0.5, 1.25, current_velocity/6))
-	elif current_velocity > 0.7:
-		anim_player.play('Boy_walk', 0.5, lerp(0.5, 1.25, current_velocity/4))
+	var speed_2d := Vector2(velocity.x, velocity.z).length()
+	var has_input := Input.get_vector("left","right","up","down").length() > 0
+
+	# Прыжки
+	if not is_on_floor():
+		is_stopping = false
+		if velocity.y > 0.5 and jump_phase != "start":
+			anim_player.play("Boy_jump_start", 0.1)
+			jump_phase = "start"
+		elif velocity.y <= 0.1 and jump_phase != "mid":
+			anim_player.play("Boy_jump_mid", 0.2, lerp(0.5, 1.25, 0.1))
+			jump_phase = "mid"
+		return
 	else:
-		anim_player.play('Boy_idle')
+		if jump_phase in ["start", "mid"]:
+			anim_player.play("Boy_jump_end", 0.1, lerp(0.5, 1.25, 0.1))
+			jump_phase = ""
+
+	# Движение по земле
+	if has_input:
+		is_stopping = false
+		if speed_2d > base_speed + 1.5:
+			anim_player.play("Boy_run", 0.8, lerp(0.5, 1.25, speed_2d/6))
+		elif speed_2d > 0.7:
+			anim_player.play("Boy_walk", 0.5, lerp(0.5, 1.25, speed_2d/4))
+	else:
+		# торможение
+		if speed_2d > 4.0:
+			if not is_stopping:
+				anim_player.play("Boy_stopping", 0.2, lerp(0.5, 1.25, 0.1))
+				is_stopping = true
+		else:
+			is_stopping = false
+			anim_player.play("Boy_idle", 0.2, 1.0)

@@ -4,19 +4,22 @@
 [ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://scenes/character/character.tscn" id="2_635qg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
-radius = 0.441262
+radius = 0.316145
 
 [node name="Player" type="CharacterBody3D"]
 floor_constant_speed = true
 platform_on_leave = 1
 script = ExtResource("1_1hmtu")
-jump_time_to_peak = 0.45
-jump_time_to_descent = 0.28
-air_control = 0.05
+jump_height = null
+jump_time_to_peak = null
+jump_time_to_descent = null
+air_control = null
+in_air_speed = null
 base_speed = 4.0
 run_speed = 6.0
-stop_speed = 10.0
-acceleration = 0.5
+stop_speed = 0.01
+acceleration = null
+rot_speed = 0.1
 run_toggle_mode = false
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
