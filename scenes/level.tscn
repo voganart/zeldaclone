@@ -63,7 +63,7 @@ directional_shadow_blend_splits = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, 0, 9, 2.782)
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 9, 2.782)
 current = true
 fov = 50.0
 

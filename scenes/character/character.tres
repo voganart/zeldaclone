@@ -4,12 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://cxrlqk43br06g" path="res://scenes/character/BaseColorTexture.png" id="2_q8nud"]
 
 [sub_resource type="Gradient" id="Gradient_uqu1y"]
-colors = PackedColorArray(0.0528316, 0.0644234, 0.169619, 1, 1, 0.959876, 0.767445, 1)
+colors = PackedColorArray(0.0328631, 0.0439688, 0.174144, 1, 1, 0.977274, 0.868285, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_q8nud"]
 gradient = SubResource("Gradient_uqu1y")
-fill_from = Vector2(0.301282, 1)
-fill_to = Vector2(1, 1)
 
 [resource]
 render_priority = 0
@@ -17,9 +15,9 @@ shader = ExtResource("1_uqu1y")
 shader_parameter/rim = 0.5
 shader_parameter/rim_threshold = 0.5
 shader_parameter/emission = 0.0
-shader_parameter/specular = 0.7
-shader_parameter/specular_color = Color(1, 0.883454, 0.745523, 1)
-shader_parameter/roughness = 0.8
+shader_parameter/specular = 0.5
+shader_parameter/specular_color = Color(1, 0.922209, 0.684142, 1)
+shader_parameter/roughness = 0.9
 shader_parameter/is_normal_symmetric = false
 shader_parameter/normal_scale = 1.0
 shader_parameter/albedo_color = Color(1, 1, 1, 1)
