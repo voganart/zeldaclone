@@ -24,28 +24,36 @@ var is_running: bool = false
 var is_stopping := false
 var is_attacking := false
 @export var run_toggle_mode: bool = true
-@onready var timer: Timer = $FirstAttackTimer
+@onready var attack_timer: Timer = $FirstAttackTimer
+@onready var sprint_timer: Timer = $SprintTimer
 @export var primary_attack_speed: float = 1.0
 @export var attack_movement_influense: float = 1.0
+@export var attack_cooldown: float = 0.1
+var can_attack := true
+var can_sprint = true
 var primary_naked_attacks := ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
 
 func _input(event):
-	if event.is_action_pressed("run"):
+	if event.is_action_pressed("run") and is_on_floor() and can_sprint:
 		if run_toggle_mode:
 			is_running = !is_running
 		else:
 			is_running = true
+		can_sprint = false
+		sprint_timer.start()
 	if event.is_action_released("run") and not run_toggle_mode:
 		is_running = false
-	first_attack(event, primary_attack_speed)
+	if Input.is_action_just_pressed("first_attack") and can_attack and is_on_floor():
+		first_attack(primary_attack_speed)
 
-func first_attack(event, primary_attack_speed):
-	var random_primary_naked_attacks = primary_naked_attacks.pick_random()
-	if event.is_action_pressed("first_attack") and not is_attacking and is_on_floor():
-		is_attacking = true
-		anim_player.play(random_primary_naked_attacks, 0.1, primary_attack_speed)
-		timer.start(anim_player.get_animation(random_primary_naked_attacks).length)
-		
+func first_attack(attack_speed):
+	is_attacking = true
+	var rand_anim = primary_naked_attacks.pick_random()
+	attack_timer.start(anim_player.get_animation(rand_anim).length + attack_cooldown)
+	anim_player.play(rand_anim, 0.05, attack_speed)
+	can_attack = false
+
+
 func _physics_process(delta: float) -> void:
 	move_logic(delta)
 	jump_logic(delta)
@@ -53,19 +61,19 @@ func _physics_process(delta: float) -> void:
 	tilt_character(delta)
 	animation_player()
 	move_and_slide()
-	
 
-		
-		
+
+
+
 func move_logic(delta):
 	movement_input = Input.get_vector('left',"right", "up", "down")
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	var is_airborne = not is_on_floor()
 	var control = 1.0 if not is_airborne else clamp(air_control, 0.0, 1.0)
-	
+
 	if movement_input == Vector2.ZERO:
 		is_running = false
-		
+
 	var current_speed = run_speed if is_running else base_speed
 	if is_airborne:
 		current_speed = air_speed  # сохраняем текущую скорость на воздухе
@@ -78,17 +86,17 @@ func move_logic(delta):
 
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
-	
+
 func jump_logic(delta):
 	if Input.is_action_just_pressed('jump') and is_on_floor():
 		velocity.y = -jump_velocity
 		air_speed = Vector2(velocity.x, velocity.z).length()
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta
-	
+
 func rot_char(delta):
 	if is_attacking: return
-	var current_rot_speed = 0 if is_stopping else rot_speed
+	var current_rot_speed = 0.0 if is_stopping else rot_speed
 	var vel_2d = Vector2(velocity.x, -velocity.z)
 	if vel_2d.length_squared() > 0.001:
 		var target_angle = vel_2d.angle() + PI / 2
@@ -127,7 +135,7 @@ func animation_player():
 	if has_input:
 		is_stopping = false
 		if speed_2d > lerp(base_speed, run_speed, 0.5):
-			anim_player.play("Boy_run", 0.1, lerp(0.5, 1.25, speed_2d/run_speed))
+			anim_player.play("Boy_run", 0.3, lerp(0.5, 1.25, speed_2d/run_speed))
 		elif speed_2d > 0.2:
 			anim_player.play("Boy_walk", 0.3, lerp(0.5, 1.25, speed_2d/base_speed))
 	else:
@@ -139,8 +147,12 @@ func animation_player():
 		else:
 			is_stopping = false
 			anim_player.play("Boy_idle", 0.5)
-			
 
 
-func _on_timer_timeout() -> void:
+func _on_first_attack_timer_timeout() -> void:
+	can_attack = true
 	is_attacking = false
+
+
+func _on_sprint_timer_timeout():
+	can_sprint = true

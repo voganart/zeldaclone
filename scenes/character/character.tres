@@ -1,26 +1,32 @@
 [gd_resource type="ShaderMaterial" load_steps=5 format=3 uid="uid://c3gmswlr7otco"]
 
 [ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://scenes/character/toonShader.gdshader" id="1_uqu1y"]
-[ext_resource type="Texture2D" uid="uid://cxrlqk43br06g" path="res://scenes/character/BaseColorTexture.png" id="2_q8nud"]
+[ext_resource type="Texture2D" uid="uid://d3acm432223op" path="res://scenes/character/character_BaseColorTexture.png" id="2_uqu1y"]
 
 [sub_resource type="Gradient" id="Gradient_uqu1y"]
-colors = PackedColorArray(0.0328631, 0.0439688, 0.174144, 1, 1, 0.977274, 0.868285, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_q8nud"]
 gradient = SubResource("Gradient_uqu1y")
+fill_from = Vector2(1, 0)
+fill_to = Vector2(0, 0)
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_uqu1y")
-shader_parameter/rim = 0.5
-shader_parameter/rim_threshold = 0.5
-shader_parameter/emission = 0.0
-shader_parameter/specular = 0.5
-shader_parameter/specular_color = Color(1, 0.922209, 0.684142, 1)
-shader_parameter/roughness = 0.9
-shader_parameter/is_normal_symmetric = false
-shader_parameter/normal_scale = 1.0
-shader_parameter/albedo_color = Color(1, 1, 1, 1)
-shader_parameter/albedo_color2 = Color(0, 0, 0, 1)
-shader_parameter/diffuse_map = ExtResource("2_q8nud")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/albedo_texture = ExtResource("2_uqu1y")
+shader_parameter/clamp_diffuse_to_max = true
+shader_parameter/cuts = 2
+shader_parameter/wrap = 0.353
+shader_parameter/steepness = 3.208
+shader_parameter/use_attenuation = false
+shader_parameter/use_specular = true
+shader_parameter/specular_strength = 0.007
+shader_parameter/specular_shininess = 5.265
+shader_parameter/use_rim = true
+shader_parameter/rim_width = 12.983
+shader_parameter/rim_color = Color(1, 1, 1, 1)
+shader_parameter/use_ramp = false
 shader_parameter/ramp = SubResource("GradientTexture2D_q8nud")
+shader_parameter/use_borders = false
+shader_parameter/border_width = 0.01
