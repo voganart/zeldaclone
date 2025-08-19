@@ -2,10 +2,10 @@ extends CharacterBody3D
 @onready var _mesh: Node3D = $character
 
 #jump
-@export var jump_height : float = 2.25
-@export var jump_time_to_peak : float = 0.4
-@export var jump_time_to_descent : float = 0.3
-@export var air_control: float = 0.3
+@export var jump_height : float = 1.25
+@export var jump_time_to_peak : float = 0.45
+@export var jump_time_to_descent : float = 0.28
+@export var air_control: float = 0.05
 
 @onready var jump_velocity : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
@@ -13,11 +13,11 @@ extends CharacterBody3D
 var jump_phase := ""  # '' / 'start' / 'mid'
 
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
-@export var base_speed: float = 5.0
-@export var run_speed: float = 8.0
-@export var stop_speed: float = 15.0
-@export var acceleration: float = 0.1
-@export var rot_speed: float = 10.0
+@export var base_speed: float = 3.0
+@export var run_speed: float = 4.5
+@export var stop_speed: float = 8.0
+@export var acceleration: float = 0.3
+@export var rot_speed: float = 5.0
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
@@ -26,9 +26,9 @@ var is_attacking := false
 @export var run_toggle_mode: bool = true
 @onready var attack_timer: Timer = $FirstAttackTimer
 @onready var sprint_timer: Timer = $SprintTimer
-@export var primary_attack_speed: float = 1.0
-@export var attack_movement_influense: float = 1.0
-@export var attack_cooldown: float = 0.1
+@export var primary_attack_speed: float = 0.8
+@export var attack_movement_influense: float = 0.15
+@export var attack_cooldown: float = 0.15
 var can_attack := true
 var can_sprint = true
 var primary_naked_attacks := ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
@@ -43,17 +43,21 @@ func _input(event):
 		sprint_timer.start()
 	if event.is_action_released("run") and not run_toggle_mode:
 		is_running = false
-	if Input.is_action_just_pressed("first_attack") and can_attack and is_on_floor():
+	if Input.is_action_just_pressed("first_attack"):
 		first_attack(primary_attack_speed)
 
 func first_attack(attack_speed):
+	if not can_attack or not is_on_floor():
+		return
 	is_attacking = true
-	var rand_anim = primary_naked_attacks.pick_random()
-	attack_timer.start(anim_player.get_animation(rand_anim).length + attack_cooldown)
-	anim_player.play(rand_anim, 0.05, attack_speed)
 	can_attack = false
+	var rand_anim = primary_naked_attacks.pick_random()
+	#var rand_anim_length = anim_player.get_animation(rand_anim).length
+	#attack_timer.start(rand_anim_length + attack_cooldown)
+	anim_player.play(rand_anim, 0, attack_speed)
 	await anim_player.animation_finished
-
+	is_attacking = false
+	can_attack = true
 
 func _physics_process(delta: float) -> void:
 	move_logic(delta)
