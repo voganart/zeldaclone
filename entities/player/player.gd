@@ -52,6 +52,7 @@ func first_attack(attack_speed):
 	attack_timer.start(anim_player.get_animation(rand_anim).length + attack_cooldown)
 	anim_player.play(rand_anim, 0.05, attack_speed)
 	can_attack = false
+	await anim_player.animation_finished
 
 
 func _physics_process(delta: float) -> void:
@@ -104,7 +105,7 @@ func rot_char(delta):
 
 func tilt_character(delta):
 	if is_attacking: return
-	var tilt_angle = 10 if is_running and velocity.length() > base_speed else 3
+	var tilt_angle = 10 if is_running and velocity.length() > base_speed + 1 else 3
 	var move_vec = Vector3(velocity.x, 0, velocity.z)
 	var local_move = global_transform.basis.inverse() * move_vec
 	var target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)

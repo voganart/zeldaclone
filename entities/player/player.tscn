@@ -20,9 +20,8 @@ stop_speed = 8.0
 acceleration = 0.3
 rot_speed = 5.0
 run_toggle_mode = false
-primary_attack_speed = 0.5
-attack_movement_influense = 0.1
-attack_cooldown = 0.15
+attack_movement_influense = 0.15
+attack_cooldown = 0.0
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 
