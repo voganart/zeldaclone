@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c364awakh0qqj"]
 
-[ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://scenes/entities/player/player.gd" id="1_1hmtu"]
-[ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://scenes/character/character.tscn" id="2_635qg"]
+[ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
+[ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/assets/character.tscn" id="2_635qg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
 radius = 0.441262
@@ -21,8 +21,8 @@ acceleration = 0.3
 rot_speed = 5.0
 run_toggle_mode = false
 primary_attack_speed = 0.5
-attack_movement_influense = 0.2
-attack_cooldown = 0.2
+attack_movement_influense = 0.1
+attack_cooldown = 0.15
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 

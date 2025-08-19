@@ -2,26 +2,27 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://blf3dl453cod4"
-path="res://.godot/imported/1b471ea3e15a5b32c53d9923a4d03e85.jpg-7b98bdd54db4292bf47d0d8be90eae1d.ctex"
+uid="uid://cxrlqk43br06g"
+path.s3tc="res://.godot/imported/BaseColorTexture.png-c9917342cbe500095a886c761ec7a1e7.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://scenes/references/1b471ea3e15a5b32c53d9923a4d03e85.jpg"
-dest_files=["res://.godot/imported/1b471ea3e15a5b32c53d9923a4d03e85.jpg-7b98bdd54db4292bf47d0d8be90eae1d.ctex"]
+source_file="res://entities/player/assets/BaseColorTexture.png"
+dest_files=["res://.godot/imported/BaseColorTexture.png-c9917342cbe500095a886c761ec7a1e7.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -31,4 +32,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

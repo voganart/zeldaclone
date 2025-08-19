@@ -1,6 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=7 format=3 uid="uid://d8g64g8viihh"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tir2s"]
+albedo_color = Color(1, 0.210633, 0.210633, 1)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_dxw06"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ksmh7"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_im2q6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
 
@@ -11,7 +18,14 @@ radius = 8.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = SubResource("StandardMaterial3D_tir2s")
 mesh = SubResource("CapsuleMesh_dxw06")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(0.205904, 0, 0, 0, 0.205904, 0, 0, 0, 0.403643, 0, 0.414101, 0.506453)
+material_override = SubResource("StandardMaterial3D_ksmh7")
+mesh = SubResource("BoxMesh_im2q6")
+skeleton = NodePath("../..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

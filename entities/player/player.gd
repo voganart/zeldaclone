@@ -104,7 +104,7 @@ func rot_char(delta):
 
 func tilt_character(delta):
 	if is_attacking: return
-	var tilt_angle = 10 if is_running else 5
+	var tilt_angle = 10 if is_running and velocity.length() > base_speed else 3
 	var move_vec = Vector3(velocity.x, 0, velocity.z)
 	var local_move = global_transform.basis.inverse() * move_vec
 	var target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)

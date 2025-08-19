@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bbd5awb4fen4k"
-path.s3tc="res://.godot/imported/ref2.jpg-bb3a727a960db5dc589cd03c53750180.s3tc.ctex"
+uid="uid://4bi6720rxkam"
+path.s3tc="res://.godot/imported/UVgridTexture.png-90f962e88645de024cc43c3ed1e05094.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://scenes/character/ref2.jpg"
-dest_files=["res://.godot/imported/ref2.jpg-bb3a727a960db5dc589cd03c53750180.s3tc.ctex"]
+source_file="res://entities/levels/test_level/assets/UVgridTexture.png"
+dest_files=["res://.godot/imported/UVgridTexture.png-90f962e88645de024cc43c3ed1e05094.s3tc.ctex"]
 
 [params]
 

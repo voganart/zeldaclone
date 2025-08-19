@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=14 format=3 uid="uid://dj30vac7b3xou"]
 
-[ext_resource type="PackedScene" uid="uid://c364awakh0qqj" path="res://scenes/entities/player/player.tscn" id="1_2q6dc"]
-[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="3_ppgk2"]
-[ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="4_2r41h"]
-[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="5_klq6b"]
-[ext_resource type="Material" uid="uid://cbwth4d32mm7k" path="res://scenes/level/floor_mat.tres" id="5_ppgk2"]
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
+[ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="2_u71mg"]
+[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="3_5v5q3"]
+[ext_resource type="PackedScene" uid="uid://c364awakh0qqj" path="res://entities/player/player.tscn" id="4_5iexk"]
+[ext_resource type="Material" uid="uid://cbwth4d32mm7k" path="res://entities/levels/test_level/assets/floor_mat.tres" id="5_owp05"]
+[ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemy/enemy.tscn" id="5_u71mg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_51e2h"]
 sky_top_color = Color(0.171174, 0.517774, 1, 1)
@@ -35,7 +36,7 @@ adjustment_enabled = true
 adjustment_saturation = 1.1
 
 [sub_resource type="Resource" id="Resource_b121j"]
-script = ExtResource("5_klq6b")
+script = ExtResource("3_5v5q3")
 duration = 1.0
 transition = 0
 ease = 2
@@ -49,17 +50,19 @@ bounce = 0.1
 
 [node name="Level" type="Node3D"]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_k5f4k")
+[node name="Lights" type="Node3D" parent="."]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.854459, 0.461654, -0.238277, 0, 0.458649, 0.888617, 0.519519, -0.759287, 0.391897, 13, 6, 0)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lights"]
+transform = Transform3D(0.79229, 0.599536, -0.113284, 0, 0.185667, 0.982613, 0.610145, -0.778514, 0.147102, 13, 6, 0)
 light_color = Color(1, 0.991251, 0.907744, 1)
 shadow_enabled = true
 shadow_opacity = 0.9
 shadow_blur = 1.4
 directional_shadow_split_1 = 0.05
 directional_shadow_blend_splits = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Lights"]
+environment = SubResource("Environment_k5f4k")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
@@ -70,13 +73,13 @@ fov = 50.0
 [node name="PhantomCameraHost" type="Node" parent="Camera3D"]
 process_priority = 300
 process_physics_priority = 300
-script = ExtResource("3_ppgk2")
+script = ExtResource("1_cosw0")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
 transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, -1.86105, 9, 2.782)
 top_level = true
-script = ExtResource("4_2r41h")
+script = ExtResource("2_u71mg")
 follow_mode = 2
 follow_target = NodePath("../Entities/Player")
 tween_resource = SubResource("Resource_b121j")
@@ -91,8 +94,11 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
 [node name="Entities" type="Node3D" parent="."]
 
-[node name="Player" parent="Entities" instance=ExtResource("1_2q6dc")]
+[node name="Player" parent="Entities" instance=ExtResource("4_5iexk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.86105, 2, -3.218)
+
+[node name="Enemy" parent="Entities" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.92761, 0, 3.98107)
 
 [node name="Environment" type="Node3D" parent="."]
 
@@ -103,7 +109,7 @@ use_collision = true
 transform = Transform3D(2.84561, 0, 0, 0, 1, 0, 0, 0, 2.84561, 0, -0.5, 0)
 use_collision = true
 size = Vector3(20, 1, 20)
-material = ExtResource("5_ppgk2")
+material = ExtResource("5_owp05")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 0, 0, -6)
