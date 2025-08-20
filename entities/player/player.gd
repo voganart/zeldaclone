@@ -31,6 +31,8 @@ var is_attacking := false
 @export var attack_cooldown: float = 0.15
 var can_attack := true
 var can_sprint = true
+@onready var punch_hand_r: Area3D = $character/root/Skeleton3D/hand_r/punch_hand_r
+@onready var punch_hand_l: Area3D = $character/root/Skeleton3D/hand_l/punch_hand_l
 var primary_naked_attacks := ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
 
 func _input(event):
@@ -161,3 +163,28 @@ func _on_first_attack_timer_timeout() -> void:
 
 func _on_sprint_timer_timeout():
 	can_sprint = true
+
+func punch_collision(body):
+	if is_attacking and body.is_in_group("Enemies"):
+		# нанесение урона
+		var direction = (body.global_transform.origin - punch_hand_r.global_transform.origin).normalized()
+		if body.has_method("take_damage"):
+			body.take_damage(1, direction)
+	print(body)
+
+func _on_punch_hand_r_body_entered(body: Node3D) -> void:
+	if is_attacking and body.is_in_group("Enemies"):
+		# нанесение урона
+		var direction = (body.global_transform.origin - punch_hand_r.global_transform.origin).normalized()
+		if body.has_method("take_damage"):
+			body.take_damage(1, direction)
+	print(body)
+
+
+func _on_punch_hand_l_body_entered(body: Node3D) -> void:
+	if is_attacking and body.is_in_group("Enemies"):
+		# нанесение урона
+		var direction = (body.global_transform.origin - punch_hand_l.global_transform.origin).normalized()
+		if body.has_method("take_damage"):
+			body.take_damage(1, direction)
+	print(body)

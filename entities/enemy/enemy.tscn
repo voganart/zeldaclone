@@ -1,5 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://d8g64g8viihh"]
 
+[ext_resource type="Script" uid="uid://b01pe5336p70y" path="res://entities/enemy/enemy.gd" id="1_ksmh7"]
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tir2s"]
 albedo_color = Color(1, 0.210633, 0.210633, 1)
 
@@ -11,10 +13,14 @@ albedo_color = Color(1, 0.210633, 0.210633, 1)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_dxw06"]
-radius = 8.0
-
-[node name="Enemy" type="CharacterBody3D"]
+[node name="Enemy" type="CharacterBody3D" groups=["Enemies"]]
+collision_layer = 4
+collision_mask = 11
+script = ExtResource("1_ksmh7")
+knockback_time = 0.5
+gravity = 150
+knockback_strength = 1.0
+knockback_height = 10.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -30,8 +36,3 @@ skeleton = NodePath("../..")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_lw7nh")
-
-[node name="Area3D" type="Area3D" parent="."]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
-shape = SubResource("SphereShape3D_dxw06")

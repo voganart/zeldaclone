@@ -98,12 +98,14 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.86105, 2, -3.218)
 
 [node name="Enemy" parent="Entities" instance=ExtResource("5_u71mg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.92761, 0, 3.98107)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.92761, 2, -3.01893)
 
 [node name="Environment" type="Node3D" parent="."]
 
 [node name="CSGCombiner3D" type="CSGCombiner3D" parent="Environment"]
 use_collision = true
+collision_layer = 8
+collision_mask = 7
 
 [node name="Floor" type="CSGBox3D" parent="Environment/CSGCombiner3D"]
 transform = Transform3D(2.84561, 0, 0, 0, 1, 0, 0, 0, 2.84561, 0, -0.5, 0)

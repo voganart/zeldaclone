@@ -7,11 +7,11 @@
 radius = 0.441262
 
 [node name="Player" type="CharacterBody3D"]
+collision_mask = 12
 floor_constant_speed = true
 platform_on_leave = 1
 script = ExtResource("1_1hmtu")
 run_toggle_mode = false
-attack_cooldown = 0.4
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 
@@ -53,6 +53,7 @@ bones/19/rotation = Quaternion(-0.484332, 0.503632, 0.49192, 0.519415)
 bones/20/rotation = Quaternion(-0.603408, -0.0957485, -0.13844, 0.779465)
 bones/20/scale = Vector3(1, 1, 1)
 bones/21/rotation = Quaternion(-6.17469e-08, -0.0513242, 2.332e-08, 0.998682)
+bones/21/scale = Vector3(1, 1, 1)
 bones/22/rotation = Quaternion(-1.67553e-07, -2.14103e-08, 0.25674, 0.966481)
 bones/22/scale = Vector3(1, 1, 1)
 bones/23/rotation = Quaternion(-5.72621e-08, -0.0837164, 4.39961e-10, 0.99649)
@@ -93,6 +94,12 @@ bones/42/rotation = Quaternion(-2.25879e-05, 0.95459, -0.297922, 6.20034e-06)
 bones/42/scale = Vector3(1, 1, 1)
 bones/43/rotation = Quaternion(4.6536e-09, -0.00292787, -1.87301e-08, 0.999996)
 
+[node name="hand_r" parent="character/root/Skeleton3D" index="1"]
+transform = Transform3D(-0.217001, -0.113246, -0.969579, -0.206172, -0.965524, 0.158916, -0.95415, 0.234385, 0.186172, -0.432041, 0.547882, -0.079795)
+
+[node name="hand_l" parent="character/root/Skeleton3D" index="2"]
+transform = Transform3D(-0.253558, 0.0577804, 0.965592, 0.216767, -0.969433, 0.114932, 0.942719, 0.238451, 0.233283, 0.427551, 0.538877, -0.0580709)
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_yel1f")
@@ -104,6 +111,8 @@ one_shot = true
 wait_time = 0.6
 one_shot = true
 
+[connection signal="body_entered" from="character/root/Skeleton3D/hand_r/punch_hand_r" to="." method="_on_punch_hand_r_body_entered"]
+[connection signal="body_entered" from="character/root/Skeleton3D/hand_l/punch_hand_l" to="." method="_on_punch_hand_l_body_entered"]
 [connection signal="timeout" from="FirstAttackTimer" to="." method="_on_first_attack_timer_timeout"]
 [connection signal="timeout" from="SprintTimer" to="." method="_on_sprint_timer_timeout"]
 
