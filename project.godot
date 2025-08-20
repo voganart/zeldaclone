@@ -26,7 +26,7 @@ window/size/viewport_height=1080
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/3dEnemyToolkit/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/script_spliter/plugin.cfg")
+enabled=PackedStringArray("res://addons/phantom_camera/plugin.cfg", "res://addons/script_spliter/plugin.cfg")
 
 [global_group]
 
@@ -94,6 +94,7 @@ first_attack={
 3d_physics/layer_2="Punches"
 3d_physics/layer_3="Enemies"
 3d_physics/layer_4="Envi"
+avoidance/layer_1="enemies"
 
 [physics]
 
