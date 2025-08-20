@@ -17,13 +17,6 @@ script = ExtResource("1_1hmtu")
 [node name="PlayerStats" type="Node" parent="."]
 script = ExtResource("2_fkugw")
 
-[node name="SprintTimer" type="Timer" parent="PlayerStats"]
-wait_time = 0.6
-one_shot = true
-
-[node name="FirstAttackTimer" type="Timer" parent="PlayerStats"]
-one_shot = true
-
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 
 [node name="Skeleton3D" parent="character/root" index="0"]
@@ -108,11 +101,18 @@ bones/43/rotation = Quaternion(4.6536e-09, -0.00292787, -1.87301e-08, 0.999996)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_yel1f")
 
+[node name="FirstAttackTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="SprintTimer" type="Timer" parent="."]
+wait_time = 0.6
+one_shot = true
+
 [node name="AnimController" type="Node" parent="." node_paths=PackedStringArray("player_stats", "player", "attack_timer", "anim_player")]
 script = ExtResource("3_sglur")
 player_stats = NodePath("../PlayerStats")
 player = NodePath("..")
-attack_timer = NodePath("../PlayerStats/FirstAttackTimer")
+attack_timer = NodePath("../FirstAttackTimer")
 anim_player = NodePath("../character/AnimationPlayer")
 
 [node name="MoveController" type="Node" parent="." node_paths=PackedStringArray("_mesh", "player", "anim_controller", "player_stats")]
@@ -122,7 +122,7 @@ player = NodePath("..")
 anim_controller = NodePath("../AnimController")
 player_stats = NodePath("../PlayerStats")
 
-[connection signal="timeout" from="PlayerStats/SprintTimer" to="MoveController" method="_on_sprint_timer_timeout"]
-[connection signal="timeout" from="PlayerStats/FirstAttackTimer" to="." method="_on_first_attack_timer_timeout"]
+[connection signal="timeout" from="FirstAttackTimer" to="." method="_on_first_attack_timer_timeout"]
+[connection signal="timeout" from="SprintTimer" to="MoveController" method="_on_sprint_timer_timeout"]
 
 [editable path="character"]
