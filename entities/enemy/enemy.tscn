@@ -23,10 +23,9 @@ script = ExtResource("1_ksmh7")
 knockback_strength = 5.0
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
-target_desired_distance = 1.5
+target_desired_distance = 1.8
 avoidance_enabled = true
-radius = 1.0
-debug_enabled = true
+radius = 1.2
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

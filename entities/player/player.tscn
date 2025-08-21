@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=6 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/assets/character.tscn" id="2_635qg"]
+[ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="3_sglur"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
 radius = 0.441262
@@ -95,6 +96,9 @@ bones/41/scale = Vector3(1.00002, 1.00202, 1.00731)
 bones/42/rotation = Quaternion(-2.25879e-05, 0.95459, -0.297922, 6.20034e-06)
 bones/42/scale = Vector3(1, 1, 1)
 bones/43/rotation = Quaternion(4.6536e-09, -0.00292787, -1.87301e-08, 0.999996)
+
+[node name="Character_mesh" parent="character/root/Skeleton3D" index="0"]
+material_overlay = ExtResource("3_sglur")
 
 [node name="hand_r" parent="character/root/Skeleton3D" index="1"]
 transform = Transform3D(-0.217001, -0.113247, -0.969579, -0.206171, -0.965524, 0.158917, -0.95415, 0.234385, 0.186172, -0.432041, 0.547882, -0.0797954)
