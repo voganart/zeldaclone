@@ -1,10 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=5 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/assets/character.tscn" id="2_635qg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
 radius = 0.441262
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_abrql"]
+size = Vector3(1.18555, 1, 1.12976)
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 collision_mask = 12
@@ -109,6 +112,13 @@ one_shot = true
 [node name="SprintTimer" type="Timer" parent="."]
 wait_time = 0.6
 one_shot = true
+
+[node name="FirstAttackArea" type="Area3D" parent="."]
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FirstAttackArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.651306)
+shape = SubResource("BoxShape3D_abrql")
 
 [connection signal="body_entered" from="character/root/Skeleton3D/hand_r/punch_hand_r" to="." method="_on_punch_hand_r_body_entered"]
 [connection signal="body_entered" from="character/root/Skeleton3D/hand_l/punch_hand_l" to="." method="_on_punch_hand_l_body_entered"]

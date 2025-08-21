@@ -22,7 +22,7 @@ func _ready() -> void:
 	agent.avoidance_enabled = true
 	agent.velocity_computed.connect(Callable(self, "_on_velocity_computed"))
 
-func _on_navmesh_ready():
+func _on_navmesh_ready(_map_rid):
 	if is_inside_tree():
 		_set_random_patrol_target()
 

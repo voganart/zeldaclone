@@ -33,6 +33,7 @@ var can_attack := true
 var can_sprint = true
 @onready var punch_hand_r: Area3D = $character/root/Skeleton3D/hand_r/punch_hand_r
 @onready var punch_hand_l: Area3D = $character/root/Skeleton3D/hand_l/punch_hand_l
+@onready var first_attack_area: Area3D = $FirstAttackArea
 var primary_naked_attacks := ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
 
 func _input(event):
@@ -169,9 +170,16 @@ func _on_punch_hand_r_body_entered(body: Node3D) -> void:
 func _on_punch_hand_l_body_entered(body: Node3D) -> void:
 	punch_collision(body, punch_hand_l)
 	
-func punch_collision(body: Node3D, hand: Area3D)-> void:
-	if is_attacking and body.is_in_group("enemies"):
+func punch_collision(body: Node3D, hand: Area3D) -> void:
+	if not is_attacking:
+		return
+		
+	if not body.is_in_group("enemies"):
+		return
+
+	# Проверка: враг действительно внутри зоны атаки
+	if first_attack_area and body in first_attack_area.get_overlapping_bodies():
 		var direction = (body.global_transform.origin - hand.global_transform.origin).normalized()
 		if body.has_method("take_damage"):
 			body.take_damage(1, direction)
-		#print("Hit:", body)
+	#print(first_attack_area.get_overlapping_bodies())
