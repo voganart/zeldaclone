@@ -1,0 +1,13 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://sa808od45lpa"]
+
+[ext_resource type="Texture2D" uid="uid://cxrlqk43br06g" path="res://entities/player/assets/BaseColorTexture.png" id="1_cgdkm"]
+
+[resource]
+diffuse_mode = 3
+specular_mode = 1
+albedo_texture = ExtResource("1_cgdkm")
+roughness = 0.71
+emission_energy_multiplier = 7.65
+rim_enabled = true
+rim = 0.29
+rim_tint = 1.0
