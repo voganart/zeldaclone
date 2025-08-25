@@ -1,5 +1,6 @@
-[gd_scene load_steps=12 format=3 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=13 format=3 uid="uid://dj30vac7b3xou"]
 
+[ext_resource type="PackedScene" uid="uid://kx3mf2eh2l4w" path="res://water_shader/scenes/water_plane.tscn" id="4_2ltcv"]
 [ext_resource type="PackedScene" uid="uid://c364awakh0qqj" path="res://entities/player/player.tscn" id="4_5iexk"]
 [ext_resource type="Material" uid="uid://cbwth4d32mm7k" path="res://entities/levels/test_level/assets/floor_mat.tres" id="5_owp05"]
 [ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemy/enemy.tscn" id="5_u71mg"]
@@ -191,6 +192,17 @@ transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -28.43
 use_collision = true
 size = Vector3(10, 10, 1)
 
+[node name="CSGBox3D17" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -14.1834, -1.96305, 9.39328)
+use_collision = true
+size = Vector3(10, 10, 5.14355)
+
+[node name="CSGBox3D18" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
+transform = Transform3D(0.739167, 0, 0, 0, -4.15678e-08, 1, 0, -0.697393, -5.96046e-08, -14.1834, -1.15399, 9.39328)
+operation = 2
+use_collision = true
+size = Vector3(10, 10.5742, 6.56897)
+
 [node name="CSGBox3D5" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -39.0839, 5.00595, -26.243)
 use_collision = true
@@ -226,6 +238,9 @@ mesh = SubResource("BoxMesh_w7c3h")
 
 [node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="NavigationRegion3D/Environment/CSGCombiner3D/CSGBox3D10"]
 radius = 1.0
+
+[node name="WaterPlane" parent="NavigationRegion3D/Environment" instance=ExtResource("4_2ltcv")]
+transform = Transform3D(9.8046, 0, 0, 0, 1, 0, 0, 0, 8.64166, -14.369, 0.234627, 9.09804)
 
 [node name="NavigationLink3D" type="NavigationLink3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05593, 2.0631, -2.78533)
