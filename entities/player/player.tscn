@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=7 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/assets/character.tscn" id="2_635qg"]
+[ext_resource type="Material" uid="uid://sa808od45lpa" path="res://entities/player/assets/characterSM.tres" id="3_bls4j"]
 [ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="3_sglur"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
@@ -98,6 +99,7 @@ bones/42/scale = Vector3(1, 1, 1)
 bones/43/rotation = Quaternion(4.6536e-09, -0.00292787, -1.87301e-08, 0.999996)
 
 [node name="Character_mesh" parent="character/root/Skeleton3D" index="0"]
+material_override = ExtResource("3_bls4j")
 material_overlay = ExtResource("3_sglur")
 
 [node name="hand_r" parent="character/root/Skeleton3D" index="1"]
