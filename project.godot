@@ -33,6 +33,10 @@ enabled=PackedStringArray("res://addons/phantom_camera/plugin.cfg", "res://addon
 player=""
 enemies=""
 
+[gui]
+
+theme/default_theme_scale=0.9
+
 [input]
 
 left={

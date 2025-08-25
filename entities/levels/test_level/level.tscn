@@ -109,30 +109,37 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.86105, 0, 2.782)
 [node name="Enemy" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.92761, 0, -2.01893)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="Enemy2" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.604, 0, -1.73355)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="Enemy3" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.3188, 0, -13.462)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="Enemy4" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.1016, 0, -14.6378)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="Enemy5" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.10161, 0, -23.6378)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="Enemy6" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.1016, 0, -24.6378)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="Enemy7" parent="Entities" node_paths=PackedStringArray("patrol_zone") instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.1016, 0, 13.3622)
 patrol_zone = NodePath("../PatrolZone")
+idle_chance = 0.96
 
 [node name="PatrolZone" type="Area3D" parent="Entities"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9447, 0, -2.46294)

@@ -10,6 +10,8 @@ extends CharacterBody3D
 @export var patrol_zone: Area3D
 @onready var agent: NavigationAgent3D = get_node("NavigationAgent3D")
 @onready var player: Node3D = get_tree().get_first_node_in_group("player")
+@export var idle_chance: float = 0.3
+var idling: bool = false
 var chasing := false
 var current_vertical_velocity := 0.0
 
@@ -42,11 +44,19 @@ func _on_velocity_computed(safe_velocity: Vector3):
 	velocity.y = current_vertical_velocity
 	
 	# Поворачиваем персонажа в сторону движения
-	if velocity.length() > 0.001:
+	# Поворачиваем персонажа
+	if chasing and is_instance_valid(player):
+		var look_dir = (player.global_position - global_position).normalized()
+		look_dir.y = 0
+		if look_dir.length() > 0.001:
+			var target_angle = atan2(look_dir.x, look_dir.z)
+			rotation.y = lerp_angle(rotation.y, target_angle, get_physics_process_delta_time() * 6.0)
+	elif velocity.length() > 0.001:
 		var look_dir = velocity
 		look_dir.y = 0
 		var target_angle = atan2(look_dir.x, look_dir.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, get_physics_process_delta_time() * 6.0)
+
 
 	# Двигаем персонажа
 	move_and_slide()
@@ -123,3 +133,48 @@ func _set_random_patrol_target():
 			if valid_point != Vector3.ZERO:
 				agent.target_position = valid_point
 				return
+	if randf() < idle_chance:
+		_start_idle()
+		return
+
+func _start_idle() -> void:
+	idling = true
+	velocity = Vector3.ZERO
+	agent.set_velocity(Vector3.ZERO)
+
+	# первая пауза
+	await get_tree().create_timer(1.0).timeout
+	if chasing:
+		idling = false
+		return
+
+	# 1–2 коротких "тычка" влево/вправо
+	var n = randi_range(1, 2)
+	for i in range(n):
+		var start_angle = rotation.y
+		
+		var angle_deg = randf_range(20.0, 40.0)
+		var sign := 1.0
+		if randf() < 0.5:
+			sign = -1.0
+		
+		var target_angle = start_angle + deg_to_rad(angle_deg) * sign
+		var t := 0.0
+		while t < 1.0:
+			if chasing:
+				idling = false
+				return
+			t += get_physics_process_delta_time() * 1.5 # скорость поворота
+			rotation.y = lerp_angle(start_angle, target_angle, t)
+			await get_tree().process_frame
+
+		# маленькая пауза между "тычками"
+		await get_tree().create_timer(randf_range(0.5, 1.0)).timeout
+		if chasing:
+			idling = false
+			return
+
+	# финальная пауза
+	await get_tree().create_timer(1.5).timeout
+	idling = false
+	_set_random_patrol_target()
