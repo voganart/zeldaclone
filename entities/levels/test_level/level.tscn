@@ -1,8 +1,5 @@
-[gd_scene load_steps=16 format=3 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=12 format=3 uid="uid://dj30vac7b3xou"]
 
-[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
-[ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="2_u71mg"]
-[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="3_5v5q3"]
 [ext_resource type="PackedScene" uid="uid://c364awakh0qqj" path="res://entities/player/player.tscn" id="4_5iexk"]
 [ext_resource type="Material" uid="uid://cbwth4d32mm7k" path="res://entities/levels/test_level/assets/floor_mat.tres" id="5_owp05"]
 [ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemy/enemy.tscn" id="5_u71mg"]
@@ -34,12 +31,6 @@ volumetric_fog_emission = Color(0.128887, 0.128887, 0.128887, 1)
 volumetric_fog_length = 1.0
 adjustment_enabled = true
 adjustment_saturation = 1.1
-
-[sub_resource type="Resource" id="Resource_b121j"]
-script = ExtResource("3_5v5q3")
-duration = 1.0
-transition = 0
-ease = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_u71mg"]
 size = Vector3(34.7108, 3.48389, 41.0958)
@@ -82,24 +73,11 @@ fov = 50.0
 [node name="PhantomCameraHost" type="Node" parent="Camera3D"]
 process_priority = 300
 process_physics_priority = 300
-script = ExtResource("1_cosw0")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
-[node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
+[node name="PhantomCamera3D" type="Node3D" parent="."]
 transform = Transform3D(0.999998, 0, 0, 0, 0.707107, 0.707105, 0, -0.707107, 0.707105, -1.86105, 10, 10.782)
 top_level = true
-script = ExtResource("2_u71mg")
-follow_mode = 2
-follow_target = NodePath("../Entities/Player")
-tween_resource = SubResource("Resource_b121j")
-follow_offset = Vector3(0, 10, 8)
-follow_damping = true
-follow_damping_value = Vector3(0.2, 0.2, 0.2)
-follow_distance = 10.0
-dead_zone_width = 0.1
-dead_zone_height = 0.05
-spring_length = 10.0
-metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
 [node name="Entities" type="Node3D" parent="."]
 
