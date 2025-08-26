@@ -154,11 +154,11 @@ func _start_idle() -> void:
 		var start_angle = rotation.y
 		
 		var angle_deg = randf_range(20.0, 40.0)
-		var sign := 1.0
+		var _sign := 1.0
 		if randf() < 0.5:
-			sign = -1.0
+			_sign = -1.0
 		
-		var target_angle = start_angle + deg_to_rad(angle_deg) * sign
+		var target_angle = start_angle + deg_to_rad(angle_deg) * _sign
 		var t := 0.0
 		while t < 1.0:
 			if chasing:
