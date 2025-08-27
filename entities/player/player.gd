@@ -21,20 +21,20 @@ var jump_phase := ""  # '' / 'start' / 'mid'
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
-var is_stopping := false
-var is_attacking := false
+var is_stopping: bool = false
+var is_attacking: bool = false
 @export var run_toggle_mode: bool = true
 @onready var attack_timer: Timer = $FirstAttackTimer
 @onready var sprint_timer: Timer = $SprintTimer
 @export var primary_attack_speed: float = 0.8
 @export var attack_movement_influense: float = 0.15
 @export var attack_cooldown: float = 0.15
-var can_attack := true
-var can_sprint = true
+var can_attack: bool = true
+var can_sprint: bool = true
 @onready var punch_hand_r: Area3D = $character/root/Skeleton3D/hand_r/punch_hand_r
 @onready var punch_hand_l: Area3D = $character/root/Skeleton3D/hand_l/punch_hand_l
 @onready var first_attack_area: Area3D = $FirstAttackArea
-var primary_naked_attacks := ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
+var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
 
 func _input(event):
 	if event.is_action_pressed("run") and is_on_floor() and can_sprint:

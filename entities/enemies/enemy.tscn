@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://d8g64g8viihh"]
 
-[ext_resource type="Script" uid="uid://b01pe5336p70y" path="res://entities/enemy/enemy.gd" id="1_ksmh7"]
+[ext_resource type="Script" uid="uid://b01pe5336p70y" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tir2s"]
 albedo_color = Color(1, 0.210633, 0.210633, 1)
@@ -23,9 +23,9 @@ script = ExtResource("1_ksmh7")
 knockback_strength = 5.0
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
-target_desired_distance = 1.8
 avoidance_enabled = true
-radius = 1.2
+radius = 0.8
+debug_enabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
