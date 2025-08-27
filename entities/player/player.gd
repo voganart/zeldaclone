@@ -35,6 +35,7 @@ var can_sprint: bool = true
 @onready var punch_hand_l: Area3D = $character/root/Skeleton3D/hand_l/punch_hand_l
 @onready var first_attack_area: Area3D = $FirstAttackArea
 var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3","Boy_attack_naked_1","Boy_attack_naked_3"]
+@export var push_force: float = 1.0
 
 func _input(event):
 	if event.is_action_pressed("run") and is_on_floor() and can_sprint:
@@ -69,9 +70,16 @@ func _physics_process(delta: float) -> void:
 	tilt_character(delta)
 	animation_player()
 	move_and_slide()
+	push_obj()
 
-
-
+func push_obj():
+	for i in range(get_slide_collision_count()):
+		var c = get_slide_collision(i)
+		var collider = c.get_collider()
+		if collider is RigidBody3D:
+			collider.apply_central_impulse(-c.get_normal() * push_force)
+		if collider is CharacterBody3D and collider.has_method("receive_push"):
+			collider.receive_push(-c.get_normal() * push_force) 
 
 func move_logic(delta):
 	movement_input = Input.get_vector('left',"right", "up", "down")

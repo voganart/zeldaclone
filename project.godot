@@ -26,7 +26,7 @@ window/size/viewport_height=1080
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/phantom_camera/plugin.cfg", "res://addons/script_spliter/plugin.cfg")
+enabled=PackedStringArray("res://addons/jigglebones/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/script_spliter/plugin.cfg")
 
 [global_group]
 
@@ -97,7 +97,8 @@ first_attack={
 3d_physics/layer_1="Player"
 3d_physics/layer_2="Punches"
 3d_physics/layer_3="Enemies"
-3d_physics/layer_4="Envi"
+3d_physics/layer_4="Environment"
+3d_physics/layer_5="RigidObjects"
 avoidance/layer_1="enemies"
 
 [physics]

@@ -11,6 +11,7 @@ extends CharacterBody3D
 @onready var agent: NavigationAgent3D = get_node("NavigationAgent3D")
 @onready var player: Node3D = get_tree().get_first_node_in_group("player")
 @export var idle_chance: float = 0.3
+var external_push: Vector3 = Vector3.ZERO
 var idling: bool = false
 var chasing: bool = false
 var current_vertical_velocity: float = 0.0
@@ -26,7 +27,9 @@ func _ready() -> void:
 func _on_navmesh_ready(_map_rid):
 	if is_inside_tree():
 		_set_random_patrol_target()
-
+		
+func receive_push(push: Vector3):
+	external_push += push
 # Этот колбэк вызывается агентом каждый физический кадр
 # и предоставляет скорректированную скорость
 func _on_velocity_computed(safe_velocity: Vector3):
@@ -34,8 +37,8 @@ func _on_velocity_computed(safe_velocity: Vector3):
 		move_and_slide()
 		return
 
-	velocity.x = safe_velocity.x
-	velocity.z = safe_velocity.z
+	velocity.x = safe_velocity.x + external_push.x
+	velocity.z = safe_velocity.z + external_push.z
 	velocity.y = current_vertical_velocity
 
 	var look_dir = Vector3.ZERO
@@ -51,6 +54,7 @@ func _on_velocity_computed(safe_velocity: Vector3):
 
 	move_and_slide()
 	current_vertical_velocity = velocity.y
+	external_push = external_push.lerp(Vector3.ZERO, 0.1)
 
 
 func take_damage(amount, knockback_dir: Vector3):

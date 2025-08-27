@@ -12,11 +12,12 @@ radius = 0.441262
 size = Vector3(1.18555, 1, 1.12976)
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
-collision_mask = 12
+collision_mask = 28
 floor_constant_speed = true
 platform_on_leave = 1
 script = ExtResource("1_1hmtu")
 run_toggle_mode = false
+push_force = 0.5
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 
