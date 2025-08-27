@@ -1,0 +1,15 @@
+CharacterBody3D
+RigidBody3D
+NavigationAgent3D
+Control
+ColorRect
+CanvasLayer
+NavigationObstacle3D
+CollisionShape3D
+Area3D
+RayCast3D
+NavigationLink3D
+NavigationRegion3D
+BoneAttachment3D
+Node
+Node3D
