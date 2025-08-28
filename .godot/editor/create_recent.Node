@@ -1,3 +1,5 @@
+Timer
+AnimationPlayer
 CharacterBody3D
 RigidBody3D
 NavigationAgent3D
@@ -11,5 +13,3 @@ RayCast3D
 NavigationLink3D
 NavigationRegion3D
 BoneAttachment3D
-Node
-Node3D

@@ -9,4 +9,4 @@ res://entities/levels/test_level/outline.gdshader
 res://entities/player/player.tscn
 res://entities/enemies/enemy.tscn
 res://entities/enemies/enemy.gd
-res://entities/player/player.gd
+res://environment/movable_objects/box_1x1.tscn

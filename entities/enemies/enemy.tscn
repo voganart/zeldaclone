@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=7 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://b01pe5336p70y" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 
@@ -13,14 +13,13 @@ albedo_color = Color(1, 0.210633, 0.210633, 1)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ksmh7"]
-size = Vector3(6, 1.39453, 6)
-
 [node name="Enemy" type="CharacterBody3D" groups=["enemies"]]
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_ksmh7")
 knockback_strength = 5.0
+_chase_distance = 8.0
+_lost_chase_distance = 12.0
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 target_desired_distance = 1.2
@@ -46,14 +45,9 @@ shape = SubResource("CapsuleShape3D_lw7nh")
 [node name="LineOfSightCast" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4024, 0.712576)
 target_position = Vector3(0, 0, 0)
+collision_mask = 9
 debug_shape_thickness = 5
 
-[node name="DetectionZone" type="Area3D" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="DetectionZone"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.33679, 1.02979)
-shape = SubResource("BoxShape3D_ksmh7")
-debug_color = Color(1, 0, 0.203922, 1)
-
-[connection signal="body_entered" from="DetectionZone" to="." method="_on_detection_zone_body_entered"]
-[connection signal="body_exited" from="DetectionZone" to="." method="_on_detection_zone_body_exited"]
+[node name="AttackTimer" type="Timer" parent="."]
