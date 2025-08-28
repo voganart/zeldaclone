@@ -26,6 +26,10 @@ enum State { PATROL, CHASE, ATTACK, IDLE, KNOCKBACK }
 @onready var attack_timer: Timer = $AttackTimer # Добавьте этот узел в сцену
 var external_push: Vector3 = Vector3.ZERO
 
+# ⚠️ Новые переменные для системы зрения
+@onready var line_of_sight_cast: ShapeCast3D = $LineOfSightCast # ⚠️ Теперь это ShapeCast3D
+@export var sight_range: float = 15.0 # Дистанция, на которую враг может "видеть"
+
 var current_state: State = State.PATROL
 var last_attack_time: float = -100.0
 var retreating: bool = false
@@ -73,8 +77,28 @@ func take_damage(amount, knockback_dir: Vector3):
 	knockback_time = 0.3
 	set_state(State.KNOCKBACK)
 	
+	# ⚠️ НОВАЯ ЛОГИКА: Если врага ударили, он начинает преследовать
+	if current_state != State.CHASE and current_state != State.ATTACK:
+		set_state(State.CHASE)
+	
 	if hp <= 0:
 		queue_free()
+
+func _can_see_player() -> bool:
+	if not is_instance_valid(player):
+		return false
+	if global_position.distance_to(player.global_position) > _chase_distance:
+		return false
+	line_of_sight_cast.target_position = to_local(player.global_position)
+	line_of_sight_cast.force_shapecast_update()
+	if line_of_sight_cast.is_colliding():
+		var collider = line_of_sight_cast.get_collider(0)
+		if collider == player:
+			return true
+		else:
+			return false
+			
+	return false
 
 func _physics_process(delta):
 	# Всегда применяем гравитацию, если не на земле
@@ -101,13 +125,13 @@ func _physics_process(delta):
 		State.IDLE:
 			agent.set_velocity(Vector3.ZERO)
 			# Логика перехода из IDLE в CHASE
-			if is_instance_valid(player) and global_position.distance_to(player.global_position) < 10.0:
+			if _can_see_player(): # ⚠️ Используем новую функцию
 				set_state(State.CHASE)
 			return
 
 		State.PATROL:
 			# Если игрок в зоне видимости, переходим в CHASE
-			if is_instance_valid(player) and global_position.distance_to(player.global_position) <= _chase_distance:
+			if _can_see_player(): # ⚠️ Используем новую функцию
 				set_state(State.CHASE)
 				return
 
@@ -123,8 +147,8 @@ func _physics_process(delta):
 			agent.set_velocity(dir * agent.max_speed)
 
 		State.CHASE:
-			# Если игрок слишком далеко, возвращаемся в PATROL
-			if is_instance_valid(player) and global_position.distance_to(player.global_position) > _lost_chase_distance:
+			# Если игрок слишком далеко или не виден, возвращаемся в PATROL
+			if not _can_see_player() or global_position.distance_to(player.global_position) > _lost_chase_distance:
 				set_state(State.PATROL)
 				return
 			else:
@@ -202,15 +226,6 @@ func set_state(new_state: State):
 		State.KNOCKBACK:
 			pass
 			
-# --- Остальные функции остались прежними ---
-func _on_detection_zone_body_entered(body: Node3D) -> void:
-	if body.is_in_group("player"):
-		set_state(State.CHASE)
-
-func _on_detection_zone_body_exited(body: Node3D) -> void:
-	if body.is_in_group("player"):
-		set_state(State.PATROL)
-		_set_random_patrol_target()
 
 func _set_random_patrol_target():
 	if not patrol_zone:
