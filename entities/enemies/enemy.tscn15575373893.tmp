@@ -19,10 +19,24 @@ albedo_color = Color(1, 0.210633, 0.210633, 1)
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_ksmh7")
+hp = null
+knockback_time = null
+gravity = null
 knockback_strength = 5.0
+knockback_height = null
+walk_speed = null
+run_speed = null
+attack_range = null
+attack_cooldown = null
 tactical_retreat_distance = 5.0
+attack_animation_speed = null
 idle_chance = 0.8
+_chase_distance = null
+_lost_chase_distance = null
+chase_timeout = null
+stuck_threshold = null
 idle_cooldown = 1.16
+sight_range = null
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_desired_distance = 1.1
