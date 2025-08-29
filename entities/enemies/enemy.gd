@@ -165,6 +165,7 @@ func _physics_process(delta):
 			# Возвращаемся в патрулирование, если игрок слишком далеко или потерян
 			if global_position.distance_to(player.global_position) > _lost_chase_distance or time_since_last_seen_player > chase_timeout:
 				set_state(State.PATROL)
+				_set_random_patrol_target()
 				return
 				
 			if time_stuck > stuck_threshold:
@@ -219,6 +220,7 @@ func set_state(new_state: State):
 	match current_state:
 		State.PATROL:
 			agent.max_speed = walk_speed
+			_set_random_patrol_target()
 		State.CHASE:
 			agent.max_speed = run_speed
 		State.ATTACK:

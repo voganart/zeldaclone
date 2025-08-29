@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=9 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://b01pe5336p70y" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
+[ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://entities/health_component/HealthComponent.tscn" id="2_wqcwe"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tir2s"]
 albedo_color = Color(1, 0.210633, 0.210633, 1)
@@ -24,11 +25,11 @@ tactical_retreat_distance = 5.0
 idle_chance = 0.8
 idle_cooldown = 1.16
 
+[node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
+
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
-path_desired_distance = 1.1
-target_desired_distance = 1.2
 avoidance_enabled = true
-radius = 0.7
+radius = 0.6
 max_speed = 20.0
 debug_enabled = true
 

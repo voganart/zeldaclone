@@ -1,4 +1,4 @@
-res://entities/enemies/enemy.tscn
+res://entities/player/player.tscn
 res://addons/phantom_camera/themes/theme.tres
 res://entities/player/assets/characterSM.tres
 res://entities/player/assets/toonShader.gdshader
@@ -6,6 +6,6 @@ res://entities/player/assets/character.tres
 res://water_shader/shaders/Water.tres
 res://entities/player/assets/comicShader_Simple.tres
 res://entities/levels/test_level/outline.gdshader
-res://entities/enemies/enemy.gd
 res://entities/levels/test_level/level.tscn
-res://entities/player/player.tscn
+res://entities/enemies/enemy.tscn
+res://entities/enemies/enemy.gd
