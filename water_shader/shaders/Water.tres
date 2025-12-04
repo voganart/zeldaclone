@@ -7,9 +7,9 @@ noise_type = 3
 fractal_type = 2
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_p3qj1"]
+noise = SubResource("FastNoiseLite_l8pnj")
 seamless = true
 as_normal_map = true
-noise = SubResource("FastNoiseLite_l8pnj")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_p3qj1"]
 noise_type = 3
@@ -17,16 +17,16 @@ seed = 10
 fractal_type = 2
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_dhcye"]
+noise = SubResource("FastNoiseLite_p3qj1")
 seamless = true
 as_normal_map = true
-noise = SubResource("FastNoiseLite_p3qj1")
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_l8pnj")
 shader_parameter/albedo = Color(0, 0.579461, 0.668359, 1)
 shader_parameter/metallic = 0.0
-shader_parameter/roughness = 0.021
+shader_parameter/roughness = 0.02
 shader_parameter/texture_normal = SubResource("NoiseTexture2D_p3qj1")
 shader_parameter/texture_normal2 = SubResource("NoiseTexture2D_dhcye")
 shader_parameter/wave_direction = Vector2(2, 0)

@@ -62,6 +62,9 @@ func first_attack(attack_speed):
 	await anim_player.animation_finished
 	is_attacking = false
 	can_attack = true
+func _process(_delta):
+	RenderingServer.global_shader_parameter_set("player_position", global_transform.origin)
+
 
 func _physics_process(delta: float) -> void:
 	move_logic(delta)

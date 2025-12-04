@@ -1,3 +1,10 @@
+MeshInstance3D
+MultiMeshInstance3D
+SimpleGrassTextured
+Terrain3D
+Node3D
+Node
+ReflectionProbe
 ShapeCast3D
 RayCast3D
 Timer
@@ -6,9 +13,3 @@ CharacterBody3D
 RigidBody3D
 NavigationAgent3D
 Control
-ColorRect
-CanvasLayer
-NavigationObstacle3D
-CollisionShape3D
-Area3D
-NavigationLink3D
