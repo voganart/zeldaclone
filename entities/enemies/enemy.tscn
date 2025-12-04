@@ -1,16 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=6 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://b01pe5336p70y" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://entities/health_component/HealthComponent.tscn" id="2_wqcwe"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tir2s"]
-albedo_color = Color(1, 0.210633, 0.210633, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_dxw06"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ksmh7"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_im2q6"]
+[ext_resource type="PackedScene" uid="uid://duk5b06ohkpsc" path="res://entities/enemies/monstr.tscn" id="3_5lf1o"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
 
@@ -20,10 +12,6 @@ albedo_color = Color(1, 0.210633, 0.210633, 1)
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_ksmh7")
-knockback_strength = 5.0
-tactical_retreat_distance = 5.0
-idle_chance = 0.8
-idle_cooldown = 1.16
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
 
@@ -32,16 +20,48 @@ avoidance_enabled = true
 radius = 0.6
 max_speed = 20.0
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource("StandardMaterial3D_tir2s")
-mesh = SubResource("CapsuleMesh_dxw06")
+[node name="Monstr" parent="." instance=ExtResource("3_5lf1o")]
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(0.205904, 0, 0, 0, 0.205904, 0, 0, 0, 0.403643, 0, 0.414101, 0.506453)
-material_override = SubResource("StandardMaterial3D_ksmh7")
-mesh = SubResource("BoxMesh_im2q6")
-skeleton = NodePath("../..")
+[node name="Skeleton3D" parent="Monstr/root" index="0"]
+bones/1/position = Vector3(-1.6116648e-10, 0.4740881, 0.00042610895)
+bones/1/rotation = Quaternion(0.042217515, -2.5835184e-06, -1.06987635e-07, 0.9991085)
+bones/2/position = Vector3(-0.023021227, 0.26262203, -0.020780325)
+bones/2/rotation = Quaternion(-0.024146868, -0.013606974, -0.0105933035, 0.99955976)
+bones/3/rotation = Quaternion(0.23842315, 3.1305094e-06, 4.6796426e-06, 0.9711614)
+bones/4/position = Vector3(5.007035e-09, 0.06338361, -8.4430965e-08)
+bones/4/rotation = Quaternion(-0.23819123, -4.129839e-06, -4.784509e-06, 0.97121835)
+bones/5/position = Vector3(-0.12701668, 0.47739196, -0.018639954)
+bones/5/rotation = Quaternion(-0.50328225, 0.47770002, 0.5925264, 0.40917268)
+bones/6/rotation = Quaternion(-0.5865149, 0.11242889, -0.21573031, 0.77254164)
+bones/6/scale = Vector3(1.0000001, 0.9999992, 1)
+bones/7/rotation = Quaternion(-1.5145245e-08, -0.2226202, 3.0284127e-08, 0.97490525)
+bones/8/rotation = Quaternion(3.2035693e-08, -5.111557e-09, 0.20769283, 0.9781941)
+bones/8/scale = Vector3(1, 1.0000001, 0.9999999)
+bones/9/rotation = Quaternion(-3.0514325e-08, -0.21160494, -2.2284324e-08, 0.97735536)
+bones/10/rotation = Quaternion(-0.06059888, -0.21036625, 0.035550546, 0.97509485)
+bones/10/scale = Vector3(0.99999887, 0.9999994, 0.9999991)
+bones/11/position = Vector3(0.13084687, 0.4734017, -0.047634102)
+bones/11/rotation = Quaternion(0.5738763, 0.3806284, 0.5379449, -0.48621318)
+bones/12/rotation = Quaternion(-0.56906277, -0.08479205, 0.06557033, 0.8152781)
+bones/12/scale = Vector3(1.0000001, 0.9999896, 1.0000001)
+bones/13/rotation = Quaternion(-5.878794e-08, 0.10203464, -1.4226614e-08, 0.9947809)
+bones/14/rotation = Quaternion(7.518869e-08, -1.2185266e-07, -0.3591247, 0.9332897)
+bones/14/scale = Vector3(1.0000044, 0.99999595, 1)
+bones/15/rotation = Quaternion(-2.7370644e-08, 0.21364364, -2.146775e-08, 0.97691166)
+bones/16/rotation = Quaternion(-0.09632337, 0.1965055, 0.16631125, 0.96148217)
+bones/16/scale = Vector3(0.9999997, 1.0000076, 1.0000001)
+bones/17/rotation = Quaternion(0.6991029, 0.11600131, 0.6959159, 0.116189696)
+bones/18/rotation = Quaternion(2.5422062e-09, -6.284562e-06, 1.15175e-06, 1)
+bones/19/rotation = Quaternion(1.0980854e-08, -1.0472182e-08, 0.26311696, 0.96476394)
+bones/20/rotation = Quaternion(0.32276246, 0.630698, -0.32291302, 0.6275122)
+bones/21/rotation = Quaternion(-3.4294163e-07, 0.9152513, 0.40288338, -2.98566e-07)
+bones/22/rotation = Quaternion(4.815235e-08, -1.1541822e-05, 1.4099615e-07, 1)
+bones/23/rotation = Quaternion(0.69909936, -0.116000324, -0.69591963, 0.11618976)
+bones/24/rotation = Quaternion(1.162875e-09, 6.5741274e-06, -4.961263e-07, 1)
+bones/25/rotation = Quaternion(8.8167855e-09, -4.893591e-08, -0.2631159, 0.96476424)
+bones/26/rotation = Quaternion(0.32276228, -0.630698, 0.32291308, 0.6275124)
+bones/27/rotation = Quaternion(4.3082656e-07, 0.91525143, 0.40288314, 2.0303418e-07)
+bones/28/rotation = Quaternion(1.4531615e-10, 1.1596324e-05, 2.3524446e-07, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -54,6 +74,6 @@ target_position = Vector3(0, 0, 0)
 collision_mask = 9
 debug_shape_custom_color = Color(0.996577, 0, 1, 1)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-
 [node name="AttackTimer" type="Timer" parent="."]
+
+[editable path="Monstr"]

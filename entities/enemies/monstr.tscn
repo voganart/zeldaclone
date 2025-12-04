@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://duk5b06ohkpsc"]
+
+[ext_resource type="PackedScene" uid="uid://c6017hromuhsr" path="res://entities/enemies/Monstr.glb" id="1_io610"]
+[ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="2_a184d"]
+
+[node name="Monstr" instance=ExtResource("1_io610")]
+
+[node name="Monstr" parent="root/Skeleton3D" index="0"]
+surface_material_override/0 = ExtResource("2_a184d")
