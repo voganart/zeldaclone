@@ -1,3 +1,5 @@
+Label
+Container
 Area3D
 BoneAttachment3D
 MeshInstance3D
@@ -11,5 +13,3 @@ ShapeCast3D
 RayCast3D
 Timer
 AnimationPlayer
-CharacterBody3D
-RigidBody3D

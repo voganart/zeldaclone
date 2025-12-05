@@ -47,7 +47,7 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK}
 @export var knockback_strength: float = 2.0
 @export var knockback_height: float = 5.0
 @export var knockback_duration: float = 0.5
-@export var stuck_threshold: float = 0.5 # Time before considered stuck
+@export var stuck_threshold: float = 0.1 # Time before considered stuck
 
 # ============================================================================
 # STATE VARIABLES
@@ -64,6 +64,8 @@ var last_known_player_pos: Vector3 = Vector3.ZERO
 var time_since_player_seen: float = 0.0
 var last_attack_time: float = -999.0
 var time_stuck: float = 0.0
+
+var frustration_total_time: float = 0.0
 
 # Attack state
 var is_attacking: bool = false
@@ -90,6 +92,7 @@ var nav_ready: bool = false
 @onready var player: Node3D = get_tree().get_first_node_in_group("player")
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
 @onready var los_cast: ShapeCast3D = $LineOfSightCast
+@export var punch_hand_r: Area3D # Assign in editor!
 
 # ============================================================================
 # INITIALIZATION
@@ -110,6 +113,27 @@ func _on_navmesh_ready(_map_rid) -> void:
 	if is_inside_tree():
 		nav_ready = true
 		enter_state(State.PATROL)
+		
+		# Initialize punch hand
+		if punch_hand_r:
+			if not punch_hand_r.body_entered.is_connected(_on_punch_hand_body_entered):
+				punch_hand_r.body_entered.connect(_on_punch_hand_body_entered)
+
+func _on_punch_hand_body_entered(body: Node3D) -> void:
+	# Only damage if we are currently attacking
+	if not is_attacking:
+		return
+		
+	if body == player:
+		# Calculate knockback direction (away from enemy)
+		var knockback_dir = (player.global_position - global_position).normalized()
+		# Add some upward force
+		knockback_dir.y = 0.5
+		knockback_dir = knockback_dir.normalized() * knockback_strength
+		
+		if player.has_method("take_damage"):
+			# Assuming 1 damage for now, can be exported variable later
+			player.take_damage(1.0, knockback_dir)
 
 # ============================================================================
 # MAIN LOOP
@@ -159,35 +183,42 @@ func enter_state(new_state: State) -> void:
 	# Enter new state
 	match current_state:
 		State.IDLE:
+			frustration_total_time = 0.0
 			nav_agent.max_speed = 0.0
-			anim_player.play("Monstr_idle")
+			anim_player.play("Monstr_idle", 0.2, 1.0)
 			state_timer = randf_range(idle_duration_min, idle_duration_max)
 			idle_look_timer = randf_range(1.5, 4.0)
 			
 		State.PATROL:
+			frustration_total_time = 0.0
 			nav_agent.max_speed = walk_speed
-			anim_player.play("Monstr_walk")
+			anim_player.play("Monstr_walk", 0.2, 1.0)
 			_set_random_patrol_target()
 			
 		State.CHASE:
+			# Don't reset frustration_total_time here to allow loop accumulation
 			nav_agent.max_speed = run_speed
-			anim_player.play("Monstr_walk")
+			anim_player.play("Monstr_walk", 0.2, 1.0)
 			state_timer = 0.0 # Track chase duration
 			
 		State.FRUSTRATED:
 			nav_agent.max_speed = 0.0
-			anim_player.play("Monstr_angry")
+			anim_player.play("Monstr_angry", 0.2, 1.0)
+			# Short duraton for the angry animation before trying to chase again
+			state_timer = 3.0
+			print("State: Frustrated")
 			
 		State.ATTACK:
+			frustration_total_time = 0.0
 			nav_agent.max_speed = 0.0
 			# Don't auto-execute, let update handle it
 			
 		State.FLEE:
-			nav_agent.max_speed = run_speed * 1.2
-			anim_player.play("Monstr_walk")
+			nav_agent.max_speed = run_speed * 0.5
+			anim_player.play("Monstr_walk", 0.2, 1.0)
 			
 		State.KNOCKBACK:
-			anim_player.play("Monstr_knockdown")
+			anim_player.play("Monstr_knockdown", 0.2, 1.0)
 			state_timer = knockback_duration
 
 func _update_state(delta: float, player_visible: bool) -> void:
@@ -296,31 +327,22 @@ func _update_chase(delta: float, player_visible: bool) -> void:
 			nav_agent.target_position = orbit_target
 			
 			_move_toward_target()
-			anim_player.play("Monstr_walk")
+			anim_player.play("Monstr_walk", 0, 1.0, 0.2)
 			return # Выход, так как движение уже обработано
 
 	# 2. Проверка на Потерю Игрока / Отступление (Lost Player)
-	if dist_to_player > lost_sight_range or time_since_player_seen > chase_memory_duration:
-		# Если игрок вне зоны погони или потерян слишком долго,
-		# пытаемся исследовать последнее известное местоположение.
-		if last_known_player_pos != Vector3.ZERO and global_position.distance_to(last_known_player_pos) > 2.0:
-			nav_agent.target_position = last_known_player_pos
-		else:
-			# Расследование завершено или нет информации
-			enter_state(State.PATROL)
-			return
+	# Strict limits as requested
+	if time_since_player_seen > chase_memory_duration:
+		enter_state(State.PATROL)
+		return
 
-	# 3. Проверка на Застревание (Stuck Recovery)
-	if time_stuck > stuck_threshold:
-		time_stuck = 0.0
-		# Вместо немедленного патрулирования можно попытаться сбросить цель и вернуться в погоню
-		# Для простоты вернемся в PATROL, как было.
+	if dist_to_player > lost_sight_range:
 		enter_state(State.PATROL)
 		return
 		
-	# 4. Проверка на Фрустрацию (Frustration check)
-	# Этот таймер будет сбрасываться каждый раз, когда враг атакует или теряет игрока.
-	if state_timer > frustration_duration:
+	# 3. Проверка на Застревание (Stuck Recovery) -> FRUSTRATION
+	if time_stuck > stuck_threshold:
+		time_stuck = 0.0
 		enter_state(State.FRUSTRATED)
 		return
 
@@ -332,17 +354,19 @@ func _update_chase(delta: float, player_visible: bool) -> void:
 		_move_toward_target()
 
 func _update_frustrated(delta: float) -> void:
-	state_timer += delta
+	state_timer -= delta
+	frustration_total_time += delta
 	nav_agent.set_velocity(Vector3.ZERO)
 	
-	# Player came close - attack!
-	if is_instance_valid(player) and global_position.distance_to(player.global_position) <= attack_range:
-		enter_state(State.ATTACK)
-		return
-	
-	# Give up
-	if state_timer > give_up_duration:
+	# Give up if we've been frustrated for too long total
+	if frustration_total_time > give_up_duration:
 		enter_state(State.PATROL)
+		return
+
+	# If anger animation/wait is done, try chasing again
+	if state_timer <= 0:
+		enter_state(State.CHASE)
+		return
 
 func _update_attack(delta: float) -> void:
 	# Wait for attack animation
@@ -352,7 +376,7 @@ func _update_attack(delta: float) -> void:
 	
 	# Tactical retreat phase
 	if should_tactical_retreat:
-		nav_agent.max_speed = run_speed * 1.5 # ⚠️ КОНТРОЛЬ СКОРОСТИ: Используем большую скорость!
+		nav_agent.max_speed = run_speed * 0.8
 		
 		# Расчет цели отступления: точка, удаленная от игрока
 		if is_instance_valid(player):
@@ -366,20 +390,20 @@ func _update_attack(delta: float) -> void:
 		_move_toward_target()
 		
 		# ⚠️ АНИМАЦИЯ: Включаем анимацию ходьбы/бега
-		anim_player.play("Monstr_walk")
+		anim_player.play("Monstr_walk", 0.2, 1.0)
 
 		# Проверка, достигнута ли цель отступления
 		if nav_agent.is_navigation_finished() and tactical_retreat_pause_timer <= 0:
 			# Пауза в точке отступления
 			nav_agent.set_velocity(Vector3.ZERO)
-			anim_player.play("Monstr_idle")
+			anim_player.play("Monstr_attack_idle", 0.2, 1.0)
 			tactical_retreat_pause_timer = randf_range(tactical_retreat_pause_min, tactical_retreat_pause_max)
 
 		# Пауза в точке отступления
 		if tactical_retreat_pause_timer > 0:
 			tactical_retreat_pause_timer -= delta
 			nav_agent.set_velocity(Vector3.ZERO)
-			anim_player.play("Monstr_idle")
+			anim_player.play("Monstr_attack_idle", 0.2, 1.0)
 			
 			if tactical_retreat_pause_timer <= 0:
 				should_tactical_retreat = false
@@ -406,6 +430,7 @@ func _update_attack(delta: float) -> void:
 		_execute_attack()
 	else:
 		# Wait for cooldown, stay still and face player
+		anim_player.play("Monstr_attack_idle", 0.2, 1.0)
 		nav_agent.set_velocity(Vector3.ZERO)
 
 func _update_flee(_delta: float) -> void:
@@ -496,7 +521,7 @@ func _execute_attack() -> void:
 		return
 	
 	is_attacking = true
-	anim_player.play("Monstr_attack_1", 0.2)
+	anim_player.play("Monstr_attack_1", 0.2, 1.0)
 	await anim_player.animation_finished
 	is_attacking = false
 	
@@ -510,6 +535,15 @@ func _execute_attack() -> void:
 
 func take_damage(amount: float, knockback_dir: Vector3) -> void:
 	hp -= amount
+
+	# Death check
+	if hp <= 0:
+		queue_free()
+		return
+	
+	# Apply knockback only if force is sufficient
+	if knockback_dir.length_squared() < 0.1:
+		return
 	
 	# Apply knockback
 	var final_knockback = knockback_dir.normalized() * knockback_strength
@@ -517,10 +551,6 @@ func take_damage(amount: float, knockback_dir: Vector3) -> void:
 	velocity = final_knockback
 	
 	enter_state(State.KNOCKBACK)
-	
-	# Death
-	if hp <= 0:
-		queue_free()
 
 func receive_push(push: Vector3) -> void:
 	external_push += push
@@ -576,15 +606,10 @@ func _set_random_patrol_target() -> void:
 	
 	# Try 10 times to find valid point
 	for i in range(10):
-		var random_offset = Vector3(
-			randf_range(-extents.x, extents.x),
-			0,
-			randf_range(-extents.z, extents.z)
-		)
+		var random_offset = Vector3(randf_range(-extents.x, extents.x), 0, randf_range(-extents.z, extents.z))
 		var candidate = origin + random_offset
 		var nav_map = nav_agent.get_navigation_map()
 		var valid_point = NavigationServer3D.map_get_closest_point(nav_map, candidate)
-		
 		if valid_point != Vector3.ZERO:
 			nav_agent.target_position = valid_point
 			return
