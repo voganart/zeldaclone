@@ -1,3 +1,5 @@
+Area3D
+BoneAttachment3D
 MeshInstance3D
 MultiMeshInstance3D
 SimpleGrassTextured
@@ -11,5 +13,3 @@ Timer
 AnimationPlayer
 CharacterBody3D
 RigidBody3D
-NavigationAgent3D
-Control

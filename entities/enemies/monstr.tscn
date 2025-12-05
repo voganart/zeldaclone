@@ -1,9 +1,64 @@
-[gd_scene load_steps=3 format=3 uid="uid://duk5b06ohkpsc"]
+[gd_scene load_steps=4 format=3 uid="uid://duk5b06ohkpsc"]
 
 [ext_resource type="PackedScene" uid="uid://c6017hromuhsr" path="res://entities/enemies/Monstr.glb" id="1_io610"]
 [ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="2_a184d"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_a184d"]
+size = Vector3(0.3, 0.3, 0.3)
+
 [node name="Monstr" instance=ExtResource("1_io610")]
+
+[node name="Skeleton3D" parent="root" index="0"]
+bones/1/position = Vector3(-1.6116648e-10, 0.4740881, 0.00042610895)
+bones/1/rotation = Quaternion(0.040821746, 0.2012587, -0.008374395, 0.9786513)
+bones/2/position = Vector3(-0.08563234, 0.275475, 0.12571764)
+bones/2/rotation = Quaternion(0.12383611, -0.045929193, 0.06569742, 0.9890596)
+bones/3/rotation = Quaternion(0.23842315, 3.1305094e-06, 4.6796426e-06, 0.9711614)
+bones/4/position = Vector3(-0.0138760535, 0.0880782, 0.10780082)
+bones/4/rotation = Quaternion(-0.25851604, -0.052536096, 0.058704443, 0.96278936)
+bones/5/position = Vector3(-0.12701668, 0.47739196, -0.018639954)
+bones/5/rotation = Quaternion(-0.50328225, 0.47770002, 0.5925264, 0.40917268)
+bones/6/rotation = Quaternion(0.19370048, 0.099309996, 0.5994735, 0.7702267)
+bones/6/scale = Vector3(1, 2.0180933, 0.99999976)
+bones/7/rotation = Quaternion(2.1925698e-07, 0.57904464, 1.4216997e-07, 0.8152958)
+bones/8/rotation = Quaternion(-0.012671888, -0.00024222882, 0.061782017, 0.9980092)
+bones/8/scale = Vector3(0.99026203, 1.1477488, 0.9995646)
+bones/9/rotation = Quaternion(-3.7890874e-08, -0.04155444, 2.2714488e-08, 0.9991363)
+bones/10/rotation = Quaternion(-0.046158638, -0.029110057, 0.13189925, 0.98975986)
+bones/10/scale = Vector3(1.3515818, 0.5211274, 1.4130055)
+bones/11/position = Vector3(0.13084687, 0.4734017, -0.047634102)
+bones/11/rotation = Quaternion(0.5738763, 0.3806284, 0.5379449, -0.48621318)
+bones/12/rotation = Quaternion(-0.35609683, -0.35594603, 0.03299899, 0.86337054)
+bones/12/scale = Vector3(0.9999998, 1.0483159, 1)
+bones/13/rotation = Quaternion(1.7202656e-07, 0.27679205, -6.45933e-08, 0.9609299)
+bones/14/rotation = Quaternion(1.250484e-07, -4.419178e-08, -0.0017962009, 0.9999984)
+bones/14/scale = Vector3(1.0000044, 0.99999595, 1)
+bones/15/rotation = Quaternion(-6.5353696e-08, 0.31039143, 1.5919298e-08, 0.95060885)
+bones/16/rotation = Quaternion(0.06271679, 0.23173836, -0.28296062, 0.92859966)
+bones/16/scale = Vector3(0.9950609, 0.9633877, 0.99839675)
+bones/17/rotation = Quaternion(0.55228776, 0.14358217, 0.8097428, 0.13667156)
+bones/18/rotation = Quaternion(9.18727e-08, -0.1845127, 4.902944e-07, 0.98283017)
+bones/19/rotation = Quaternion(-7.0847714e-09, -5.4385666e-08, 0.072437294, 0.997373)
+bones/20/rotation = Quaternion(0.14994693, 0.69164366, -0.1959103, 0.67879623)
+bones/21/rotation = Quaternion(-3.4294163e-07, 0.9152513, 0.40288338, -2.98566e-07)
+bones/22/rotation = Quaternion(-4.2906553e-08, 0.019268971, 5.956185e-08, 0.9998144)
+bones/23/rotation = Quaternion(0.84597397, 0.027208433, -0.53199184, -0.023925811)
+bones/24/rotation = Quaternion(-1.1179218e-08, -0.22108613, 7.715445e-08, 0.9752543)
+bones/25/rotation = Quaternion(-1.0634921e-08, -4.197742e-08, -0.102240466, 0.9947598)
+bones/26/rotation = Quaternion(0.32422742, -0.6291629, 0.36194342, 0.6066528)
+bones/27/rotation = Quaternion(4.3082656e-07, 0.91525143, 0.40288314, 2.0303418e-07)
+bones/28/rotation = Quaternion(-8.361731e-08, -0.023225226, 2.982801e-07, 0.9997303)
 
 [node name="Monstr" parent="root/Skeleton3D" index="0"]
 surface_material_override/0 = ExtResource("2_a184d")
+
+[node name="hand_r" type="BoneAttachment3D" parent="root/Skeleton3D" index="1"]
+transform = Transform3D(-1.0449224, 0.36533237, -0.10528147, -0.15975535, -0.0058608428, 1.4030157, 1.3050188, 1.0747362, 0.3104156, -0.26535293, 1.0666379, 1.8173592)
+bone_name = "hand.r"
+bone_idx = 10
+
+[node name="punch_hand_r" type="Area3D" parent="root/Skeleton3D/hand_r" index="0"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_r/punch_hand_r" index="0"]
+transform = Transform3D(1.5, 5.9604645e-08, -7.4505806e-08, -1.1920929e-07, 1.5, 2.9802322e-08, 5.2154064e-08, -3.7252903e-08, 1.5, 0, 0, 0)
+shape = SubResource("BoxShape3D_a184d")
