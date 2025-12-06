@@ -33,7 +33,12 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK}
 @export_group("Detection")
 @export var sight_range: float = 10.0
 @export var lost_sight_range: float = 15.0
+@export_range(0, 360) var sight_angle: float = 120.0 # Field of view in degrees
+@export var proximity_detection_range: float = 3.0 # Detect player in 360 degrees if overly close
+@export var eye_height_offset: float = 1.0 # Height of enemy eyes
+@export var player_height_offset: float = 0.5 # Height of player target point
 @export var chase_memory_duration: float = 7.0 # Remember player position
+@export var debug_vision: bool = false # Draw debug info for vision
 
 @export_group("Behavior Timers")
 @export var idle_duration_min: float = 3.0
@@ -41,6 +46,9 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK}
 @export var idle_chance: float = 0.8 # 80% chance to idle after patrol
 @export var frustration_duration: float = 3.0 # Time before getting frustrated
 @export var give_up_duration: float = 5.0 # Total time before giving up
+@export var chase_cooldown_duration: float = 2.0 # Time to ignore player after frustration
+var frustrated_cooldown: float = 0.0
+
 
 @export_group("Physics")
 @export var gravity: float = 100.0
@@ -54,6 +62,8 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK}
 # ============================================================================
 var current_state: State = State.IDLE
 var state_timer: float = 0.0 # Robust timer for state durations
+var last_dist_to_target: float = INF
+
 
 # ============================================================================
 # RUNTIME VARIABLES
@@ -81,6 +91,10 @@ var is_looking_around: bool = false
 var vertical_velocity: float = 0.0
 var external_push: Vector3 = Vector3.ZERO
 
+# Debug Visuals
+var debug_sight_mesh: MeshInstance3D
+var debug_proximity_mesh: MeshInstance3D
+
 # Navigation
 var nav_ready: bool = false
 
@@ -91,7 +105,6 @@ var nav_ready: bool = false
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var player: Node3D = get_tree().get_first_node_in_group("player")
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
-@onready var los_cast: ShapeCast3D = $LineOfSightCast
 @export var punch_hand_r: Area3D # Assign in editor!
 
 # ============================================================================
@@ -108,6 +121,9 @@ func _ready() -> void:
 	
 	# Wait for navmesh
 	NavigationServer3D.map_changed.connect(_on_navmesh_ready)
+	
+	if debug_vision:
+		_setup_debug_meshes()
 
 func _on_navmesh_ready(_map_rid) -> void:
 	if is_inside_tree():
@@ -163,6 +179,9 @@ func _physics_process(delta: float) -> void:
 	
 	# Handle rotation
 	_update_rotation(delta)
+	
+	if debug_vision:
+		_update_debug_meshes()
 
 # ============================================================================
 # STATE MACHINE - Enter/Update/Exit Pattern
@@ -183,29 +202,31 @@ func enter_state(new_state: State) -> void:
 	# Enter new state
 	match current_state:
 		State.IDLE:
-			frustration_total_time = 0.0
 			nav_agent.max_speed = 0.0
 			anim_player.play("Monstr_idle", 0.2, 1.0)
 			state_timer = randf_range(idle_duration_min, idle_duration_max)
 			idle_look_timer = randf_range(1.5, 4.0)
 			
 		State.PATROL:
-			frustration_total_time = 0.0
 			nav_agent.max_speed = walk_speed
 			anim_player.play("Monstr_walk", 0.2, 1.0)
 			_set_random_patrol_target()
 			
 		State.CHASE:
+			# Reset stuck timer if moving normally
+			if velocity.length() > 0.2:
+				time_stuck = 0.0
 			# Don't reset frustration_total_time here to allow loop accumulation
 			nav_agent.max_speed = run_speed
 			anim_player.play("Monstr_walk", 0.2, 1.0)
 			state_timer = 0.0 # Track chase duration
 			
 		State.FRUSTRATED:
+			frustration_total_time = 0.0
 			nav_agent.max_speed = 0.0
 			anim_player.play("Monstr_angry", 0.2, 1.0)
-			# Short duraton for the angry animation before trying to chase again
-			state_timer = 3.0
+			# Play angry animation for the duration
+			state_timer = frustration_duration
 			print("State: Frustrated")
 			
 		State.ATTACK:
@@ -265,11 +286,24 @@ func _update_idle(delta: float, player_visible: bool) -> void:
 		enter_state(State.PATROL)
 
 func _update_patrol(_delta: float, player_visible: bool) -> void:
+	# Кулдаун FRUSTRATED — игнор игрока
+	if frustrated_cooldown > 0:
+		frustrated_cooldown -= _delta
+		player_visible = false
 	# Spot player
 	if player_visible:
 		enter_state(State.CHASE)
 		return
-	
+
+	# --- Проверка застревания по скорости ---
+	if velocity.length() < 0.1:
+		time_stuck += _delta
+	else:
+		time_stuck = 0.0
+
+	# --- Проверка застревания по прогрессу ---
+	var _dist = global_position.distance_to(nav_agent.target_position)
+
 	# Reached destination
 	if nav_agent.is_navigation_finished():
 		if randf() < idle_chance:
@@ -277,17 +311,25 @@ func _update_patrol(_delta: float, player_visible: bool) -> void:
 		else:
 			_set_random_patrol_target()
 		return
-	
+
 	# Stuck recovery
 	if time_stuck > stuck_threshold:
 		time_stuck = 0.0
 		_set_random_patrol_target()
 		return
-	
+
 	# Move toward target
 	_move_toward_target()
 
+
 func _update_chase(delta: float, player_visible: bool) -> void:
+# Если фрустрация ещё не остыла — игнорим игрока
+	if frustrated_cooldown > 0:
+		frustrated_cooldown -= delta
+		# сброс погони → уходим в патруль
+		enter_state(State.PATROL)
+		return
+
 	state_timer += delta
 	
 	# Проверка на валидность игрока
@@ -357,16 +399,17 @@ func _update_frustrated(delta: float) -> void:
 	state_timer -= delta
 	frustration_total_time += delta
 	nav_agent.set_velocity(Vector3.ZERO)
-	
-	# Give up if we've been frustrated for too long total
+
+	# Если слишком долго бесится — сдаётся (Give Up)
 	if frustration_total_time > give_up_duration:
+		frustrated_cooldown = chase_cooldown_duration
 		enter_state(State.PATROL)
 		return
 
-	# If anger animation/wait is done, try chasing again
+	# Окончание короткой анимации злости (End of Frustration -> Cooldown)
 	if state_timer <= 0:
-		enter_state(State.CHASE)
-		return
+		# Просто анимация закончилась — остаёмся в FRUSTRATED
+		state_timer = 0.0
 
 func _update_attack(delta: float) -> void:
 	# Wait for attack animation
@@ -535,7 +578,7 @@ func _execute_attack() -> void:
 
 func take_damage(amount: float, knockback_dir: Vector3) -> void:
 	hp -= amount
-
+	$HitFlash.flash()
 	# Death check
 	if hp <= 0:
 		queue_free()
@@ -563,15 +606,54 @@ func _can_see_player() -> bool:
 		return false
 	
 	var dist = global_position.distance_to(player.global_position)
+	
+	# 1. Absolute Range Check
 	if dist > sight_range:
 		return false
 	
-	los_cast.target_position = to_local(player.global_position)
-	los_cast.force_shapecast_update()
+	# 2. Field of View (FOV) & Proximity Check
+	# If player is within proximity range, they are detected 360 degrees (blind spot mitigation)
+	# Otherwise, we check the view angle.
+	var in_proximity = dist <= proximity_detection_range
 	
-	if los_cast.is_colliding():
-		var collider = los_cast.get_collider(0)
-		return collider == player
+	if not in_proximity:
+		var direction_to_player = (player.global_position - global_position).normalized()
+		# Assuming standard forward is -Z in local space, transformed to global
+		# Or simplified: use the enemy's current forward vector.
+		# Godot default forward is -Z.
+		var forward_vector = global_transform.basis.z
+		
+		# Calculate angle
+		var angle_to_player = rad_to_deg(forward_vector.angle_to(direction_to_player))
+		
+		# If angle is outside half of the FOV, we can't see them
+		if angle_to_player > sight_angle / 2.0:
+			return false
+
+	# 3. Physical Line of Sight (Raycast)
+	# Even if close or in angle, walls should block vision.
+	var space_state = get_world_3d().direct_space_state
+	
+	var origin_pos = global_position + Vector3(0, eye_height_offset, 0)
+	var target_pos = player.global_position + Vector3(0, player_height_offset, 0)
+	
+	var query = PhysicsRayQueryParameters3D.create(origin_pos, target_pos)
+	query.exclude = [self] # Don't hit self
+	# query.collision_mask = 1 # Optional: Define vision layers if needed
+	
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		if result.collider == player:
+			if debug_vision:
+				print("Player Seen! Dist: %.1f" % dist)
+			return true
+		else:
+			if debug_vision:
+				# Use a timer or frame counter to avoid spam if needed, or just print occasionally
+				# print("Vision blocked by: ", result.collider.name)
+				pass
+			return false
 	
 	return false
 
@@ -602,14 +684,65 @@ func _set_random_patrol_target() -> void:
 		return
 	
 	var extents = shape.shape.extents
-	var origin = patrol_zone.global_transform.origin
-	
-	# Try 10 times to find valid point
+	var box_center = shape.global_transform.origin # центр бокса в мире
+
 	for i in range(10):
-		var random_offset = Vector3(randf_range(-extents.x, extents.x), 0, randf_range(-extents.z, extents.z))
-		var candidate = origin + random_offset
+		var random_offset = Vector3(
+			randf_range(-extents.x, extents.x),
+			0,
+			randf_range(-extents.z, extents.z)
+		)
+
+		var candidate = box_center + random_offset
 		var nav_map = nav_agent.get_navigation_map()
 		var valid_point = NavigationServer3D.map_get_closest_point(nav_map, candidate)
-		if valid_point != Vector3.ZERO:
-			nav_agent.target_position = valid_point
-			return
+
+		# ---- ГЛОБАЛЬНАЯ проверка границ ----
+		var min_x = box_center.x - extents.x
+		var max_x = box_center.x + extents.x
+		var min_z = box_center.z - extents.z
+		var max_z = box_center.z + extents.z
+
+		if valid_point.x < min_x or valid_point.x > max_x:
+			continue
+		if valid_point.z < min_z or valid_point.z > max_z:
+			continue
+
+		# точка валидная
+		nav_agent.target_position = valid_point
+		return
+
+# ============================================================================
+# DEBUG VISUALIZATION
+# ============================================================================
+func _setup_debug_meshes() -> void:
+	# 1. Sight Range Sphere (Yellow)
+	debug_sight_mesh = MeshInstance3D.new()
+	var sphere_mesh = SphereMesh.new()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 1.0, 0.0, 0.1) # Transparent Yellow
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED # See from inside
+	sphere_mesh.material = mat
+	debug_sight_mesh.mesh = sphere_mesh
+	add_child(debug_sight_mesh)
+	
+	# 2. Proximity Range Sphere (Red)
+	debug_proximity_mesh = MeshInstance3D.new()
+	var prox_mesh = SphereMesh.new()
+	var prox_mat = StandardMaterial3D.new()
+	prox_mat.albedo_color = Color(1.0, 0.0, 0.0, 0.5) # Transparent Red
+	prox_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	prox_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	prox_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	prox_mesh.material = prox_mat
+	debug_proximity_mesh.mesh = prox_mesh
+	add_child(debug_proximity_mesh)
+
+func _update_debug_meshes() -> void:
+	if debug_sight_mesh:
+		debug_sight_mesh.scale = Vector3(sight_range * 2, sight_range * 2, sight_range * 2)
+
+	if debug_proximity_mesh:
+		debug_proximity_mesh.scale = Vector3(proximity_detection_range * 2, proximity_detection_range * 2, proximity_detection_range * 2)

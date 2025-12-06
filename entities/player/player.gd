@@ -43,6 +43,8 @@ var combo_count: int = 0
 var current_attack_damage: float = 1.0
 var current_attack_knockback_enabled: bool = false
 var combo_reset_timer: Timer
+var is_knockbacked: bool = false
+
 
 # Components
 @onready var health_component: Node = $HealthComponent
@@ -76,10 +78,22 @@ func _on_died() -> void:
 	# Handle death logic here
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
+	print("PLAYER TOOK DAMAGE:", amount)
+
+	is_knockbacked = true
+
 	if health_component:
 		health_component.take_damage(amount)
+
+	$HitFlash.flash()
+
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
+
+	# Выключаем нокбэк через 0.2–0.4 сек (как нравится)
+	await get_tree().create_timer(0.25).timeout
+	is_knockbacked = false
+
 
 func _input(event):
 	if event.is_action_pressed("run") and is_on_floor() and can_sprint:
@@ -190,11 +204,15 @@ func jump_logic(delta):
 
 func rot_char(delta):
 	if is_attacking: return
+	if is_knockbacked: return # ← ВАЖНО
+
 	var current_rot_speed = 0.0 if is_stopping else rot_speed
 	var vel_2d = Vector2(velocity.x, -velocity.z)
+
 	if vel_2d.length_squared() > 0.001:
 		var target_angle = vel_2d.angle() + PI / 2
 		rotation.y = lerp_angle(rotation.y, target_angle, current_rot_speed * delta)
+
 
 func tilt_character(delta):
 	if is_attacking: return

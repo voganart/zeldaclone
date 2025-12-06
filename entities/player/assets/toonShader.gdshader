@@ -2,6 +2,9 @@ shader_type spatial;
 
 //render_mode ambient_light_disabled;
 
+uniform bool use_hit_flash = false;
+uniform float hit_flash_strength : hint_range(0.0, 1.0) = 1.0;
+uniform vec4 hit_flash_color : source_color = vec4(1.0, 0.1, 0.1, 1.0);
 
 uniform vec4 albedo : source_color = vec4(1.0f);
 uniform sampler2D albedo_texture : source_color;
@@ -41,8 +44,17 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = albedo.rgb * texture(albedo_texture, UV).rgb;
+	vec3 base_color = albedo.rgb * texture(albedo_texture, UV).rgb;
+
+	// Если включён хит-флэш – перекрываем базовый цвет.
+	if (use_hit_flash) {
+		vec3 flash_color = hit_flash_color.rgb;
+		base_color = mix(base_color, flash_color, hit_flash_strength);
+	}
+
+	ALBEDO = base_color;
 }
+
 
 void light() {
 	// Attenuation.

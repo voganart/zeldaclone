@@ -48,7 +48,6 @@ bones/19/rotation = Quaternion(-0.484332, 0.503632, 0.49192, 0.519415)
 bones/20/rotation = Quaternion(-0.0259242, 0.187464, 0.439941, 0.87786)
 bones/20/scale = Vector3(1, 1.43307, 1)
 bones/21/rotation = Quaternion(-3.57341e-08, 0.0230332, 1.80119e-07, 0.999735)
-bones/21/scale = Vector3(1, 1, 1)
 bones/22/rotation = Quaternion(-1.41913e-07, -8.69973e-08, 0.0615627, 0.998103)
 bones/22/scale = Vector3(1, 1, 1)
 bones/23/rotation = Quaternion(-9.70601e-08, -0.071795, -2.22584e-08, 0.997419)
@@ -90,7 +89,7 @@ bones/42/scale = Vector3(1, 1, 1)
 bones/43/rotation = Quaternion(-7.18759e-08, 0.0384469, -1.67954e-07, 0.999261)
 
 [node name="hand_r" type="BoneAttachment3D" parent="root/Skeleton3D" index="1"]
-transform = Transform3D(-0.997581, 0.00555696, -0.128333, -0.123423, 0.320398, 0.905587, 0.206959, 1.22674, -0.477023, -0.282516, 0.890391, 1.16833)
+transform = Transform3D(-0.9975801, 0.0055578947, -0.1283332, -0.12342298, 0.32039636, 0.90558654, 0.20696151, 1.2267433, -0.47702253, -0.2825152, 0.8903915, 1.1683321)
 bone_name = "hand.r"
 bone_idx = 24
 
@@ -104,7 +103,7 @@ transform = Transform3D(1, 3.72529e-09, 3.35276e-08, 7.45058e-09, 1, -2.98023e-0
 shape = SubResource("BoxShape3D_brhp1")
 
 [node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
-transform = Transform3D(0.73742, 0.218484, 0.63912, 0.10746, -0.972135, 0.208338, 0.66683, -0.0849526, -0.74035, 0.339554, 0.675392, -0.0603894)
+transform = Transform3D(0.7374201, 0.21848296, 0.6391199, 0.107459426, -0.9721347, 0.2083367, 0.6668291, -0.08495165, -0.74034995, 0.33955422, 0.6753932, -0.060389165)
 bone_name = "hand.l"
 bone_idx = 11
 

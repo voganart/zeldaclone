@@ -60,5 +60,5 @@ bone_idx = 10
 [node name="punch_hand_r" type="Area3D" parent="root/Skeleton3D/hand_r" index="0"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_r/punch_hand_r" index="0"]
-transform = Transform3D(1.5, 0, -1.0430813e-07, -1.1920929e-07, 1.5, 4.4703484e-08, 4.4703484e-08, -3.7252903e-08, 1.5, -0.009334392, 0.1862461, -0.012251139)
+transform = Transform3D(1.5, 1.1920929e-07, -4.4703484e-08, -1.1920929e-07, 1.5, 3.7252903e-08, 4.470349e-08, -3.72529e-08, 1.5, -0.009334392, 0.1862461, -0.012251139)
 shape = SubResource("BoxShape3D_a184d")
