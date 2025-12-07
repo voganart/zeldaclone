@@ -21,6 +21,7 @@ script = ExtResource("1_ksmh7")
 health_bar_visible_time = 3.0
 health_bar_fade_speed = 2.0
 attack_cooldown = 1.6
+tactical_retreat_chance = 0.8
 tactical_retreat_pause_min = 0.1
 sight_range = 6.0
 lost_sight_range = 12.0

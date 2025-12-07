@@ -7,6 +7,14 @@ extends CharacterBody3D
 @export var jump_time_to_peak: float = 0.45
 @export var jump_time_to_descent: float = 0.28
 @export var air_control: float = 0.05
+@export var max_jump_count: int = 2 # Double Jump default
+@export_group("Ground Slam")
+@export var slam_damage: float = 1.0
+@export var slam_radius: float = 2.0
+@export var slam_descent_speed: float = 20.0
+@export var slam_knockback: float = 0.3
+@export var slam_cooldown: float = 2.0 # Cooldown between slams
+@export var slam_windup_delay: float = 0.5 # Delay before descent starts
 
 @export_group("Movement")
 @export var base_speed: float = 3.0
@@ -15,6 +23,7 @@ extends CharacterBody3D
 @export var acceleration: float = 0.3
 @export var rot_speed: float = 5.0
 @export var push_force: float = 0.5
+@export var roll_push_multiplier: float = 2.5 # Multiplier for push force during roll
 @export var roll_speed: float = 6.0
 @export var roll_control: float = 0.5
 @export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 # 0 = finish roll first, 1 = interrupt anytime
@@ -46,6 +55,11 @@ extends CharacterBody3D
 @onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
 var jump_phase := ""
+var current_jump_count: int = 0
+var is_slamming: bool = false
+var slam_cooldown_timer: float = 0.0
+var slam_windup_timer: float = 0.0 # Timer for windup delay
+var slam_animation_phase: String = "" # Tracks: start, mid, end
 
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
@@ -148,7 +162,11 @@ func _input(event):
 		shift_pressed_time = 0.0
 
 	if Input.is_action_just_pressed("first_attack"):
-		first_attack(primary_attack_speed)
+		# Ground Slam only after second jump and if cooldown ready
+		if not is_on_floor() and not is_slamming and current_jump_count >= 2 and slam_cooldown_timer <= 0:
+			start_ground_slam()
+		else:
+			first_attack(primary_attack_speed)
 
 func first_attack(attack_speed):
 	if is_rolling:
@@ -218,6 +236,10 @@ func _process(delta):
 	if roll_interval_timer > 0:
 		roll_interval_timer -= delta
 	
+	# 4. Slam Cooldown Timer
+	if slam_cooldown_timer > 0:
+		slam_cooldown_timer -= delta
+	
 	# Shift Update Logic
 	if is_shift_down:
 		shift_pressed_time += delta
@@ -238,12 +260,16 @@ func _physics_process(delta: float) -> void:
 	animation_player()
 	move_and_slide()
 	push_obj()
-
-	push_obj()
+	
+	# Ground Slam Impact Detection
+	if is_slamming and is_on_floor():
+		perform_slam_impact()
 
 func perform_roll() -> void:
 	# Constraints: Floor, States, Cooldowns, Charges
-	if not is_on_floor() or is_rolling or is_attacking or is_knockbacked:
+	# Constraints: Floor, States, Cooldowns, Charges
+	# Allows interrupting attack
+	if not is_on_floor() or is_rolling or is_knockbacked:
 		return
 		
 	# Block if in chain delay
@@ -291,6 +317,17 @@ func perform_roll() -> void:
 			
 		print("Roll used. Charges: ", current_roll_charges)
 	
+	
+	# Handle Attack Interruption (Roll Cancel)
+	if is_attacking:
+		is_attacking = false
+		can_attack = true # Reset flag
+		# combo_reset_timer is usually managed by attack flow, 
+		# but if we cancel, we might want to keep the combo count active for a moment or reset it?
+		# Standard cancel often preserves combo or resets it.
+		# Let's just ensure we are physically free.
+		# attack_timer logic: essentially we just override the state.
+	
 	# Запоминаем: бежал ли игрок ДО переката
 	var was_running = is_running
 	
@@ -303,7 +340,7 @@ func perform_roll() -> void:
 	# Dynamic Speed Boost
 	var current_roll_speed = roll_speed
 	if was_running:
-		current_roll_speed += run_speed * 1.05 # 50% of run speed as bonus
+		current_roll_speed += run_speed * 0.8 # 50% of run speed as bonus
 	
 	velocity.x = forward.x * current_roll_speed
 	velocity.z = forward.z * current_roll_speed
@@ -351,14 +388,56 @@ func perform_run() -> void:
 		return
 	is_running = true
 
+func start_ground_slam() -> void:
+	is_slamming = true
+	slam_cooldown_timer = slam_cooldown
+	slam_windup_timer = slam_windup_delay
+	slam_animation_phase = "start"
+	
+	# Zero out all velocity for freeze effect
+	velocity.x = 0
+	velocity.z = 0
+	velocity.y = 0
+	
+	# Play start animation
+	anim_player.play("Boy_attack_air_naked_start", 0.1, 0.5)
+	print("Ground Slam Started - Windup Phase!")
+
+func perform_slam_impact() -> void:
+	is_slamming = false
+	slam_animation_phase = ""
+	print("Ground Slam Impact!")
+	
+	# Find all enemies in radius
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	for enemy in enemies:
+		if not is_instance_valid(enemy):
+			continue
+			
+		var distance = global_position.distance_to(enemy.global_position)
+		if distance <= slam_radius:
+			# Calculate knockback direction (away from impact point)
+			var knockback_dir = (enemy.global_position - global_position).normalized()
+			knockback_dir.y = 0.5 # Add upward component
+			var knockback_vec = knockback_dir * slam_knockback
+			
+			# Apply damage
+			if enemy.has_method("take_damage"):
+				enemy.take_damage(slam_damage, knockback_vec)
+				print("Slam hit enemy at distance: ", distance)
+
 func push_obj():
+	var current_push_force = push_force
+	if is_rolling:
+		current_push_force *= roll_push_multiplier
+
 	for i in range(get_slide_collision_count()):
 		var c = get_slide_collision(i)
 		var collider = c.get_collider()
 		if collider is RigidBody3D:
-			collider.apply_central_impulse(-c.get_normal() * push_force)
+			collider.apply_central_impulse(-c.get_normal() * current_push_force)
 		if collider is CharacterBody3D and collider.has_method("receive_push"):
-			collider.receive_push(-c.get_normal() * push_force)
+			collider.receive_push(-c.get_normal() * current_push_force)
 
 func move_logic(delta):
 	movement_input = Input.get_vector('left', "right", "up", "down")
@@ -399,7 +478,11 @@ func move_logic(delta):
 	velocity.z = velocity_2d.y
 
 func jump_logic(delta):
-	if Input.is_action_just_pressed('jump') and is_on_floor():
+	# Reset jumps when on floor
+	if is_on_floor():
+		current_jump_count = 0
+		
+	if Input.is_action_just_pressed('jump'):
 		# Roll Cancellation Logic
 		if is_rolling:
 			var can_cancel = false
@@ -419,10 +502,55 @@ func jump_logic(delta):
 			# If cancelling, clear rolling state immediately so jump physics apply
 			is_rolling = false
 		
-		velocity.y = - jump_velocity
-		air_speed = Vector2(velocity.x, velocity.z).length()
+		# Execute Jump
+		if is_on_floor() or current_jump_count < max_jump_count:
+			velocity.y = - jump_velocity
+			current_jump_count += 1
+			air_speed = Vector2(velocity.x, velocity.z).length()
+			
+			# Play jump animation for air jumps specifically
+			if not is_on_floor():
+				anim_player.play("Boy_jump_start", 0.1)
+				jump_phase = "start"
+
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
-	velocity.y -= gravity * delta
+	
+	# Ground Slam: Three-phase logic
+	if is_slamming:
+		if slam_windup_timer > 0:
+			# PHASE 1: Windup - Freeze in air
+			slam_windup_timer -= delta
+			velocity.y = 0 # Completely freeze vertical movement
+			velocity.x = 0 # Keep horizontal frozen too
+			velocity.z = 0
+			
+			# Check if windup just finished
+			if slam_windup_timer <= 0:
+				print("Ground Slam - Descent Phase!")
+				slam_animation_phase = "mid"
+				# Play mid animation looping
+				anim_player.play("Boy_attack_air_naked_mid", 0.0, 1.0)
+		else:
+			# PHASE 2: Descent - High speed fall
+			velocity.y = - slam_descent_speed
+			velocity.x = 0 # Maintain zero horizontal
+			velocity.z = 0
+			
+			# Check proximity to ground for end animation
+			# Use raycast to detect ground distance
+			var space_state = get_world_3d().direct_space_state
+			var query = PhysicsRayQueryParameters3D.create(global_position, global_position + Vector3(0, 0.1, 0))
+			query.exclude = [self]
+			var result = space_state.intersect_ray(query)
+			
+			if result and slam_animation_phase == "mid":
+				# Close to ground, play end animation
+				slam_animation_phase = "end"
+				anim_player.play("Boy_attack_air_naked_end", 0.0, 1.0)
+				print("Ground Slam - Landing Phase!")
+	else:
+		# Normal gravity application
+		velocity.y -= gravity * delta
 
 func rot_char(delta):
 	# Allow rolling rotation, but prevent attacking/knockback rotation
