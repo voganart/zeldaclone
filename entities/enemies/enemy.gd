@@ -16,6 +16,8 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 # @export var max_hp: float = 10.0 # Use HealthComponent for max_hp!
 @export var flee_hp_threshold: float = 0.3 # Flee when HP < 30%
 @export var flee_chance: float = 0.5 # 50% chance to flee
+@export var health_bar_visible_time: float = 1.0 # сколько секунд бар остаётся видимым после урона
+@export var health_bar_fade_speed: float = 3.0 # скорость ухода в прозрачность
 
 @export_group("Movement")
 @export var walk_speed: float = 1.5
@@ -100,6 +102,13 @@ var debug_proximity_mesh: MeshInstance3D
 # Navigation
 var nav_ready: bool = false
 
+# UI
+var health_bar_mesh: MeshInstance3D
+var health_bar_opacity: float = 0.5
+var health_bar_timer: float = 0.0
+var health_bar_enabled: bool = true
+
+
 # ============================================================================
 # NODE REFERENCES
 # ============================================================================
@@ -111,6 +120,7 @@ var nav_ready: bool = false
 @export var punch_hand_l: Area3D # Assign in editor!
 @export var punch_area: Area3D # Main attack cone for hit validation
 @onready var health_component: Node = $HealthComponent
+@onready var health_bar_node: Node3D = $HealthBar3D
 
 # ============================================================================
 # INITIALIZATION
@@ -121,6 +131,20 @@ func _ready() -> void:
 	# Connect to HealthComponent signals
 	if health_component:
 		health_component.died.connect(die)
+		health_component.health_changed.connect(_on_health_changed)
+	
+	# Setup Health Bar
+	if health_bar_node:
+		# Try to find the mesh child. It might be a direct child or nested.
+		# User said it's a child.
+		for child in health_bar_node.get_children():
+			if child is MeshInstance3D:
+				health_bar_mesh = child
+				break
+		
+		# If we found the mesh, initialize it
+		if health_bar_mesh and health_component:
+			_update_health_bar_visuals(health_component.get_health(), 0.0)
 	
 	# Setup navigation
 	nav_agent.max_speed = walk_speed
@@ -134,6 +158,10 @@ func _ready() -> void:
 		_setup_debug_meshes()
 
 func _on_navmesh_ready(_map_rid) -> void:
+	if is_inside_tree():
+		nav_ready = true
+		enter_state(State.PATROL)
+		
 	if is_inside_tree():
 		nav_ready = true
 		enter_state(State.PATROL)
@@ -219,6 +247,8 @@ func _physics_process(delta: float) -> void:
 	if debug_vision:
 		_update_debug_meshes()
 
+	_update_health_bar_process(delta)
+
 # ============================================================================
 # STATE MACHINE - Enter/Update/Exit Pattern
 # ============================================================================
@@ -239,15 +269,13 @@ func enter_state(new_state: State) -> void:
 	match current_state:
 		State.IDLE:
 			nav_agent.max_speed = 0.0
-			anim_player.play("Monstr_idle", 0.2, 1.0)
-			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
+			play_with_random_offset("Monstr_idle", 0.2, 1.0)
 			state_timer = randf_range(idle_duration_min, idle_duration_max)
 			idle_look_timer = randf_range(1.5, 4.0)
 			
 		State.PATROL:
 			nav_agent.max_speed = walk_speed
-			anim_player.play("Monstr_walk", 0.2, 1.0)
-			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
+			play_with_random_offset("Monstr_walk", 0.2, 1.0)
 			_set_random_patrol_target()
 			
 		State.CHASE:
@@ -256,8 +284,7 @@ func enter_state(new_state: State) -> void:
 				time_stuck = 0.0
 			# Don't reset frustration_total_time here to allow loop accumulation
 			nav_agent.max_speed = run_speed
-			anim_player.play("Monstr_walk", 0.2, 1.0)
-			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
+			play_with_random_offset("Monstr_walk", 0.2, 1.0)
 			state_timer = 0.0 # Track chase duration
 			
 		State.FRUSTRATED:
@@ -275,8 +302,7 @@ func enter_state(new_state: State) -> void:
 			
 		State.FLEE:
 			nav_agent.max_speed = run_speed * 0.5
-			anim_player.play("Monstr_walk", 0.2, 1.0)
-			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
+			play_with_random_offset("Monstr_walk", 0.2, 1.0)
 			
 		State.KNOCKBACK:
 			anim_player.play("Monstr_knockdown", 0.2, 1.0)
@@ -409,7 +435,7 @@ func _update_chase(delta: float, player_visible: bool) -> void:
 			nav_agent.target_position = orbit_target
 			
 			_move_toward_target()
-			anim_player.play("Monstr_walk", 0, 1.0, 0.2)
+			play_with_random_offset("Monstr_walk", 0.2, 1.0)
 			return # Выход, так как движение уже обработано
 
 	# 2. Проверка на Потерю Игрока / Отступление (Lost Player)
@@ -478,7 +504,7 @@ func _update_attack(delta: float) -> void:
 		_move_toward_target()
 		
 		# ⚠️ АНИМАЦИЯ: Включаем анимацию ходьбы/бега
-		anim_player.play("Monstr_walk", 0.2, 1.0)
+		play_with_random_offset("Monstr_walk", 0.2, 1.0)
 
 		# Проверка, достигнута ли цель отступления
 		if nav_agent.is_navigation_finished() and tactical_retreat_pause_timer <= 0:
@@ -683,6 +709,49 @@ func receive_push(push: Vector3) -> void:
 	external_push += push
 
 # ============================================================================
+# UI UPDATES
+# ============================================================================
+func _on_health_changed(new_health: float) -> void:
+	# Reset timer and force full opacity on damage
+	health_bar_timer = health_bar_visible_time
+	health_bar_opacity = 1.0
+	_update_health_bar_visuals(new_health, health_bar_opacity)
+
+func _update_health_bar_process(delta: float) -> void:
+	if not health_bar_mesh:
+		return
+	if not health_bar_enabled:
+		return
+
+	if health_bar_timer > 0:
+		health_bar_timer -= delta
+	else:
+		if health_bar_opacity > 0:
+			# Smoothly fade out using lerp
+			health_bar_opacity = lerp(health_bar_opacity, 0.0, delta * health_bar_fade_speed)
+			# Snap to 0 if very low to save processing/rendering
+			if health_bar_opacity < 0.01:
+				health_bar_opacity = 0.0
+			
+			if health_component:
+				_update_health_bar_visuals(health_component.get_health(), health_bar_opacity)
+
+func _update_health_bar_visuals(current_hp: float, opacity_val: float) -> void:
+	if not health_bar_mesh:
+		return
+	if not health_component:
+		return
+
+	var max_hp = health_component.get_max_health()
+	if max_hp <= 0:
+		return
+
+	var ratio = clamp(current_hp / max_hp, 0.0, 1.0)
+
+	health_bar_mesh.set_instance_shader_parameter("health", ratio)
+	health_bar_mesh.set_instance_shader_parameter("opacity", opacity_val)
+
+# ============================================================================
 # DETECTION
 # ============================================================================
 func _can_see_player() -> bool:
@@ -796,6 +865,19 @@ func _set_random_patrol_target() -> void:
 		return
 
 # ============================================================================
+# ANIMATION HELPER
+# ============================================================================
+func play_with_random_offset(anim_name: String, blend: float = -1.0, speed: float = 1.0) -> void:
+	if anim_player.current_animation == anim_name:
+		anim_player.play(anim_name, blend, speed)
+		return
+
+	anim_player.play(anim_name, blend, speed)
+	var anim_len = anim_player.current_animation_length
+	if anim_len > 0:
+		anim_player.seek(randf() * anim_len)
+
+# ============================================================================
 # DEBUG VISUALIZATION
 # ============================================================================
 func _setup_debug_meshes() -> void:
@@ -834,36 +916,46 @@ func _update_debug_meshes() -> void:
 # DEATH & CLEANUP
 # ============================================================================
 func die() -> void:
+	# Отключаем и прячем хп-бар сразу
+	health_bar_enabled = false
+	if health_bar_mesh:
+		health_bar_mesh.visible = false
+		# на случай, если шейдер читает opacity
+		health_bar_opacity = 0.0
+		health_bar_mesh.set_instance_shader_parameter("opacity", 0.0)
+
 	if current_state == State.DEAD:
 		return
-	
+
 	current_state = State.DEAD
+
+	# Остановка движения/AI
 	nav_agent.max_speed = 0.0
-	nav_agent.avoidance_enabled = false # Stop RVO callbacks
+	nav_agent.avoidance_enabled = false
 	velocity = Vector3.ZERO
-	
-	# Disable processing that might interfere
+
+	# Отключаем только физику (AI/движение), но не _process
 	set_physics_process(false)
-	
-	# Disable collision with player (Layer 0) but keep world mask just in case
-	# Changing layer is safer than disabling shape to avoid fall-through glitches
+	set_process(true)
+
+	# Отключаем коллизии с игроком
 	collision_layer = 0
-	# $CollisionShape3D.set_deferred("disabled", true) # Caused fall-through if move_and_slide called
-	
+
 	if punch_hand_r:
 		punch_hand_r.set_deferred("monitoring", false)
 	if punch_hand_l:
 		punch_hand_l.set_deferred("monitoring", false)
-	
-	# Play animation
+
+	# Анимация смерти
 	anim_player.play("Monstr_death", 0.2, 0.7)
 	await anim_player.animation_finished
-	
-	# Corpse time
+
+	# Немного подержать труп
 	await get_tree().create_timer(2.0).timeout
-	
-	# Fade out
+
+	# Исчезновение модели врага
 	fade_out_and_remove()
+
 
 func fade_out_and_remove() -> void:
 	# Find all MeshInstance3D nodes to dissolve them

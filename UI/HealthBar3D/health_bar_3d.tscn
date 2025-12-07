@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://b72gnkqh5atrs"]
+
+[ext_resource type="Shader" uid="uid://qk5hrvo8vvv0" path="res://UI/HealthBar3D/health_bar_3d.gdshader" id="1_sjphd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sjphd"]
+render_priority = 0
+shader = ExtResource("1_sjphd")
+shader_parameter/use_billboard = true
+shader_parameter/fg_color = Color(0, 1, 0, 1)
+shader_parameter/bg_color = Color(1, 0, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_pb8pc"]
+lightmap_size_hint = Vector2i(7, 2)
+material = SubResource("ShaderMaterial_sjphd")
+size = Vector2(0.5, 0.05)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fue6h"]
+render_priority = 0
+shader = ExtResource("1_sjphd")
+shader_parameter/use_billboard = true
+shader_parameter/fg_color = Color(0, 1, 0.3898821, 1)
+shader_parameter/bg_color = Color(1, 0, 0, 1)
+
+[node name="HealthBar3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+instance_shader_parameters/health = 0.510000024225
+instance_shader_parameters/opacity = 1.0
+mesh = SubResource("QuadMesh_pb8pc")
+surface_material_override/0 = SubResource("ShaderMaterial_fue6h")

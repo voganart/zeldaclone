@@ -15,7 +15,14 @@ extends CharacterBody3D
 @export var acceleration: float = 0.3
 @export var rot_speed: float = 5.0
 @export var push_force: float = 0.5
-@export var run_toggle_mode: bool = true
+@export var roll_speed: float = 6.0
+@export var roll_control: float = 0.5
+@export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 # 0 = finish roll first, 1 = interrupt anytime
+@export var auto_run_latch_time: float = 2.0
+@export var roll_max_charges: int = 3
+@export var roll_cooldown: float = 0.5 # Time to regenerate 1 charge
+@export var roll_recharge_time: float = 3.0 # Penalty time if depleted
+@export var roll_chain_delay: float = 0.0 # Delay after roll completes before next roll allowed
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
@@ -59,6 +66,18 @@ var current_attack_damage: float = 1.0
 var current_attack_knockback_enabled: bool = false
 var combo_reset_timer: Timer
 var is_knockbacked: bool = false
+var is_rolling: bool = false
+
+# Shift Logic
+var roll_threshold: float = 0.18
+var shift_pressed_time: float = 0.0
+var is_shift_down: bool = false
+var is_auto_running: bool = false
+var current_roll_charges: int = 3
+var roll_penalty_timer: float = 0.0 # Long lockout when depleted
+var roll_regen_timer: float = 0.0 # Short timer to restore 1 charge
+var is_roll_recharging: bool = false # True if in penalty mode
+var roll_interval_timer: float = 0.0 # Handles roll_chain_delay
 
 var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3"]
 
@@ -80,6 +99,8 @@ func _ready() -> void:
 		health_component.health_changed.connect(_on_health_changed)
 		health_component.died.connect(_on_died)
 		_on_health_changed(health_component.get_health())
+	
+	current_roll_charges = roll_max_charges
 
 func _on_health_changed(new_health: float) -> void:
 	if health_label:
@@ -108,19 +129,30 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 
 
 func _input(event):
-	if event.is_action_pressed("run") and is_on_floor() and can_sprint:
-		if run_toggle_mode:
-			is_running = !is_running
+	if event.is_action_pressed("run") and is_on_floor():
+		is_shift_down = true
+		shift_pressed_time = 0.0
+		
+	if event.is_action_released("run"):
+		is_shift_down = false
+		if shift_pressed_time <= roll_threshold:
+			perform_roll()
 		else:
-			is_running = true
-		can_sprint = false
-		sprint_timer.start()
-	if event.is_action_released("run") and not run_toggle_mode:
-		is_running = false
+			# Stop running when button released if NOT auto-running
+			if not is_auto_running:
+				is_running = false
+			
+			# If we WERE auto-running and just tapped shift, we rolled (above).
+			# If we held shift again while auto-running, releasing it shouldn't stop us unless we stop moving (handled in move_logic).
+			
+		shift_pressed_time = 0.0
+
 	if Input.is_action_just_pressed("first_attack"):
 		first_attack(primary_attack_speed)
 
 func first_attack(attack_speed):
+	if is_rolling:
+		return
 	if not can_attack or not is_on_floor():
 		return
 	is_attacking = true
@@ -163,7 +195,39 @@ func first_attack(attack_speed):
 func _on_combo_timer_timeout() -> void:
 	combo_count = 0
 
-func _process(_delta):
+func _process(delta):
+	# Roll Timer Logic (Cooldowns & Recharge)
+	# Roll Timer Logic
+	# 1. Penalty Timer (if fully depleted/locked)
+	if is_roll_recharging:
+		roll_penalty_timer -= delta
+		if roll_penalty_timer <= 0:
+			is_roll_recharging = false
+			current_roll_charges = roll_max_charges
+			print("Rolls Recharged! Charges: ", current_roll_charges)
+			
+	# 2. Continuous Regeneration (if not locked and missing charges)
+	elif current_roll_charges < roll_max_charges:
+		roll_regen_timer -= delta
+		if roll_regen_timer <= 0:
+			current_roll_charges += 1
+			roll_regen_timer = roll_cooldown # Reset for next charge
+			print("Regenerated 1 Roll. Charges: ", current_roll_charges)
+			
+	# 3. Chain Delay Timer
+	if roll_interval_timer > 0:
+		roll_interval_timer -= delta
+	
+	# Shift Update Logic
+	if is_shift_down:
+		shift_pressed_time += delta
+		if shift_pressed_time > roll_threshold and not is_running and not is_rolling:
+			perform_run()
+		
+		# Auto-Run Latch
+		if is_running and shift_pressed_time > auto_run_latch_time:
+			is_auto_running = true
+
 	RenderingServer.global_shader_parameter_set("player_position", global_transform.origin)
 
 func _physics_process(delta: float) -> void:
@@ -174,6 +238,118 @@ func _physics_process(delta: float) -> void:
 	animation_player()
 	move_and_slide()
 	push_obj()
+
+	push_obj()
+
+func perform_roll() -> void:
+	# Constraints: Floor, States, Cooldowns, Charges
+	if not is_on_floor() or is_rolling or is_attacking or is_knockbacked:
+		return
+		
+	# Block if in chain delay
+	if roll_interval_timer > 0:
+		return
+		
+	# Block if in penalty recharge
+	if is_roll_recharging:
+		# print("Roll depleted, recharging...")
+		return
+		
+	if current_roll_charges <= 0:
+		return
+
+	# Consume Charge
+	current_roll_charges -= 1
+	
+	# Logic:
+	# If we just hit 0, start penalty timer.
+	# If we still have charges, ensure the regeneration timer is running for the used charge.
+	
+	if current_roll_charges <= 0:
+		# Depleted -> Penalty
+		is_roll_recharging = true
+		roll_penalty_timer = roll_recharge_time
+		roll_regen_timer = 0.0 # Stop normal regen
+		print("Rolls Depleted! Recharging for ", roll_recharge_time, "s")
+	else:
+		# If regen wasn't already running (i.e. we were at max), start it now.
+		# If it WAS running, we just let it continue (it effectively queues regeneration).
+		# However, if user wants "starts recovering immediately", maybe we should reset it?
+		# Usually, queuing is better (if I have 0.1s left to regen one, and I use another, I get +1 in 0.1s, then start next).
+		# But "starts recovering immediately for 0.5s" implies per-instance or reset.
+		# Let's assume standard "bucket" regen: the timer runs whenever missing charges.
+		# If we were full, we initiate the timer now.
+		if roll_regen_timer <= 0 and current_roll_charges == roll_max_charges - 1:
+			 # Logic fix: if we were full, current_roll_charges is now max-1. 
+			 # We need to start the timer.
+			roll_regen_timer = roll_cooldown
+		
+		# Simplification: JUST make sure roll_regen_timer is valid or let process handle it?
+		# Process checks < max. If timer was 0 (idle), we need to seed it.
+		if roll_regen_timer <= 0:
+			roll_regen_timer = roll_cooldown
+			
+		print("Roll used. Charges: ", current_roll_charges)
+	
+	# Запоминаем: бежал ли игрок ДО переката
+	var was_running = is_running
+	
+	is_rolling = true
+	is_running = false
+	
+	# Направление вперёд (у тебя уже работает корректно)
+	var forward = global_transform.basis.z.normalized()
+	
+	# Dynamic Speed Boost
+	var current_roll_speed = roll_speed
+	if was_running:
+		current_roll_speed += run_speed * 1.05 # 50% of run speed as bonus
+	
+	velocity.x = forward.x * current_roll_speed
+	velocity.z = forward.z * current_roll_speed
+	
+	anim_player.play("Boy_roll", 0.3, 1.0)
+	
+	# Получаем длину анимации
+	var anim_length = anim_player.get_animation("Boy_roll").length
+	
+	# Ждем чуть меньше, чем длина анимации (срезаем концовку/выход)
+	# Например: 75% времени — это сам кувырок, последние 25% — вставание (которое можно срезать для движения)
+	var rollout_time = anim_length * 0.75
+	
+	await get_tree().create_timer(rollout_time).timeout
+	# await anim_player.animation_finished # Старый вариант
+	
+	is_rolling = false
+	
+	# Start inter-roll delay
+	if roll_chain_delay > 0:
+		roll_interval_timer = roll_chain_delay
+	
+	# Restoring Run State
+	# If we were running before the roll, resume running immediately
+	if was_running:
+		is_running = true
+
+
+func play_with_random_offset(anim_name: String, blend: float = -1.0, speed: float = 1.0) -> void:
+	# If already playing, just update parameters (speed/blend) without restarting/seeking
+	if anim_player.current_animation == anim_name:
+		anim_player.play(anim_name, blend, speed)
+		return
+	
+	# Start new animation
+	anim_player.play(anim_name, blend, speed)
+	
+	# Seek to random position
+	var anim_len = anim_player.current_animation_length
+	if anim_len > 0:
+		anim_player.seek(randf() * anim_len)
+
+func perform_run() -> void:
+	if is_rolling or is_attacking:
+		return
+	is_running = true
 
 func push_obj():
 	for i in range(get_slide_collision_count()):
@@ -191,35 +367,80 @@ func move_logic(delta):
 	var control = 1.0 if not is_airborne else clamp(air_control, 0.0, 1.0)
 
 	if movement_input == Vector2.ZERO:
-		if not run_toggle_mode:
-			is_running = false
+		is_running = false
+		is_auto_running = false
 
 	var current_speed = run_speed if is_running else base_speed
 	if is_airborne:
 		current_speed = air_speed
+	elif is_rolling:
+		current_speed = roll_speed
 
 	if movement_input != Vector2.ZERO:
 		var input_factor = 1.0 if not is_attacking else attack_movement_influense
-		velocity_2d = velocity_2d.lerp(movement_input * current_speed * input_factor, acceleration * control)
+		
+		# Control factor: Normal (1.0) vs Air vs Roll
+		var final_control = control
+		
+		if is_rolling:
+			# Steerable Roll: Align velocity with actual character facing
+			# This creates a curved path as rot_char rotates the mesh
+			var current_mag = velocity_2d.length()
+			var forward = global_transform.basis.z.normalized()
+			var forward_2d = Vector2(forward.x, forward.z)
+			velocity_2d = forward_2d * current_mag
+		else:
+			velocity_2d = velocity_2d.lerp(movement_input * current_speed * input_factor, acceleration * final_control)
 	else:
-		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
+		if not is_rolling:
+			velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
 
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
 
 func jump_logic(delta):
 	if Input.is_action_just_pressed('jump') and is_on_floor():
+		# Roll Cancellation Logic
+		if is_rolling:
+			var can_cancel = false
+			if roll_jump_cancel_threshold >= 1.0:
+				can_cancel = true
+			elif roll_jump_cancel_threshold > 0.0:
+				if anim_player.current_animation == "Boy_roll":
+					var ratio = anim_player.current_animation_position / anim_player.current_animation_length
+					# threshold 1 = start (ratio 0), threshold 0 = end (ratio 1)
+					# Formula: Cancel if ratio > (1.0 - threshold)
+					if ratio >= (1.0 - roll_jump_cancel_threshold):
+						can_cancel = true
+			
+			if not can_cancel:
+				return # Block jump
+			
+			# If cancelling, clear rolling state immediately so jump physics apply
+			is_rolling = false
+		
 		velocity.y = - jump_velocity
 		air_speed = Vector2(velocity.x, velocity.z).length()
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta
 
 func rot_char(delta):
+	# Allow rolling rotation, but prevent attacking/knockback rotation
 	if is_attacking: return
 	if is_knockbacked: return # ← ВАЖНО
 
 	var current_rot_speed = 0.0 if is_stopping else rot_speed
+	
+	# If rolling, scale rotation speed by roll_control
+	if is_rolling:
+		current_rot_speed = rot_speed * roll_control
+
 	var vel_2d = Vector2(velocity.x, -velocity.z)
+	
+	# Override rotation target if rolling: Look at Input, not Velocity
+	if is_rolling:
+		if movement_input != Vector2.ZERO:
+			vel_2d = Vector2(movement_input.x, -movement_input.y)
 
 	if vel_2d.length_squared() > 0.001:
 		var target_angle = vel_2d.angle() + PI / 2
@@ -235,7 +456,7 @@ func tilt_character(delta):
 	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 15 * delta)
 
 func animation_player():
-	if is_attacking: return
+	if is_attacking or is_rolling: return
 	var speed_2d := Vector2(velocity.x, velocity.z).length()
 	var has_input := Input.get_vector("left", "right", "up", "down").length() > 0
 
@@ -258,18 +479,18 @@ func animation_player():
 	if has_input:
 		is_stopping = false
 		if speed_2d > lerp(base_speed, run_speed, 0.5):
-			anim_player.play("Boy_run", 0.3, lerp(0.5, 1.25, speed_2d / run_speed))
+			play_with_random_offset("Boy_run", 0.3, lerp(0.5, 1.25, speed_2d / run_speed))
 		elif speed_2d > 0.2:
-			anim_player.play("Boy_walk", 0.3, lerp(0.5, 1.25, speed_2d / base_speed))
+			play_with_random_offset("Boy_walk", 0.3, lerp(0.5, 1.25, speed_2d / base_speed))
 	else:
 		# торможение
 		if speed_2d > 3.2:
 			if not is_stopping:
 				is_stopping = true
-				anim_player.play("Boy_stopping", 0.2, 0.1)
+				play_with_random_offset("Boy_stopping", 0.2, 0.1)
 		else:
 			is_stopping = false
-			anim_player.play("Boy_idle", 0.5)
+			play_with_random_offset("Boy_idle", 0.5)
 
 func _on_first_attack_timer_timeout() -> void:
 	# Timer закончился — разрешаем новую атаку (кулдаун завершён)
