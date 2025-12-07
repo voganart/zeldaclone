@@ -7,13 +7,13 @@ extends CharacterBody3D
 # ============================================================================
 # ENUMS & CONSTANTS
 # ============================================================================
-enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK}
+enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 
 # ============================================================================
 # EXPORTS - Grouped for Designer UX
 # ============================================================================
 @export_group("Health & Damage")
-@export var max_hp: float = 10.0
+# @export var max_hp: float = 10.0 # Use HealthComponent for max_hp!
 @export var flee_hp_threshold: float = 0.3 # Flee when HP < 30%
 @export var flee_chance: float = 0.5 # 50% chance to flee
 
@@ -68,7 +68,6 @@ var last_dist_to_target: float = INF
 # ============================================================================
 # RUNTIME VARIABLES
 # ============================================================================
-var hp: float
 var will_flee: bool = false
 var last_known_player_pos: Vector3 = Vector3.ZERO
 var time_since_player_seen: float = 0.0
@@ -81,6 +80,9 @@ var frustration_total_time: float = 0.0
 var is_attacking: bool = false
 var should_tactical_retreat: bool = false
 var tactical_retreat_pause_timer: float = 0.0
+var monster_attacks = ["Monstr_attack_1", "Monstr_attack_2"]
+var last_attack_index = -1
+var anim_to_play = "" # Will be set by get_next_attack()
 
 # Idle state
 var idle_look_timer: float = 0.0
@@ -106,13 +108,19 @@ var nav_ready: bool = false
 @onready var player: Node3D = get_tree().get_first_node_in_group("player")
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
 @export var punch_hand_r: Area3D # Assign in editor!
+@export var punch_hand_l: Area3D # Assign in editor!
+@export var punch_area: Area3D # Main attack cone for hit validation
+@onready var health_component: Node = $HealthComponent
 
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
-	hp = max_hp
 	will_flee = randf() < flee_chance
+	
+	# Connect to HealthComponent signals
+	if health_component:
+		health_component.died.connect(die)
 	
 	# Setup navigation
 	nav_agent.max_speed = walk_speed
@@ -132,24 +140,52 @@ func _on_navmesh_ready(_map_rid) -> void:
 		
 		# Initialize punch hand
 		if punch_hand_r:
-			if not punch_hand_r.body_entered.is_connected(_on_punch_hand_body_entered):
-				punch_hand_r.body_entered.connect(_on_punch_hand_body_entered)
+			# Signal no longer needed - using Animation Event
+			pass
 
-func _on_punch_hand_body_entered(body: Node3D) -> void:
-	# Only damage if we are currently attacking
-	if not is_attacking:
-		return
-		
-	if body == player:
-		# Calculate knockback direction (away from enemy)
-		var knockback_dir = (player.global_position - global_position).normalized()
-		# Add some upward force
-		knockback_dir.y = 0.5
-		knockback_dir = knockback_dir.normalized() * knockback_strength
-		
-		if player.has_method("take_damage"):
-			# Assuming 1 damage for now, can be exported variable later
-			player.take_damage(1.0, knockback_dir)
+# Called by AnimationPlayer Call Method Track
+func _check_attack_hit() -> void:
+	var hits_found = false
+	
+	# Check Right Hand
+	if punch_hand_r:
+		if _check_single_hand_hit(punch_hand_r):
+			hits_found = true
+			
+	# Check Left Hand (if we haven't hit yet, or if we want double hits - usually one hit per event is safer, but checking both ensures we catch whatever hits)
+	# If we want strictly one hit per event frame regardless of how many hands touch:
+	if not hits_found and punch_hand_l:
+		_check_single_hand_hit(punch_hand_l)
+
+func _check_single_hand_hit(hand_area: Area3D) -> bool:
+	if not hand_area.monitoring:
+		return false
+	
+	# If punch_area is assigned, ensure the target is also within this general attack cone
+	# This prevents backward hits or hits when the enemy isn't facing the target properly
+	if punch_area:
+		var valid_targets = punch_area.get_overlapping_bodies()
+		var is_target_in_cone = false
+		for body in valid_targets:
+			if body == player:
+				is_target_in_cone = true
+				break
+		if not is_target_in_cone:
+			return false
+
+	var overlapping_bodies = hand_area.get_overlapping_bodies()
+	for body in overlapping_bodies:
+		if body == player:
+			# Calculate knockback direction (away from enemy)
+			var knockback_dir = (player.global_position - global_position).normalized()
+			# Add some upward force
+			knockback_dir.y = 0.5
+			knockback_dir = knockback_dir.normalized() * knockback_strength
+			
+			if player.has_method("take_damage"):
+				player.take_damage(1.0, knockback_dir)
+				return true # Hit successful
+	return false
 
 # ============================================================================
 # MAIN LOOP
@@ -204,12 +240,14 @@ func enter_state(new_state: State) -> void:
 		State.IDLE:
 			nav_agent.max_speed = 0.0
 			anim_player.play("Monstr_idle", 0.2, 1.0)
+			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
 			state_timer = randf_range(idle_duration_min, idle_duration_max)
 			idle_look_timer = randf_range(1.5, 4.0)
 			
 		State.PATROL:
 			nav_agent.max_speed = walk_speed
 			anim_player.play("Monstr_walk", 0.2, 1.0)
+			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
 			_set_random_patrol_target()
 			
 		State.CHASE:
@@ -219,6 +257,7 @@ func enter_state(new_state: State) -> void:
 			# Don't reset frustration_total_time here to allow loop accumulation
 			nav_agent.max_speed = run_speed
 			anim_player.play("Monstr_walk", 0.2, 1.0)
+			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
 			state_timer = 0.0 # Track chase duration
 			
 		State.FRUSTRATED:
@@ -227,7 +266,7 @@ func enter_state(new_state: State) -> void:
 			anim_player.play("Monstr_angry", 0.2, 1.0)
 			# Play angry animation for the duration
 			state_timer = frustration_duration
-			print("State: Frustrated")
+			#print("State: Frustrated")
 			
 		State.ATTACK:
 			frustration_total_time = 0.0
@@ -237,6 +276,7 @@ func enter_state(new_state: State) -> void:
 		State.FLEE:
 			nav_agent.max_speed = run_speed * 0.5
 			anim_player.play("Monstr_walk", 0.2, 1.0)
+			anim_player.seek(randf_range(0.0, anim_player.current_animation_length), true)
 			
 		State.KNOCKBACK:
 			anim_player.play("Monstr_knockdown", 0.2, 1.0)
@@ -396,6 +436,11 @@ func _update_chase(delta: float, player_visible: bool) -> void:
 		_move_toward_target()
 
 func _update_frustrated(delta: float) -> void:
+	# Если игрок снова доступен — выходим из фрустрации
+	if _can_reach_player_again():
+		frustration_total_time = 0.0
+		enter_state(State.CHASE)
+		return
 	state_timer -= delta
 	frustration_total_time += delta
 	nav_agent.set_velocity(Vector3.ZERO)
@@ -476,6 +521,23 @@ func _update_attack(delta: float) -> void:
 		anim_player.play("Monstr_attack_idle", 0.2, 1.0)
 		nav_agent.set_velocity(Vector3.ZERO)
 
+func _can_reach_player_again() -> bool:
+	if not is_instance_valid(player):
+		return false
+
+	# Проверяем видимость
+	if not _can_see_player():
+		return false
+
+	# Игрок достаточно близко (можно настроить порог)
+	var dist = global_position.distance_to(player.global_position)
+	if dist > lost_sight_range:
+		return false
+
+	# Навигация говорит, что путь есть
+	nav_agent.target_position = player.global_position
+	return not nav_agent.is_navigation_finished()
+
 func _update_flee(_delta: float) -> void:
 	# Calculate flee position
 	if is_instance_valid(player):
@@ -496,7 +558,9 @@ func _update_knockback(_delta: float) -> void:
 	# Knockback finished
 	if state_timer <= 0:
 		# Decide next state based on HP
-		if hp < max_hp * flee_hp_threshold and will_flee:
+		var current_hp = health_component.get_health() if health_component else 0.0
+		var max_health = health_component.get_max_health() if health_component else 10.0
+		if current_hp <= max_health * flee_hp_threshold and will_flee:
 			enter_state(State.FLEE)
 		elif is_instance_valid(player) and global_position.distance_to(player.global_position) < 10.0:
 			enter_state(State.CHASE)
@@ -517,7 +581,7 @@ func _move_toward_target() -> void:
 	nav_agent.set_velocity(direction * nav_agent.max_speed)
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	if current_state == State.KNOCKBACK:
+	if current_state == State.KNOCKBACK or current_state == State.DEAD:
 		return
 	
 	velocity.x = safe_velocity.x + external_push.x
@@ -559,12 +623,17 @@ func _update_rotation(delta: float) -> void:
 # ============================================================================
 # COMBAT
 # ============================================================================
+func get_next_attack() -> String:
+	last_attack_index = (last_attack_index + 1) % monster_attacks.size()
+	return monster_attacks[last_attack_index]
+
 func _execute_attack() -> void:
 	if is_attacking:
 		return
 	
 	is_attacking = true
-	anim_player.play("Monstr_attack_1", 0.2, 1.0)
+	anim_to_play = get_next_attack()
+	anim_player.play(anim_to_play, 0.2, 1.0)
 	await anim_player.animation_finished
 	is_attacking = false
 	
@@ -576,24 +645,39 @@ func _execute_attack() -> void:
 		should_tactical_retreat = true
 		tactical_retreat_pause_timer = 0.0 # Will be set when reaching position
 
-func take_damage(amount: float, knockback_dir: Vector3) -> void:
-	hp -= amount
-	$HitFlash.flash()
-	# Death check
-	if hp <= 0:
-		queue_free()
+func take_damage(amount: float, knockback_force: Vector3) -> void:
+	if current_state == State.DEAD:
 		return
+	
+	print("Monster received damage:", amount)
+	
+	$HitFlash.flash()
+	
+	# Delegate to HealthComponent
+	if health_component:
+		health_component.take_damage(amount)
+	
+	# CRITICAL FIX: If we died during take_damage, abort immediately to prevent overwriting DEAD state
+	if current_state == State.DEAD:
+		return
+	
+	# Death is handled by signal from HealthComponent
 	
 	# Apply knockback only if force is sufficient
-	if knockback_dir.length_squared() < 0.1:
-		return
+	if knockback_force.length() > 0.1:
+		velocity += knockback_force
+		# Short stun/knockback state
+		enter_state(State.KNOCKBACK)
+
+	# Flee logic update: Check against component health
+	# Use robust check. If current health is <= threshold % or very low.
+	var current_hp = health_component.get_health() if health_component else 0.0
+	var max_health = health_component.get_max_health() if health_component else 10.0
 	
-	# Apply knockback
-	var final_knockback = knockback_dir.normalized() * knockback_strength
-	final_knockback.y = knockback_height
-	velocity = final_knockback
-	
-	enter_state(State.KNOCKBACK)
+	if current_hp <= max_health * flee_hp_threshold and randf() < flee_chance:
+		should_tactical_retreat = true
+	else:
+		should_tactical_retreat = false
 
 func receive_push(push: Vector3) -> void:
 	external_push += push
@@ -651,8 +735,7 @@ func _can_see_player() -> bool:
 		else:
 			if debug_vision:
 				# Use a timer or frame counter to avoid spam if needed, or just print occasionally
-				# print("Vision blocked by: ", result.collider.name)
-				pass
+				print("Vision blocked by: ", result.collider.name)
 			return false
 	
 	return false
@@ -746,3 +829,72 @@ func _update_debug_meshes() -> void:
 
 	if debug_proximity_mesh:
 		debug_proximity_mesh.scale = Vector3(proximity_detection_range * 2, proximity_detection_range * 2, proximity_detection_range * 2)
+
+# ============================================================================
+# DEATH & CLEANUP
+# ============================================================================
+func die() -> void:
+	if current_state == State.DEAD:
+		return
+	
+	current_state = State.DEAD
+	nav_agent.max_speed = 0.0
+	nav_agent.avoidance_enabled = false # Stop RVO callbacks
+	velocity = Vector3.ZERO
+	
+	# Disable processing that might interfere
+	set_physics_process(false)
+	
+	# Disable collision with player (Layer 0) but keep world mask just in case
+	# Changing layer is safer than disabling shape to avoid fall-through glitches
+	collision_layer = 0
+	# $CollisionShape3D.set_deferred("disabled", true) # Caused fall-through if move_and_slide called
+	
+	if punch_hand_r:
+		punch_hand_r.set_deferred("monitoring", false)
+	if punch_hand_l:
+		punch_hand_l.set_deferred("monitoring", false)
+	
+	# Play animation
+	anim_player.play("Monstr_death", 0.2, 0.7)
+	await anim_player.animation_finished
+	
+	# Corpse time
+	await get_tree().create_timer(2.0).timeout
+	
+	# Fade out
+	fade_out_and_remove()
+
+func fade_out_and_remove() -> void:
+	# Find all MeshInstance3D nodes to dissolve them
+	var meshes_to_fade: Array[MeshInstance3D] = []
+	var materials_to_fade: Array[ShaderMaterial] = []
+	
+	var stack = [self]
+	while stack.size() > 0:
+		var node = stack.pop_back()
+		if node is MeshInstance3D:
+			# Filter out debug meshes
+			if node != debug_sight_mesh and node != debug_proximity_mesh:
+				meshes_to_fade.append(node)
+		stack.append_array(node.get_children())
+	
+	# Prepare materials
+	for mesh_instance in meshes_to_fade:
+		var mat = mesh_instance.get_active_material(0)
+		if mat is ShaderMaterial:
+			# Duplicate to avoid shared resource issues during fade
+			var new_mat = mat.duplicate()
+			mesh_instance.set_surface_override_material(0, new_mat)
+			materials_to_fade.append(new_mat)
+	
+	if materials_to_fade.size() > 0:
+		var t = 0.0
+		var fade_speed = 0.5
+		while t < 1.0:
+			t += get_process_delta_time() * fade_speed
+			for mat in materials_to_fade:
+				mat.set_shader_parameter("dissolve_amount", t)
+			await get_tree().process_frame
+	
+	queue_free()

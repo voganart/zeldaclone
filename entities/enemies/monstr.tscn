@@ -60,5 +60,16 @@ bone_idx = 10
 [node name="punch_hand_r" type="Area3D" parent="root/Skeleton3D/hand_r" index="0"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_r/punch_hand_r" index="0"]
-transform = Transform3D(1.5, 1.1920929e-07, -4.4703484e-08, -1.1920929e-07, 1.5, 3.7252903e-08, 4.470349e-08, -3.72529e-08, 1.5, -0.009334392, 0.1862461, -0.012251139)
+transform = Transform3D(2.5, 1.9868216e-07, -7.450581e-08, -1.9868216e-07, 2.5, 6.208817e-08, 7.450582e-08, -6.208816e-08, 2.5, -0.009334392, 0.1862461, -0.012251139)
+shape = SubResource("BoxShape3D_a184d")
+
+[node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
+transform = Transform3D(-0.15659992, 0.06965366, 0.985203, 0.22539848, -0.9686617, 0.10431504, 0.96160007, 0.2383995, 0.13599408, 0.5829645, 0.524442, -0.0130754635)
+bone_name = "hand.l"
+bone_idx = 16
+
+[node name="punch_hand_l" type="Area3D" parent="root/Skeleton3D/hand_l" index="0"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_l/punch_hand_l" index="0"]
+transform = Transform3D(2.5, 1.9868216e-07, -7.450581e-08, -1.9868216e-07, 2.5, 6.208817e-08, 7.450582e-08, -6.208816e-08, 2.5, -0.009334392, 0.1862461, -0.012251139)
 shape = SubResource("BoxShape3D_a184d")

@@ -1,10 +1,12 @@
 shader_type spatial;
-
+render_mode blend_mix, depth_prepass_alpha;
 //render_mode ambient_light_disabled;
 
 uniform bool use_hit_flash = false;
 uniform float hit_flash_strength : hint_range(0.0, 1.0) = 1.0;
 uniform vec4 hit_flash_color : source_color = vec4(1.0, 0.1, 0.1, 1.0);
+
+uniform float dissolve_amount : hint_range(0.0, 1.0) = 0.0;
 
 uniform vec4 albedo : source_color = vec4(1.0f);
 uniform sampler2D albedo_texture : source_color;
@@ -53,6 +55,7 @@ void fragment() {
 	}
 
 	ALBEDO = base_color;
+	ALPHA *= (1.0 - dissolve_amount);
 }
 
 

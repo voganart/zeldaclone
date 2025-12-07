@@ -1,7 +1,8 @@
+Area3D
+CollisionShape3D
+BoneAttachment3D
 Label
 Container
-Area3D
-BoneAttachment3D
 MeshInstance3D
 MultiMeshInstance3D
 SimpleGrassTextured
@@ -11,5 +12,3 @@ Node
 ReflectionProbe
 ShapeCast3D
 RayCast3D
-Timer
-AnimationPlayer

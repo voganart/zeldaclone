@@ -178,7 +178,7 @@ environment = SubResource("Environment_k5f4k")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071071, 0.7071046, 0, -0.7071071, 0.7071046, 4.166873, 13.6900015, 30.093838)
+transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, 4.166873, 6.000002, 22.953836)
 current = true
 fov = 50.0
 
@@ -189,13 +189,13 @@ script = ExtResource("1_cosw0")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071071, 0.7071046, 0, -0.7071071, 0.7071046, 4.166873, 13.6900015, 30.093838)
+transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, 4.166873, 6.000002, 22.953836)
 top_level = true
 script = ExtResource("2_u71mg")
 follow_mode = 2
 follow_target = NodePath("../Entities/Player")
 tween_resource = SubResource("Resource_b121j")
-follow_offset = Vector3(0, 13.69, 12.14)
+follow_offset = Vector3(0, 6, 5)
 follow_damping = true
 follow_damping_value = Vector3(0.2, 0.2, 0.2)
 follow_distance = 10.0
@@ -255,7 +255,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.508667, 0, -9.732136)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.385988, 0, -10.319809)
 
 [node name="Enemy49" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5985479, 0, 2.1309888)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3149862, 0, -0.4755726)
 
 [node name="Enemy50" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.913857, 0, -2.4058592)
@@ -301,6 +301,87 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.15191, 0, 11.684539)
 
 [node name="Enemy64" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15190887, 0, 10.684539)
+
+[node name="Enemy65" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3153725, 0, 11.245609)
+
+[node name="Enemy66" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4202328, 0, 11.792948)
+
+[node name="Enemy67" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.573878, 0, -7.502512)
+
+[node name="Enemy68" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.690593, 0, 10.077961)
+
+[node name="Enemy69" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9931507, 0, -15.688452)
+
+[node name="Enemy70" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.556669, 0, -1.0145323)
+
+[node name="Enemy71" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.135395, 0, 2.9445074)
+
+[node name="Enemy72" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8119698, 0, 5.6225033)
+
+[node name="Enemy73" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5818768, 0, 15.483896)
+
+[node name="Enemy74" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6638184, 0, 8.410868)
+
+[node name="Enemy75" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.482689, 0, 10.657936)
+
+[node name="Enemy76" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.477284, 0, -7.502512)
+
+[node name="Enemy77" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.593999, 0, 10.077961)
+
+[node name="Enemy78" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.896557, 0, -15.688452)
+
+[node name="Enemy79" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.7155, 0, 1.9459302)
+
+[node name="Enemy80" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0633497, 0, -0.9176409)
+
+[node name="Enemy81" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9085636, 0, 5.6225033)
+
+[node name="Enemy82" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9200516, 0, -16.01155)
+
+[node name="Enemy83" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.77547264, 0, 4.1440964)
+
+[node name="Enemy84" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.119183, 0, 3.556423)
+
+[node name="Enemy85" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.113778, 0, -14.604025)
+
+[node name="Enemy86" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.647052, 0, 11.470374)
+
+[node name="Enemy87" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.116491, 0, 11.757732)
+
+[node name="Enemy88" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6916142, 0, -6.1915207)
+
+[node name="Enemy89" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.639101, 0, -5.1929436)
+
+[node name="Enemy90" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.543791, 0, -2.324505)
+
+[node name="Enemy91" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.511202, 0, -13.079397)
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_u71mg")

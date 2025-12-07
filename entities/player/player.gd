@@ -2,41 +2,56 @@ extends CharacterBody3D
 @onready var _mesh: Node3D = $character
 
 # jump
+@export_group("Jump")
 @export var jump_height: float = 1.25
 @export var jump_time_to_peak: float = 0.45
 @export var jump_time_to_descent: float = 0.28
 @export var air_control: float = 0.05
 
-@onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
-@onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
-@onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
-var jump_phase := "" # '' / 'start' / 'mid'
-
-@onready var anim_player: AnimationPlayer = $character/AnimationPlayer
+@export_group("Movement")
 @export var base_speed: float = 3.0
 @export var run_speed: float = 4.5
 @export var stop_speed: float = 8.0
 @export var acceleration: float = 0.3
 @export var rot_speed: float = 5.0
+@export var push_force: float = 0.5
+@export var run_toggle_mode: bool = true
+
+@export_group("Combat")
+@export var primary_attack_speed: float = 0.8
+@export var attack_movement_influense: float = 0.15
+@export var attack_cooldown: float = 0.15
+@export var combo_window_time: float = 2.0
+@export var attack_knockback_strength: float = 5.0 # New export
+@export var attack_knockback_height: float = 2.0 # New export
+
+@export_group("Components")
+@export var punch_hand_r: Area3D # Assign in editor!
+@export var punch_hand_l: Area3D # Assign in editor!
+@onready var first_attack_area: Area3D = $FirstAttackArea
+@onready var health_component: Node = $HealthComponent
+@onready var health_label: Label = $"../../Health"
+
+# ============================================================================
+# RUNTIME VARIABLES
+# ============================================================================
+@onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
+@onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
+@onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
+var jump_phase := ""
+
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
 var is_stopping: bool = false
 var is_attacking: bool = false
-@export var run_toggle_mode: bool = true
-@onready var attack_timer: Timer = $FirstAttackTimer
-@onready var sprint_timer: Timer = $SprintTimer
-@export var primary_attack_speed: float = 0.8
-@export var attack_movement_influense: float = 0.15
-@export var attack_cooldown: float = 0.15
 var can_attack: bool = true
 var can_sprint: bool = true
-@onready var punch_hand_r: Area3D = $character/root/Skeleton3D/hand_r/punch_hand_r
-@onready var punch_hand_l: Area3D = $character/root/Skeleton3D/hand_l/punch_hand_l
-@onready var first_attack_area: Area3D = $FirstAttackArea
-var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3"]
-@export var push_force: float = 0.5
-@export var combo_window_time: float = 2.0
+
+# Components Internal
+@onready var anim_player: AnimationPlayer = $character/AnimationPlayer
+@onready var attack_timer: Timer = $FirstAttackTimer
+@onready var sprint_timer: Timer = $SprintTimer
 
 # Combo System
 var combo_count: int = 0
@@ -45,10 +60,7 @@ var current_attack_knockback_enabled: bool = false
 var combo_reset_timer: Timer
 var is_knockbacked: bool = false
 
-
-# Components
-@onready var health_component: Node = $HealthComponent
-@onready var health_label: Label = $"../../Health" # Assuming the user named the label "Health"
+var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3"]
 
 func _ready() -> void:
 	# Setup Combo Timer
@@ -91,7 +103,7 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	velocity.y = max(velocity.y, 2.0)
 
 	# Выключаем нокбэк через 0.2–0.4 сек (как нравится)
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(0.2).timeout
 	is_knockbacked = false
 
 
@@ -267,29 +279,50 @@ func _on_first_attack_timer_timeout() -> void:
 func _on_sprint_timer_timeout():
 	can_sprint = true
 
-func _on_punch_hand_r_body_entered(body: Node3D) -> void:
-	punch_collision(body, punch_hand_r)
+# Signal Handlers - Replaced by Animation Event Logic
+# func _on_punch_hand_r_body_entered(body: Node3D) -> void:
+# 	punch_collision(body, punch_hand_r)
 
-func _on_punch_hand_l_body_entered(body: Node3D) -> void:
-	punch_collision(body, punch_hand_l)
+# func _on_punch_hand_l_body_entered(body: Node3D) -> void:
+# 	punch_collision(body, punch_hand_l)
+
+# Called by AnimationPlayer Call Method Track
+func _check_attack_hit() -> void:
+	var hits_found = false
+	if punch_hand_r and _check_single_hand_hit(punch_hand_r):
+		hits_found = true
+	
+	if not hits_found and punch_hand_l:
+		_check_single_hand_hit(punch_hand_l)
+
+func _check_single_hand_hit(hand: Area3D) -> bool:
+	for body in hand.get_overlapping_bodies():
+		if body.is_in_group("enemies"):
+			punch_collision(body, hand)
+			return true
+	return false
 
 func punch_collision(body: Node3D, hand: Area3D) -> void:
 	if not is_attacking:
 		return
 	if not body.is_in_group("enemies"):
 		return
-	if first_attack_area and body in first_attack_area.get_overlapping_bodies():
-		var direction = (body.global_transform.origin - hand.global_transform.origin).normalized()
-		
-		# Apply damage with current specs
-		if body.has_method("take_damage"):
-			# If 3rd hit, send extra knockback if supported
-			if current_attack_knockback_enabled:
-				# Assumes enemy has take_damage(amount, knockback_vec)
-				# Push slightly up + away
-				var knockback_vec = direction * 5.0 # Stronger push
-				knockback_vec.y = 2.0
-				body.take_damage(current_attack_damage, knockback_vec)
-			else:
-				# Standard hit (no knockback)
-				body.take_damage(current_attack_damage, Vector3.ZERO)
+	
+	# Optional: keeping the check if body is within main attack area if strictly required
+	# But typically hand overlap is sufficient. 
+	# if first_attack_area and body in first_attack_area.get_overlapping_bodies():
+	
+	var direction = (body.global_transform.origin - hand.global_transform.origin).normalized()
+	
+	# Apply damage with current specs
+	if body.has_method("take_damage"):
+		# If 3rd hit, send extra knockback if supported
+		if current_attack_knockback_enabled:
+			# Assumes enemy has take_damage(amount, knockback_vec)
+			# Push slightly up + away
+			var knockback_vec = direction * attack_knockback_strength
+			knockback_vec.y = attack_knockback_height
+			body.take_damage(current_attack_damage, knockback_vec)
+		else:
+			# Standard hit (no knockback)
+			body.take_damage(current_attack_damage, Vector3.ZERO)
