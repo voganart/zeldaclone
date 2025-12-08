@@ -17,3 +17,4 @@ res://entities/player/animations/Boy_attack_naked_2.res
 res://entities/player/animations/Boy_attack_naked_3.res
 res://entities/enemies/enemy.tscn
 res://UI/HealthBar3D/health_bar_3d.tscn
+res://entities/levels/test_level/level.tscn

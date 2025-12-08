@@ -178,7 +178,7 @@ environment = SubResource("Environment_k5f4k")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, 4.166873, 6.000002, 22.953836)
+transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -13.422639, 11.008465, -9.61005)
 current = true
 fov = 50.0
 
@@ -189,7 +189,7 @@ script = ExtResource("1_cosw0")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, 4.166873, 6.000002, 22.953836)
+transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -13.422639, 11.008465, -9.61005)
 top_level = true
 script = ExtResource("2_u71mg")
 follow_mode = 2
@@ -207,9 +207,7 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 [node name="Entities" type="Node3D" parent="."]
 
 [node name="Player" parent="Entities" instance=ExtResource("4_5iexk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.166873, 1.9073486e-06, 17.953836)
-base_speed = 3.5
-stop_speed = 12.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.422639, 5.008465, -14.61005)
 
 [node name="PatrolZone" type="Area3D" parent="Entities"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9447, 0, -2.46294)

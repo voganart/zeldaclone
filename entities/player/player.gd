@@ -16,6 +16,7 @@ extends CharacterBody3D
 @export var slam_knockback: float = 0.3
 @export var slam_cooldown: float = 2.0 # Cooldown between slams
 @export var slam_windup_delay: float = 0.5 # Delay before descent starts
+@export var slam_acceleration: float = 50.0 # Acceleration during descent (exponential speed increase)
 
 @export_group("Movement")
 @export var base_speed: float = 3.0
@@ -46,6 +47,10 @@ extends CharacterBody3D
 @export var combo_window_time: float = 2.0
 @export var attack_knockback_strength: float = 5.0 # New export
 @export var attack_knockback_height: float = 2.0 # New export
+@export var running_attack_impulse: float = 3.0 # Forward momentum when attacking while running
+@export var walking_attack_impulse: float = 1.5 # Forward momentum when attacking while walking
+@export var idle_attack_impulse: float = 0.5 # Forward momentum when attacking while idle
+@export var attack_rotation_influence: float = 0.5 # How much player can rotate during attacks (0-1)
 
 @export_group("Components")
 @export var punch_hand_r: Area3D # Assign in editor!
@@ -66,10 +71,12 @@ var is_slamming: bool = false
 var slam_cooldown_timer: float = 0.0
 var slam_windup_timer: float = 0.0 # Timer for windup delay
 var slam_animation_phase: String = "" # Tracks: start, mid, end
+var slam_fall_time: float = 0.0 # Time spent falling during slam
 
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
+var is_trying_to_run: bool = false # Intent to run (button held)
 var is_stopping: bool = false
 var is_attacking: bool = false
 var can_attack: bool = true
@@ -170,7 +177,7 @@ func _input(event):
 		else:
 			# Stop running when button released if NOT auto-running
 			if not is_auto_running:
-				is_running = false
+				is_trying_to_run = false
 			
 			# If we WERE auto-running and just tapped shift, we rolled (above).
 			# If we held shift again while auto-running, releasing it shouldn't stop us unless we stop moving (handled in move_logic).
@@ -214,6 +221,26 @@ func first_attack(attack_speed):
 	combo_count += 1
 	if combo_count > 2:
 		combo_count = 0 # Reset after 3rd hit
+	
+	# Apply momentum based on movement state
+	var forward = global_transform.basis.z.normalized()
+	var impulse = 0.0
+	
+	# Check actual speed AND active input (to avoid stacking with momentum)
+	var current_speed_2d = Vector2(velocity.x, velocity.z).length()
+	var walk_speed_threshold = base_speed * 0.5 # 50% of walk speed
+	var has_movement_input = movement_input.length() > 0.1
+	
+	if is_running:
+		impulse = running_attack_impulse
+	elif has_movement_input and current_speed_2d > walk_speed_threshold: # Actively walking
+		impulse = walking_attack_impulse
+	else: # Idle or coasting
+		impulse = idle_attack_impulse
+	
+	if impulse > 0:
+		velocity.x += forward.x * impulse
+		velocity.z += forward.z * impulse
 
 	var rand_anim_length = anim_player.get_animation(anim_to_play).length if anim_player.has_animation(anim_to_play) else 0.0
 
@@ -297,7 +324,6 @@ func _physics_process(delta: float) -> void:
 
 func perform_roll() -> void:
 	# Constraints: Floor, States, Cooldowns, Charges
-	# Constraints: Floor, States, Cooldowns, Charges
 	# Allows interrupting attack
 	if not is_on_floor() or is_rolling or is_knockbacked:
 		return
@@ -358,8 +384,8 @@ func perform_roll() -> void:
 		# Let's just ensure we are physically free.
 		# attack_timer logic: essentially we just override the state.
 	
-	# Запоминаем: бежал ли игрок ДО переката
-	var was_running = is_running
+	# Запоминаем: бежал ли игрок ДО переката (проверяем намерение, не факт)
+	var was_running = is_trying_to_run or is_auto_running
 	
 	is_rolling = true
 	is_running = false
@@ -416,7 +442,7 @@ func play_with_random_offset(anim_name: String, blend: float = -1.0, speed: floa
 func perform_run() -> void:
 	if is_rolling or is_attacking:
 		return
-	is_running = true
+	is_trying_to_run = true
 
 func perform_air_dash() -> void:
 	# Require second jump, same as Ground Slam
@@ -442,6 +468,7 @@ func start_ground_slam() -> void:
 	slam_cooldown_timer = slam_cooldown
 	slam_windup_timer = slam_windup_delay
 	slam_animation_phase = "start"
+	slam_fall_time = 0.0 # Reset fall timer
 	
 	# Disable collision with enemies (pass through them)
 	# Assuming enemies are on collision layer 2 (adjust if different)
@@ -453,7 +480,7 @@ func start_ground_slam() -> void:
 	velocity.y = 0
 	
 	# Play start animation
-	anim_player.play("Boy_attack_air_naked_start", 0.1, 0.5)
+	anim_player.play("Boy_attack_air_naked_start", 0.5, 0.5)
 	print("Ground Slam Started - Windup Phase!")
 
 func perform_slam_impact() -> void:
@@ -517,9 +544,23 @@ func move_logic(delta):
 
 	if movement_input == Vector2.ZERO:
 		is_running = false
+		is_trying_to_run = false
 		is_auto_running = false
+	
+	# Update is_running based on intent and actual speed
+	var speed_2d = Vector2(velocity.x, velocity.z).length()
+	var run_speed_threshold = lerp(base_speed, run_speed, 0.7)
+	
+	# Set is_running if trying to run AND have reached speed threshold
+	if is_trying_to_run or is_auto_running:
+		if speed_2d >= run_speed_threshold:
+			is_running = true
+		else:
+			is_running = false
+	else:
+		is_running = false
 
-	var current_speed = run_speed if is_running else base_speed
+	var current_speed = run_speed if (is_trying_to_run or is_auto_running) else base_speed
 	if is_airborne:
 		current_speed = air_speed
 	elif is_rolling:
@@ -608,10 +649,17 @@ func jump_logic(delta):
 				print("Ground Slam - Descent Phase!")
 				slam_animation_phase = "mid"
 				# Play mid animation looping
-				anim_player.play("Boy_attack_air_naked_mid", 0.0, 1.0)
+				anim_player.play("Boy_attack_air_naked_mid", 0.5, 1.0)
 		else:
-			# PHASE 2: Descent - High speed fall
-			velocity.y = - slam_descent_speed
+			# PHASE 2: Descent - Exponential acceleration
+			slam_fall_time += delta
+			# Exponential formula: speed = initial_speed * exp(acceleration * time)
+			# Start slow, accelerate exponentially
+			var initial_speed = 5.0 # Starting descent speed
+			var current_speed = initial_speed * exp(slam_acceleration * slam_fall_time)
+			# Cap at max descent speed
+			current_speed = min(current_speed, slam_descent_speed)
+			velocity.y = - current_speed
 			velocity.x = 0 # Maintain zero horizontal
 			velocity.z = 0
 			
@@ -625,22 +673,25 @@ func jump_logic(delta):
 			if result and slam_animation_phase == "mid":
 				# Close to ground, play end animation
 				slam_animation_phase = "end"
-				anim_player.play("Boy_attack_air_naked_end", 0.0, 1.0)
+				anim_player.play("Boy_attack_air_naked_end", 0.5, 1.0)
 				print("Ground Slam - Landing Phase!")
 	else:
 		# Normal gravity application
 		velocity.y -= gravity * delta
 
 func rot_char(delta):
-	# Allow rolling rotation, but prevent attacking/knockback rotation
-	if is_attacking: return
-	if is_knockbacked: return # ← ВАЖНО
+	# Prevent rotation during knockback
+	if is_knockbacked: return
 
 	var current_rot_speed = 0.0 if is_stopping else rot_speed
 	
 	# If rolling, scale rotation speed by roll_control
 	if is_rolling:
 		current_rot_speed = rot_speed * roll_control
+	
+	# If attacking, scale rotation speed by attack_rotation_influence
+	if is_attacking:
+		current_rot_speed = rot_speed * attack_rotation_influence
 
 	var vel_2d = Vector2(velocity.x, -velocity.z)
 	
@@ -692,11 +743,10 @@ func animation_player():
 		elif speed_2d > 0.2:
 			play_with_random_offset("Boy_walk", 0.3, lerp(0.5, 1.25, speed_2d / base_speed))
 	else:
-		# торможение
-		if speed_2d > 3.2:
+		if speed_2d > 3.5:
 			if not is_stopping:
 				is_stopping = true
-				play_with_random_offset("Boy_stopping", 0.2, 0.1)
+				anim_player.play("Boy_stopping", 0.5, 0.5)
 		else:
 			is_stopping = false
 			play_with_random_offset("Boy_idle", 0.5)
