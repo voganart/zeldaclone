@@ -31,6 +31,7 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 @export var tactical_retreat_distance: float = 4.0
 @export var tactical_retreat_pause_min: float = 0.5
 @export var tactical_retreat_pause_max: float = 1.5
+@export var attack_speed: float = 1.0
 
 @export_group("Detection")
 @export var sight_range: float = 10.0
@@ -659,7 +660,7 @@ func _execute_attack() -> void:
 	
 	is_attacking = true
 	anim_to_play = get_next_attack()
-	anim_player.play(anim_to_play, 0.2, 1.0)
+	anim_player.play(anim_to_play, 0.2, attack_speed)
 	await anim_player.animation_finished
 	is_attacking = false
 	

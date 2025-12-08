@@ -1,4 +1,6 @@
-res://entities/player/player.gd
+res://entities/player/animations/Boy_attack_naked_1.res
+res://entities/player/animations/Boy_attack_naked_2.res
+res://entities/player/animations/Boy_attack_naked_3.res
 res://entities/player/player.tscn
 res://addons/phantom_camera/themes/theme.tres
 res://entities/player/assets/toonShader.gdshader
@@ -12,9 +14,3 @@ res://cloud_shader/cloud.gdshader
 res://water_shader/shaders/Water.gdshader
 res://entities/levels/island/water_island.gdshader
 res://addons/terrain_3d/extras/particle_example/grass.gdshader
-res://entities/player/animations/Boy_attack_naked_1.res
-res://entities/player/animations/Boy_attack_naked_2.res
-res://entities/player/animations/Boy_attack_naked_3.res
-res://entities/enemies/enemy.tscn
-res://UI/HealthBar3D/health_bar_3d.tscn
-res://entities/levels/test_level/level.tscn
