@@ -19,7 +19,7 @@ render_priority = 0
 shader = ExtResource("1_sjphd")
 shader_parameter/use_billboard = true
 shader_parameter/fg_color = Color(1, 0.110691965, 0, 1)
-shader_parameter/bg_color = Color(0.45112163, 0.45112163, 0.45112163, 1)
+shader_parameter/bg_color = Color(0.2936247, 0.2936247, 0.2936247, 1)
 
 [node name="HealthBar3D" type="Node3D"]
 

@@ -8,6 +8,7 @@ extends CharacterBody3D
 @export var jump_time_to_descent: float = 0.28
 @export var air_control: float = 0.05
 @export var max_jump_count: int = 2 # Double Jump default
+@export var second_jump_multiplier: float = 1.2
 @export_group("Ground Slam")
 @export var slam_damage: float = 1.0
 @export var slam_radius: float = 2.0
@@ -32,6 +33,11 @@ extends CharacterBody3D
 @export var roll_cooldown: float = 0.5 # Time to regenerate 1 charge
 @export var roll_recharge_time: float = 3.0 # Penalty time if depleted
 @export var roll_chain_delay: float = 0.0 # Delay after roll completes before next roll allowed
+
+@export_group("Air Dash")
+@export var air_dash_speed: float = 8.0 # Speed of air dash
+@export var air_dash_duration: float = 0.3 # How long dash lasts
+@export var air_dash_cooldown: float = 1.0 # Cooldown between air dashes
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
@@ -93,6 +99,12 @@ var roll_regen_timer: float = 0.0 # Short timer to restore 1 charge
 var is_roll_recharging: bool = false # True if in penalty mode
 var roll_interval_timer: float = 0.0 # Handles roll_chain_delay
 
+# Air Dash
+var is_air_dashing: bool = false
+var air_dash_timer: float = 0.0
+var air_dash_cooldown_timer: float = 0.0
+var air_dash_direction: Vector3 = Vector3.ZERO
+
 var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3"]
 
 func _ready() -> void:
@@ -125,6 +137,10 @@ func _on_died() -> void:
 	# Handle death logic here
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
+	# Invulnerable during Ground Slam
+	if is_slamming:
+		return
+	
 	print("PLAYER TOOK DAMAGE:", amount)
 
 	is_knockbacked = true
@@ -159,8 +175,11 @@ func _input(event):
 			# If we WERE auto-running and just tapped shift, we rolled (above).
 			# If we held shift again while auto-running, releasing it shouldn't stop us unless we stop moving (handled in move_logic).
 			
+		
+		# Air Dash: Tap Shift in air
+		if not is_on_floor() and shift_pressed_time <= roll_threshold:
+			perform_air_dash()
 		shift_pressed_time = 0.0
-
 	if Input.is_action_just_pressed("first_attack"):
 		# Ground Slam only after second jump and if cooldown ready
 		if not is_on_floor() and not is_slamming and current_jump_count >= 2 and slam_cooldown_timer <= 0:
@@ -239,6 +258,17 @@ func _process(delta):
 	# 4. Slam Cooldown Timer
 	if slam_cooldown_timer > 0:
 		slam_cooldown_timer -= delta
+	
+	# 5. Air Dash Cooldown Timer
+	if air_dash_cooldown_timer > 0:
+		air_dash_cooldown_timer -= delta
+	
+	# 6. Air Dash Duration Timer
+	if is_air_dashing:
+		air_dash_timer -= delta
+		if air_dash_timer <= 0:
+			is_air_dashing = false
+			print("Air Dash Complete!")
 	
 	# Shift Update Logic
 	if is_shift_down:
@@ -388,11 +418,34 @@ func perform_run() -> void:
 		return
 	is_running = true
 
+func perform_air_dash() -> void:
+	# Require second jump, same as Ground Slam
+	if is_air_dashing or is_on_floor() or air_dash_cooldown_timer > 0 or current_jump_count < 2:
+		return
+	is_air_dashing = true
+	air_dash_timer = air_dash_duration
+	air_dash_cooldown_timer = air_dash_cooldown
+
+	# Forward direction relative to camera/character
+	var forward = global_transform.basis.z.normalized()
+	air_dash_direction = Vector3(forward.x, 0, forward.z).normalized()
+
+	velocity.x = air_dash_direction.x * air_dash_speed
+	velocity.z = air_dash_direction.z * air_dash_speed
+	velocity.y = 4.0 # небольшое подбрасывание вверх
+
+	anim_player.play("Boy_air_dash", 0.1, 1.0)
+
+
 func start_ground_slam() -> void:
 	is_slamming = true
 	slam_cooldown_timer = slam_cooldown
 	slam_windup_timer = slam_windup_delay
 	slam_animation_phase = "start"
+	
+	# Disable collision with enemies (pass through them)
+	# Assuming enemies are on collision layer 2 (adjust if different)
+	set_collision_mask_value(3, false)
 	
 	# Zero out all velocity for freeze effect
 	velocity.x = 0
@@ -406,9 +459,13 @@ func start_ground_slam() -> void:
 func perform_slam_impact() -> void:
 	is_slamming = false
 	slam_animation_phase = ""
+	
+	# Re-enable collision with enemies
+	set_collision_mask_value(3, true)
+	
 	print("Ground Slam Impact!")
 	
-	# Find all enemies in radius
+	# First, push away all enemies in radius
 	var enemies = get_tree().get_nodes_in_group("enemies")
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
@@ -416,12 +473,19 @@ func perform_slam_impact() -> void:
 			
 		var distance = global_position.distance_to(enemy.global_position)
 		if distance <= slam_radius:
-			# Calculate knockback direction (away from impact point)
-			var knockback_dir = (enemy.global_position - global_position).normalized()
-			knockback_dir.y = 0.5 # Add upward component
+			# Push enemy away from impact point
+			var push_dir = (enemy.global_position - global_position).normalized()
+			push_dir.y = 0 # Horizontal push only
+			var push_force_vec = push_dir * 3.0 # Strong push to clear space
+			
+			if enemy.has_method("receive_push"):
+				enemy.receive_push(push_force_vec)
+			
+			# Then apply damage with knockback
+			var knockback_dir = push_dir
+			knockback_dir.y = 0.5 # Add upward component for damage knockback
 			var knockback_vec = knockback_dir * slam_knockback
 			
-			# Apply damage
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(slam_damage, knockback_vec)
 				print("Slam hit enemy at distance: ", distance)
@@ -444,6 +508,12 @@ func move_logic(delta):
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	var is_airborne = not is_on_floor()
 	var control = 1.0 if not is_airborne else clamp(air_control, 0.0, 1.0)
+	
+	# Air Dash: Lock velocity during dash
+	if is_air_dashing:
+		velocity.x = air_dash_direction.x * air_dash_speed
+		velocity.z = air_dash_direction.z * air_dash_speed
+		return
 
 	if movement_input == Vector2.ZERO:
 		is_running = false
@@ -503,8 +573,11 @@ func jump_logic(delta):
 			is_rolling = false
 		
 		# Execute Jump
-		if is_on_floor() or current_jump_count < max_jump_count:
-			velocity.y = - jump_velocity
+		# First jump ONLY from ground, additional jumps allowed in air
+		if (is_on_floor() and current_jump_count == 0) or (current_jump_count > 0 and current_jump_count < max_jump_count):
+			# Second jump is twice as strong
+			var jump_multiplier = second_jump_multiplier if current_jump_count == 1 else 1.0
+			velocity.y = - jump_velocity * jump_multiplier
 			current_jump_count += 1
 			air_speed = Vector2(velocity.x, velocity.z).length()
 			
@@ -514,6 +587,12 @@ func jump_logic(delta):
 				jump_phase = "start"
 
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
+	
+	# Air Dash: No gravity during dash
+	if is_air_dashing:
+		# Keep velocity.y at 0, no gravity
+		velocity.y = 0
+		return
 	
 	# Ground Slam: Three-phase logic
 	if is_slamming:
@@ -584,7 +663,9 @@ func tilt_character(delta):
 	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 15 * delta)
 
 func animation_player():
-	if is_attacking or is_rolling: return
+	# Don't override special state animations
+	if is_attacking or is_rolling or is_air_dashing or is_slamming:
+		return
 	var speed_2d := Vector2(velocity.x, velocity.z).length()
 	var has_input := Input.get_vector("left", "right", "up", "down").length() > 0
 
