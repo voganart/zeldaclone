@@ -81,6 +81,7 @@ var slam_windup_timer: float = 0.0 # Timer for windup delay
 var slam_animation_phase: String = "" # Tracks: start, mid, end
 var slam_fall_time: float = 0.0 # Time spent falling during slam
 var is_playing_slam_end: bool = false
+var slam_impact_in_progress: bool = false # Prevent re-entrant slam impact handling
 
 var air_speed: float
 var movement_input: Vector2 = Vector2.ZERO
@@ -609,12 +610,45 @@ func start_ground_slam() -> void:
 	print("Ground Slam Started - Windup Phase!")
 
 func perform_slam_impact() -> void:
+	# Prevent re-entry: if we're already handling the impact, skip subsequent calls
+	if slam_impact_in_progress:
+		return
+	slam_impact_in_progress = true
+
+	# Clear the slamming state immediately so _physics_process won't call this again
 	is_slamming = false
+
+	# Robust handling: ensure the slam-end animation is played at impact and
+	# fully completes before we clear slam-end flag and blend to Idle. This avoids
+	# the end animation being skipped or faded into Idle.
+	var end_anim_name := "Boy_attack_air_naked_end"
+	var playback_speed := 1.0
+
+	# If the animation exists, play it (if not already) and wait for its length.
+	if anim_player.has_animation(end_anim_name):
+		# Mark that we're playing the slam end so animation_player() returns early
+		is_playing_slam_end = true
+
+		# If not already playing the desired end animation, start it with a short blend
+		if anim_player.current_animation != end_anim_name or not anim_player.is_playing():
+			anim_player.play(end_anim_name, 0.05, playback_speed)
+			# let one frame pass so the animation actually starts
+			await get_tree().process_frame
+
+		# Wait for the animation duration (accounts for playback speed)
+		var anim_len = anim_player.get_animation(end_anim_name).length
+		if anim_len > 0:
+			await get_tree().create_timer(anim_len / playback_speed).timeout
+		else:
+			# fallback small delay
+			await get_tree().create_timer(0.05).timeout
+	else:
+		# No end animation available; small delay to keep behavior consistent
+		await get_tree().create_timer(0.05).timeout
+
+	# Now apply impact effects after the end animation completed.
 	is_playing_slam_end = false
 	slam_animation_phase = ""
-	set_collision_mask_value(3, true)
-
-	# Re-enable collision with enemies
 	set_collision_mask_value(3, true)
 
 	print("Ground Slam Impact!")
@@ -643,6 +677,9 @@ func perform_slam_impact() -> void:
 			if enemy.has_method("take_damage"):
 				enemy.take_damage(slam_damage, knockback_vec)
 				print("Slam hit enemy at distance: ", distance)
+
+	# Finished handling slam impact - allow future slam impacts
+	slam_impact_in_progress = false
 
 func push_obj():
 	var current_push_force = push_force
@@ -814,7 +851,7 @@ func jump_logic(delta):
 			if result and slam_animation_phase == "mid":
 				slam_animation_phase = "end"
 				is_playing_slam_end = true # ← ВКЛ
-				anim_player.play("Boy_attack_air_naked_end", 0.5, 0.5)
+				anim_player.play("Boy_attack_air_naked_end", 0.5, 1.0)
 	else:
 		# Normal gravity application
 		velocity.y -= gravity * delta
@@ -858,6 +895,7 @@ func animation_player():
 		return
 	var speed_2d := Vector2(velocity.x, velocity.z).length()
 	var has_input := Input.get_vector("left", "right", "up", "down").length() > 0
+	var min_walk_speed := 0.5 # Minimum speed threshold to play walk/run animation
 
 	# Прыжки
 	if not is_on_floor():
@@ -875,7 +913,9 @@ func animation_player():
 			anim_player.play("Boy_jump_end", 0.1, 1.0) # FIXED speed/blend
 			jump_phase = ""
 	# Движение по земле
-	if has_input:
+	# FIXED: Check actual velocity, not just input. This prevents animation freeze when walking into walls.
+	# If speed is below threshold (even with input), play idle instead of walk/run.
+	if has_input and speed_2d > min_walk_speed:
 		is_stopping = false
 		# Calculate blend factor based on speed
 		var blend_factor = calculate_walk_run_blend(speed_2d)

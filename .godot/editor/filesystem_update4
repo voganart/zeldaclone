@@ -14,3 +14,6 @@ res://cloud_shader/cloud.gdshader
 res://water_shader/shaders/Water.gdshader
 res://entities/levels/island/water_island.gdshader
 res://addons/terrain_3d/extras/particle_example/grass.gdshader
+res://entities/player/player.gd
+res://entities/enemies/enemy.gd
+res://entities/enemies/enemy.tscn
