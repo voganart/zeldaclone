@@ -3,8 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://c6017hromuhsr" path="res://entities/enemies/Monstr.glb" id="1_io610"]
 [ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="2_a184d"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_a184d"]
-size = Vector3(0.3, 0.3, 0.3)
+[sub_resource type="SphereShape3D" id="SphereShape3D_a184d"]
 
 [node name="Monstr" instance=ExtResource("1_io610")]
 
@@ -60,8 +59,8 @@ bone_idx = 10
 [node name="punch_hand_r" type="Area3D" parent="root/Skeleton3D/hand_r" index="0"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_r/punch_hand_r" index="0"]
-transform = Transform3D(2.5, 1.9868216e-07, -7.450581e-08, -1.9868216e-07, 2.5, 6.208817e-08, 7.450582e-08, -6.208816e-08, 2.5, -0.009334392, 0.1862461, -0.012251139)
-shape = SubResource("BoxShape3D_a184d")
+transform = Transform3D(2, 1.5894572e-07, -5.960465e-08, -1.5894572e-07, 2, 4.9670536e-08, 5.960466e-08, -4.9670533e-08, 2, -0.009334392, 0.1862461, -0.012251139)
+shape = SubResource("SphereShape3D_a184d")
 
 [node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
 transform = Transform3D(-0.15659992, 0.06965366, 0.985203, 0.22539848, -0.9686617, 0.10431504, 0.96160007, 0.2383995, 0.13599408, 0.5829645, 0.524442, -0.0130754635)
@@ -71,5 +70,5 @@ bone_idx = 16
 [node name="punch_hand_l" type="Area3D" parent="root/Skeleton3D/hand_l" index="0"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_l/punch_hand_l" index="0"]
-transform = Transform3D(2.5, 1.9868216e-07, -7.450581e-08, -1.9868216e-07, 2.5, 6.208817e-08, 7.450582e-08, -6.208816e-08, 2.5, -0.009334392, 0.1862461, -0.012251139)
-shape = SubResource("BoxShape3D_a184d")
+transform = Transform3D(2, 1.5894572e-07, -5.960465e-08, -1.5894572e-07, 2, 4.9670536e-08, 5.960466e-08, -4.9670533e-08, 2, -0.009334392, 0.1862461, -0.012251139)
+shape = SubResource("SphereShape3D_a184d")

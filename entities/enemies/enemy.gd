@@ -32,6 +32,7 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 @export var tactical_retreat_pause_min: float = 0.5
 @export var tactical_retreat_pause_max: float = 1.5
 @export var attack_speed: float = 1.0
+@export var attack_impulse: float = 2.0 # Forward impulse applied when performing attack
 
 @export_group("Detection")
 @export var sight_range: float = 10.0
@@ -302,8 +303,9 @@ func enter_state(new_state: State) -> void:
 			# Don't auto-execute, let update handle it
 			
 		State.FLEE:
-			nav_agent.max_speed = run_speed * 0.5
+			nav_agent.max_speed = run_speed * 0.2
 			play_with_random_offset("Monstr_walk", 0.2, 1.0)
+			print("State: Flee")
 			
 		State.KNOCKBACK:
 			anim_player.play("Monstr_knockdown", 0.2, 1.0)
@@ -584,10 +586,14 @@ func _update_knockback(_delta: float) -> void:
 	
 	# Knockback finished
 	if state_timer <= 0:
-		# Decide next state based on HP
 		var current_hp = health_component.get_health() if health_component else 0.0
 		var max_health = health_component.get_max_health() if health_component else 10.0
-		if current_hp <= max_health * flee_hp_threshold and will_flee:
+
+		# Convert percent threshold to integer minimal HP
+		var flee_hp_raw = max_health * flee_hp_threshold
+		var flee_hp_limit = int(ceil(flee_hp_raw))
+
+		if current_hp <= flee_hp_limit and will_flee:
 			enter_state(State.FLEE)
 		elif is_instance_valid(player) and global_position.distance_to(player.global_position) < 10.0:
 			enter_state(State.CHASE)
@@ -660,8 +666,18 @@ func _execute_attack() -> void:
 	
 	is_attacking = true
 	anim_to_play = get_next_attack()
+	# Apply a forward impulse while attacking so the monster advances into the
+	# player instead of standing still. Use `attack_impulse` exported parameter.
+	var forward = global_transform.basis.z.normalized()
+	# Add forward push; nav_agent velocity is set to zero during attack so
+	# external_push is applied by _on_velocity_computed and moves the enemy.
+	external_push += forward * attack_impulse
+
 	anim_player.play(anim_to_play, 0.2, attack_speed)
 	await anim_player.animation_finished
+
+	# Clear the temporary attack push so enemy doesn't keep sliding after attack
+	external_push = external_push.lerp(Vector3.ZERO, 1.0)
 	is_attacking = false
 	
 	# Record attack time

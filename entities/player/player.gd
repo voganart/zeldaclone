@@ -18,6 +18,7 @@ extends CharacterBody3D
 @export var slam_windup_delay: float = 0.5 # Delay before descent starts
 @export var slam_acceleration: float = 50.0 # Acceleration during descent (exponential speed increase)
 @export var slam_min_height: float = 3.0 # Minimum height from ground to execute slam
+@export var slam_end_anim_speed: float = 1.5
 
 @export_group("Movement")
 @export var base_speed: float = 3.0
@@ -128,6 +129,8 @@ var air_dash_cooldown_timer: float = 0.0
 var air_dash_direction: Vector3 = Vector3.ZERO
 var air_dash_bonus_jump_granted: bool = false # True if air dash was performed, allows 3rd jump
 var is_passing_through: bool = false
+var air_dash_used_in_air: bool = false
+
 
 var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3"]
 
@@ -253,14 +256,18 @@ func first_attack(attack_speed):
 
 	var anim_to_play = ""
 
-	# Determine Attack based on Combo Count
-	if combo_count == 0 or combo_count == 1:
-		# Attack 1 or 2: Random light attack
-		anim_to_play = ["Boy_attack_naked_1", "Boy_attack_naked_2"].pick_random()
+	if combo_count % 3 == 0:
+		# Attack 1
+		anim_to_play = "Boy_attack_naked_1"
 		current_attack_damage = 1.0
-		current_attack_knockback_enabled = false
-	elif combo_count == 2:
-		# Attack 3: Heavy finisher
+		current_attack_knockback_enabled = true
+	elif combo_count % 3 == 1:
+		# Attack 2
+		anim_to_play = "Boy_attack_naked_2"
+		current_attack_damage = 1.0
+		current_attack_knockback_enabled = true
+	else:
+		# Attack 3 (finisher)
 		anim_to_play = "Boy_attack_naked_3"
 		current_attack_damage = 2.0
 		current_attack_knockback_enabled = true
@@ -294,7 +301,7 @@ func first_attack(attack_speed):
 
 	# Start animation and timer that covers animation + cooldown
 	# Play attack with a short blend so it can crossfade smoothly if cancelled
-	anim_player.play(anim_to_play, 0.2, attack_speed)
+	anim_player.play(anim_to_play, 0.0, attack_speed)
 	attack_timer.start(rand_anim_length + attack_cooldown)
 
 	# Wait for the attack to finish OR until attack is cancelled (e.g. by roll)
@@ -377,6 +384,9 @@ func _physics_process(delta: float) -> void:
 	# Ground Slam Impact Detection
 	if is_slamming and is_on_floor():
 		perform_slam_impact()
+		air_dash_used_in_air = false
+	if is_on_floor():
+		air_dash_used_in_air = false
 
 func check_jump_pass_through() -> void:
 	if is_on_floor() and not is_passing_through and not is_slamming:
@@ -562,31 +572,36 @@ func perform_air_dash() -> void:
 	# Block air dash during Ground Slam
 	if is_slamming:
 		return
-	# Require second jump, same as Ground Slam
+
+	# Can't dash twice in same air-time
+	if air_dash_used_in_air:
+		return
+
+	# Require second jump (same as before)
 	if is_air_dashing or is_on_floor() or air_dash_cooldown_timer > 0 or current_jump_count < 2:
 		return
 
+	# Mark dash as used
+	air_dash_used_in_air = true
+
 	is_air_dashing = true
-	air_dash_start_position = global_position # Store starting position
+	air_dash_start_position = global_position
 	air_dash_cooldown_timer = air_dash_cooldown
 
-	# Forward direction relative to camera/character (purely horizontal)
 	var forward = global_transform.basis.z.normalized()
 	air_dash_direction = Vector3(forward.x, 0, forward.z).normalized()
 
-	# Instant horizontal burst - no vertical component
 	velocity.x = air_dash_direction.x * air_dash_speed
 	velocity.z = air_dash_direction.z * air_dash_speed
-	velocity.y = 0 # Zero vertical velocity for pure horizontal dash
+	velocity.y = 0
 
-	# Grant bonus jump after air dash (don't increment jump count)
-	# This allows: jump -> jump -> air dash -> jump (3rd jump)
 	air_dash_bonus_jump_granted = true
 	if current_jump_count >= max_jump_count:
-		current_jump_count = max_jump_count - 1 # Allow one more jump
+		current_jump_count = max_jump_count - 1
 
 	anim_player.play("Boy_air_dash", 0.1, 1.0)
 	print("Air Dash Started!")
+
 
 func start_ground_slam() -> void:
 	is_slamming = true
@@ -622,7 +637,7 @@ func perform_slam_impact() -> void:
 	# fully completes before we clear slam-end flag and blend to Idle. This avoids
 	# the end animation being skipped or faded into Idle.
 	var end_anim_name := "Boy_attack_air_naked_end"
-	var playback_speed := 1.0
+	var playback_speed := slam_end_anim_speed
 
 	# If the animation exists, play it (if not already) and wait for its length.
 	if anim_player.has_animation(end_anim_name):
@@ -827,7 +842,7 @@ func jump_logic(delta):
 				print("Ground Slam - Descent Phase!")
 				slam_animation_phase = "mid"
 				# Play mid animation looping
-				anim_player.play("Boy_attack_air_naked_mid", 0.5, 0.5)
+				anim_player.play("Boy_attack_air_naked_mid", 0.2, 1.0)
 		else:
 			# PHASE 2: Descent - Exponential acceleration
 			slam_fall_time += delta
@@ -851,7 +866,7 @@ func jump_logic(delta):
 			if result and slam_animation_phase == "mid":
 				slam_animation_phase = "end"
 				is_playing_slam_end = true # ← ВКЛ
-				anim_player.play("Boy_attack_air_naked_end", 0.5, 1.0)
+				anim_player.play("Boy_attack_air_naked_end", 0.5, slam_end_anim_speed)
 	else:
 		# Normal gravity application
 		velocity.y -= gravity * delta
@@ -1004,8 +1019,8 @@ func apply_movement_animation_blend(blend: float, speed: float) -> void:
 	if current_movement_blend < 0.5:
 		# Closer to walk - play walk animation
 		var walk_speed_scale = lerp(0.0, 1.25, speed / base_speed)
-		play_with_random_offset("Boy_walk", 0.5, walk_speed_scale)
+		play_with_random_offset("Boy_walk", 0.2, walk_speed_scale)
 	else:
 		# Closer to run - play run animation
 		var run_speed_scale = lerp(0.5, 1.25, speed / run_speed)
-		play_with_random_offset("Boy_run", 0.5, run_speed_scale)
+		play_with_random_offset("Boy_run", 0.2, run_speed_scale)

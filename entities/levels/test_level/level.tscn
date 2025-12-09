@@ -208,6 +208,7 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
 [node name="Player" parent="Entities" instance=ExtResource("4_5iexk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.438644, 1.103868, -4.815672)
+air_dash_distance = 3.0
 
 [node name="PatrolZone" type="Area3D" parent="Entities"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9447, 0, -2.46294)
@@ -392,7 +393,7 @@ collision_layer = 8
 collision_mask = 31
 
 [node name="island" parent="NavigationRegion3D/Environment/CSGCombiner3D" instance=ExtResource("7_owp05")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
+transform = Transform3D(4.9, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 10, 0, -6)
