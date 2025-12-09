@@ -31,6 +31,8 @@ extends CharacterBody3D
 @export var roll_speed: float = 6.0
 @export var roll_control: float = 0.5
 @export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 # 0 = finish roll first, 1 = interrupt anytime (affects jump and attack)
+@export var buffered_jump_min_time: float = 0.0 # Minimum time after buffering when buffered jump is allowed
+@export var buffered_jump_max_time: float = 0.5 # Maximum time after buffering when buffered jump is allowed
 @export var auto_run_latch_time: float = 2.0
 @export var roll_max_charges: int = 3
 @export var roll_cooldown: float = 0.5 # Time to regenerate 1 charge
@@ -54,12 +56,16 @@ extends CharacterBody3D
 @export var attack_movement_influense: float = 0.15
 @export var attack_cooldown: float = 0.15
 @export var combo_window_time: float = 2.0
+@export var combo_cooldown_after_combo: float = 0.5 # Cooldown after completing a 3-hit combo
 @export var attack_knockback_strength: float = 5.0 # New export
 @export var attack_knockback_height: float = 2.0 # New export
+@export var knockback_duration: float = 0.2 # Duration of knockback effect in seconds
 @export var running_attack_impulse: float = 3.0 # Forward momentum when attacking while running
 @export var walking_attack_impulse: float = 1.5 # Forward momentum when attacking while walking
 @export var idle_attack_impulse: float = 0.5 # Forward momentum when attacking while idle
 @export var attack_rotation_influence: float = 0.5 # How much player can rotate during attacks (0-1)
+
+
 
 @export_group("Components")
 @export var punch_hand_r: Area3D # Assign in editor!
@@ -107,8 +113,14 @@ var combo_count: int = 0
 var current_attack_damage: float = 1.0
 var current_attack_knockback_enabled: bool = false
 var combo_reset_timer: Timer
+
+var combo_cooldown_active: bool = false
+var combo_cooldown_timer: Timer
 var is_knockbacked: bool = false
-var is_rolling: bool = false
+var is_knockback_stun: bool = false # Cannot move/attack during knockback
+var is_rolling: bool = false# Input buffering
+var buffered_jump: bool = false
+var buffered_jump_time: float = -1.0
 
 # Shift Logic
 var roll_threshold: float = 0.18
@@ -130,6 +142,7 @@ var air_dash_direction: Vector3 = Vector3.ZERO
 var air_dash_bonus_jump_granted: bool = false # True if air dash was performed, allows 3rd jump
 var is_passing_through: bool = false
 var air_dash_used_in_air: bool = false
+var was_on_floor: bool = true
 
 
 var primary_naked_attacks: Array = ["Boy_attack_naked_1", "Boy_attack_naked_2", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3", "Boy_attack_naked_1", "Boy_attack_naked_3"]
@@ -154,6 +167,17 @@ func _ready() -> void:
 		_on_health_changed(health_component.get_health())
 
 	current_roll_charges = roll_max_charges
+
+	# Combo cooldown timer (used after finishing a 3-hit combo)
+	combo_cooldown_timer = Timer.new()
+	combo_cooldown_timer.one_shot = true
+	combo_cooldown_timer.wait_time = combo_cooldown_after_combo
+	combo_cooldown_timer.timeout.connect(func():
+		combo_cooldown_active = false
+		can_attack = true
+		print("Combo cooldown ended, attacks enabled")
+	)
+	add_child(combo_cooldown_timer)
 
 func _on_health_changed(new_health: float) -> void:
 	if health_label:
@@ -180,8 +204,10 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 
-	# Выключаем нокбэк через 0.2–0.4 сек (как нравится)
-	await get_tree().create_timer(0.2).timeout
+	# Disable movement and input for knockback duration (stun effect)
+	is_knockback_stun = true
+	await get_tree().create_timer(knockback_duration).timeout
+	is_knockback_stun = false
 	is_knockbacked = false
 
 func _input(event):
@@ -229,6 +255,10 @@ func _input(event):
 			first_attack(primary_attack_speed)
 
 func first_attack(attack_speed):
+	# Block attack if in knockback stun
+	if is_knockback_stun:
+		return
+
 	# Roll Cancellation Logic (same as jump)
 	if is_rolling:
 		var can_cancel = false
@@ -272,6 +302,9 @@ func first_attack(attack_speed):
 		current_attack_damage = 2.0
 		current_attack_knockback_enabled = true
 
+	# Detect if this attack is the finisher (3rd in combo)
+	var was_finisher: bool = (combo_count % 3) == 2
+
 	# Increment Combo
 	combo_count += 1
 	if combo_count > 2:
@@ -313,6 +346,16 @@ func first_attack(attack_speed):
 		await get_tree().process_frame
 
 	is_attacking = false
+
+	# If we just completed a finisher, start combo cooldown
+	if was_finisher:
+		combo_cooldown_active = true
+		can_attack = false
+		# Start the cooldown timer (uses exported value)
+		if combo_cooldown_timer:
+			combo_cooldown_timer.wait_time = combo_cooldown_after_combo
+			combo_cooldown_timer.start()
+		print("Finisher completed — combo cooldown started (", combo_cooldown_after_combo, "s)")
 
 	# Start combo reset timer
 	combo_reset_timer.start()
@@ -357,7 +400,7 @@ func _process(delta):
 		var distance_traveled = global_position.distance_to(air_dash_start_position)
 		if distance_traveled >= air_dash_distance:
 			is_air_dashing = false
-			print("Air Dash Complete! Distance: ", distance_traveled)
+			#print("Air Dash Complete! Distance: ", distance_traveled)
 
 	# Shift Update Logic
 	if is_shift_down:
@@ -422,6 +465,10 @@ func check_jump_pass_through() -> void:
 
 func perform_roll() -> void:
 	# Constraints: Floor, States, Cooldowns, Charges
+	# Block if in knockback stun
+	if is_knockback_stun:
+		return
+
 	# Allows interrupting attack
 	if not is_on_floor() or is_rolling or is_knockbacked:
 		return
@@ -488,7 +535,9 @@ func perform_roll() -> void:
 
 		if can_cancel:
 			is_attacking = false
-			can_attack = true # Reset flag
+			# Reset attack flag only if no combo cooldown is active
+			if not combo_cooldown_active:
+				can_attack = true
 			# combo_reset_timer is usually managed by attack flow,
 			# but if we cancel, we might want to keep the combo count active for a moment or reset it?
 			# Standard cancel often preserves combo or resets it.
@@ -539,6 +588,23 @@ func perform_roll() -> void:
 	# await anim_player.animation_finished # Старый вариант
 
 	is_rolling = false
+
+	# If a jump was buffered during the roll, execute it immediately after the roll ends
+	# but only if it falls within the configured buffered time window.
+	if buffered_jump:
+		var now = Time.get_ticks_msec() / 1000.0
+		var valid := false
+		if buffered_jump_time >= 0.0:
+			var dt = now - buffered_jump_time
+			if dt >= buffered_jump_min_time and dt <= buffered_jump_max_time:
+				valid = true
+
+		# Consume the buffer in any case (valid or expired)
+		buffered_jump = false
+		buffered_jump_time = -1.0
+
+		if valid:
+			_execute_buffered_jump()
 
 	# Start inter-roll delay
 	if roll_chain_delay > 0:
@@ -714,6 +780,10 @@ func move_logic(delta):
 	if is_slamming:
 		return
 
+	# Knockback Stun: Lock movement control during stun
+	if is_knockback_stun:
+		return
+
 	movement_input = Input.get_vector('left', "right", "up", "down")
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	var is_airborne = not is_on_floor()
@@ -772,12 +842,18 @@ func move_logic(delta):
 	velocity.z = velocity_2d.y
 
 func jump_logic(delta):
-	# Reset jumps when on floor
-	if is_on_floor():
+	# Reset jumps when landing (transition from air -> floor)
+	var currently_on_floor = is_on_floor()
+	if currently_on_floor and not was_on_floor:
 		current_jump_count = 0
 		air_dash_bonus_jump_granted = false
 		jump_phase = "" # ADD/ENSURE
+	was_on_floor = currently_on_floor
 	if Input.is_action_just_pressed('jump'):
+		# Block jump if in knockback stun
+		if is_knockback_stun:
+			return
+
 		# Roll Cancellation Logic
 		if is_rolling:
 			var can_cancel = false
@@ -791,8 +867,11 @@ func jump_logic(delta):
 					if ratio >= (1.0 - roll_jump_cancel_threshold):
 						can_cancel = true
 
-			if not can_cancel:
-				return # Block jump
+				if not can_cancel:
+					# Buffer the jump input to be executed immediately after the roll ends
+					buffered_jump = true
+					buffered_jump_time = Time.get_ticks_msec() / 1000.0
+					return # Block immediate jump; it will be executed after roll ends
 
 			# If cancelling, clear rolling state immediately so jump physics apply
 			is_rolling = false
@@ -839,7 +918,7 @@ func jump_logic(delta):
 
 			# Check if windup just finished
 			if slam_windup_timer <= 0:
-				print("Ground Slam - Descent Phase!")
+				#print("Ground Slam - Descent Phase!")
 				slam_animation_phase = "mid"
 				# Play mid animation looping
 				anim_player.play("Boy_attack_air_naked_mid", 0.2, 1.0)
@@ -871,9 +950,29 @@ func jump_logic(delta):
 		# Normal gravity application
 		velocity.y -= gravity * delta
 
+func _execute_buffered_jump() -> void:
+	# Execute a buffered jump if possible. Uses same rules as regular jump input.
+	# This function consumes the buffered_jump flag when called.
+	var can_jump = false
+
+	if is_on_floor() and current_jump_count == 0:
+		can_jump = true
+	elif current_jump_count > 0 and current_jump_count < 2:
+		can_jump = true
+	elif current_jump_count == 2 and air_dash_bonus_jump_granted:
+		can_jump = true
+
+	if can_jump:
+		if current_jump_count > 0:
+			jump_phase = ""
+		var jump_multiplier = second_jump_multiplier if current_jump_count == 1 else 1.0
+		velocity.y = - jump_velocity * jump_multiplier
+		current_jump_count += 1
+		air_speed = Vector2(velocity.x, velocity.z).length()
+
 func rot_char(delta):
-	# Prevent rotation during knockback or Ground Slam
-	if is_knockbacked or is_slamming: return
+	# Prevent rotation during knockback, knockback stun, or Ground Slam
+	if is_knockbacked or is_knockback_stun or is_slamming: return
 
 	var current_rot_speed = 0.0 if is_stopping else rot_speed
 
@@ -946,7 +1045,10 @@ func animation_player():
 
 func _on_first_attack_timer_timeout() -> void:
 	# Timer закончился — разрешаем новую атаку (кулдаун завершён)
-	can_attack = true
+	# Only enable attacks if combo cooldown is not active; otherwise the combo cooldown
+	# handler will re-enable attacks when it finishes.
+	if not combo_cooldown_active:
+		can_attack = true
 	# убедимся, что флаг is_attacking уже сброшен отдельным await'ом после окончания анимации
 
 func _on_sprint_timer_timeout():

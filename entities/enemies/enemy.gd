@@ -308,7 +308,7 @@ func enter_state(new_state: State) -> void:
 			print("State: Flee")
 			
 		State.KNOCKBACK:
-			anim_player.play("Monstr_knockdown", 0.2, 1.0)
+			anim_player.play("Monstr_knockdown", 0.5, 1.0)
 			state_timer = knockback_duration
 
 func _update_state(delta: float, player_visible: bool) -> void:

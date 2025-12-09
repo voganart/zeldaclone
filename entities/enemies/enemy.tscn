@@ -19,9 +19,12 @@ collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_ksmh7")
 health_bar_visible_time = 3.0
-run_speed = 4.0
+run_speed = 4.5
+attack_range = 1.6
 tactical_retreat_pause_max = 2.0
-knockback_duration = 0.2
+knockback_strength = 1.0
+knockback_height = 1.0
+knockback_duration = 0.1
 punch_hand_r = NodePath("Monstr/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("Monstr/root/Skeleton3D/hand_l/punch_hand_l")
 punch_area = NodePath("PunchArea")
@@ -32,9 +35,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.175171, 0)
 [node name="HitFlash" parent="." instance=ExtResource("4_msovg")]
 mesh_path = NodePath("../Monstr/root/Skeleton3D/Monstr")
 flash_color = Color(1, 1, 1, 1)
-flash_time = 0.15
+flash_time = 0.2
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
+max_health = 3.0
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 avoidance_enabled = true
