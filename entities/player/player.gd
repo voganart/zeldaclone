@@ -415,6 +415,7 @@ func _process(delta):
 	RenderingServer.global_shader_parameter_set("player_position", global_transform.origin)
 
 func _physics_process(delta: float) -> void:
+	stop_dash_if_wall()
 	move_logic(delta)
 	jump_logic(delta)
 	move_and_slide()
@@ -430,6 +431,15 @@ func _physics_process(delta: float) -> void:
 		air_dash_used_in_air = false
 	if is_on_floor():
 		air_dash_used_in_air = false
+
+func stop_dash_if_wall() -> void:
+	if is_air_dashing:
+		var collision = get_last_slide_collision()
+		if collision:
+			if collision.get_normal().dot(Vector3.UP) < 0.7: 
+				# Это стена, а не пол/потолок
+				is_air_dashing = false
+				velocity.y = -0.1  # Чтоб сразу начал падать
 
 func check_jump_pass_through() -> void:
 	if is_on_floor() and not is_passing_through and not is_slamming:

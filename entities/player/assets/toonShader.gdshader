@@ -37,7 +37,7 @@ uniform float border_width = 0.01;
 
 
 // ======================================================
-// NEW: Auto gradient using mesh_min_y / mesh_max_y
+// Gradient settings
 // ======================================================
 uniform bool use_gradient = false;
 uniform sampler2D gradient_texture : source_color;
@@ -45,16 +45,56 @@ uniform sampler2D gradient_texture : source_color;
 // Blend modes: 0=Multiply,1=Overlay,2=Add,3=Replace
 uniform int gradient_blend_mode : hint_range(0, 3) = 0;
 uniform float gradient_strength : hint_range(0.0, 1.0) = 1.0;
-// These values must be set from GDScript automatically
+
+// LOCAL coordinate bounds (should be set once from GDScript or adjusted manually)
 uniform float mesh_min_y = 0.0;
 uniform float mesh_max_y = 1.0;
+
+// Choose UV set for gradient sampling: 0 = UV, 1 = UV2
+uniform int gradient_uv_set : hint_range(0, 1) = 0;
 
 
 // ======================================================
 varying float v_y;
-varying vec3 normal;
+varying vec3 v_normal;
 
+// Multiply
+vec3 blend_multiply(vec3 base, vec3 blend) {
+	return base * blend;
+}
 
+// Add (Linear Dodge)
+vec3 blend_add(vec3 base, vec3 blend) {
+	return min(base + blend, 1.0);
+}
+
+// Screen
+vec3 blend_screen(vec3 base, vec3 blend) {
+	return 1.0 - (1.0 - base) * (1.0 - blend);
+}
+
+// Overlay (правильная, как в Photoshop)
+vec3 blend_overlay(vec3 base, vec3 blend) {
+	return mix(
+		2.0 * base * blend,                        // base < 0.5
+		1.0 - 2.0 * (1.0 - base) * (1.0 - blend),  // base >= 0.5
+		step(0.5, base)
+	);
+}
+
+// Soft Light (намного мягче)
+vec3 blend_softlight(vec3 base, vec3 blend) {
+	return mix(
+		base - (1.0 - 2.0 * blend) * base * (1.0 - base),                // blend <= 0.5
+		base + (2.0 * blend - 1.0) * (sqrt(base) - base),                // blend > 0.5
+		step(0.5, blend)
+	);
+}
+
+// Linear Light (жёсткий контраст)
+vec3 blend_linear_light(vec3 base, vec3 blend) {
+	return clamp(base + 2.0 * blend - 1.0, 0.0, 1.0);
+}
 // ======================================================
 float split_specular(float specular) {
 	return step(0.5, specular);
@@ -63,41 +103,70 @@ float split_specular(float specular) {
 
 // ======================================================
 void vertex() {
+	// VERTEX is local-space position *before* skinning result in many cases;
+	// using VERTEX.y fixes the gradient to model space (won't follow animation transforms).
 	v_y = VERTEX.y;
-	normal = NORMAL;
+	v_normal = NORMAL;
 }
 
 
 // ======================================================
 void fragment() {
+	// Base albedo
 	vec3 base_color = albedo.rgb * texture(albedo_texture, UV).rgb;
 
+	// Hit flash
 	if (use_hit_flash) {
 		vec3 flash_color = hit_flash_color.rgb;
 		base_color = mix(base_color, flash_color, hit_flash_strength);
 	}
 
 	// ---------------------
-	// Gradient
+	// Local-space Gradient (sample from chosen UV set)
 	// ---------------------
 	if (use_gradient) {
+		// safe range
 		float range = max(mesh_max_y - mesh_min_y, 0.0001);
 		float t = clamp((v_y - mesh_min_y) / range, 0.0, 1.0);
 
-		vec3 grad = texture(gradient_texture, vec2(t, 0.5)).rgb;
+		// choose UV set: UV or UV2
+		vec2 uv_for_grad = (gradient_uv_set == 1) ? UV2 : UV;
+
+		// replace x with t so gradient follows model-local vertical position
+		uv_for_grad.x = t;
+
+		// sample gradient texture
+		vec3 grad = texture(gradient_texture, uv_for_grad).rgb;
 
 		if (gradient_blend_mode == 0) {
-			base_color = mix(base_color, base_color * grad, gradient_strength);
+			// Multiply
+			base_color = mix(base_color, blend_multiply(base_color, grad), gradient_strength);
+
 		} else if (gradient_blend_mode == 1) {
-			vec3 low = 2.0 * base_color * grad;
-			vec3 high = 1.0 - 2.0 * (1.0 - base_color) * (1.0 - grad);
-			vec3 overlay = mix(low, high, step(0.5, base_color));
-			base_color = mix(base_color, overlay, gradient_strength);
+			// Overlay
+			base_color = mix(base_color, blend_overlay(base_color, grad), gradient_strength);
+
 		} else if (gradient_blend_mode == 2) {
-			base_color = mix(base_color, base_color + grad, gradient_strength);
+			// Add
+			base_color = mix(base_color, blend_add(base_color, grad), gradient_strength);
+
+		} else if (gradient_blend_mode == 3) {
+			// Screen
+			base_color = mix(base_color, blend_screen(base_color, grad), gradient_strength);
+
+		} else if (gradient_blend_mode == 4) {
+			// Soft Light
+			base_color = mix(base_color, blend_softlight(base_color, grad), gradient_strength);
+
+		} else if (gradient_blend_mode == 5) {
+			// Linear Light
+			base_color = mix(base_color, blend_linear_light(base_color, grad), gradient_strength);
+
 		} else {
+			// Replace
 			base_color = mix(base_color, grad, gradient_strength);
 		}
+
 	}
 
 	ALBEDO = base_color;
@@ -123,7 +192,7 @@ void light() {
 	if (use_borders) {
 		float corr_border_width = length(cross(NORMAL, LIGHT)) * border_width * steepness;
 		border = step(diffuse_stepped - corr_border_width, diffuse_amount)
-		         - step(1.0 - corr_border_width, diffuse_amount);
+				- step(1.0 - corr_border_width, diffuse_amount);
 	}
 
 	vec3 diffuse = ALBEDO.rgb * LIGHT_COLOR / PI;

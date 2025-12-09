@@ -128,6 +128,7 @@ var health_bar_enabled: bool = true
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
+	initialize_navigation()
 	will_flee = randf() < flee_chance
 	
 	# Connect to HealthComponent signals
@@ -154,24 +155,30 @@ func _ready() -> void:
 	nav_agent.velocity_computed.connect(_on_velocity_computed)
 	
 	# Wait for navmesh
-	NavigationServer3D.map_changed.connect(_on_navmesh_ready)
+	#NavigationServer3D.map_changed.connect(_on_navmesh_ready)
 	
 	if debug_vision:
 		_setup_debug_meshes()
 
-func _on_navmesh_ready(_map_rid) -> void:
-	if is_inside_tree():
-		nav_ready = true
-		enter_state(State.PATROL)
-		
-	if is_inside_tree():
-		nav_ready = true
-		enter_state(State.PATROL)
-		
-		# Initialize punch hand
-		if punch_hand_r:
-			# Signal no longer needed - using Animation Event
-			pass
+
+func initialize_navigation():
+	await get_tree().process_frame
+	nav_agent.set_navigation_map(get_world_3d().navigation_map)
+	nav_ready = true
+	
+#func _on_navmesh_ready(_map_rid) -> void:
+	#if is_inside_tree():
+		#nav_ready = true
+		#enter_state(State.PATROL)
+		#
+	#if is_inside_tree():
+		#nav_ready = true
+		#enter_state(State.PATROL)
+		#
+		## Initialize punch hand
+		#if punch_hand_r:
+			## Signal no longer needed - using Animation Event
+			#pass
 
 # Called by AnimationPlayer Call Method Track
 func _check_attack_hit() -> void:

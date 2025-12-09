@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://k5os7k8wlcvf"]
+[gd_scene load_steps=4 format=3 uid="uid://k5os7k8wlcvf"]
 
 [ext_resource type="PackedScene" uid="uid://csr3wt4d4pa2g" path="res://entities/player/assets/character.glb" id="1_mqt3v"]
+[ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="2_gbq34"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_brhp1"]
 
@@ -89,6 +90,9 @@ bones/42/rotation = Quaternion(-2.2587938e-05, 0.9545904, -0.29792175, 6.200335e
 bones/42/scale = Vector3(0.9999999, 1, 0.9999999)
 bones/43/rotation = Quaternion(4.6535957e-09, -0.0029278686, -1.8730146e-08, 0.9999957)
 bones/43/scale = Vector3(0.9999998, 0.9999999, 0.99999994)
+
+[node name="Character_mesh" parent="root/Skeleton3D" index="0"]
+surface_material_override/0 = ExtResource("2_gbq34")
 
 [node name="hand_r" type="BoneAttachment3D" parent="root/Skeleton3D" index="1"]
 transform = Transform3D(-0.21700113, -0.11324635, -0.9695793, -0.2061717, -0.96552384, 0.15891646, -0.9541497, 0.23438495, 0.18617176, -0.43204063, 0.5478822, -0.07979504)

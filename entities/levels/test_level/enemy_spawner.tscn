@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://d0uiwhqnc58mf"]
+
+[ext_resource type="Script" uid="uid://dlkyfvw4otooy" path="res://entities/levels/test_level/enemy_spawner.gd" id="1_dqla6"]
+[ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemies/enemy.tscn" id="2_6lv35"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pgoaj"]
+size = Vector3(6, 1, 6)
+
+[node name="EnemySpawner" type="Node3D"]
+script = ExtResource("1_dqla6")
+enemy_scene = ExtResource("2_6lv35")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 1, 0)
+shape = SubResource("BoxShape3D_pgoaj")
+debug_color = Color(0, 11.618606, 13.50434, 1)

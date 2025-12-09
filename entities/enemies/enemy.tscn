@@ -1,13 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=8 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://UI/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
 [ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://entities/health_component/HealthComponent.tscn" id="2_wqcwe"]
 [ext_resource type="PackedScene" uid="uid://duk5b06ohkpsc" path="res://entities/enemies/monstr.tscn" id="3_5lf1o"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="4_msovg"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_a184d"]
-size = Vector3(0.3, 0.3, 0.3)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
 
@@ -22,6 +19,9 @@ health_bar_visible_time = 3.0
 run_speed = 4.5
 attack_range = 1.6
 tactical_retreat_pause_max = 2.0
+sight_range = 5.8
+lost_sight_range = 8.0
+proximity_detection_range = 2.5
 knockback_strength = 1.0
 knockback_height = 1.0
 knockback_duration = 0.1
@@ -32,18 +32,19 @@ punch_area = NodePath("PunchArea")
 [node name="HealthBar3D" parent="." instance=ExtResource("2_twyc1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.175171, 0)
 
+[node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
+max_health = 3.0
+
 [node name="HitFlash" parent="." instance=ExtResource("4_msovg")]
 mesh_path = NodePath("../Monstr/root/Skeleton3D/Monstr")
 flash_color = Color(1, 1, 1, 1)
 flash_time = 0.2
 
-[node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
-max_health = 3.0
-
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 avoidance_enabled = true
 radius = 0.6
 max_speed = 20.0
+debug_enabled = true
 
 [node name="Monstr" parent="." instance=ExtResource("3_5lf1o")]
 
@@ -93,7 +94,6 @@ transform = Transform3D(0.011491569, 0.009337544, -0.99989045, 0.0009844399, -0.
 
 [node name="CollisionShape3D" parent="Monstr/root/Skeleton3D/hand_r/punch_hand_r" index="0"]
 transform = Transform3D(2, 1.1920928e-07, -3.9736424e-08, -1.1920928e-07, 2, 4.4703487e-08, 3.9736427e-08, -4.4703484e-08, 2, 0.014108133, 0.12905324, -0.011775196)
-shape = SubResource("BoxShape3D_a184d")
 
 [node name="hand_l" parent="Monstr/root/Skeleton3D" index="2"]
 transform = Transform3D(0.011491574, -0.009337917, 0.9998902, -0.0009846729, -0.9999559, -0.009327218, 0.9999331, -0.00087729713, -0.011500389, 0.60493815, 0.51779485, -0.014306482)
