@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=4 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=35 format=4 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://entities/levels/test_level/enemy_spawner.tscn" id="1_nb3sg"]
@@ -13,6 +13,8 @@
 [ext_resource type="Shader" uid="uid://d4cci5dovs27b" path="res://water_shader/shaders/water_style.gdshader" id="9_p7nu3"]
 [ext_resource type="Shader" uid="uid://c8ktwvuun6cjf" path="res://entities/levels/island/grass/grass.tres" id="10_nb3sg"]
 [ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://DebugOverlay/canvas_layer.tscn" id="13_qmhhi"]
+[ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="14_tfnen"]
+[ext_resource type="Script" uid="uid://cghbw6nlcm2el" path="res://vfx/blood_splash/VfxPool.gd" id="15_bi1di"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xfgcj"]
 sky_top_color = Color(0.3526861, 0.5895269, 1, 1)
@@ -32,10 +34,10 @@ ssao_enabled = true
 sdfgi_enabled = true
 sdfgi_use_occlusion = true
 sdfgi_energy = 0.2
-volumetric_fog_density = 0.0739
-volumetric_fog_albedo = Color(0.846363, 1, 0.884188, 1)
-volumetric_fog_emission = Color(0.128887, 0.128887, 0.128887, 1)
-volumetric_fog_length = 1.0
+volumetric_fog_albedo = Color(1, 0.7310908, 0.3158576, 1)
+volumetric_fog_anisotropy = 0.6
+volumetric_fog_length = 10.98
+volumetric_fog_detail_spread = 4.0000005
 adjustment_enabled = true
 adjustment_brightness = 0.9
 adjustment_contrast = 0.9
@@ -164,8 +166,9 @@ buffer = PackedFloat32Array(-1.050571, -0.028589377, 0.5466561, -2.2752361, 0.04
 [node name="Lights" type="Node3D" parent="."]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lights"]
-transform = Transform3D(0.9851742, 0.020177515, -0.17036712, 0.16452159, 0.17036709, 0.9715494, 0.048628427, -0.9851742, 0.16452162, 13, 6, 0)
+transform = Transform3D(0.9581458, -0.20463677, -0.20020136, 0.28109476, 0.539978, 0.7933535, -0.054244943, -0.8164238, 0.57490003, 13, 6, 0)
 light_color = Color(1, 0.991251, 0.907744, 1)
+light_volumetric_fog_energy = 13.527
 light_angular_distance = 0.2
 shadow_enabled = true
 shadow_opacity = 0.9
@@ -207,6 +210,7 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
 [node name="Player" parent="Entities" instance=ExtResource("4_5iexk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.350209, 1.1827798, -5.3009925)
+air_control = 0.05
 
 [node name="PatrolZone" type="Area3D" parent="Entities"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9447, 0, -2.46294)
@@ -241,7 +245,7 @@ collision_layer = 8
 collision_mask = 31
 
 [node name="island" parent="NavigationRegion3D/Environment/CSGCombiner3D" instance=ExtResource("7_owp05")]
-transform = Transform3D(4.9, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 0.4, 0, 0, 0, 1, 10, 0, -6)
@@ -329,6 +333,11 @@ transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, -17.06
 use_collision = true
 size = Vector3(10, 10, 1)
 
+[node name="CSGBox3D23" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, 14.776649, 6.815289, 27.921953)
+use_collision = true
+size = Vector3(18.356293, 12.870396, 1)
+
 [node name="CSGBox3D8" type="CSGBox3D" parent="NavigationRegion3D/Environment/CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.54186, 1.6552186, 0.522964)
 size = Vector3(1, 3.2589111, 1)
@@ -393,5 +402,10 @@ text = "10"
 metadata/_edit_use_anchors_ = true
 
 [node name="CanvasLayer" parent="." instance=ExtResource("13_qmhhi")]
+
+[node name="VfxPull" type="Node3D" parent="."]
+script = ExtResource("15_bi1di")
+effect_scenes = Array[PackedScene]([ExtResource("14_tfnen")])
+pool_size = 20
 
 [editable path="Grass_multi/grass_plane/grass"]

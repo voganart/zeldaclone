@@ -1,12 +1,13 @@
 extends CharacterBody3D
 @onready var _mesh: Node3D = $character
+@onready var vfx_pull: Node3D = $"../../VfxPull"
 
 # jump
 @export_group("Jump")
 @export var jump_height: float = 1.25
 @export var jump_time_to_peak: float = 0.45
 @export var jump_time_to_descent: float = 0.28
-@export var air_control: float = 0.05
+@export var air_control: float = 0.25
 @export var max_jump_count: int = 3 # Triple Jump after air dash
 @export var second_jump_multiplier: float = 1.2
 @export_group("Ground Slam")
@@ -191,7 +192,7 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	# Invulnerable during Ground Slam or Roll i-frames
 	if is_slamming or is_invincible:
 		return
-
+	vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0.5))
 	print("PLAYER TOOK DAMAGE:", amount)
 
 	is_knockbacked = true
@@ -794,9 +795,11 @@ func move_logic(delta):
 	if is_knockback_stun:
 		return
 
-	movement_input = Input.get_vector('left', "right", "up", "down")
+	movement_input = Input.get_vector("left", "right", "up", "down")
+
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	var is_airborne = not is_on_floor()
+
 	var control = 1.0 if not is_airborne else clamp(air_control, 0.0, 1.0)
 
 	# Air Dash: Lock velocity during dash (maintain horizontal speed)
@@ -805,6 +808,7 @@ func move_logic(delta):
 		velocity.z = air_dash_direction.z * air_dash_speed
 		return
 
+	# No movement input → reset running
 	if movement_input == Vector2.ZERO:
 		is_running = false
 		is_trying_to_run = false
@@ -814,7 +818,6 @@ func move_logic(delta):
 	var speed_2d = Vector2(velocity.x, velocity.z).length()
 	var run_speed_threshold = lerp(base_speed, run_speed, 0.7)
 
-	# Set is_running if trying to run AND have reached speed threshold
 	if is_trying_to_run or is_auto_running:
 		if speed_2d >= run_speed_threshold:
 			is_running = true
@@ -823,33 +826,54 @@ func move_logic(delta):
 	else:
 		is_running = false
 
+	# Select current speed
 	var current_speed = run_speed if (is_trying_to_run or is_auto_running) else base_speed
+
 	if is_airborne:
 		current_speed = air_speed
 	elif is_rolling:
 		current_speed = roll_speed
 
+	# Movement with input
 	if movement_input != Vector2.ZERO:
-		var input_factor = 1.0 if not is_attacking else attack_movement_influense
+		var input_factor = 1.0
+		if is_attacking:
+			input_factor = attack_movement_influense
 
-		# Control factor: Normal (1.0) vs Air vs Roll
 		var final_control = control
 
+		# Steerable Roll: align velocity with facing direction
 		if is_rolling:
-			# Steerable Roll: Align velocity with actual character facing
-			# This creates a curved path as rot_char rotates the mesh
 			var current_mag = velocity_2d.length()
 			var forward = global_transform.basis.z.normalized()
 			var forward_2d = Vector2(forward.x, forward.z)
 			velocity_2d = forward_2d * current_mag
 		else:
-			velocity_2d = velocity_2d.lerp(movement_input * current_speed * input_factor, acceleration * final_control)
+			# Ground: preserve existing lerp behavior (unchanged)
+			if not is_airborne:
+				velocity_2d = velocity_2d.lerp(
+					movement_input * current_speed * input_factor,
+					acceleration * final_control
+				)
+			else:
+				# Airborne: allow player to steer in-flight using `air_control`.
+				# Use a meaningful desired horizontal speed (base/run) instead
+				# of relying on `air_speed` which can be zero when player jumps
+				# from standstill. This ensures `air_control` (0..1) actually
+				# influences steering responsiveness.
+				var desired_horiz_speed = run_speed if (is_trying_to_run or is_auto_running) else base_speed
+				var desired = movement_input * desired_horiz_speed * input_factor
+				var steer_strength = clamp(air_control, 0.0, 1.0) * desired_horiz_speed
+				# move_toward takes max_delta (units per second), so multiply by delta
+				velocity_2d = velocity_2d.move_toward(desired, steer_strength * delta)
 	else:
+		# No movement input → decelerate
 		if not is_rolling:
 			velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
 
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
+
 
 func jump_logic(delta):
 	# Reset jumps when landing (transition from air -> floor)

@@ -13,6 +13,8 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 # EXPORTS - Grouped for Designer UX
 # ============================================================================
 @export_group("Health & Damage")
+@onready var vfx_pull: Node3D = $"../../../VfxPull"
+
 # @export var max_hp: float = 10.0 # Use HealthComponent for max_hp!
 @export var flee_hp_threshold: float = 0.3 # Flee when HP < 30%
 @export var flee_chance: float = 0.5 # 50% chance to flee
@@ -703,7 +705,7 @@ func _execute_attack() -> void:
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if current_state == State.DEAD:
 		return
-	
+	vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0.5))
 	print("Monster received damage:", amount)
 	
 	$HitFlash.flash()

@@ -1,3 +1,6 @@
+GPUParticles3D
+Node3D
+MeshInstance3D
 MarginContainer
 Label
 FoldableContainer
@@ -7,8 +10,5 @@ VBoxContainer
 CanvasLayer
 Area3D
 CollisionShape3D
-Node3D
 AnimationTree
-MeshInstance3D
 TextureProgressBar
-Control
