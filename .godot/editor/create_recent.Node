@@ -1,3 +1,10 @@
+MarginContainer
+Label
+FoldableContainer
+BoxContainer
+Container
+VBoxContainer
+CanvasLayer
 Area3D
 CollisionShape3D
 Node3D
@@ -5,10 +12,3 @@ AnimationTree
 MeshInstance3D
 TextureProgressBar
 Control
-SubViewport
-Sprite3D
-Node
-BoneAttachment3D
-Label
-Container
-MultiMeshInstance3D

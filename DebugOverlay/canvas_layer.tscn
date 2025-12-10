@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://biv4p35iwqj6n"]
+
+[ext_resource type="Script" uid="uid://7baulf3qbkaa" path="res://DebugOverlay/DebugOverlay.gd" id="1_p8xgy"]
+
+[sub_resource type="Theme" id="Theme_qmhhi"]
+default_font_size = 25
+
+[node name="CanvasLayer" type="CanvasLayer"]
+script = ExtResource("1_p8xgy")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -24.0
+offset_bottom = 44.0
+grow_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = SubResource("Theme_qmhhi")
+theme_override_constants/separation = 8
+
+[node name="Stats" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "123"
+
+[node name="FPS" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "32"

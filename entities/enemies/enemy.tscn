@@ -33,7 +33,7 @@ punch_area = NodePath("PunchArea")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.175171, 0)
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
-max_health = 3.0
+max_health = 5.0
 
 [node name="HitFlash" parent="." instance=ExtResource("4_msovg")]
 mesh_path = NodePath("../Monstr/root/Skeleton3D/Monstr")
@@ -44,7 +44,6 @@ flash_time = 0.2
 avoidance_enabled = true
 radius = 0.6
 max_speed = 20.0
-debug_enabled = true
 
 [node name="Monstr" parent="." instance=ExtResource("3_5lf1o")]
 

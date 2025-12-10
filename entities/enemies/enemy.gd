@@ -19,6 +19,7 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 @export var health_bar_visible_time: float = 1.0 # сколько секунд бар остаётся видимым после урона
 @export var health_bar_fade_speed: float = 3.0 # скорость ухода в прозрачность
 
+
 @export_group("Movement")
 @export var walk_speed: float = 1.5
 @export var run_speed: float = 3.5
@@ -106,9 +107,13 @@ var nav_ready: bool = false
 
 # UI
 var health_bar_mesh: MeshInstance3D
-var health_bar_opacity: float = 0.5
+var health_bar_opacity: float = 0.0
 var health_bar_timer: float = 0.0
 var health_bar_enabled: bool = true
+var health: float = 1.0
+var delayed_health: float = 1.0
+
+signal died
 
 
 # ============================================================================
@@ -128,35 +133,35 @@ var health_bar_enabled: bool = true
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
+	# Инициализация переменных здоровья и бара
+	health = health_component.get_health() / health_component.get_max_health() if health_component else 1.0
+	delayed_health = health
+	health_bar_opacity = 0.0  # изначально невидим
+
 	initialize_navigation()
 	will_flee = randf() < flee_chance
-	
+
 	# Connect to HealthComponent signals
 	if health_component:
 		health_component.died.connect(die)
 		health_component.health_changed.connect(_on_health_changed)
-	
+
 	# Setup Health Bar
 	if health_bar_node:
-		# Try to find the mesh child. It might be a direct child or nested.
-		# User said it's a child.
+		# Найти MeshInstance3D внутри health_bar_node
 		for child in health_bar_node.get_children():
 			if child is MeshInstance3D:
 				health_bar_mesh = child
 				break
-		
-		# If we found the mesh, initialize it
-		if health_bar_mesh and health_component:
-			_update_health_bar_visuals(health_component.get_health(), 0.0)
-	
+		# Если нашли mesh и есть health_component, обновляем визуально
+		if health_bar_mesh:
+			_update_health_bar_visuals(health, delayed_health, health_bar_opacity)
+
 	# Setup navigation
 	nav_agent.max_speed = walk_speed
 	nav_agent.avoidance_enabled = true
 	nav_agent.velocity_computed.connect(_on_velocity_computed)
-	
-	# Wait for navmesh
-	#NavigationServer3D.map_changed.connect(_on_navmesh_ready)
-	
+
 	if debug_vision:
 		_setup_debug_meshes()
 
@@ -735,44 +740,46 @@ func receive_push(push: Vector3) -> void:
 # ============================================================================
 # UI UPDATES
 # ============================================================================
-func _on_health_changed(new_health: float) -> void:
-	# Reset timer and force full opacity on damage
-	health_bar_timer = health_bar_visible_time
-	health_bar_opacity = 1.0
-	_update_health_bar_visuals(new_health, health_bar_opacity)
-
-func _update_health_bar_process(delta: float) -> void:
-	if not health_bar_mesh:
-		return
-	if not health_bar_enabled:
-		return
-
-	if health_bar_timer > 0:
-		health_bar_timer -= delta
-	else:
-		if health_bar_opacity > 0:
-			# Smoothly fade out using lerp
-			health_bar_opacity = lerp(health_bar_opacity, 0.0, delta * health_bar_fade_speed)
-			# Snap to 0 if very low to save processing/rendering
-			if health_bar_opacity < 0.01:
-				health_bar_opacity = 0.0
-			
-			if health_component:
-				_update_health_bar_visuals(health_component.get_health(), health_bar_opacity)
-
-func _update_health_bar_visuals(current_hp: float, opacity_val: float) -> void:
-	if not health_bar_mesh:
-		return
+func _on_health_changed(_new_health: float) -> void:
 	if not health_component:
 		return
+	# обновляем нормализованное здоровье
+	health = clamp(health_component.get_health() / health_component.get_max_health(), 0.0, 1.0)
+	# при получении урона бар проявляется полностью
+	health_bar_timer = health_bar_visible_time
+	health_bar_opacity = 1.0
+	_update_health_bar_visuals(health, delayed_health, health_bar_opacity)
 
-	var max_hp = health_component.get_max_health()
-	if max_hp <= 0:
+func _update_health_bar_process(delta: float) -> void:
+	if not health_bar_mesh or not health_component or not health_bar_enabled:
 		return
 
-	var ratio = clamp(current_hp / max_hp, 0.0, 1.0)
+	# плавное уменьшение delayed_health
+	delayed_health = lerp(delayed_health, health, delta * 4.0)
 
-	health_bar_mesh.set_instance_shader_parameter("health", ratio)
+	if health_bar_timer > 0.0:
+		health_bar_timer -= delta
+	else:
+		if health_component.get_health() <= 0:
+			# враг умер — полностью скрываем
+			health_bar_opacity = lerp(health_bar_opacity, 0.0, delta * health_bar_fade_speed)
+			if health_bar_opacity < 0.01:
+				health_bar_opacity = 0.0
+		else:
+			# бар активен только после первого удара
+			if health_bar_opacity > 0.0:
+				health_bar_opacity = lerp(health_bar_opacity, 0.5, delta * health_bar_fade_speed)
+
+	_update_health_bar_visuals(health, delayed_health, health_bar_opacity)
+
+
+
+func _update_health_bar_visuals(current_hp: float, delayed_hp: float, opacity_val: float) -> void:
+	if not health_bar_mesh or not health_component:
+		return
+
+	health_bar_mesh.set_instance_shader_parameter("health", current_hp)       # зелёная
+	health_bar_mesh.set_instance_shader_parameter("delayed_health", delayed_hp) # красная
 	health_bar_mesh.set_instance_shader_parameter("opacity", opacity_val)
 
 # ============================================================================
@@ -941,6 +948,7 @@ func _update_debug_meshes() -> void:
 # ============================================================================
 func die() -> void:
 	# Отключаем и прячем хп-бар сразу
+	emit_signal("died")
 	health_bar_enabled = false
 	if health_bar_mesh:
 		health_bar_mesh.visible = false
@@ -978,6 +986,7 @@ func die() -> void:
 	await get_tree().create_timer(2.0).timeout
 
 	# Исчезновение модели врага
+	
 	fade_out_and_remove()
 
 
@@ -1012,5 +1021,6 @@ func fade_out_and_remove() -> void:
 			for mat in materials_to_fade:
 				mat.set_shader_parameter("dissolve_amount", t)
 			await get_tree().process_frame
+			
 	
 	queue_free()

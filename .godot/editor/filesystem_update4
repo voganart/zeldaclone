@@ -16,3 +16,12 @@ res://entities/enemies/enemy.gd
 res://entities/levels/test_level/enemy_spawner.gd
 res://entities/levels/test_level/level.tscn
 res://entities/levels/test_level/enemy_spawner.tscn
+res://entities/player/player.gd
+res://entities/enemies/animations/Monstr_attack_1.res
+res://entities/enemies/animations/Monstr_attack_2.res
+res://entities/player/assets/character.tscn
+res://entities/enemies/monstr.tscn
+res://DebugOverlay/DebugOverlay.gd
+res://UI/HealthBar3D/health_bar_3d.tscn
+res://demo/data/nav_mesh.res
+res://water_shader/shaders/Water.tres
