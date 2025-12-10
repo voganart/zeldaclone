@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://bh7ppnkyaubf7"]
+[gd_scene load_steps=4 format=3 uid="uid://bh7ppnkyaubf7"]
 
 [ext_resource type="Script" uid="uid://g2rtfvy6dpqi" path="res://vfx/hit_flash/HitFlash.gd" id="1_mac7j"]
 [ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="2_siyqw"]
+[ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="3_bnu6a"]
 
 [node name="HitFlash" type="Node3D"]
 script = ExtResource("1_mac7j")
 flash_shader = ExtResource("2_siyqw")
+hit_vfx_scene = ExtResource("3_bnu6a")
