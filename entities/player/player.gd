@@ -1,6 +1,6 @@
 extends CharacterBody3D
 @onready var _mesh: Node3D = $character
-
+@onready var vfx_pull: Node3D = $"../../VfxPull"
 # jump
 @export_group("Jump")
 @export var jump_height: float = 1.25
@@ -191,7 +191,7 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	# Invulnerable during Ground Slam or Roll i-frames
 	if is_slamming or is_invincible:
 		return
-
+	vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0))
 	print("PLAYER TOOK DAMAGE:", amount)
 
 	is_knockbacked = true
