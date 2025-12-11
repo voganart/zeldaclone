@@ -20,3 +20,14 @@ res://vfx/fade_cutout/fade_cutout.gdshader
 res://entities/enemies/enemy.gd
 res://entities/levels/test_level/level.tscn
 res://entities/player/player.tscn
+res://common/fsm/state.gd
+res://common/fsm/state_machine.gd
+res://entities/enemies/states/enemy_attack.gd
+res://entities/enemies/states/enemy_chase.gd
+res://entities/enemies/states/enemy_dead.gd
+res://entities/enemies/states/enemy_frustrated.gd
+res://entities/enemies/states/enemy_idle.gd
+res://entities/enemies/states/enemy_patrol.gd
+res://entities/player/abilities/air_dash_ability.gd
+res://entities/player/abilities/ground_slam_ability.gd
+res://entities/player/player.gd

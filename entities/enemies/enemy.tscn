@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=19 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://UI/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
@@ -6,6 +6,15 @@
 [ext_resource type="PackedScene" uid="uid://duk5b06ohkpsc" path="res://entities/enemies/monstr.tscn" id="3_5lf1o"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="4_msovg"]
 [ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://entities/player/assets/toonShader.gdshader" id="5_w4yt1"]
+[ext_resource type="Script" uid="uid://bms48mt88e42c" path="res://entities/enemies/components/vision_component.gd" id="7_56i32"]
+[ext_resource type="Script" uid="uid://c55cu0n3gbdfm" path="res://entities/enemies/components/enemy_attack_component.gd" id="8_sb13e"]
+[ext_resource type="Script" uid="uid://cbx8244k71rsk" path="res://common/fsm/state_machine.gd" id="9_3udgd"]
+[ext_resource type="Script" uid="uid://cxbbb82wp8q2v" path="res://entities/enemies/states/enemy_idle.gd" id="10_xmuku"]
+[ext_resource type="Script" uid="uid://cvvgodl7fxgrn" path="res://entities/enemies/states/enemy_patrol.gd" id="11_2ggct"]
+[ext_resource type="Script" uid="uid://cbsjg06awuo6g" path="res://entities/enemies/states/enemy_chase.gd" id="12_wy1il"]
+[ext_resource type="Script" uid="uid://dirsi2ohsa4hb" path="res://entities/enemies/states/enemy_attack.gd" id="13_53k0f"]
+[ext_resource type="Script" uid="uid://c6ccg8dnavfcp" path="res://entities/enemies/states/enemy_frustrated.gd" id="14_u01qb"]
+[ext_resource type="Script" uid="uid://bn3bsn15qof6y" path="res://entities/enemies/states/enemy_dead.gd" id="15_4teby"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ipr6v"]
 render_priority = 0
@@ -45,18 +54,12 @@ size = Vector3(2.765625, 1.7850952, 2.4552612)
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_ksmh7")
-health_bar_visible_time = 3.0
-run_speed = 4.5
-obstacle_face_angle_deg = 10.0
-sight_range = 5.8
-proximity_detection_range = 2.5
-flee_duration = 5.0
-knockback_strength = 1.0
-knockback_height = 1.0
-knockback_duration = 0.1
 punch_hand_r = NodePath("Monstr/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("Monstr/root/Skeleton3D/hand_l/punch_hand_l")
 punch_area = NodePath("PunchArea")
+run_speed = 4.5
+knockback_strength = 1.0
+knockback_duration = 0.1
 
 [node name="HealthBar3D" parent="." instance=ExtResource("2_twyc1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.175171, 0)
@@ -145,6 +148,12 @@ blend_times = [&"Monstr_idle", &"Monstr_angry", 0.2, &"Monstr_idle", &"Monstr_at
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_lw7nh")
 
+[node name="VisionComponent" type="Node3D" parent="."]
+script = ExtResource("7_56i32")
+
+[node name="EnemyAttackComponent" type="Node" parent="."]
+script = ExtResource("8_sb13e")
+
 [node name="AttackTimer" type="Timer" parent="."]
 
 [node name="PunchArea" type="Area3D" parent="."]
@@ -152,5 +161,27 @@ shape = SubResource("CapsuleShape3D_lw7nh")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PunchArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8913391, 1.4406242)
 shape = SubResource("BoxShape3D_msovg")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("9_3udgd")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("10_xmuku")
+
+[node name="Patrol" type="Node" parent="StateMachine"]
+script = ExtResource("11_2ggct")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("12_wy1il")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("13_53k0f")
+
+[node name="Frustrated" type="Node" parent="StateMachine"]
+script = ExtResource("14_u01qb")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("15_4teby")
 
 [editable path="Monstr"]

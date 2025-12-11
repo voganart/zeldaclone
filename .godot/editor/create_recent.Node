@@ -1,3 +1,4 @@
+Node
 Node3D
 MarginContainer
 Label
@@ -11,4 +12,3 @@ CollisionShape3D
 AnimationTree
 MeshInstance3D
 TextureProgressBar
-Control
