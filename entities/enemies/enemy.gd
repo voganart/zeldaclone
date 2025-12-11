@@ -8,7 +8,11 @@ extends CharacterBody3D
 # ENUMS & CONSTANTS
 # ============================================================================
 enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
-
+# ---------------- Debug AI ----------------
+@export var debug_ai: bool = true
+@export var debug_ai_interval: float = 0.5 # seconds between prints
+var _debug_ai_acc: float = 0.0
+# ------------------------------------------
 # ============================================================================
 # EXPORTS - Grouped for Designer UX
 # ============================================================================
@@ -66,6 +70,14 @@ var frustrated_cooldown: float = 0.0
 var current_flee_charges: int = 1
 var time_since_last_damaged: float = 9999.0
 
+@export_group("Animation Blending")
+@export var walk_run_blend_smoothing: float = 8.0
+@export var walk_run_blend_start_speed: float = 1.8
+@export var walk_run_blend_end_speed: float = 3.2
+
+var current_movement_blend: float = 0.0
+var target_movement_blend: float = 0.0
+
 
 @export_group("Physics")
 @export var gravity: float = 100.0
@@ -98,6 +110,7 @@ var is_attacking: bool = false
 var should_tactical_retreat: bool = false
 var tactical_retreat_pause_timer: float = 0.0
 var tactical_retreat_target: Vector3 = Vector3.ZERO
+var is_in_tactical_retreat: bool = false # Used to prevent animation update conflicts
 var monster_attacks = ["Monstr_attack_1", "Monstr_attack_2"]
 var last_attack_index = -1
 var anim_to_play = "" # Will be set by get_next_attack()
@@ -250,6 +263,12 @@ func _check_single_hand_hit(hand_area: Area3D) -> bool:
 # MAIN LOOP
 # ============================================================================
 func _physics_process(delta: float) -> void:
+	# --- debug ticking ---
+	if debug_ai:
+		_debug_ai_acc += delta
+		if _debug_ai_acc >= debug_ai_interval:
+			_debug_ai_acc = 0.0
+			_debug_ai_log()
 	if not nav_ready:
 		return
 	
@@ -283,6 +302,9 @@ func _physics_process(delta: float) -> void:
 	
 	# Handle rotation
 	_update_rotation(delta)
+
+	# Update movement animations (walk <-> run blending)
+	enemy_animation_update(delta)
 	
 	if debug_vision:
 		_update_debug_meshes()
@@ -293,6 +315,7 @@ func _physics_process(delta: float) -> void:
 # STATE MACHINE - Enter/Update/Exit Pattern
 # ============================================================================
 func enter_state(new_state: State) -> void:
+	var prev_state = current_state
 	# Exit old state
 	match current_state:
 		State.IDLE:
@@ -301,10 +324,10 @@ func enter_state(new_state: State) -> void:
 			is_attacking = false
 			should_tactical_retreat = false
 			tactical_retreat_pause_timer = 0.0
-	
+
 	current_state = new_state
 	state_timer = 0.0
-	
+
 	# Enter new state
 	match current_state:
 		State.IDLE:
@@ -312,47 +335,50 @@ func enter_state(new_state: State) -> void:
 			play_with_random_offset("Monstr_idle", 0.2, 1.0)
 			state_timer = randf_range(idle_duration_min, idle_duration_max)
 			idle_look_timer = randf_range(1.5, 4.0)
-			
+
 		State.PATROL:
 			nav_agent.max_speed = walk_speed
 			play_with_random_offset("Monstr_walk", 0.2, 1.0)
 			_set_random_patrol_target()
-			
+
 		State.CHASE:
 			# Reset stuck timer if moving normally
 			if velocity.length() > 0.2:
 				time_stuck = 0.0
-			# Don't reset frustration_total_time here to allow loop accumulation
+			# init last dist so chase stuck logic starts sane
+			if is_instance_valid(player):
+				last_dist_to_target = global_position.distance_to(player.global_position)
+			else:
+				last_dist_to_target = INF
 			nav_agent.max_speed = run_speed
 			play_with_random_offset("Monstr_walk", 0.2, 1.0)
-			state_timer = 0.0 # Track chase duration
-			
+			state_timer = 0.0
+
 		State.FRUSTRATED:
+			print("[AI] ENTER FRUSTRATED at pos=%.2f,%.2f,%.2f; last_dist=%.2f time_stuck=%.2f" % [global_position.x, global_position.y, global_position.z, last_dist_to_target, time_stuck])
 			frustration_total_time = 0.0
 			nav_agent.max_speed = 0.0
+			last_dist_to_target = INF
 			anim_player.play("Monstr_angry", 0.2, 1.0)
-			# Play angry animation for the duration
 			state_timer = frustration_duration
-			#print("State: Frustrated")
-			
+
 		State.ATTACK:
 			frustration_total_time = 0.0
 			nav_agent.max_speed = 0.0
-			# Don't auto-execute, let update handle it
-			
+
 		State.FLEE:
 			nav_agent.max_speed = run_speed * 0.6
 			play_with_random_offset("Monstr_walk", 0.2, 1.0)
-			# Set flee duration timer
 			state_timer = flee_duration
-			# Consume a flee charge when entering FLEE
 			if current_flee_charges > 0:
 				current_flee_charges -= 1
-			print("State: Flee")
-			
+
 		State.KNOCKBACK:
 			anim_player.play("Monstr_knockdown", 0.5, 1.0)
 			state_timer = knockback_duration
+	print("[AI] enter_state -> %s (from %s)" % [str(current_state), str(prev_state) if "prev_state" in self else "unknown"])
+	
+
 
 func _update_state(delta: float, player_visible: bool) -> void:
 	match current_state:
@@ -398,25 +424,22 @@ func _update_idle(delta: float, player_visible: bool) -> void:
 		enter_state(State.PATROL)
 
 func _update_patrol(_delta: float, player_visible: bool) -> void:
-	# Кулдаун FRUSTRATED — игнор игрока
+	# Уменьшаем кулдаун если он есть, но не делаем врага полностью слепым
 	if frustrated_cooldown > 0:
-		frustrated_cooldown -= _delta
-		player_visible = false
-	# Spot player
-	if player_visible:
+		frustrated_cooldown = max(frustrated_cooldown - _delta, 0.0)
+
+	# Spot player (патруль может всё ещё увидеть игрока)
+	if player_visible and frustrated_cooldown <= 0:
 		enter_state(State.CHASE)
 		return
 
-	# --- Проверка застревания по скорости ---
+	# Проверка застревания по скорости
 	if velocity.length() < 0.1:
 		time_stuck += _delta
 	else:
 		time_stuck = 0.0
 
-	# --- Проверка застревания по прогрессу ---
-	var _dist = global_position.distance_to(nav_agent.target_position)
-
-	# Reached destination
+	# Проверка достижения текущей патрульной точки
 	if nav_agent.is_navigation_finished():
 		if randf() < idle_chance:
 			enter_state(State.IDLE)
@@ -424,22 +447,26 @@ func _update_patrol(_delta: float, player_visible: bool) -> void:
 			_set_random_patrol_target()
 		return
 
-	# Stuck recovery
+	# Stuck recovery (если застряли при патруле)
 	if time_stuck > stuck_threshold:
 		time_stuck = 0.0
 		_set_random_patrol_target()
 		return
 
-	# Move toward target
+	# Движение к цели патруля
 	_move_toward_target()
 
 
+
 func _update_chase(delta: float, player_visible: bool) -> void:
-# Если фрустрация ещё не остыла — игнорим игрока
+	var path = nav_agent.get_current_navigation_path()
+	print("[CHASE PATH] finished=", nav_agent.is_navigation_finished(),
+		" path_points=", path.size(),
+		" target=", nav_agent.target_position)
+	# Если фрустрация ещё не остыла — просто уменьшаем кулдаун и не насильно переключаем стейт
 	if frustrated_cooldown > 0:
-		frustrated_cooldown -= delta
-		# сброс погони → уходим в патруль
-		enter_state(State.PATROL)
+		frustrated_cooldown = max(frustrated_cooldown - delta, 0.0)
+		# не делать enter_state тут
 		return
 
 	state_timer += delta
@@ -452,40 +479,41 @@ func _update_chase(delta: float, player_visible: bool) -> void:
 	# Update last known position
 	if player_visible:
 		last_known_player_pos = player.global_position
-	
+
 	var dist_to_player = global_position.distance_to(player.global_position)
+
+	# --- Проверка прогресса приближения (стабильная логика stuck) ---
+	# Инициализируем last_dist_to_target при первом заходе в chase
+	if last_dist_to_target == INF:
+		last_dist_to_target = dist_to_player
+
+	if dist_to_player > last_dist_to_target + 0.1:
+		time_stuck += delta
+	else:
+		# если есть прогресс — уменьшать time_stuck
+		time_stuck = max(time_stuck - delta * 2.0, 0.0)
+
+	# сохраняем для следующего кадра
+	last_dist_to_target = dist_to_player
+
 	var time_now = Time.get_ticks_msec() / 1000.0
 
 	# 1. Проверка на Атаку / Кружение (Attack or Orbit)
 	if dist_to_player <= attack_range:
 		if time_now - last_attack_time >= attack_cooldown:
-			# Атака готова, переходим в ATTACK
 			enter_state(State.ATTACK)
 			return
 		else:
-			# ⚠️ ЛОГИКА КРУЖЕНИЯ: На кулдауне, кружим вокруг игрока.
-			# Направление от врага к игроку
 			var player_dir = (player.global_position - global_position).normalized()
-			
-			# Вычисляем направление, перпендикулярное направлению на игрока (орбитальное движение)
-			# Используем Vector3(player_dir.z, 0, -player_dir.x) для движения вправо,
-			# или Vector3(-player_dir.z, 0, player_dir.x) для движения влево.
-			# Чередование направления или случайный выбор может добавить разнообразия.
 			var orbit_dir = Vector3(player_dir.z, 0, -player_dir.x)
-			
-			# Устанавливаем цель на небольшом расстоянии в направлении орбиты
-			nav_agent.max_speed = walk_speed * 0.7 # Немного замедляем для маневра
+			nav_agent.max_speed = walk_speed * 0.7
 			var orbit_target = global_position + orbit_dir * attack_range * 0.5
-			
-			# Устанавливаем целевую позицию агенту, чтобы он искал путь в сторону
 			nav_agent.target_position = orbit_target
-			
 			_move_toward_target()
 			play_with_random_offset("Monstr_walk", 0.2, 1.0)
-			return # Выход, так как движение уже обработано
+			return # движение обработано
 
-	# 2. Проверка на Потерю Игрока / Отступление (Lost Player)
-	# Strict limits as requested
+	# 2. Потеря игрока по памяти / дальности
 	if time_since_player_seen > chase_memory_duration:
 		enter_state(State.PATROL)
 		return
@@ -493,40 +521,58 @@ func _update_chase(delta: float, player_visible: bool) -> void:
 	if dist_to_player > lost_sight_range:
 		enter_state(State.PATROL)
 		return
-		
-	# 3. Проверка на Застревание (Stuck Recovery) -> FRUSTRATION
+
+	if time_stuck > 0:
+		print("[AI] chase progress: dist=%.2f last_dist=%.2f time_stuck=%.2f" % [dist_to_player, last_dist_to_target, time_stuck])
+	# 3. Проверка на Застревание -> FRUSTRATED
 	if time_stuck > stuck_threshold:
 		time_stuck = 0.0
+		# готовим last_dist_to_target на будущее
+		last_dist_to_target = INF
 		enter_state(State.FRUSTRATED)
 		return
 
-	# 5. Движение Погони (Standard Chase Movement)
-	# Если не кружим и не потеряли игрока, продолжаем двигаться к его текущему положению.
+	# 5. Движение Погони
 	if is_instance_valid(player):
 		nav_agent.target_position = player.global_position
-		nav_agent.max_speed = run_speed # Возвращаем скорость бега
+		nav_agent.max_speed = run_speed
 		_move_toward_target()
 
+
 func _update_frustrated(delta: float) -> void:
-	# Если игрок снова доступен — выходим из фрустрации
-	if _can_reach_player_again():
-		frustration_total_time = 0.0
-		enter_state(State.CHASE)
-		return
-	state_timer -= delta
-	frustration_total_time += delta
 	nav_agent.set_velocity(Vector3.ZERO)
 
-	# Если слишком долго бесится — сдаётся (Give Up)
-	if frustration_total_time > give_up_duration:
-		frustrated_cooldown = chase_cooldown_duration
-		enter_state(State.PATROL)
+	frustration_total_time += delta
+	state_timer -= delta
+
+	if _can_reach_player_again():
+		print("[AI] player reachable again from FRUSTRATED -> CHASE")
+		_exit_frustration_to_chase()
 		return
 
-	# Окончание короткой анимации злости (End of Frustration -> Cooldown)
-	if state_timer <= 0:
-		# Просто анимация закончилась — остаёмся в FRUSTRATED
-		state_timer = 0.0
+	if frustration_total_time >= give_up_duration:
+		_exit_frustration_to_patrol()
+		return
+
+	if state_timer <= 0.0:
+		_exit_frustration_to_patrol()
+		return
+	if state_timer <= 0.0:
+		print("[AI] frustrated timer ended -> going to PATROL")
+		_exit_frustration_to_patrol()
+		return
+
+func _exit_frustration_to_patrol():
+	frustration_total_time = 0.0
+	frustrated_cooldown = chase_cooldown_duration
+	enter_state(State.PATROL)
+	print("State: Patrol from Frustrated")
+
+func _exit_frustration_to_chase():
+	frustration_total_time = 0.0
+	frustrated_cooldown = 0.0
+	enter_state(State.CHASE)
+	print("State: Chase from Frustrated")
 
 func _update_attack(delta: float) -> void:
 	# Wait for attack animation
@@ -536,6 +582,7 @@ func _update_attack(delta: float) -> void:
 	
 	# Tactical retreat phase
 	if should_tactical_retreat:
+		is_in_tactical_retreat = true
 		nav_agent.max_speed = run_speed * 0.8
 
 		# Use the precomputed retreat target (set when retreat was triggered).
@@ -548,9 +595,7 @@ func _update_attack(delta: float) -> void:
 			
 		# Двигаемся к цели отступления
 		_move_toward_target()
-		
-		# ⚠️ АНИМАЦИЯ: Включаем анимацию ходьбы/бега
-		play_with_random_offset("Monstr_walk", 0.2, 1.0)
+		# Note: enemy_animation_update will handle animation based on velocity (no explicit anim call)
 
 		# Проверка, достигнута ли цель отступления
 		if nav_agent.is_navigation_finished() and tactical_retreat_pause_timer <= 0:
@@ -567,6 +612,8 @@ func _update_attack(delta: float) -> void:
 			
 			if tactical_retreat_pause_timer <= 0:
 				should_tactical_retreat = false
+				is_in_tactical_retreat = false
+				tactical_retreat_target = Vector3.ZERO
 				enter_state(State.CHASE) # Возврат в погоню
 			return
 		
@@ -667,6 +714,9 @@ func _update_knockback(_delta: float) -> void:
 # MOVEMENT HELPERS
 # ============================================================================
 func _move_toward_target() -> void:
+	print("[MOVE] finished=", nav_agent.is_navigation_finished(),
+	  " next_pos=", nav_agent.get_next_path_position())
+
 	if nav_agent.is_navigation_finished():
 		nav_agent.set_velocity(Vector3.ZERO)
 		return
@@ -702,10 +752,14 @@ func _update_rotation(delta: float) -> void:
 	
 	var look_dir = Vector3.ZERO
 
+	# During tactical retreat, always face movement direction (velocity)
+	# to avoid jerky rotation between player and retreat direction.
+	if is_in_tactical_retreat and velocity.length_squared() > 0.1:
+		look_dir = velocity
 	# In combat states prefer to face the player, but if we're actively
 	# navigating around an obstacle (velocity direction differs significantly
 	# from direct player direction) prefer facing along velocity while moving.
-	if is_instance_valid(player) and current_state in [State.CHASE, State.ATTACK, State.FRUSTRATED]:
+	elif is_instance_valid(player) and current_state in [State.CHASE, State.ATTACK, State.FRUSTRATED]:
 		var player_dir = player.global_position - global_position
 		player_dir.y = 0
 		# If we're currently moving along a path (nav_agent has a target)
@@ -872,6 +926,51 @@ func _update_health_bar_process(delta: float) -> void:
 				health_bar_opacity = lerp(health_bar_opacity, 0.5, delta * health_bar_fade_speed)
 
 	_update_health_bar_visuals(health, delayed_health, health_bar_opacity)
+
+
+func calculate_walk_run_blend(speed: float) -> float:
+	# Map speed to 0..1 between start and end thresholds
+	var blend = inverse_lerp(walk_run_blend_start_speed, walk_run_blend_end_speed, speed)
+	return clamp(blend, 0.0, 1.0)
+
+
+func enemy_animation_update(delta: float) -> void:
+	# Avoid overriding attack/knockback/death animations
+	if is_attacking or current_state == State.KNOCKBACK or current_state == State.DEAD:
+		return
+	# If looking around in idle, let idle animation play
+	if current_state == State.IDLE and is_looking_around:
+		return
+	# During tactical retreat pause, let explicit animation play
+	if should_tactical_retreat and tactical_retreat_pause_timer > 0:
+		return
+
+	# Determine horizontal speed
+	var speed_2d := Vector2(velocity.x, velocity.z).length()
+	var has_movement := speed_2d > 0.1
+
+	# Calculate target blend based on current horizontal speed
+	target_movement_blend = calculate_walk_run_blend(speed_2d)
+	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+
+	# Choose animation based on blend
+	if has_movement and current_movement_blend < 0.5:
+		# Play walk with speed scale relative to walk_speed
+		var walk_speed_scale = 1.0
+		if walk_speed > 0:
+			walk_speed_scale = clamp(speed_2d / walk_speed, 0.5, 1.5)
+		play_with_random_offset("Monstr_walk", 0.2, walk_speed_scale)
+	elif has_movement and current_movement_blend >= 0.5:
+		# Play run with speed scale relative to run_speed
+		var run_speed_scale = 1.0
+		if run_speed > 0:
+			run_speed_scale = clamp(speed_2d / run_speed, 0.5, 1.5)
+		# Use same helper to avoid restarting if already playing
+		play_with_random_offset("Monstr_run", 0.2, run_speed_scale)
+	else:
+		# No meaningful movement -> keep idle (don't restart idle if already playing)
+		if anim_player.current_animation != "Monstr_idle":
+			play_with_random_offset("Monstr_idle", 0.2, 1.0)
 
 
 
@@ -1125,3 +1224,34 @@ func fade_out_and_remove() -> void:
 			
 	
 	queue_free()
+
+
+func _debug_ai_log() -> void:
+	# Основной слип в одну строку — легко копировать в чат
+	var s := "[AI DEBUG] state=%s pos=%.2f,%.2f,%.2f hp=%.2f/%s time_stuck=%.2f last_dist=%.2f frustr_total=%.2f frustr_cd=%.2f state_timer=%.2f target_pos=%.2f,%.2f,%.2f player_seen=%.2f" % [
+		str(current_state),
+		global_position.x, global_position.y, global_position.z,
+		health, (health_component.get_max_health() if is_instance_valid(health_component) else "N/A"),
+		time_stuck, last_dist_to_target, frustration_total_time, frustrated_cooldown, state_timer,
+		(nav_agent.target_position.x if nav_agent else 0.0),
+		(nav_agent.target_position.y if nav_agent else 0.0),
+		(nav_agent.target_position.z if nav_agent else 0.0),
+		time_since_player_seen
+	]
+	print(s)
+
+	# Дополнительные полезные данные (каждая на новой строке)
+	print("    velocity_len=%.2f nav_finished=%s player_valid=%s player_visible=%s is_attacking=%s is_in_tactical_retreat=%s" % [
+		velocity.length(),
+		str(nav_agent.is_navigation_finished()),
+		str(is_instance_valid(player)),
+		str(_can_see_player()),
+		str(is_attacking),
+		str(is_in_tactical_retreat)
+	])
+
+	# Если хочешь видеть путь агента — распечатать следующий путь/позицию
+	var next = Vector3.ZERO
+	if nav_agent and not nav_agent.is_navigation_finished():
+		next = nav_agent.get_next_path_position()
+	print("    next_path_pos=%.2f, %.2f, %.2f" % [next.x, next.y, next.z])
