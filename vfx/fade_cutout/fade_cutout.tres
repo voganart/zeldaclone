@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bfabdmswpic2x"]
+
+[ext_resource type="Shader" uid="uid://c7a18f4cdbmtb" path="res://vfx/fade_cutout/fade_cutout.gdshader" id="1_2lfsx"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_2lfsx")
+shader_parameter/radius = 8.3570003969575
+shader_parameter/smoothness = 0.0
+shader_parameter/fallback_color = Color(1, 1, 1, 1)

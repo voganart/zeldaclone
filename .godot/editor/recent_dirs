@@ -1,3 +1,6 @@
+res://entities/player/assets
+res://vfx/fade_cutout
+res://entities/player
 res://DebugOverlay
 res://entities/levels/test_level
 res://UI/HealthBar3D
@@ -12,4 +15,3 @@ res://entities/levels/island
 res://dd
 res://environment/movable_objects
 D:/Downloads
-res://entities/player

@@ -1,5 +1,6 @@
-[gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://c3gmswlr7otco"]
+[gd_resource type="ShaderMaterial" load_steps=7 format=3 uid="uid://c3gmswlr7otco"]
 
+[ext_resource type="Material" uid="uid://dmrecklaxbldq" path="res://entities/player/assets/x-ray_mat.tres" id="1_5mmyw"]
 [ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://entities/player/assets/toonShader.gdshader" id="1_vor6y"]
 [ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://entities/player/assets/character_BaseColorTexture.png" id="2_dv3lr"]
 [ext_resource type="Texture2D" uid="uid://cttux46qnikqf" path="res://entities/player/assets/gradient_overlay.png" id="3_bj817"]
@@ -16,6 +17,7 @@ fill_to = Vector2(1, 1)
 
 [resource]
 render_priority = 0
+next_pass = ExtResource("1_5mmyw")
 shader = ExtResource("1_vor6y")
 shader_parameter/use_hit_flash = false
 shader_parameter/hit_flash_strength = 1.0
@@ -33,7 +35,7 @@ shader_parameter/specular_strength = 0.005
 shader_parameter/specular_shininess = 3.8210001814975
 shader_parameter/use_rim = true
 shader_parameter/rim_width = 11.538000548055
-shader_parameter/rim_color = Color(1, 1, 1, 0.0627451)
+shader_parameter/rim_color = Color(1, 1, 1, 0.096)
 shader_parameter/use_ramp = false
 shader_parameter/ramp = SubResource("GradientTexture2D_bj817")
 shader_parameter/use_borders = false

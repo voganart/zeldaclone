@@ -48,6 +48,7 @@ SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+window/size/mode=4
 
 [editor_plugins]
 
@@ -57,6 +58,7 @@ enabled=PackedStringArray("res://addons/jigglebones/plugin.cfg", "res://addons/p
 
 player=""
 enemies=""
+fade_objects=""
 
 [gui]
 

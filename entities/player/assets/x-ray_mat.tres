@@ -1,0 +1,46 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://dmrecklaxbldq"]
+
+[sub_resource type="Gradient" id="Gradient_gk3i3"]
+colors = PackedColorArray(0, 0.37082916, 0.6194804, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_2x8df"]
+gradient = SubResource("Gradient_gk3i3")
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gk3i3"]
+transparency = 1
+shading_mode = 0
+grow = true
+grow_amount = 0.017
+stencil_mode = 3
+stencil_flags = 1
+stencil_compare = 5
+metadata/_stencil_owned = true
+
+[resource]
+render_priority = -1
+next_pass = SubResource("StandardMaterial3D_gk3i3")
+transparency = 1
+depth_draw_mode = 2
+no_depth_test = true
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+disable_fog = true
+disable_specular_occlusion = true
+albedo_color = Color(1, 1, 1, 0.25800002)
+detail_enabled = true
+detail_uv_layer = 1
+detail_albedo = SubResource("GradientTexture2D_2x8df")
+disable_receive_shadows = true
+grow_amount = 0.091
+point_size = 3.7
+proximity_fade_distance = 20.0
+distance_fade_mode = 1
+distance_fade_min_distance = 30.0
+distance_fade_max_distance = 0.0
+stencil_mode = 1
+stencil_flags = 2
+stencil_color = Color(1, 1, 1, 1)
+stencil_outline_thickness = 0.017
