@@ -16,8 +16,7 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 @onready var vfx_pull: Node3D = $"../../../VfxPull"
 
 # @export var max_hp: float = 10.0 # Use HealthComponent for max_hp!
-@export var flee_hp_threshold: float = 0.3 # Flee when HP < 30%
-@export var flee_chance: float = 0.5 # 50% chance to flee
+
 @export var health_bar_visible_time: float = 1.0 # сколько секунд бар остаётся видимым после урона
 @export var health_bar_fade_speed: float = 3.0 # скорость ухода в прозрачность
 
@@ -26,6 +25,7 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 @export var walk_speed: float = 1.5
 @export var run_speed: float = 3.5
 @export var rotation_speed: float = 6.0
+@export var obstacle_face_angle_deg: float = 60.0
 
 @export_group("Combat")
 @export var attack_range: float = 2.0
@@ -55,6 +55,16 @@ enum State {IDLE, PATROL, CHASE, FRUSTRATED, ATTACK, FLEE, KNOCKBACK, DEAD}
 @export var give_up_duration: float = 5.0 # Total time before giving up
 @export var chase_cooldown_duration: float = 2.0 # Time to ignore player after frustration
 var frustrated_cooldown: float = 0.0
+
+# Flee settings
+@export var flee_charges_max: int = 1
+@export var flee_duration: float = 3.0
+@export var flee_heal_delay: float = 10.0 # seconds without taking damage before passive heal
+@export var flee_heal_per_second: float = 1.0 # HP per second healed when idle
+@export var flee_hp_threshold: float = 0.3 # Flee when HP < 30%
+@export var flee_chance: float = 0.5 # 50% chance to flee
+var current_flee_charges: int = 1
+var time_since_last_damaged: float = 9999.0
 
 
 @export_group("Physics")
@@ -87,6 +97,7 @@ var frustration_total_time: float = 0.0
 var is_attacking: bool = false
 var should_tactical_retreat: bool = false
 var tactical_retreat_pause_timer: float = 0.0
+var tactical_retreat_target: Vector3 = Vector3.ZERO
 var monster_attacks = ["Monstr_attack_1", "Monstr_attack_2"]
 var last_attack_index = -1
 var anim_to_play = "" # Will be set by get_next_attack()
@@ -142,6 +153,10 @@ func _ready() -> void:
 
 	initialize_navigation()
 	will_flee = randf() < flee_chance
+
+	# Flee charges initialization
+	current_flee_charges = flee_charges_max
+	time_since_last_damaged = flee_heal_delay + 1.0
 
 	# Connect to HealthComponent signals
 	if health_component:
@@ -249,6 +264,15 @@ func _physics_process(delta: float) -> void:
 		time_since_player_seen = 0.0
 	else:
 		time_since_player_seen += delta
+
+	# Passive heal when idle (no damage for configured delay)
+	time_since_last_damaged += delta
+	if time_since_last_damaged > flee_heal_delay and health_component:
+		var cur = health_component.get_health()
+		var maxh = health_component.get_max_health()
+		if cur < maxh:
+			# Heal gradually
+			health_component.heal(min(flee_heal_per_second * delta, maxh - cur))
 	
 	# Detect stuck
 	_update_stuck_detection(delta)
@@ -317,8 +341,13 @@ func enter_state(new_state: State) -> void:
 			# Don't auto-execute, let update handle it
 			
 		State.FLEE:
-			nav_agent.max_speed = run_speed * 0.2
+			nav_agent.max_speed = run_speed * 0.6
 			play_with_random_offset("Monstr_walk", 0.2, 1.0)
+			# Set flee duration timer
+			state_timer = flee_duration
+			# Consume a flee charge when entering FLEE
+			if current_flee_charges > 0:
+				current_flee_charges -= 1
 			print("State: Flee")
 			
 		State.KNOCKBACK:
@@ -508,14 +537,14 @@ func _update_attack(delta: float) -> void:
 	# Tactical retreat phase
 	if should_tactical_retreat:
 		nav_agent.max_speed = run_speed * 0.8
-		
-		# Расчет цели отступления: точка, удаленная от игрока
-		if is_instance_valid(player):
+
+		# Use the precomputed retreat target (set when retreat was triggered).
+		# Fallback: compute local retreat target if none set.
+		if tactical_retreat_target == Vector3.ZERO and is_instance_valid(player):
 			var retreat_dir = (global_position - player.global_position).normalized()
-			var retreat_pos = player.global_position + retreat_dir * tactical_retreat_distance
-			
-			# Устанавливаем цель навигации
-			nav_agent.target_position = retreat_pos
+			tactical_retreat_target = global_position + retreat_dir * tactical_retreat_distance
+
+		nav_agent.target_position = tactical_retreat_target
 			
 		# Двигаемся к цели отступления
 		_move_toward_target()
@@ -582,18 +611,38 @@ func _can_reach_player_again() -> bool:
 	return not nav_agent.is_navigation_finished()
 
 func _update_flee(_delta: float) -> void:
-	# Calculate flee position
-	if is_instance_valid(player):
-		var flee_dir = (global_position - player.global_position).normalized()
-		var flee_pos = global_position + flee_dir * 10.0
-		nav_agent.target_position = flee_pos
-	
-	# Safe - return to patrol
-	if time_since_player_seen > 5.0:
-		enter_state(State.PATROL)
-		return
-	
+	# Move to a precomputed flee target (set when entering FLEE or on damage)
+	if tactical_retreat_target != Vector3.ZERO:
+		nav_agent.target_position = tactical_retreat_target
+	else:
+		# Fallback: pick a nearby random point away from player
+		if is_instance_valid(player):
+			var fallback_dir = (global_position - player.global_position).normalized()
+			var candidate = global_position + fallback_dir * tactical_retreat_distance
+			# try to snap to navmesh
+			var nav_map = nav_agent.get_navigation_map()
+			if nav_map:
+				var valid_point = NavigationServer3D.map_get_closest_point(nav_map, candidate)
+				if valid_point != Vector3.ZERO:
+					nav_agent.target_position = valid_point
+				else:
+					nav_agent.target_position = candidate
+			else:
+				nav_agent.target_position = candidate
+
+	# Move towards chosen flee target
 	_move_toward_target()
+
+	# Flee timer: when expired, return to chase if player visible nearby, else patrol
+	state_timer -= _delta
+	if state_timer <= 0:
+		# Clear tactical_retreat_target so next time it's recomputed
+		tactical_retreat_target = Vector3.ZERO
+		# After flee duration, decide next state
+		if time_since_player_seen <= chase_memory_duration and is_instance_valid(player) and global_position.distance_to(player.global_position) <= lost_sight_range:
+			enter_state(State.CHASE)
+		else:
+			enter_state(State.PATROL)
 
 func _update_knockback(_delta: float) -> void:
 	move_and_slide()
@@ -652,13 +701,29 @@ func _update_rotation(delta: float) -> void:
 		return # Handled in idle update
 	
 	var look_dir = Vector3.ZERO
-	
-	# Face movement direction when moving
-	if velocity.length_squared() > 0.1:
+
+	# In combat states prefer to face the player, but if we're actively
+	# navigating around an obstacle (velocity direction differs significantly
+	# from direct player direction) prefer facing along velocity while moving.
+	if is_instance_valid(player) and current_state in [State.CHASE, State.ATTACK, State.FRUSTRATED]:
+		var player_dir = player.global_position - global_position
+		player_dir.y = 0
+		# If we're currently moving along a path (nav_agent has a target)
+		# and our velocity direction is very different from the direct player
+		# direction, face along velocity so the enemy looks like it's skirting
+		# an obstacle. Otherwise face the player.
+		if velocity.length_squared() > 0.1 and nav_agent and not nav_agent.is_navigation_finished():
+			var vel_dir = velocity.normalized()
+			var pd_norm = player_dir.normalized()
+			var angle_diff = rad_to_deg(vel_dir.angle_to(pd_norm))
+			if angle_diff > obstacle_face_angle_deg:
+				look_dir = velocity
+			else:
+				look_dir = player_dir
+		else:
+			look_dir = player_dir
+	elif velocity.length_squared() > 0.1:
 		look_dir = velocity
-	# Face player when stationary in combat states
-	elif is_instance_valid(player) and current_state in [State.CHASE, State.ATTACK, State.FRUSTRATED]:
-		look_dir = player.global_position - global_position
 	else:
 		return
 	
@@ -699,6 +764,14 @@ func _execute_attack() -> void:
 	
 	# Chance to do tactical retreat
 	if randf() < tactical_retreat_chance:
+		if is_instance_valid(player):
+			# Compute a fixed retreat target now so it doesn't chase the player
+			var retreat_dir = (global_position - player.global_position).normalized()
+			# Place target at a distance from current pos in retreat_dir
+			# Use tactical_retreat_distance as offset from current position
+			tactical_retreat_target = global_position + retreat_dir * tactical_retreat_distance
+		else:
+			tactical_retreat_target = global_position
 		should_tactical_retreat = true
 		tactical_retreat_pause_timer = 0.0 # Will be set when reaching position
 
@@ -727,14 +800,40 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 		enter_state(State.KNOCKBACK)
 
 	# Flee logic update: Check against component health
-	# Use robust check. If current health is <= threshold % or very low.
 	var current_hp = health_component.get_health() if health_component else 0.0
 	var max_health = health_component.get_max_health() if health_component else 10.0
-	
-	if current_hp <= max_health * flee_hp_threshold and randf() < flee_chance:
-		should_tactical_retreat = true
+
+	# Reset damage timer used for passive healing
+	time_since_last_damaged = 0.0
+
+	# If health below threshold and we have flee charges, enter FLEE
+	if current_hp <= max_health * flee_hp_threshold and current_flee_charges > 0 and will_flee:
+		# Choose a flee target that is not relative to the player: sample random directions
+		var chosen = Vector3.ZERO
+		var nav_map = nav_agent.get_navigation_map()
+		for i in range(12):
+			var ang = randf() * TAU
+			var dir = Vector3(cos(ang), 0, sin(ang))
+			var candidate = global_position + dir * tactical_retreat_distance
+			if nav_map:
+				var valid_point = NavigationServer3D.map_get_closest_point(nav_map, candidate)
+				if valid_point != Vector3.ZERO:
+					chosen = valid_point
+					break
+			else:
+				chosen = candidate
+				break
+		# Fallback if nothing found
+		if chosen == Vector3.ZERO:
+			chosen = global_position + Vector3(0,0, tactical_retreat_distance)
+
+		tactical_retreat_target = chosen
+		enter_state(State.FLEE)
+		current_flee_charges = max(current_flee_charges - 1, 0)
+		return
 	else:
-		should_tactical_retreat = false
+		# do nothing special; tactical retreat remains managed by attack flow
+		should_tactical_retreat = should_tactical_retreat
 
 func receive_push(push: Vector3) -> void:
 	external_push += push
