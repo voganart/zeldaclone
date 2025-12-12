@@ -143,7 +143,6 @@ attack_cooldown = 0.0
 combo_window_time = 0.5
 attack_knockback_strength = 1.0
 attack_knockback_height = 1.0
-knockback_duration = 0.1
 attack_rotation_influence = 0.1
 punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("character/root/Skeleton3D/hand_l/punch_hand_l")
@@ -193,6 +192,9 @@ script = ExtResource("6_qiwj3")
 
 [node name="GroundSlamAbility" type="Node" parent="."]
 script = ExtResource("7_26q78")
+slam_radius = 2.5
+slam_descent_speed = 30.0
+slam_cooldown = 1.0
 slam_windup_delay = 0.2
 
 [connection signal="body_entered" from="character/root/Skeleton3D/hand_r/punch_hand_r" to="." method="_on_punch_hand_r_body_entered"]

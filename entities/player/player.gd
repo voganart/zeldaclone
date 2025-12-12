@@ -102,7 +102,8 @@ var combo_cooldown_timer: Timer
 var is_knockbacked: bool = false
 var is_knockback_stun: bool = false
 var is_rolling: bool = false
-
+var stun_release_time: float = 0.0
+var current_knockback_timer: float = 0.0
 # Input buffering
 var buffered_jump: bool = false
 var buffered_jump_time: float = -1.0
@@ -159,30 +160,31 @@ func _on_health_changed(new_health: float) -> void:
 
 func _on_died() -> void:
 	print("Player Died!")
+	anim_player.play("Boy_death", 0.1)
 	set_physics_process(false) # Disable controls
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
-	# Invulnerable during Ground Slam or Roll i-frames
+	# Если мы в неуязвимости или в слэме — игнорируем урон
 	if ground_slam_ability.is_slamming or is_invincible:
 		return
 		
 	vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0))
 	print("PLAYER TOOK DAMAGE:", amount)
 
-	is_knockbacked = true
-
+	# Наносим урон
 	if health_component:
 		health_component.take_damage(amount)
 
 	$HitFlash.flash()
 
+	# Применяем отбрасывание
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 
 	is_knockback_stun = true
-	await get_tree().create_timer(knockback_duration).timeout
-	is_knockback_stun = false
-	is_knockbacked = false
+	is_knockbacked = true
+
+	current_knockback_timer = knockback_duration
 
 func _input(event):
 	if event.is_action_pressed("run") and is_on_floor():
@@ -213,7 +215,7 @@ func _input(event):
 
 func first_attack(attack_speed):
 	if is_knockback_stun: return
-
+	if ground_slam_ability.is_recovering: return
 	# Roll Cancellation Logic
 	if is_rolling:
 		if _try_cancel_roll_for_attack():
@@ -332,7 +334,14 @@ func _update_roll_timers(delta: float) -> void:
 		roll_interval_timer -= delta
 
 func _physics_process(delta: float) -> void:
-	# --- 1. SPECIAL ABILITIES PRIORITY ---
+	# --- 0. STUN TIMER UPDATE (НОВОЕ) ---
+	if current_knockback_timer > 0:
+		current_knockback_timer -= delta
+		if current_knockback_timer <= 0:
+			# Таймер вышел — возвращаем управление
+			is_knockback_stun = false
+			is_knockbacked = false
+			current_knockback_timer = 0
 	
 	# Если Slam активен, он полностью управляет физикой
 	if ground_slam_ability.update_physics(delta):
@@ -361,8 +370,9 @@ func _physics_process(delta: float) -> void:
 		air_dash_ability.reset_air_state()
 
 func check_jump_pass_through() -> void:
-	# Slam имеет свою логику прохода сквозь врагов, здесь только для обычного падения
-	if is_on_floor() and not is_passing_through and not ground_slam_ability.is_slamming:
+	# ДОБАВЛЕНО: and not ground_slam_ability.is_recovering
+	# Это предотвращает включение режима прохода сквозь врагов во время анимации приземления
+	if is_on_floor() and not is_passing_through and not ground_slam_ability.is_slamming and not ground_slam_ability.is_recovering:
 		var standing_on_enemy = false
 		for i in get_slide_collision_count():
 			var c = get_slide_collision(i)
@@ -373,18 +383,19 @@ func check_jump_pass_through() -> void:
 			is_passing_through = true
 			is_invincible = true
 			set_collision_mask_value(3, false)
-			# Push enemies logic omitted for brevity, logic remains same as original
 			velocity.y = -5.0
 			global_position.y -= 0.1
 			print("Passing through enemy!")
 			
 	if is_on_floor() and is_passing_through:
 		is_passing_through = false
+		is_invincible = false # ЯВНО выключаем неуязвимость при выходе
 		set_collision_mask_value(3, true)
 		print("Re-enabled enemy collisions.")
 
 func perform_roll() -> void:
 	if is_knockback_stun: return
+	if ground_slam_ability.is_recovering: return 
 	if not is_on_floor() or is_rolling or is_knockbacked: return
 	if roll_interval_timer > 0: return
 	if is_roll_recharging: return
@@ -526,7 +537,7 @@ func jump_logic(delta):
 
 	if Input.is_action_just_pressed('jump'):
 		if is_knockback_stun: return
-
+		if ground_slam_ability.is_recovering: return
 		if is_rolling:
 			if _try_cancel_roll_for_attack(): # Reusing logic, technically same threshold
 				is_rolling = false
