@@ -1,0 +1,29 @@
+{
+    "files.exclude": {
+        "**/*.png": true,
+        "**/*.jpg": true,
+        "**/*.cs": true,
+        "**/*.cfg": true,
+        "**/*.bin": true,
+        "**/*.import": true,
+        "**/*.mat": true,
+        "**/*.wav": true,
+        "**/*.blend": true,
+        "**/*.blend1": true,
+        "**/*.TMP": true,
+        "**/*.tmp": true,
+        "**/*.glb": true,
+        "**/*.uid": true,
+        "**/*.tscn": true,
+        "**/*.res": true,
+        "**/*.gdshader": true,
+        "**/*.tres": true,
+        "**/*.zip": true,
+        "**/editor/": true,
+        "**/imported/": true,
+        "**/shader_cache/": true,
+        "**/.sounds/": true,
+        "**/addons/": true,
+        
+    }
+}

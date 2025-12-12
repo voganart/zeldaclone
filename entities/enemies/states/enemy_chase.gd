@@ -6,7 +6,7 @@ extends State
 var time_since_player_seen: float = 0.0
 var time_stuck: float = 0.0
 var last_dist_to_target: float = INF
-
+var stuck_detector = StuckDetector.new()
 # Ссылки на типизированного родителя для удобства
 var enemy: Enemy
 
@@ -21,12 +21,13 @@ func enter() -> void:
 	# Сброс кулдауна фрустрации при начале погони
 	enemy.frustrated_cooldown = 0.0
 	
-	enemy.play_animation("Monstr_run", 0.2, 1.0)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_RUN, 0.2, 1.0)
+	stuck_detector.init(stuck_threshold)
 	# print("[FSM] Enter Chase")
 
 func physics_update(delta: float) -> void:
 	if not is_instance_valid(enemy.player):
-		transitioned.emit(self, "patrol")
+		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 
 	# 1. Обновляем таймеры видимости
@@ -42,7 +43,7 @@ func physics_update(delta: float) -> void:
 	# Если мы в радиусе атаки и кулдаун готов -> Атака
 	if dist_to_player <= enemy.attack_component.attack_range:
 		if enemy.attack_component.is_attack_ready():
-			transitioned.emit(self, "attack")
+			transitioned.emit(self, GameConstants.STATE_ATTACK)
 			return
 		# Если кулдаун не готов, можно кружить (орбита), но для простоты пока стоим/двигаемся медленно
 		# (Логику орбиты можно добавить сюда же)
@@ -50,28 +51,17 @@ func physics_update(delta: float) -> void:
 	# 3. Условия выхода из погони
 	# Потеряли из виду надолго
 	if time_since_player_seen > chase_memory_duration:
-		transitioned.emit(self, "patrol")
+		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 		
 	# Игрок слишком далеко (абсолютный лимит)
 	if dist_to_player > enemy.vision_component.lost_sight_range:
-		transitioned.emit(self, "patrol")
+		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 
 	# 4. Логика застревания (Stuck Detection)
-	# Если дистанция не сокращается, накапливаем таймер
-	if last_dist_to_target != INF and dist_to_player > last_dist_to_target - 0.05:
-		# Если мы движемся (попытка), но дистанция не меняется
-		if enemy.velocity.length() < 0.5: 
-			time_stuck += delta
-	else:
-		time_stuck = max(time_stuck - delta * 2.0, 0.0)
-	
-	last_dist_to_target = dist_to_player
-	
-	if time_stuck > stuck_threshold:
-		# print("[FSM] Stuck in Chase -> Frustrated")
-		transitioned.emit(self, "frustrated")
+	if stuck_detector.check(delta, enemy.velocity):
+		transitioned.emit(self, GameConstants.STATE_FRUSTRATED)
 		return
 
 	# 5. Движение

@@ -14,7 +14,7 @@ func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
 	
-	enemy.play_animation("Monstr_idle", 0.2, 1.0)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_IDLE, 0.2, 1.0)
 	
 	timer = randf_range(idle_duration_min, idle_duration_max)
 	idle_look_timer = randf_range(1.5, 4.0)
@@ -27,7 +27,7 @@ func update(delta: float) -> void:
 	
 	# Если увидели игрока -> Погоня
 	if enemy.vision_component.can_see_target(enemy.player):
-		transitioned.emit(self, "chase")
+		transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 	
 	# Логика оглядывания
@@ -35,7 +35,7 @@ func update(delta: float) -> void:
 	
 	# Таймер истек -> Патруль
 	if timer <= 0:
-		transitioned.emit(self, "patrol")
+		transitioned.emit(self, GameConstants.STATE_PATROL)
 
 func _handle_looking_around(delta: float) -> void:
 	idle_look_timer -= delta

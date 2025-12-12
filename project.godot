@@ -43,6 +43,7 @@ config/icon="res://icon.svg"
 
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
+GameEvents="*res://common/autoload/game_events.gd"
 
 [display]
 

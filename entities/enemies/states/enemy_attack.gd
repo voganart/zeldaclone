@@ -26,14 +26,14 @@ func physics_update(delta: float) -> void:
 	
 	# 2. Проверка валидности цели
 	if not is_instance_valid(enemy.player):
-		transitioned.emit(self, "patrol") # Или Idle
+		transitioned.emit(self, GameConstants.STATE_PATROL) # Или Idle
 		return
 		
 	var dist = enemy.global_position.distance_to(enemy.player.global_position)
 	
 	# Если игрок убежал далеко -> Chase
 	if dist > enemy.attack_component.attack_range * 1.5:
-		transitioned.emit(self, "chase")
+		transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 	
 	# 3. Атака или Ожидание
@@ -41,7 +41,7 @@ func physics_update(delta: float) -> void:
 		_perform_attack()
 	else:
 		# Просто смотрим на игрока и ждем отката (Combat Idle)
-		enemy.play_animation("Monstr_attack_idle", 0.2, 1.0)
+		enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
 		enemy.handle_rotation(delta, enemy.player.global_position)
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
 
@@ -70,12 +70,12 @@ func _handle_retreat(delta: float) -> void:
 	if enemy.attack_component.tactical_retreat_pause_timer > 0:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
-		enemy.play_animation("Monstr_attack_idle", 0.2, 1.0)
+		enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
 		
 		if enemy.attack_component.tactical_retreat_pause_timer <= 0:
 			# Пауза закончилась — возвращаемся в бой (Chase решит, атаковать или сблизиться)
 			enemy.attack_component.clear_retreat_state()
-			transitioned.emit(self, "chase")
+			transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 
 	# Движение к точке отступления
@@ -84,7 +84,7 @@ func _handle_retreat(delta: float) -> void:
 	enemy.move_toward_path()
 	
 	# Смотрим в сторону движения при отступлении, чтобы не пятиться странно
-	enemy.handle_rotation(delta) 
+	enemy.handle_rotation(delta)
 	enemy.update_movement_animation(delta)
 	
 	# Проверка достижения точки

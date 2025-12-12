@@ -36,12 +36,11 @@ extends CharacterBody3D
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
 @onready var vfx_pull: Node3D = $"../../../VfxPull" # Adjust path as needed
-@onready var player: Node3D = get_tree().get_first_node_in_group("player")
+@onready var player: Node3D = get_tree().get_first_node_in_group(GameConstants.GROUP_PLAYER)
 @onready var patrol_zone: Area3D = get_parent() as Area3D
 
 # UI References
-@onready var health_bar_node: Node3D = $HealthBar3D
-var health_bar_mesh: MeshInstance3D
+@onready var health_bar: EnemyHealthBar = $HealthBar3D
 
 # ============================================================================
 # SHARED DATA (Accessible by States)
@@ -75,8 +74,6 @@ func _ready() -> void:
 	if health_component:
 		health_component.died.connect(_on_died)
 		health_component.health_changed.connect(_on_health_changed)
-	
-	_setup_health_bar()
 
 func _physics_process(delta: float) -> void:
 	# Гравитация применяется всегда
@@ -84,19 +81,12 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 	vertical_velocity = velocity.y
 	
-	# Уменьшаем кулдаун фрустрации (используется в Patrol State)
 	if frustrated_cooldown > 0:
 		frustrated_cooldown = max(frustrated_cooldown - delta, 0.0)
-
-	# FSM обновляется автоматически внутри StateMachine._physics_process
-	# Здесь мы только обрабатываем результат расчетов физики (move_and_slide вызывается в _on_velocity_computed)
-	
-	# Если мы НЕ используем Avoidance (например, при атаке или простое), 
-	# нам нужно вызывать move_and_slide вручную, если velocity была установлена напрямую.
-	# Но nav_agent.velocity_computed вызывается только если мы устанавливаем nav_agent.velocity.
-	
-	# Для упрощения: состояния устанавливают nav_agent.velocity, а _on_velocity_computed двигает тело.
-	# Если состояния хотят остановить врага, они ставят nav_agent.velocity = Vector3.ZERO.
+		
+	var state_name = state_machine.current_state.name.to_lower()
+	if state_name != "chase" and state_name != "patrol":
+		move_and_slide()
 
 # ============================================================================
 # MOVEMENT HELPERS (Called by States)
@@ -119,7 +109,6 @@ func move_toward_path() -> void:
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	# Если мертв или в нокдауне, управление физикой может отличаться
 	# (Логика нокбэка может быть вынесена в состояние KnockbackState)
-	
 	velocity.x = safe_velocity.x + external_push.x
 	velocity.z = safe_velocity.z + external_push.z
 	velocity.y = vertical_velocity # Сохраняем гравитацию
@@ -166,19 +155,19 @@ func update_movement_animation(delta: float) -> void:
 	if speed_2d > 0.1:
 		if current_movement_blend < 0.5:
 			var walk_scale = clamp(speed_2d / walk_speed, 0.5, 1.5) if walk_speed > 0 else 1.0
-			play_animation("Monstr_walk", 0.2, walk_scale)
+			play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, walk_scale)
 		else:
 			var run_scale = clamp(speed_2d / run_speed, 0.5, 1.5) if run_speed > 0 else 1.0
-			play_animation("Monstr_run", 0.2, run_scale)
+			play_animation(GameConstants.ANIM_ENEMY_RUN, 0.2, run_scale)
 	else:
-		play_animation("Monstr_idle", 0.2, 1.0)
+		play_animation(GameConstants.ANIM_ENEMY_IDLE, 0.2, 1.0)
 
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	# Если уже мертв, игнорируем
-	if state_machine.current_state.name.to_lower() == "dead":
+	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
 		return
 
 	if vfx_pull:
@@ -195,14 +184,13 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 		# Переход в состояние Knockback (если оно есть)
 		# state_machine.change_state("knockback") 
 		# Пока что просто применяем импульс, состояние Chase/Patrol обработает это
-		
-	# Обновление UI бара
-	_show_health_bar()
 
 func _on_died() -> void:
 	emit_signal("died")
-	_hide_health_bar()
-	state_machine.change_state("dead") # Переход в состояние смерти
+	# Скрываем бар через компонент
+	if health_bar:
+		health_bar.visible = false
+	state_machine.change_state(GameConstants.STATE_DEAD)
 
 # Animation Event Call
 func _check_attack_hit() -> void:
@@ -236,29 +224,7 @@ func _check_single_hand_hit(hand_area: Area3D) -> bool:
 # ============================================================================
 # UI & MISC
 # ============================================================================
-func _setup_health_bar() -> void:
-	if health_bar_node:
-		for child in health_bar_node.get_children():
-			if child is MeshInstance3D:
-				health_bar_mesh = child
-				break
-	_update_health_bar_visuals(1.0, 1.0, 0.0)
 
-func _on_health_changed(_new_health: float) -> void:
-	_show_health_bar()
-
-func _show_health_bar() -> void:
-	if not health_component or not health_bar_mesh: return
-	var h = health_component.get_health() / health_component.get_max_health()
-	_update_health_bar_visuals(h, h, 1.0)
-	# TODO: Добавить логику плавного исчезновения в _process или в UI компонент
-
-func _hide_health_bar() -> void:
-	if health_bar_mesh:
-		health_bar_mesh.visible = false
-
-func _update_health_bar_visuals(hp: float, delayed: float, opacity: float) -> void:
-	if health_bar_mesh:
-		health_bar_mesh.set_instance_shader_parameter("health", hp)
-		health_bar_mesh.set_instance_shader_parameter("delayed_health", delayed)
-		health_bar_mesh.set_instance_shader_parameter("opacity", opacity)
+func _on_health_changed(new_health: float) -> void:
+	if health_bar and health_component:
+		health_bar.update_health(new_health, health_component.get_max_health())

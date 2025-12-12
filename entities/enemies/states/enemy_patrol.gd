@@ -12,7 +12,7 @@ func enter() -> void:
 	
 	time_stuck = 0.0
 	_set_random_patrol_target()
-	enemy.play_animation("Monstr_walk", 0.2, 1.0)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, 1.0)
 	
 	# print("[FSM] Enter Patrol")
 
@@ -20,7 +20,7 @@ func physics_update(delta: float) -> void:
 	# Проверка на обнаружение игрока (с учетом кулдауна фрустрации)
 	if enemy.frustrated_cooldown <= 0:
 		if enemy.vision_component.can_see_target(enemy.player):
-			transitioned.emit(self, "chase")
+			transitioned.emit(self, GameConstants.STATE_CHASE)
 			return
 
 	# Проверка застревания

@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=4 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=35 format=4 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://entities/levels/test_level/enemy_spawner.tscn" id="1_nb3sg"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://bs37mw4nd5fcs" path="res://environment/island/grass.glb" id="8_nb3sg"]
 [ext_resource type="Shader" uid="uid://d4cci5dovs27b" path="res://water_shader/shaders/water_style.gdshader" id="9_p7nu3"]
 [ext_resource type="Shader" uid="uid://c8ktwvuun6cjf" path="res://entities/levels/island/grass/grass.tres" id="10_nb3sg"]
+[ext_resource type="Script" uid="uid://8afyhmg3uo5n" path="res://UI/player_ui/player_health_label.gd" id="13_jnjk1"]
 [ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://DebugOverlay/canvas_layer.tscn" id="13_qmhhi"]
 [ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="14_tfnen"]
 [ext_resource type="Script" path="res://vfx/blood_splash/VfxPool.gd" id="15_bi1di"]
@@ -382,6 +383,7 @@ offset_bottom = 20.0
 size_flags_horizontal = 0
 theme_override_font_sizes/font_size = 50
 text = "10"
+script = ExtResource("13_jnjk1")
 metadata/_edit_use_anchors_ = true
 
 [node name="CanvasLayer" parent="." instance=ExtResource("13_qmhhi")]

@@ -68,7 +68,7 @@ func perform_dash() -> void:
 	
 	# Анимация
 	if actor.has_node("character/AnimationPlayer"):
-		actor.get_node("character/AnimationPlayer").play("Boy_air_dash", 0.1, 1.0)
+		actor.get_node("character/AnimationPlayer").play(GameConstants.ANIM_PLAYER_AIR_DASH, 0.1, 1.0)
 	
 	print("Air Dash Ability Started!")
 
@@ -86,5 +86,5 @@ func _handle_dash_physics() -> void:
 	# Проверка столкновения со стеной (как в оригинале)
 	var collision = actor.get_last_slide_collision()
 	if collision:
-		if collision.get_normal().dot(Vector3.UP) < 0.7: 
+		if collision.get_normal().dot(Vector3.UP) < 0.7:
 			stop_dash()

@@ -19,7 +19,7 @@ var is_recovering: bool = false # <--- НОВЫЙ ФЛАГ
 var cooldown_timer: float = 0.0
 var _windup_timer: float = 0.0
 var _fall_time: float = 0.0
-var _animation_phase: String = "" 
+var _animation_phase: String = ""
 var _impact_processed: bool = false
 var _playing_end_anim: bool = false
 
@@ -66,7 +66,7 @@ func start_slam() -> void:
 	actor.set_collision_mask_value(3, false)
 	actor.velocity = Vector3.ZERO
 	
-	anim_player.play("Boy_attack_air_naked_start", 0.1, 0.5)
+	anim_player.play(GameConstants.ANIM_PLAYER_SLAM_START, 0.1, 0.5)
 
 func update_physics(delta: float) -> bool:
 	# 1. Если мы в фазе восстановления (анимация приземления), блокируем физику игрока
@@ -74,7 +74,7 @@ func update_physics(delta: float) -> bool:
 		# Можно добавить небольшое трение, чтобы игрок не скользил
 		actor.velocity.x = move_toward(actor.velocity.x, 0, 1.0)
 		actor.velocity.z = move_toward(actor.velocity.z, 0, 1.0)
-		return true 
+		return true
 
 	if not is_slamming:
 		return false
@@ -82,7 +82,7 @@ func update_physics(delta: float) -> bool:
 	# Если коснулись пола — удар
 	if actor.is_on_floor() and not _impact_processed:
 		_perform_impact()
-		return true 
+		return true
 		
 	# Фаза Windup
 	if _windup_timer > 0:
@@ -90,7 +90,7 @@ func update_physics(delta: float) -> bool:
 		actor.velocity = Vector3.ZERO
 		if _windup_timer <= 0:
 			_animation_phase = "mid"
-			anim_player.play("Boy_attack_air_naked_mid", 0.2, 1.0)
+			anim_player.play(GameConstants.ANIM_PLAYER_SLAM_MID, 0.2, 1.0)
 		return true
 	
 	# Фаза падения
@@ -100,7 +100,7 @@ func update_physics(delta: float) -> bool:
 	
 	actor.velocity.x = 0
 	actor.velocity.z = 0
-	actor.velocity.y = -current_speed
+	actor.velocity.y = - current_speed
 	
 	_check_ground_proximity()
 	
@@ -120,7 +120,7 @@ func _check_ground_proximity() -> void:
 	if result:
 		_animation_phase = "end"
 		_playing_end_anim = true
-		anim_player.play("Boy_attack_air_naked_end", 0.1, slam_end_anim_speed)
+		anim_player.play(GameConstants.ANIM_PLAYER_SLAM_END, 0.1, slam_end_anim_speed)
 
 func _perform_impact() -> void:
 	if _impact_processed: return
@@ -129,14 +129,14 @@ func _perform_impact() -> void:
 	# Включаем фазу восстановления. 
 	# Теперь update_physics будет возвращать true, блокируя Player.gd
 	is_slamming = false
-	is_recovering = true 
+	is_recovering = true
 	
 	# Гарантируем запуск анимации, если Raycast промахнулся
-	if not _playing_end_anim or anim_player.current_animation != "Boy_attack_air_naked_end":
-		anim_player.play("Boy_attack_air_naked_end", 0.025, slam_end_anim_speed)
+	if not _playing_end_anim or anim_player.current_animation != GameConstants.ANIM_PLAYER_SLAM_END:
+		anim_player.play(GameConstants.ANIM_PLAYER_SLAM_END, 0.025, slam_end_anim_speed)
 	
 	# Ждем окончания анимации
-	var anim_len = anim_player.get_animation("Boy_attack_air_naked_end").length
+	var anim_len = anim_player.get_animation(GameConstants.ANIM_PLAYER_SLAM_END).length
 	# Делим на скорость воспроизведения
 	var wait_time = anim_len / slam_end_anim_speed
 	
@@ -148,13 +148,14 @@ func _perform_impact() -> void:
 	
 	# Ждем, пока проиграется анимация
 	await get_tree().create_timer(wait_time).timeout
-	
+	if not is_instance_valid(actor):
+		return
 	# Возвращаем управление игроку
 	is_recovering = false
 	_playing_end_anim = false
 
 func _deal_damage() -> void:
-	var enemies = get_tree().get_nodes_in_group("enemies")
+	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
 	for enemy in enemies:
 		if not is_instance_valid(enemy): continue
 		

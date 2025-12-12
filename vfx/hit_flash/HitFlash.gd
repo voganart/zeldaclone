@@ -43,18 +43,21 @@ func flash():
 	if shader_mat == null:
 		return
 
-	shader_mat.set_shader_parameter("use_hit_flash", true)
-	shader_mat.set_shader_parameter("hit_flash_color", flash_color)
-	shader_mat.set_shader_parameter("hit_flash_strength", flash_strength)
+	# Сбрасываем предыдущий Tween, если он еще идет (защита от спама ударов)
+	var tween = create_tween()
+	
+	# Устанавливаем начальные значения
+	shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_USE, true)
+	shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_COLOR, flash_color)
+	shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_STRENGTH, flash_strength)
 
-	_fade_out()
-
-
-func _fade_out() -> void:
-	var strength := flash_strength
-	while strength > 0.0:
-		strength -= get_process_delta_time() / flash_time
-		shader_mat.set_shader_parameter("hit_flash_strength", max(strength, 0.0))
-		await get_tree().process_frame
-
-	shader_mat.set_shader_parameter("use_hit_flash", false)
+	# Анимируем параметр 'hit_flash_strength' от текущего до 0.0
+	tween.tween_method(
+		func(value): shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_STRENGTH, value),
+		flash_strength,
+		0.0,
+		flash_time
+	)
+	
+	# В конце выключаем эффект
+	tween.tween_callback(func(): shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_USE, false))

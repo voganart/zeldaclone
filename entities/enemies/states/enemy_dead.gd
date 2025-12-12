@@ -22,7 +22,7 @@ func enter() -> void:
 	if enemy.punch_hand_l: enemy.punch_hand_l.set_deferred("monitoring", false)
 	
 	# Анимация
-	enemy.play_animation("Monstr_death", 0.2, 0.7)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_DEATH, 0.2, 0.7)
 	
 	# Ждем окончания анимации + время лежания
 	await enemy.anim_player.animation_finished
@@ -31,10 +31,10 @@ func enter() -> void:
 	_fade_out_and_free()
 
 func _fade_out_and_free() -> void:
+	# ... (код сбора мешей и материалов оставляем как был) ...
 	# 1. Сбор мешей и материалов
 	var meshes_to_fade: Array[MeshInstance3D] = []
 	var materials_to_fade: Array[ShaderMaterial] = []
-	
 	_collect_meshes(enemy, meshes_to_fade)
 	
 	for mesh in meshes_to_fade:
@@ -43,18 +43,19 @@ func _fade_out_and_free() -> void:
 			var new_mat = mat.duplicate()
 			mesh.set_surface_override_material(0, new_mat)
 			materials_to_fade.append(new_mat)
-	
-	# 2. Цикл растворения
+
+	# 2. Безопасный цикл растворения
 	if materials_to_fade.size() > 0:
 		var t: float = 0.0
-		var fade_speed: float = 0.5 # Объявляем переменную здесь, перед циклом
+		var fade_speed: float = 0.5
 		
 		while t < 1.0:
-			# Используем дельту времени для плавности
-			var dt = enemy.get_process_delta_time()
-			# Защита от нулевой дельты (на всякий случай)
-			if dt <= 0.0: dt = 0.016 
-			
+			# !!! ВАЖНО: Проверка, жив ли враг
+			if not is_instance_valid(enemy) or not enemy.is_inside_tree():
+				return
+
+			# Используем глобальное время, так как physics_process может быть отключен
+			var dt = get_process_delta_time()
 			t += dt * fade_speed
 			
 			for mat in materials_to_fade:
@@ -62,12 +63,13 @@ func _fade_out_and_free() -> void:
 				
 			await get_tree().process_frame
 			
-	enemy.queue_free()
+	if is_instance_valid(enemy):
+		enemy.queue_free()
 
 func _collect_meshes(node: Node, result: Array[MeshInstance3D]) -> void:
 	if node is MeshInstance3D:
 		# Игнорируем дебажные сферы, если они есть
-		if "Debug" not in node.name: 
+		if "Debug" not in node.name:
 			result.append(node)
 	for child in node.get_children():
 		_collect_meshes(child, result)

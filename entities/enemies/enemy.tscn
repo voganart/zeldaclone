@@ -1,8 +1,9 @@
-[gd_scene load_steps=19 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=20 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://UI/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
 [ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://entities/health_component/HealthComponent.tscn" id="2_wqcwe"]
+[ext_resource type="Script" uid="uid://nqcrxsuj1cdf" path="res://UI/HealthBar3D/enemy_health_bar.gd" id="3_2ggct"]
 [ext_resource type="PackedScene" uid="uid://duk5b06ohkpsc" path="res://entities/enemies/monstr.tscn" id="3_5lf1o"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="4_msovg"]
 [ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://entities/player/assets/toonShader.gdshader" id="5_w4yt1"]
@@ -63,6 +64,7 @@ knockback_duration = 0.1
 
 [node name="HealthBar3D" parent="." instance=ExtResource("2_twyc1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.175171, 0)
+script = ExtResource("3_2ggct")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
 max_health = 5.0

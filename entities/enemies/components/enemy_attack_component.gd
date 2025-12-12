@@ -14,7 +14,7 @@ extends Node
 @export var tactical_retreat_pause_max: float = 1.5
 
 # Данные об атаках
-var monster_attacks = ["Monstr_attack_1", "Monstr_attack_2"]
+var monster_attacks = [GameConstants.ANIM_ENEMY_ATTACK_1, GameConstants.ANIM_ENEMY_ATTACK_2]
 var last_attack_index = -1
 var last_attack_time: float = -999.0
 
@@ -47,7 +47,7 @@ func _check_for_tactical_retreat() -> void:
 	if randf() < tactical_retreat_chance:
 		should_tactical_retreat = true
 		# Таймер паузы будет установлен, когда враг доберется до точки
-		tactical_retreat_pause_timer = 0.0 
+		tactical_retreat_pause_timer = 0.0
 	else:
 		should_tactical_retreat = false
 

@@ -43,8 +43,13 @@ func _enable_particles(node):
 			child.one_shot = true
 			child.emitting = true
 		_enable_particles(child)
-		
+
 func _return_to_pool_later(effect):
-	await get_tree().create_timer(effect_lifetime).timeout
-	effect.visible = false
-	available.append(effect)
+	# Создаем Tween, который привязан к самому эффекту (effect)
+	# Если эффект будет удален, Tween тоже удалится (безопасно)
+	var tween = effect.create_tween()
+	tween.tween_interval(effect_lifetime)
+	tween.tween_callback(func():
+		effect.visible = false
+		effect.global_position = Vector3(0, -1000, 0) # Убираем далеко, чтобы не мешал
+		available.append(effect))

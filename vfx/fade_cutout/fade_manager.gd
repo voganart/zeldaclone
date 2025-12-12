@@ -13,11 +13,11 @@ func _process(_delta):
 		return
 	var pos = player.global_position
 	for mat in fade_materials:
-		mat.set_shader_parameter("player_position", pos)
+		mat.set_shader_parameter(GameConstants.SHADER_PARAM_PLAYER_POS, pos)
 
 func _collect_fade_materials():
 	fade_materials.clear()
-	for node in get_tree().get_nodes_in_group("fade_objects"):
+	for node in get_tree().get_nodes_in_group(GameConstants.GROUP_FADE_OBJECTS):
 		if node is MeshInstance3D:
 			# берем material_override, и если у него есть next_pass — используем next_pass
 			var main_mat = node.get_active_material(0)
