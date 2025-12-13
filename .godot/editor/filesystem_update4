@@ -31,3 +31,6 @@ res://entities/player/states/player_move.gd
 res://entities/player/states/player_air.gd
 res://entities/player/states/player_attack.gd
 res://entities/player/states/player_roll.gd
+res://common/autoload/game_manager.gd
+res://vfx/camera_shaker/camera_shaker.gd
+res://entities/player/abilities/ground_slam_ability.gd

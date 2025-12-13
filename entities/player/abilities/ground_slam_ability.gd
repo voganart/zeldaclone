@@ -130,7 +130,7 @@ func _perform_impact() -> void:
 	# Теперь update_physics будет возвращать true, блокируя Player.gd
 	is_slamming = false
 	is_recovering = true
-	
+	get_tree().call_group("camera_shaker", "add_trauma", 5.8)
 	# Гарантируем запуск анимации, если Raycast промахнулся
 	if not _playing_end_anim or anim_player.current_animation != GameConstants.ANIM_PLAYER_SLAM_END:
 		anim_player.play(GameConstants.ANIM_PLAYER_SLAM_END, 0.025, slam_end_anim_speed)
@@ -168,4 +168,4 @@ func _deal_damage() -> void:
 				enemy.receive_push(push_dir * 3.0)
 			
 			if enemy.has_method("take_damage"):
-				enemy.take_damage(slam_damage, push_dir * slam_knockback)
+				enemy.take_damage(slam_damage, push_dir * slam_knockback, true)

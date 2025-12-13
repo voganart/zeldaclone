@@ -147,7 +147,6 @@ primary_attack_speed = 1.0
 attack_cooldown = 0.0
 combo_window_time = 0.5
 combo_cooldown_after_combo = 0.8
-attack_knockback_strength = 1.0
 attack_knockback_height = 1.0
 running_attack_impulse = 1.5
 walking_attack_impulse = 1.0

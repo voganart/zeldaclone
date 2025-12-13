@@ -408,9 +408,22 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 	if not body.is_in_group(GameConstants.GROUP_ENEMIES): return
 	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
 	if body.has_method("take_damage"):
+		var is_finisher = (current_attack_damage >= 2.0)
+		var knockback_vec = Vector3.ZERO
 		if current_attack_knockback_enabled:
-			var vec = dir * attack_knockback_strength
-			vec.y = attack_knockback_height
-			body.take_damage(current_attack_damage, vec)
-		else:
-			body.take_damage(current_attack_damage, Vector3.ZERO)
+			knockback_vec = dir * attack_knockback_strength
+			if is_finisher:
+				# Подбрасываем вверх!
+				# Значение 8.0 - 10.0 обычно хорошо чувствуется при гравитации ~20-30
+				knockback_vec.y = 10.0 
+				
+				# Можно немного уменьшить отталкивание назад, чтобы он подлетел "на месте"
+				knockback_vec.x *= 0.5
+				knockback_vec.z *= 0.5
+				print("DEBUG: Uppercut! Vector: ", knockback_vec) # <--- ДОБАВЬ ЭТО
+			else:
+				# Обычный удар - легкий подскок
+				knockback_vec.y = attack_knockback_height # (например 2.0)
+		
+		# Передаем вектор
+		body.take_damage(current_attack_damage, knockback_vec, is_finisher)

@@ -1,10 +1,12 @@
-[gd_scene load_steps=35 format=4 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=38 format=4 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://entities/levels/test_level/enemy_spawner.tscn" id="1_nb3sg"]
 [ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="2_u71mg"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="3_5v5q3"]
 [ext_resource type="PackedScene" uid="uid://c364awakh0qqj" path="res://entities/player/player.tscn" id="4_5iexk"]
+[ext_resource type="Script" uid="uid://cuffvge5ad4aa" path="res://addons/phantom_camera/scripts/resources/phantom_camera_noise_3d.gd" id="4_bmxuo"]
+[ext_resource type="Script" uid="uid://35ri7723h3wb" path="res://vfx/camera_shaker/camera_shaker.gd" id="5_dev6b"]
 [ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemies/enemy.tscn" id="5_u71mg"]
 [ext_resource type="PackedScene" uid="uid://g7e0n43b2svy" path="res://environment/movable_objects/box_1x1.tscn" id="7_5iexk"]
 [ext_resource type="PackedScene" uid="uid://3qeblptfymiv" path="res://environment/island/island.tscn" id="7_owp05"]
@@ -48,6 +50,14 @@ adjustment_saturation = 1.1
 
 [sub_resource type="Resource" id="Resource_b121j"]
 script = ExtResource("3_5v5q3")
+
+[sub_resource type="Resource" id="Resource_dev6b"]
+script = ExtResource("4_bmxuo")
+amplitude = 0.0
+frequency = 5.0
+randomize_noise_seed = 1
+positional_noise = true
+metadata/_custom_type_script = "uid://cuffvge5ad4aa"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_u71mg"]
 size = Vector3(23.754791, 10.51172, 33.32413)
@@ -179,7 +189,7 @@ environment = SubResource("Environment_k5f4k")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -5.1335325, 8.19233, 9.802958)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.70710677, 0, -0.7071068, 0.70710677, -5.1335325, 8.19233, 9.802958)
 current = true
 fov = 50.0
 
@@ -203,7 +213,12 @@ follow_distance = 10.0
 dead_zone_width = 0.1
 dead_zone_height = 0.05
 spring_length = 10.0
+noise = SubResource("Resource_dev6b")
+_preview_noise = false
 metadata/_custom_type_script = "uid://csjccrhj5wnx7"
+
+[node name="CameraShaker" type="Node" parent="PhantomCamera3D"]
+script = ExtResource("5_dev6b")
 
 [node name="Entities" type="Node3D" parent="."]
 

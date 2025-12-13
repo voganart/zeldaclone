@@ -22,7 +22,7 @@ extends CharacterBody3D
 @export var rotation_speed: float = 6.0
 @export var combat_rotation_speed: float = 30.0
 @export_range(0, 180) var strafe_view_angle: float = 45.0
-@export var gravity: float = 100.0
+@export var gravity: float = 30.0
 @export var knockback_strength: float = 2.0
 @export var knockback_duration: float = 0.5
 
@@ -46,7 +46,6 @@ var vfx_pull: Node3D
 
 # UI References
 @onready var health_bar: EnemyHealthBar = $HealthBar3D
-
 # ============================================================================
 # SHARED DATA (Accessible by States)
 # ============================================================================
@@ -58,7 +57,8 @@ var frustrated_cooldown: float = 0.0 # Кулдаун после фрустра�
 # Animation Blending Vars
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
-
+var is_knocked_back: bool = false
+var knockback_timer: float = 0.0
 # Signals
 signal died
 
@@ -86,16 +86,35 @@ func _ready() -> void:
 		health_component.health_changed.connect(_on_health_changed)
 
 func _physics_process(delta: float) -> void:
-	# Гравитация применяется всегда
+	# 1. Применяем гравитацию ВСЕГДА, если не на полу
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-	vertical_velocity = velocity.y
+
+	# 2. Если враг в нокбэке (полете от удара)
+	if is_knocked_back:
+		knockback_timer -= delta
+		if knockback_timer <= 0:
+			is_knocked_back = false
+			# Сбрасываем горизонтальную инерцию при приземлении/окончании
+			velocity.x = 0
+			velocity.z = 0
+		
+		# В полете работает только гравитация и затухание горизонтальной скорости (трение воздуха)
+		velocity.x = move_toward(velocity.x, 0, 2.0 * delta) 
+		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
+		
+		# Двигаем тело вручную, игнорируя NavAgent
+		move_and_slide()
+		return # <--- ВАЖНО: Прерываем функцию, чтобы StateMachine не лезла в управление
+
+	# 3. Обычное поведение (управляется через StateMachine -> NavAgent)
 	
 	if frustrated_cooldown > 0:
 		frustrated_cooldown = max(frustrated_cooldown - delta, 0.0)
-		
+
 	var state_name = state_machine.current_state.name.to_lower()
 	if state_name != "chase" and state_name != "patrol":
+		# Для Idle/Attack мы просто падаем (гравитация) и применяем остаточную инерцию
 		move_and_slide()
 
 # ============================================================================
@@ -117,17 +136,13 @@ func move_toward_path() -> void:
 
 ## Callback от NavigationAgent (RVO Avoidance)
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	# Если мертв или в нокдауне, управление физикой может отличаться
-	# (Логика нокбэка может быть вынесена в состояние KnockbackState)
-	velocity.x = safe_velocity.x + external_push.x
-	velocity.z = safe_velocity.z + external_push.z
-	velocity.y = vertical_velocity # Сохраняем гравитацию
+	if is_knocked_back: return # Если нас пнули, навигация не должна мешать
+	
+	velocity.x = safe_velocity.x
+	velocity.z = safe_velocity.z
+	# Y не трогаем, он управляется гравитацией в _physics_process
 	
 	move_and_slide()
-	
-	vertical_velocity = velocity.y
-	# Затухание внешнего толчка
-	external_push = external_push.lerp(Vector3.ZERO, 0.1)
 
 ## Поворот к цели движения или к игроку
 
@@ -189,15 +204,31 @@ func update_movement_animation(delta: float) -> void:
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================
-func take_damage(amount: float, knockback_force: Vector3) -> void:
+func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
 	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
 		return
-	AIDirector.return_attack_token(self)
-	# !!! ИСПРАВЛЕНИЕ: Проверка на null
+	# --- ЛОГИКА СМЕРТЕЛЬНОГО УДАРА ---
+	# Проверяем, убьет ли этот удар врага
+	var current_hp = health_component.get_health()
+	var is_lethal = (current_hp - amount) <= 0
+	
+	# Считаем удар "тяжелым", если он был тяжелым изначально ИЛИ он смертельный
+	var perform_hit_stop = is_heavy_attack or is_lethal
+	
+	# Если смертельный - делаем фриз еще дольше и драматичнее
+	if is_lethal:
+		GameManager.hit_stop(0.05, 0.3) # Долгий фриз (0.3с)
+		get_tree().call_group("camera_shaker", "add_trauma", 0.8) # Сильная тряска
+	elif is_heavy_attack:
+		GameManager.hit_stop(0.05, 0.15)
+		get_tree().call_group("camera_shaker", "add_trauma", 0.6)
+	else:
+		get_tree().call_group("camera_shaker", "add_trauma", 0.2)
+	# --------------------------------
 	if vfx_pull:
 		vfx_pull.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
-	
 	$HitFlash.flash()
+	AIDirector.return_attack_token(self)
 	
 	if health_component:
 		health_component.take_damage(amount)
@@ -205,8 +236,13 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if state_machine and state_machine.current_state:
 		state_machine.current_state.on_damage_taken()
 		
-	if knockback_force.length() > 0.1:
-		velocity += knockback_force
+	if knockback_force.length() > 0.5:
+		velocity = knockback_force # Заменяем скорость, чтобы был резкий рывок
+		if is_heavy_attack or knockback_force.y > 5.0:
+			is_knocked_back = true
+			knockback_timer = 0.3 # Чуть больше полсекунды на полет
+			# NavAgent нужно сбросить, чтобы он не тянул к цели
+			nav_agent.set_velocity(Vector3.ZERO)
 
 func _on_died() -> void:
 	AIDirector.return_attack_token(self)
