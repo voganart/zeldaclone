@@ -1,6 +1,6 @@
 extends Node
 
-const MAX_ATTACKERS = 2 # !!! Временно поставь 1, чтобы проверить наверняка !!!
+const MAX_ATTACKERS = 1 # !!! Временно поставь 1, чтобы проверить наверняка !!!
 
 var current_attackers: Array[Enemy] = []
 

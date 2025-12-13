@@ -373,23 +373,30 @@ func push_obj():
 			collider.receive_push(-c.get_normal() * force)
 
 func check_jump_pass_through() -> void:
-	if is_on_floor() and not is_passing_through and not ground_slam_ability.is_slamming and not ground_slam_ability.is_recovering:
-		var standing_on_enemy = false
+	# 1. Если мы уже "проваливаемся" (маска врагов отключена)
+	if is_passing_through:
+		# Ждем, пока коснемся "настоящего" пола (World/Ground)
+		# Так как маска врагов отключена, is_on_floor() вернет true ИСКЛЮЧИТЕЛЬНО от земли/стен
+		if is_on_floor():
+			is_passing_through = false
+			set_collision_mask_value(3, true) # Включаем врагов обратно
+		return
+
+	# 2. Если мы стоим на чем-то (проверяем, не враг ли это)
+	if is_on_floor():
 		for i in get_slide_collision_count():
 			var c = get_slide_collision(i)
-			if c.get_collider().is_in_group(GameConstants.GROUP_ENEMIES) and c.get_normal().y > 0.5:
-				standing_on_enemy = true
-				break
-		if standing_on_enemy:
-			is_passing_through = true
-			is_invincible = true
-			set_collision_mask_value(3, false)
-			velocity.y = -5.0
-			global_position.y -= 0.1
-	if is_on_floor() and is_passing_through:
-		is_passing_through = false
-		is_invincible = false
-		set_collision_mask_value(3, true)
+			if c.get_collider().is_in_group(GameConstants.GROUP_ENEMIES):
+				# Если мы сверху (нормаль вверх)
+				if c.get_normal().y > 0.6:
+					# !!! FIX: Pass Through !!!
+					# Отключаем коллизию с врагами, чтобы провалиться сквозь них
+					is_passing_through = true
+					set_collision_mask_value(3, false)
+					
+					# Чуть сдвигаем вниз, чтобы гарантированно "войти" в коллайдер врага и не застрять на грани
+					global_position.y -= 0.05
+					break
 
 func _check_attack_hit() -> void:
 	var hits = false

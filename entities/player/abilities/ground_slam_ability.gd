@@ -162,10 +162,14 @@ func _deal_damage() -> void:
 		var dist = actor.global_position.distance_to(enemy.global_position)
 		if dist <= slam_radius:
 			var push_dir = (enemy.global_position - actor.global_position).normalized()
-			push_dir.y = 0.5
+			
+			# Формируем вектор отбрасывания: Сильный вертикальный подброс для Knockdown
+			var knockback_vec = push_dir * 8.0 # Горизонтальный разлет
+			knockback_vec.y = 3.0 # Вертикальный подброс (гарантирует анимацию полета)
 			
 			if enemy.has_method("receive_push"):
 				enemy.receive_push(push_dir * 3.0)
 			
 			if enemy.has_method("take_damage"):
-				enemy.take_damage(slam_damage, push_dir * slam_knockback, true)
+				# is_heavy_attack = true, плюс высокий Y вектор
+				enemy.take_damage(slam_damage, knockback_vec, true)

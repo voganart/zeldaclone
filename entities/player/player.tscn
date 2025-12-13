@@ -147,7 +147,6 @@ primary_attack_speed = 1.0
 attack_cooldown = 0.0
 combo_window_time = 0.5
 combo_cooldown_after_combo = 0.8
-knockback_duration = 1.0
 running_attack_impulse = 1.5
 walking_attack_impulse = 1.0
 punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")

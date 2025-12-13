@@ -13,6 +13,9 @@ func enter() -> void:
 	player.is_rolling = true
 	player.is_invincible = true
 	
+	# Проходим сквозь врагов (Layer 3)
+	player.set_collision_mask_value(3, false)
+	
 	# Сброс буфера
 	has_buffered_jump = false
 	jump_buffer_timer = 0.0
@@ -121,3 +124,5 @@ func _perform_roll_jump() -> void:
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false
+	# Возвращаем коллизию с врагами
+	player.set_collision_mask_value(3, true)

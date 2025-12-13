@@ -23,3 +23,8 @@ res://entities/player/player.tscn
 res://entities/enemies/states/enemy_chase.gd
 res://entities/enemies/states/enemy_frustrated.gd
 res://entities/enemies/states/enemy_patrol.gd
+res://entities/player/states/player_roll.gd
+res://common/autoload/ai_director.gd
+res://vfx/blood_splash/blood_splash.tscn
+res://entities/player/abilities/ground_slam_ability.gd
+res://UI/HealthBar3D/enemy_health_bar.gd

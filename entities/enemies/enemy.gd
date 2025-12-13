@@ -16,6 +16,14 @@ extends CharacterBody3D
 @export_range(0.0, 1.0) var flee_health_threshold: float = 0.25 # Убегает при 25% здоровья или меньше
 @export_range(0.0, 1.0) var flee_chance: float = 0.3 # Шанс (30%), что враг вообще захочет убегать
 
+@export_group("Hit Stop Settings")
+## Насколько замедляется время при смертельном ударе (0.0 - стоп, 1.0 - норма)
+@export var hit_stop_lethal_time_scale: float = 0.15
+## Длительность замедления при смерти
+@export var hit_stop_lethal_duration: float = 0.5
+## Длительность микро-фриза анимации при обычном ударе
+@export var hit_stop_local_duration: float = 0.08
+
 @export_group("Movement")
 @export var walk_speed: float = 1.5
 @export var run_speed: float = 3.5
@@ -235,7 +243,7 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	if not is_lethal:
 		if is_knockdown:
 			anim_player.play(GameConstants.ANIM_ENEMY_KNOCKDOWN, 0.0, 1.0)
-			hurt_lock_timer = 0.1
+			hurt_lock_timer = 0.3
 			anim_player.advance(0)
 		elif is_attacking:
 			# "Layered Hit": Если враг атакует, не сбиваем анимацию, но даем фриз (см. ниже)
@@ -243,7 +251,7 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 			pass
 		else:
 			anim_player.play(GameConstants.ANIM_ENEMY_HIT, 0.1, 1.0)
-			hurt_lock_timer = 0.05
+			hurt_lock_timer = 0.15
 			anim_player.advance(0)
 	
 	# --- 2. VFX и Камера ---
@@ -260,13 +268,13 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 
 	# --- 3. HIT STOP ---
 	if is_lethal:
-		GameManager.hit_stop_smooth(0.5, 0.15, 0.0, 0.3)
+		GameManager.hit_stop_smooth(hit_stop_lethal_duration, hit_stop_lethal_time_scale, 0.0, 0.3)
 	elif is_knockdown:
 		# При нокдауне полагаемся на глобальный фриз игрока
 		pass
 	else:
 		# Для обычных ударов и для "layered" ударов во время атаки
-		GameManager.hit_stop_local([anim_player], 0.08)
+		GameManager.hit_stop_local([anim_player], hit_stop_local_duration)
 	
 	AIDirector.return_attack_token(self)
 	
