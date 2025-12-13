@@ -14,6 +14,7 @@ extends CharacterBody3D
 @export var punch_area: Area3D # Основной конус атаки
 @export var can_flee: bool = true # Может ли этот тип врага вообще убегать
 @export_range(0.0, 1.0) var flee_health_threshold: float = 0.25 # Убегает при 25% здоровья или меньше
+@export_range(0.0, 1.0) var flee_chance: float = 0.3 # Шанс (30%), что враг вообще захочет убегать
 
 @export_group("Movement")
 @export var walk_speed: float = 1.5
@@ -59,6 +60,7 @@ var hurt_lock_timer: float = 0.0 # Таймер блокировки анима�
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 var is_knocked_back: bool = false
+var pending_death: bool = false # Флаг отложенной смерти (чтобы доиграть нокдаун)
 var knockback_timer: float = 0.0
 # Signals
 signal died
@@ -85,6 +87,10 @@ func _ready() -> void:
 	if health_component:
 		health_component.died.connect(_on_died)
 		health_component.health_changed.connect(_on_health_changed)
+		
+	# Определяем "характер" врага: 30% трусов, 70% храбрецов
+	if can_flee:
+		can_flee = (randf() <= flee_chance)
 
 func _physics_process(delta: float) -> void:
 	# 1. Применяем гравитацию ВСЕГДА, если не на полу
@@ -99,6 +105,13 @@ func _physics_process(delta: float) -> void:
 			# Сбрасываем горизонтальную инерцию при приземлении/окончании
 			velocity.x = 0
 			velocity.z = 0
+			
+			# === ОБРАБОТКА ОТЛОЖЕННОЙ СМЕРТИ ===
+			if pending_death:
+				pending_death = false
+				state_machine.change_state(GameConstants.STATE_DEAD)
+				if health_bar: health_bar.visible = false
+				emit_signal("died")
 		
 		# В полете работает только гравитация и затухание горизонтальной скорости (трение воздуха)
 		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
@@ -272,6 +285,11 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 			nav_agent.set_velocity(Vector3.ZERO)
 
 func _on_died() -> void:
+	# Если мы сейчас летим в нокдауне, откладываем смерть до приземления
+	if is_knocked_back:
+		pending_death = true
+		return
+
 	AIDirector.return_attack_token(self)
 	emit_signal("died")
 	# Скрываем бар через компонент

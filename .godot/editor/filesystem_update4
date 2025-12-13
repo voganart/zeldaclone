@@ -19,3 +19,7 @@ res://entities/player/player.gd
 res://entities/levels/test_level/level.tscn
 res://entities/enemies/enemy.gd
 res://entities/player/states/player_dead.gd
+res://entities/player/player.tscn
+res://entities/enemies/states/enemy_chase.gd
+res://entities/enemies/states/enemy_frustrated.gd
+res://entities/enemies/states/enemy_patrol.gd

@@ -22,6 +22,10 @@ func physics_update(delta: float) -> void:
 		if enemy.vision_component.can_see_target(enemy.player):
 			transitioned.emit(self, GameConstants.STATE_CHASE)
 			return
+	
+	# Пассивная регенерация здоровья (награда за выход из боя)
+	if enemy.health_component and enemy.health_component.current_health < enemy.health_component.max_health:
+		enemy.health_component.heal(10.0 * delta)
 
 	# Проверка застревания
 	if enemy.velocity.length() < 0.1:

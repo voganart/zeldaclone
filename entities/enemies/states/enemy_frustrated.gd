@@ -22,6 +22,10 @@ func update(delta: float) -> void:
 	if not enemy.anim_player.is_playing() or enemy.anim_player.current_animation != GameConstants.ANIM_ENEMY_ANGRY:
 		enemy.play_animation(GameConstants.ANIM_ENEMY_ANGRY, 0.1, 1.0)
 		
+	# Поворачиваемся к игроку, чтобы "ругаться" на него
+	if is_instance_valid(enemy.player):
+		enemy.handle_rotation(delta, enemy.player.global_position)
+		
 	# ПРОВЕРКА: Если игрок вдруг стал доступен (спрыгнул к нам) — прерываем
 	# Для простоты проверяем: виден ли игрок и есть ли путь (можно добавить проверку nav_agent.is_target_reachable(), если Godot 4.2+)
 	# Здесь упрощенно: если очень близко

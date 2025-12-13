@@ -204,7 +204,7 @@ func perform_jump() -> void:
 	current_jump_count += 1
 
 func rot_char(delta: float) -> void:
-	if is_knockbacked or is_knockback_stun: return
+	# if is_knockbacked or is_knockback_stun: return # Отключили, чтобы игрок сохранял контроль поворота
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
 	var vel_2d = Vector2(velocity.x, -velocity.z)

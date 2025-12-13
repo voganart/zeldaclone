@@ -5,6 +5,7 @@ extends State
 
 var time_since_player_seen: float = 0.0
 var time_stuck: float = 0.0
+var unreachable_timer: float = 0.0 # Таймер недосягаемости
 var last_dist_to_target: float = INF
 var stuck_detector = StuckDetector.new()
 # Ссылки на типизированного родителя для удобства
@@ -16,6 +17,7 @@ func enter() -> void:
 	
 	time_since_player_seen = 0.0
 	time_stuck = 0.0
+	unreachable_timer = 0.0
 	last_dist_to_target = INF
 	
 	# Сброс кулдауна фрустрации при начале погони
@@ -66,6 +68,21 @@ func physics_update(delta: float) -> void:
 		# Движение
 		enemy.nav_agent.target_position = enemy.player.global_position
 		enemy.move_toward_path()
+		
+		# ПРОВЕРКА 1: Застряли ли мы физически?
+		if stuck_detector.check(delta, enemy.velocity):
+			transitioned.emit(self, GameConstants.STATE_FRUSTRATED)
+			return
+
+		# ПРОВЕРКА 2: Достижима ли цель? (Например, игрок на возвышенности)
+		# ИСПРАВЛЕНИЕ: Добавили таймер, чтобы не триггерилось при обычном прыжке игрока
+		if not enemy.nav_agent.is_target_reachable():
+			unreachable_timer += delta
+			if unreachable_timer > 1.5: # Накопить 1.5 секунды недосягаемости
+				transitioned.emit(self, GameConstants.STATE_FRUSTRATED)
+				return
+		else:
+			unreachable_timer = 0.0
 		
 		# !!! НОВАЯ УМНАЯ ЛОГИКА ПОВОРОТА !!!
 		var move_direction = enemy.velocity.normalized()
