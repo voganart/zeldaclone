@@ -18,7 +18,7 @@ extends CharacterBody3D
 @export_group("Movement")
 @export var walk_speed: float = 1.5
 @export var run_speed: float = 3.5
-@export var retreat_speed: float = 2.5 
+@export var retreat_speed: float = 2.5
 @export var rotation_speed: float = 6.0
 @export var combat_rotation_speed: float = 30.0
 @export_range(0, 180) var strafe_view_angle: float = 45.0
@@ -53,6 +53,7 @@ var vertical_velocity: float = 0.0
 var external_push: Vector3 = Vector3.ZERO
 var last_known_player_pos: Vector3 = Vector3.ZERO
 var frustrated_cooldown: float = 0.0 # Кулдаун после фрустрации, чтобы сразу не агрился
+var hurt_lock_timer: float = 0.0 # Таймер блокировки анимаций
 
 # Animation Blending Vars
 var current_movement_blend: float = 0.0
@@ -100,7 +101,7 @@ func _physics_process(delta: float) -> void:
 			velocity.z = 0
 		
 		# В полете работает только гравитация и затухание горизонтальной скорости (трение воздуха)
-		velocity.x = move_toward(velocity.x, 0, 2.0 * delta) 
+		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
 		
 		# Двигаем тело вручную, игнорируя NavAgent
@@ -149,7 +150,7 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, speed_override: float = -1.0) -> void:
 	if target_override != Vector3.ZERO:
 		if global_position.distance_squared_to(target_override) < 0.01:
-			return 
+			return
 	var look_dir: Vector3
 	
 	if target_override != Vector3.ZERO:
@@ -161,7 +162,7 @@ func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, spee
 
 	look_dir.y = 0
 	if look_dir.is_normalized():
-		var current_forward = -global_transform.basis.z.normalized()
+		var current_forward = - global_transform.basis.z.normalized()
 		var angle_to_target = current_forward.signed_angle_to(look_dir, Vector3.UP)
 		
 		# Выбираем, какую скорость использовать
@@ -212,22 +213,48 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	var current_hp = health_component.get_health()
 	var is_lethal = (current_hp - amount) <= 0
 	
-	# Считаем удар "тяжелым", если он был тяжелым изначально ИЛИ он смертельный
-	var perform_hit_stop = is_heavy_attack or is_lethal
+	# === ФИКС ПРОБЛЕМЫ 1: Точное определение нокдауна ===
+	# Нокдаун если это Финишер/Слэм (Heavy) ИЛИ сила подбрасывания реальная (> 2.0)
+	var is_knockdown = is_heavy_attack or (knockback_force.y > 2.0)
+	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
 	
-	# Если смертельный - делаем фриз еще дольше и драматичнее
+	# --- 1. АНИМАЦИЯ ---
+	if not is_lethal:
+		if is_knockdown:
+			anim_player.play(GameConstants.ANIM_ENEMY_KNOCKDOWN, 0.0, 1.0)
+			hurt_lock_timer = 0.1
+			anim_player.advance(0)
+		elif is_attacking:
+			# "Layered Hit": Если враг атакует, не сбиваем анимацию, но даем фриз (см. ниже)
+			# Можно добавить короткий таймер, чтобы нельзя было спамить
+			pass
+		else:
+			anim_player.play(GameConstants.ANIM_ENEMY_HIT, 0.1, 1.0)
+			hurt_lock_timer = 0.05
+			anim_player.advance(0)
+	
+	# --- 2. VFX и Камера ---
 	if is_lethal:
-		GameManager.hit_stop(0.05, 0.3) # Долгий фриз (0.3с)
-		get_tree().call_group("camera_shaker", "add_trauma", 0.8) # Сильная тряска
+		get_tree().call_group("camera_shaker", "add_trauma", 0.8)
 	elif is_heavy_attack:
-		GameManager.hit_stop(0.05, 0.15)
 		get_tree().call_group("camera_shaker", "add_trauma", 0.6)
 	else:
 		get_tree().call_group("camera_shaker", "add_trauma", 0.2)
-	# --------------------------------
+	
 	if vfx_pull:
 		vfx_pull.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()
+
+	# --- 3. HIT STOP ---
+	if is_lethal:
+		GameManager.hit_stop_smooth(0.5, 0.15, 0.0, 0.3)
+	elif is_knockdown:
+		# При нокдауне полагаемся на глобальный фриз игрока
+		pass
+	else:
+		# Для обычных ударов и для "layered" ударов во время атаки
+		GameManager.hit_stop_local([anim_player], 0.08)
+	
 	AIDirector.return_attack_token(self)
 	
 	if health_component:
@@ -240,7 +267,7 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 		velocity = knockback_force # Заменяем скорость, чтобы был резкий рывок
 		if is_heavy_attack or knockback_force.y > 5.0:
 			is_knocked_back = true
-			knockback_timer = 0.3 # Чуть больше полсекунды на полет
+			knockback_timer = 0.1 # Чуть больше полсекунды на полет
 			# NavAgent нужно сбросить, чтобы он не тянул к цели
 			nav_agent.set_velocity(Vector3.ZERO)
 

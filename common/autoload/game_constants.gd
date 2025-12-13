@@ -62,6 +62,8 @@ const ANIM_ENEMY_ANGRY = "Monstr_angry" # Frustrated
 const ANIM_ENEMY_ATTACK_IDLE = "Monstr_attack_idle" # Combat Idle
 const ANIM_ENEMY_ATTACK_1 = "Monstr_attack_1"
 const ANIM_ENEMY_ATTACK_2 = "Monstr_attack_2"
+const ANIM_ENEMY_KNOCKDOWN = "Monstr_knockdown"
+const ANIM_ENEMY_HIT = "Monstr_hit"
 
 # --- ПАРАМЕТРЫ ШЕЙДЕРОВ (SHADER PARAMS) ---
 const SHADER_PARAM_PLAYER_POS = "player_position"

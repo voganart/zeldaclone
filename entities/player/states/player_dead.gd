@@ -5,11 +5,11 @@ var player: Player
 func enter() -> void:
 	player = entity as Player
 	# Запускаем анимацию
-	player.anim_player.play(GameConstants.ANIM_PLAYER_DEATH)
+	player.anim_player.play(GameConstants.ANIM_PLAYER_DEATH, 0.1, 0.8)
 	# Отключаем коллизии с врагами (опционально, слой 2 или 3)
 	player.set_collision_mask_value(3, false)
 	
-	print("[FSM] Player Dead")
+	#print("[FSM] Player Dead")
 
 func physics_update(delta: float) -> void:
 	# Оставляем только гравитацию и трение

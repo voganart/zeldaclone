@@ -244,6 +244,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.335703, 0, -5.48917)
 [node name="Enemy39" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.7630835, 0, -0.5413401)
 
+[node name="Enemy41" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.080539, 0, 6.1469383)
+
 [node name="Enemy40" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4951859, 0, -9.327648)
 

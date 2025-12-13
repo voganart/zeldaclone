@@ -414,13 +414,12 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 			knockback_vec = dir * attack_knockback_strength
 			if is_finisher:
 				# Подбрасываем вверх!
-				# Значение 8.0 - 10.0 обычно хорошо чувствуется при гравитации ~20-30
-				knockback_vec.y = 10.0 
+				# Было 10.0, уменьшаем по просьбе (например до 6.0)
+				knockback_vec.y = 6.0
 				
 				# Можно немного уменьшить отталкивание назад, чтобы он подлетел "на месте"
 				knockback_vec.x *= 0.5
 				knockback_vec.z *= 0.5
-				print("DEBUG: Uppercut! Vector: ", knockback_vec) # <--- ДОБАВЬ ЭТО
 			else:
 				# Обычный удар - легкий подскок
 				knockback_vec.y = attack_knockback_height # (например 2.0)
