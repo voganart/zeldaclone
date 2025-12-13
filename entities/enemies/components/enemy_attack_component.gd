@@ -10,6 +10,7 @@ extends Node
 @export_group("Tactical Retreat")
 @export var tactical_retreat_chance: float = 0.3 # 30% chance to retreat after attack
 @export var tactical_retreat_distance: float = 4.0
+@export var retreat_interrupt_range: float = 2.5
 @export var tactical_retreat_pause_min: float = 0.5
 @export var tactical_retreat_pause_max: float = 1.5
 

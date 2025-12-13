@@ -15,7 +15,7 @@
 [ext_resource type="Script" uid="uid://8afyhmg3uo5n" path="res://UI/player_ui/player_health_label.gd" id="13_jnjk1"]
 [ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://DebugOverlay/canvas_layer.tscn" id="13_qmhhi"]
 [ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="14_tfnen"]
-[ext_resource type="Script" path="res://vfx/blood_splash/VfxPool.gd" id="15_bi1di"]
+[ext_resource type="Script" uid="uid://cghbw6nlcm2el" path="res://vfx/blood_splash/VfxPool.gd" id="15_bi1di"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xfgcj"]
 sky_top_color = Color(0.3526861, 0.5895269, 1, 1)
@@ -30,9 +30,11 @@ sky_material = SubResource("ProceduralSkyMaterial_xfgcj")
 [sub_resource type="Environment" id="Environment_k5f4k"]
 background_mode = 2
 sky = SubResource("Sky_nb3sg")
+ambient_light_source = 3
+ambient_light_color = Color(0, 0.54380035, 1, 1)
+ambient_light_energy = 0.5
 ssr_enabled = true
 ssao_enabled = true
-sdfgi_enabled = true
 sdfgi_use_occlusion = true
 sdfgi_energy = 0.2
 volumetric_fog_density = 0.0739
@@ -79,13 +81,13 @@ seamless = true
 render_priority = 0
 shader = ExtResource("9_p7nu3")
 shader_parameter/absorption_color = Color(1, 0.84238327, 0, 1)
-shader_parameter/fresnel_radius = 2.0
+shader_parameter/fresnel_radius = 1.67999996244864
 shader_parameter/fresnel_color = Color(0, 0.56521404, 0.7172371, 1)
 shader_parameter/roughness = 0.3499999921768
 shader_parameter/specular = 0.25999999418848
 shader_parameter/depth_distance = 0.10000000149012
-shader_parameter/beers_law = 1.70000002533204
-shader_parameter/displacement_strength = 0.30000000447036
+shader_parameter/beers_law = 0.80000001192096
+shader_parameter/displacement_strength = 0.20000000298024
 shader_parameter/displacement_scroll_speed = 0.27200001292
 shader_parameter/displacement_scroll_offset = Vector2(-0.2, 0.3)
 shader_parameter/displacement_scale_offset = 0.745
@@ -99,12 +101,12 @@ shader_parameter/player_wave_frequenzy = 10.0
 shader_parameter/player_wave_speed = 5.0
 shader_parameter/caustic_size = 2.0
 shader_parameter/caustic_range = 40.0
-shader_parameter/caustic_strength = 0.15999999642368
-shader_parameter/ssr_mix_strength = 0.03999999910592
+shader_parameter/caustic_strength = 0.30999999307088
+shader_parameter/ssr_mix_strength = 0.08999999798832
 shader_parameter/ssr_travel = 300.0
-shader_parameter/ssr_resolution_near = 4.10000006109492
+shader_parameter/ssr_resolution_near = 0.10000000149012
 shader_parameter/ssr_resolution_far = 2.0
-shader_parameter/ssr_tolerance = 1.0
+shader_parameter/ssr_tolerance = 1.999999955296
 shader_parameter/refraction_strength = 1.25
 shader_parameter/normal_map_strength = 1.0
 shader_parameter/scroll_speed = 0.3
@@ -169,7 +171,7 @@ light_color = Color(1, 0.991251, 0.907744, 1)
 light_angular_distance = 0.2
 shadow_enabled = true
 shadow_opacity = 0.9
-shadow_blur = 1.4
+shadow_blur = 3.0
 directional_shadow_blend_splits = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Lights"]
@@ -177,7 +179,7 @@ environment = SubResource("Environment_k5f4k")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -1.0051508, 8.19233, 6.503067)
+transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -5.1335325, 8.19233, 9.802958)
 current = true
 fov = 50.0
 
@@ -188,7 +190,7 @@ script = ExtResource("1_cosw0")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
-transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -1.0051508, 8.19233, 6.503067)
+transform = Transform3D(0.999998, 0, 0, 0, 0.7071068, 0.70710427, 0, -0.7071068, 0.70710427, -5.1335325, 8.19233, 9.802958)
 top_level = true
 script = ExtResource("2_u71mg")
 follow_mode = 2
@@ -206,7 +208,7 @@ metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 [node name="Entities" type="Node3D" parent="."]
 
 [node name="Player" parent="Entities" instance=ExtResource("4_5iexk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0051508, 0.1923306, -0.49693298)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.1335325, 0.1923306, 2.8029575)
 
 [node name="PatrolZone" type="Area3D" parent="Entities"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9447, 0, -2.46294)
@@ -388,7 +390,7 @@ metadata/_edit_use_anchors_ = true
 
 [node name="CanvasLayer" parent="." instance=ExtResource("13_qmhhi")]
 
-[node name="VfxPull" type="Node3D" parent="."]
+[node name="VfxPull" type="Node3D" parent="." groups=["vfx_pool"]]
 script = ExtResource("15_bi1di")
 effect_scenes = Array[PackedScene]([ExtResource("14_tfnen")])
 pool_size = 20

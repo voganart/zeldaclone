@@ -30,3 +30,6 @@ func update(_delta: float) -> void:
 ## Аналог _physics_process(delta). Вызывается машиной состояний каждый физический кадр.
 func physics_update(_delta: float) -> void:
 	pass
+
+func on_damage_taken() -> void:
+	pass

@@ -16,7 +16,9 @@ extends CharacterBody3D
 @export_group("Movement")
 @export var walk_speed: float = 1.5
 @export var run_speed: float = 3.5
+@export var retreat_speed: float = 2.5 
 @export var rotation_speed: float = 6.0
+@export var combat_rotation_speed: float = 30.0
 @export var gravity: float = 100.0
 @export var knockback_strength: float = 2.0
 @export var knockback_duration: float = 0.5
@@ -35,7 +37,7 @@ extends CharacterBody3D
 @onready var health_component: Node = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
-@onready var vfx_pull: Node3D = $"../../../VfxPull" # Adjust path as needed
+var vfx_pull: Node3D
 @onready var player: Node3D = get_tree().get_first_node_in_group(GameConstants.GROUP_PLAYER)
 @onready var patrol_zone: Area3D = get_parent() as Area3D
 
@@ -61,15 +63,19 @@ signal died
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
+	var pool_node = get_tree().get_first_node_in_group("vfx_pool")
+	if pool_node:
+		vfx_pull = pool_node
+	else:
+		push_warning("Enemy: VfxPool not found in scene tree!")
 	# Инициализация NavAgent
 	nav_agent.max_speed = walk_speed
 	nav_agent.avoidance_enabled = true
 	nav_agent.velocity_computed.connect(_on_velocity_computed)
-	
 	# Ждем кадр для инициализации карты навигации
 	await get_tree().process_frame
 	nav_agent.set_navigation_map(get_world_3d().navigation_map)
-
+	GameEvents.player_died.connect(_on_player_died)
 	# Настройка HealthComponent
 	if health_component:
 		health_component.died.connect(_on_died)
@@ -120,18 +126,32 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	external_push = external_push.lerp(Vector3.ZERO, 0.1)
 
 ## Поворот к цели движения или к игроку
-func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO) -> void:
-	var look_dir = Vector3.ZERO
+
+func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, speed_override: float = -1.0) -> void:
+	if target_override != Vector3.ZERO:
+		if global_position.distance_squared_to(target_override) < 0.01:
+			return 
+	var look_dir: Vector3
 	
 	if target_override != Vector3.ZERO:
 		look_dir = (target_override - global_position).normalized()
 	elif velocity.length_squared() > 0.1:
-		look_dir = velocity.normalized()
-	
+		look_dir = Vector3(velocity.x, 0, velocity.z).normalized()
+	else:
+		return
+
 	look_dir.y = 0
-	if look_dir.length() > 0.001:
-		var target_angle = atan2(look_dir.x, look_dir.z)
-		rotation.y = lerp_angle(rotation.y, target_angle, delta * rotation_speed)
+	if look_dir.is_normalized():
+		var current_forward = -global_transform.basis.z.normalized()
+		var angle_to_target = current_forward.signed_angle_to(look_dir, Vector3.UP)
+		
+		# Выбираем, какую скорость использовать
+		var current_rotation_speed = speed_override if speed_override > 0 else rotation_speed
+		
+		var max_rotation_angle = current_rotation_speed * delta
+		var rotation_angle = clamp(angle_to_target, -max_rotation_angle, max_rotation_angle)
+		
+		rotate_y(rotation_angle)
 
 func receive_push(push: Vector3) -> void:
 	external_push += push
@@ -166,10 +186,10 @@ func update_movement_animation(delta: float) -> void:
 # COMBAT & DAMAGE
 # ============================================================================
 func take_damage(amount: float, knockback_force: Vector3) -> void:
-	# Если уже мертв, игнорируем
 	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
 		return
 
+	# !!! ИСПРАВЛЕНИЕ: Проверка на null
 	if vfx_pull:
 		vfx_pull.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	
@@ -177,13 +197,12 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	
 	if health_component:
 		health_component.take_damage(amount)
-	
-	# Обработка нокбэка через смену состояния
+		
+	if state_machine and state_machine.current_state:
+		state_machine.current_state.on_damage_taken()
+		
 	if knockback_force.length() > 0.1:
 		velocity += knockback_force
-		# Переход в состояние Knockback (если оно есть)
-		# state_machine.change_state("knockback") 
-		# Пока что просто применяем импульс, состояние Chase/Patrol обработает это
 
 func _on_died() -> void:
 	emit_signal("died")
@@ -228,3 +247,22 @@ func _check_single_hand_hit(hand_area: Area3D) -> bool:
 func _on_health_changed(new_health: float) -> void:
 	if health_bar and health_component:
 		health_bar.update_health(new_health, health_component.get_max_health())
+func _on_player_died() -> void:
+	# 1. Если враг уже мертв, ему всё равно
+	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
+		return
+
+	# 2. Сбрасываем ссылку на игрока, чтобы VisionComponent не триггерился
+	# (Хотя удаление из группы уже помогает, это двойная защита)
+	player = null
+	
+	# 3. Сбрасываем агрессию в компоненте атаки (если там есть логика)
+	if attack_component.has_method("clear_retreat_state"):
+		attack_component.clear_retreat_state()
+
+	# 4. Принудительно меняем состояние на Патруль или Idle
+	# Если мы сейчас в Chase или Attack - это прервет их.
+	state_machine.change_state(GameConstants.STATE_PATROL)
+	
+	# Опционально: Можно проиграть анимацию "Победы" или просто постоять
+	# state_machine.change_state(GameConstants.STATE_IDLE)

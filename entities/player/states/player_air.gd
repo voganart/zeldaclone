@@ -23,10 +23,11 @@ func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
 	
 	# 2. Управление в воздухе (Air Control)
-	# Мы можем использовать handle_movement_input, но нужно убедиться, что player.gd
-	# использует air_control, если не на земле. (В обновленном player.gd это учтено в handle_movement_input через переменную current_speed, но air_control там не явно используется для lerp.
-	# Давай лучше вызовем стандартный метод, он должен работать, если player.gd настроен верно)
-	player.handle_movement_input(delta)
+	# !!! ИЗМЕНЕНИЕ: Используем новый метод
+	var input_vec = player.get_movement_vector()
+	# В воздухе используем base_speed, но с малой интерполяцией (которая внутри apply_movement_velocity зашита как acceleration)
+	# Для лучшего Air Control можно передать другой параметр acceleration, но пока используем стандартный
+	player.apply_movement_velocity(delta, input_vec, player.base_speed)
 	
 	# 3. Вращение
 	player.rot_char(delta)

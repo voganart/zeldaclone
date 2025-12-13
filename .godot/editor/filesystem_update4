@@ -46,3 +46,5 @@ res://entities/enemies/states/enemy_patrol.gd
 res://entities/levels/test_level/enemy_spawner.gd
 res://entities/player/abilities/air_dash_ability.gd
 res://vfx/fade_cutout/fade_manager.gd
+res://vfx/blood_splash/blood_splash.tscn
+res://common/fsm/state.gd

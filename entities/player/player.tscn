@@ -142,7 +142,6 @@ auto_run_latch_time = 0.3
 roll_cooldown = 2.0
 roll_recharge_time = 4.0
 roll_chain_delay = 0.2
-roll_invincibility_duration = 0.3
 primary_attack_speed = 1.0
 attack_cooldown = 0.0
 combo_window_time = 0.5

@@ -46,10 +46,10 @@ shader_parameter/mesh_min_y = 0.0
 shader_parameter/mesh_max_y = 1.0
 shader_parameter/gradient_uv_set = 0
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_msovg"]
 size = Vector3(2.765625, 1.7850952, 2.4552612)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
 
 [node name="Enemy" type="CharacterBody3D" node_paths=PackedStringArray("punch_hand_r", "punch_hand_l", "punch_area") groups=["enemies"]]
 collision_layer = 4
@@ -57,8 +57,9 @@ collision_mask = 15
 script = ExtResource("1_ksmh7")
 punch_hand_r = NodePath("Monstr/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("Monstr/root/Skeleton3D/hand_l/punch_hand_l")
-punch_area = NodePath("PunchArea")
+punch_area = NodePath("Monstr/PunchArea")
 run_speed = 4.5
+retreat_speed = 1.5
 knockback_strength = 1.0
 knockback_duration = 0.1
 
@@ -68,6 +69,11 @@ script = ExtResource("3_2ggct")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_wqcwe")]
 max_health = 5.0
+
+[node name="EnemyAttackComponent" type="Node" parent="."]
+script = ExtResource("8_sb13e")
+tactical_retreat_distance = 3.0
+retreat_interrupt_range = 0.8
 
 [node name="HitFlash" parent="." instance=ExtResource("4_msovg")]
 mesh_path = NodePath("../Monstr/root/Skeleton3D/Monstr")
@@ -81,6 +87,7 @@ radius = 0.6
 max_speed = 20.0
 
 [node name="Monstr" parent="." instance=ExtResource("3_5lf1o")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="Monstr/root" index="0"]
 bones/1/position = Vector3(-8.497717e-11, 0.43805516, 0.003183168)
@@ -146,6 +153,12 @@ autoplay = "Monstr_idle"
 playback_default_blend_time = 0.2
 blend_times = [&"Monstr_idle", &"Monstr_angry", 0.2, &"Monstr_idle", &"Monstr_attack_1", 0.2, &"Monstr_idle", &"Monstr_attack_idle", 0.2, &"Monstr_idle", &"Monstr_idle", 0.2, &"Monstr_idle", &"Monstr_knockdown", 0.2, &"Monstr_idle", &"Monstr_walk", 0.2]
 
+[node name="PunchArea" type="Area3D" parent="Monstr"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Monstr/PunchArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8913391, 1.4406242)
+shape = SubResource("BoxShape3D_msovg")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_lw7nh")
@@ -153,16 +166,7 @@ shape = SubResource("CapsuleShape3D_lw7nh")
 [node name="VisionComponent" type="Node3D" parent="."]
 script = ExtResource("7_56i32")
 
-[node name="EnemyAttackComponent" type="Node" parent="."]
-script = ExtResource("8_sb13e")
-
 [node name="AttackTimer" type="Timer" parent="."]
-
-[node name="PunchArea" type="Area3D" parent="."]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PunchArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8913391, 1.4406242)
-shape = SubResource("BoxShape3D_msovg")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("9_3udgd")

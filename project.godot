@@ -59,6 +59,7 @@ enabled=PackedStringArray("res://addons/jigglebones/plugin.cfg", "res://addons/p
 player=""
 enemies=""
 fade_objects=""
+vfx_pool=""
 
 [gui]
 

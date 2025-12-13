@@ -2,8 +2,7 @@ class_name Player
 extends CharacterBody3D
 
 @onready var _mesh: Node3D = $character
-@onready var vfx_pull: Node3D = $"../../VfxPull"
-
+var vfx_pull: Node3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
@@ -56,8 +55,8 @@ extends CharacterBody3D
 @export var attack_rotation_influence: float = 0.5
 
 @export_group("Components")
-@export var punch_hand_r: Area3D 
-@export var punch_hand_l: Area3D 
+@export var punch_hand_r: Area3D
+@export var punch_hand_l: Area3D
 @onready var health_component: Node = $HealthComponent
 
 # КОМПОНЕНТЫ
@@ -65,7 +64,7 @@ extends CharacterBody3D
 @onready var air_dash_ability: AirDashAbility = $AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $GroundSlamAbility
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
-@onready var attack_timer: Timer = $FirstAttackTimer 
+@onready var attack_timer: Timer = $FirstAttackTimer
 @onready var sprint_timer: Timer = $SprintTimer
 
 # ============================================================================
@@ -118,7 +117,12 @@ var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 
 func _ready() -> void:
-	# Инициализация таймеров комбо
+	# Безопасный поиск пула эффектов
+	var pool_node = get_tree().get_first_node_in_group("vfx_pool")
+	if pool_node:
+		vfx_pull = pool_node
+	
+	# Инициализация таймеров комбо (оставляем как было)
 	combo_reset_timer = Timer.new()
 	combo_reset_timer.one_shot = true
 	combo_reset_timer.wait_time = combo_window_time
@@ -131,8 +135,7 @@ func _ready() -> void:
 	combo_cooldown_timer.timeout.connect(func():
 		combo_cooldown_active = false
 		can_attack = true
-		print("Combo cooldown ended")
-	)
+		print("Combo cooldown ended"))
 	add_child(combo_cooldown_timer)
 
 	if health_component:
@@ -146,51 +149,52 @@ func _ready() -> void:
 # PHYSICS PROCESS (CONTROLLER)
 # ============================================================================
 func _physics_process(delta: float) -> void:
-	# 1. Обновление глобальных таймеров (стан, кувырки)
 	_update_stun_timer(delta)
 	_update_roll_timers(delta)
 	
-	# 2. Если стан - блокируем FSM и физику (или переводим в StunState, но пока так)
 	if is_knockback_stun:
-		# Применяем гравитацию и затухание скорости при стане
 		apply_gravity(delta)
 		velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 5.0 * delta)
 		move_and_slide()
 		return
 		
-	# 3. Обновление позиции для шейдера
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	# 4. FSM обрабатывает основную логику!
-	# (StateMachine обновляется автоматически через свой _physics_process)
+	# ВАЖНО: Мы больше НЕ вызываем handle_movement_input() здесь.
+	# StateMachine управляет скоростью через apply_movement_velocity
 	
-	# 5. Применяем движение
-	# StateMachine устанавливает velocity, здесь мы двигаем тело.
-	# ВАЖНО: move_and_slide должен вызываться в конце
 	move_and_slide()
 	
-	# 6. Взаимодействие с объектами (толкание)
 	push_obj()
-	
-	# 7. Проход сквозь врагов
 	check_jump_pass_through()
 	
-	# 8. Сброс состояния воздуха
 	if is_on_floor() and not was_on_floor:
 		air_dash_ability.reset_air_state()
 		current_jump_count = 0
 	was_on_floor = is_on_floor()
 
+func get_movement_vector() -> Vector2:
+	return Input.get_vector(GameConstants.INPUT_MOVE_LEFT, GameConstants.INPUT_MOVE_RIGHT, GameConstants.INPUT_MOVE_UP, GameConstants.INPUT_MOVE_DOWN)
+
+func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
+	# Логика авто-бега и попытки бега перенесена в расчет target_speed внутри State
+	var velocity_2d = Vector2(velocity.x, velocity.z)
+	
+	if input_dir != Vector2.ZERO:
+		velocity_2d = velocity_2d.lerp(input_dir * target_speed, acceleration)
+	else:
+		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
+		
+	velocity.x = velocity_2d.x
+	velocity.z = velocity_2d.y
 # ============================================================================
 # HELPER FUNCTIONS (Called by States)
 # ============================================================================
 
 func apply_gravity(delta: float) -> void:
-	# Гравитация отключается спец-способностями
 	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming:
 		return
-		
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta
 
@@ -228,14 +232,11 @@ func perform_jump() -> void:
 	var jump_multiplier = second_jump_multiplier if current_jump_count == 1 else 1.0
 	velocity.y = - jump_velocity * jump_multiplier
 	current_jump_count += 1
-	# air_speed можно сохранить для AirState
 
 func rot_char(delta: float) -> void:
 	if is_knockbacked or is_knockback_stun: return
-	
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
-	
 	var vel_2d = Vector2(velocity.x, -velocity.z)
 	if vel_2d.length_squared() > 0.001:
 		var target_angle = vel_2d.angle() + PI / 2
@@ -249,17 +250,13 @@ func tilt_character(delta: float) -> void:
 	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 15 * delta)
 
 func apply_attack_impulse() -> void:
+	# (Код без изменений)
 	var forward = global_transform.basis.z.normalized()
 	var impulse = 0.0
 	var speed_2d = Vector2(velocity.x, velocity.z).length()
-	
-	if is_running:
-		impulse = running_attack_impulse
-	elif movement_input.length() > 0.1 and speed_2d > base_speed * 0.5:
-		impulse = walking_attack_impulse
-	else:
-		impulse = idle_attack_impulse
-		
+	if is_running: impulse = running_attack_impulse
+	elif get_movement_vector().length() > 0.1 and speed_2d > base_speed * 0.5: impulse = walking_attack_impulse
+	else: impulse = idle_attack_impulse
 	velocity.x += forward.x * impulse
 	velocity.z += forward.z * impulse
 
@@ -282,51 +279,48 @@ func try_cancel_attack_for_roll() -> bool:
 	return ratio >= (1.0 - attack_roll_cancel_threshold)
 
 # ============================================================================
-# ANIMATION & VISUALS
+# ANIMATION & VISUALS (ИСПРАВЛЕНИЕ БАГА)
 # ============================================================================
-func handle_move_animation(delta: float) -> void:
+
+# !!! ИСПРАВЛЕНИЕ: Добавили аргумент current_input
+func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	var speed_2d = Vector2(velocity.x, velocity.z).length()
-	# Проверяем, есть ли ввод от игрока
-	var has_input = movement_input.length_squared() > 0.01
 	
-	# Рассчитываем блендинг всегда, чтобы переменная была актуальной
+	# !!! ИСПРАВЛЕНИЕ: Используем переданный аргумент, а не старую переменную movement_input
+	var has_input = current_input.length_squared() > 0.01
+	
 	if speed_2d > 0.1:
 		var blend = calculate_walk_run_blend(speed_2d)
 		target_movement_blend = blend
 		current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
 	
-	# 1. Если игрок жмет кнопки движения — мы НЕ останавливаемся
+	# 1. Если есть ввод - бежим/идем
 	if has_input:
 		is_stopping = false
-		
-		# Выбираем между ходьбой и бегом на основе блендинга
 		if current_movement_blend < 0.5:
-			# Масштабируем скорость анимации под реальную скорость
 			var walk_scale = lerp(0.5, 1.5, speed_2d / base_speed) if base_speed > 0 else 1.0
 			play_anim(GameConstants.ANIM_PLAYER_WALK, 0.2, walk_scale)
 		else:
 			var run_scale = lerp(0.5, 1.5, speed_2d / run_speed) if run_speed > 0 else 1.0
 			play_anim(GameConstants.ANIM_PLAYER_RUN, 0.2, run_scale)
 			
-	# 2. Ввода нет, но скорость всё еще высокая — включаем анимацию торможения
-	# Порог 3.0 подобран под base_speed, чтобы не срабатывало при мелких шажках
+	# 2. Ввода нет, но скорость еще есть - тормозим
 	elif speed_2d > 3.0:
 		if not is_stopping:
 			is_stopping = true
-			# Используем blend 0.2 для плавного перехода из бега/кувырка в торможение
 			anim_player.play(GameConstants.ANIM_PLAYER_STOPPING, 0.2, 0.1)
 			
-	# 3. Ввода нет и скорость низкая — Idle
+	# 3. Стоим
 	else:
 		is_stopping = false
 		play_anim(GameConstants.ANIM_PLAYER_IDLE, 0.2)
 
-func play_anim(name: String, blend: float = -1.0, speed: float = 1.0) -> void:
-	if anim_player.current_animation == name:
-		anim_player.play(name, blend, speed)
+# !!! ИСПРАВЛЕНИЕ: Переименовали аргумент name -> anim_name
+func play_anim(anim_name: String, blend: float = -1.0, speed: float = 1.0) -> void:
+	if anim_player.current_animation == anim_name:
+		anim_player.play(anim_name, blend, speed)
 		return
-	anim_player.play(name, blend, speed)
-	# Random start for loops to avoid sync
+	anim_player.play(anim_name, blend, speed)
 	if anim_player.current_animation_length > 0:
 		anim_player.seek(randf() * anim_player.current_animation_length)
 
@@ -335,12 +329,15 @@ func calculate_walk_run_blend(speed: float) -> float:
 	return clamp(blend, 0.0, 1.0)
 
 # ============================================================================
-# HEALTH & DAMAGE
+# HEALTH & DAMAGE (ИСПРАВЛЕНИЕ КРАША)
 # ============================================================================
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
 	
-	vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0))
+	# !!! ИСПРАВЛЕНИЕ: Проверка на null перед использованием
+	if vfx_pull:
+		vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0))
+	
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
 	
@@ -357,7 +354,17 @@ func _on_health_changed(val: float) -> void:
 
 func _on_died() -> void:
 	print("Player Died Signal Received")
-	# Вместо отключения процесса переводим машину состояний
+	
+	# 1. Отправляем глобальный сигнал всем врагам
+	GameEvents.player_died.emit()
+	
+	# 2. Удаляем игрока из группы "player"
+	# Это автоматически заставит VisionComponent врагов перестать "видеть" игрока,
+	# так как они обычно ищут цели в этой группе.
+	if is_in_group(GameConstants.GROUP_PLAYER):
+		remove_from_group(GameConstants.GROUP_PLAYER)
+	
+	# 3. Переход в состояние смерти (анимация и отключение управления)
 	state_machine.change_state(GameConstants.STATE_DEAD)
 
 func _update_stun_timer(delta: float) -> void:
