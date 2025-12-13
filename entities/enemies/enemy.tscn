@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=19 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://UI/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" uid="uid://nqcrxsuj1cdf" path="res://UI/HealthBar3D/enemy_health_bar.gd" id="3_2ggct"]
 [ext_resource type="PackedScene" uid="uid://duk5b06ohkpsc" path="res://entities/enemies/monstr.tscn" id="3_5lf1o"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="4_msovg"]
-[ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://entities/player/assets/toonShader.gdshader" id="5_w4yt1"]
 [ext_resource type="Script" uid="uid://bms48mt88e42c" path="res://entities/enemies/components/vision_component.gd" id="7_56i32"]
 [ext_resource type="Script" uid="uid://c55cu0n3gbdfm" path="res://entities/enemies/components/enemy_attack_component.gd" id="8_sb13e"]
 [ext_resource type="Script" uid="uid://cbx8244k71rsk" path="res://common/fsm/state_machine.gd" id="9_3udgd"]
@@ -16,35 +15,7 @@
 [ext_resource type="Script" uid="uid://dirsi2ohsa4hb" path="res://entities/enemies/states/enemy_attack.gd" id="13_53k0f"]
 [ext_resource type="Script" uid="uid://c6ccg8dnavfcp" path="res://entities/enemies/states/enemy_frustrated.gd" id="14_u01qb"]
 [ext_resource type="Script" uid="uid://bn3bsn15qof6y" path="res://entities/enemies/states/enemy_dead.gd" id="15_4teby"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ipr6v"]
-render_priority = 0
-shader = ExtResource("5_w4yt1")
-shader_parameter/use_hit_flash = false
-shader_parameter/hit_flash_strength = 1.0
-shader_parameter/hit_flash_color = Color(1, 0.1, 0.1, 1)
-shader_parameter/dissolve_amount = 0.0
-shader_parameter/albedo = Color(1, 1, 1, 1)
-shader_parameter/clamp_diffuse_to_max = false
-shader_parameter/cuts = 3
-shader_parameter/wrap = 0.0
-shader_parameter/steepness = 1.0
-shader_parameter/use_attenuation = true
-shader_parameter/use_specular = true
-shader_parameter/specular_strength = 1.0
-shader_parameter/specular_shininess = 16.0
-shader_parameter/use_rim = true
-shader_parameter/rim_width = 8.0
-shader_parameter/rim_color = Color(1, 1, 1, 1)
-shader_parameter/use_ramp = false
-shader_parameter/use_borders = false
-shader_parameter/border_width = 0.01
-shader_parameter/use_gradient = false
-shader_parameter/gradient_blend_mode = 0
-shader_parameter/gradient_strength = 1.0
-shader_parameter/mesh_min_y = 0.0
-shader_parameter/mesh_max_y = 1.0
-shader_parameter/gradient_uv_set = 0
+[ext_resource type="Script" uid="uid://c2im05hged14y" path="res://entities/enemies/states/enemy_flee.gd" id="17_wy1il"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_msovg"]
 size = Vector3(2.765625, 1.7850952, 2.4552612)
@@ -75,10 +46,12 @@ script = ExtResource("8_sb13e")
 tactical_retreat_distance = 3.0
 retreat_interrupt_range = 0.8
 
+[node name="VisionComponent" type="Node3D" parent="."]
+script = ExtResource("7_56i32")
+debug_vision = true
+
 [node name="HitFlash" parent="." instance=ExtResource("4_msovg")]
 mesh_path = NodePath("../Monstr/root/Skeleton3D/Monstr")
-flash_shader = SubResource("ShaderMaterial_ipr6v")
-flash_color = Color(1, 1, 1, 1)
 flash_time = 0.2
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
@@ -163,9 +136,6 @@ shape = SubResource("BoxShape3D_msovg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_lw7nh")
 
-[node name="VisionComponent" type="Node3D" parent="."]
-script = ExtResource("7_56i32")
-
 [node name="AttackTimer" type="Timer" parent="."]
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
@@ -189,5 +159,9 @@ script = ExtResource("14_u01qb")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("15_4teby")
+
+[node name="Flee" type="Node" parent="StateMachine"]
+script = ExtResource("17_wy1il")
+flee_speed = 1.0
 
 [editable path="Monstr"]

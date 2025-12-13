@@ -4,9 +4,8 @@ render_mode blend_mix, depth_prepass_alpha;
 // ======================================================
 // Original uniforms
 // ======================================================
-uniform bool use_hit_flash = false;
-uniform float hit_flash_strength : hint_range(0.0, 1.0) = 1.0;
-uniform vec4 hit_flash_color : source_color = vec4(1.0, 0.1, 0.1, 1.0);
+instance uniform float hit_flash_strength : hint_range(0.0, 1.0) = 0.0; 
+instance uniform vec4 hit_flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0); 
 
 uniform float dissolve_amount : hint_range(0.0, 1.0) = 0.0;
 
@@ -115,12 +114,7 @@ void fragment() {
 	// Base albedo
 	vec3 base_color = albedo.rgb * texture(albedo_texture, UV).rgb;
 
-	// Hit flash
-	if (use_hit_flash) {
-		vec3 flash_color = hit_flash_color.rgb;
-		base_color = mix(base_color, flash_color, hit_flash_strength);
-	}
-
+	base_color = mix(base_color, hit_flash_color.rgb, hit_flash_strength);
 	// ---------------------
 	// Local-space Gradient (sample from chosen UV set)
 	// ---------------------

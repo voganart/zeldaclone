@@ -61,7 +61,7 @@ func physics_update(delta: float) -> void:
 	# --- BUFFERED JUMP & CANCEL THRESHOLD ---
 	
 	# 1. Запоминаем нажатие прыжка
-	if Input.is_action_just_pressed(GameConstants.INPUT_JUMP):
+	if player.input_handler.is_jump_pressed:
 		has_buffered_jump = true
 		jump_buffer_timer = 0.0
 	
@@ -88,7 +88,7 @@ func physics_update(delta: float) -> void:
 		return
 
 	# --- Управление направлением (Steering) ---
-	var input_dir = Input.get_vector(GameConstants.INPUT_MOVE_LEFT, GameConstants.INPUT_MOVE_RIGHT, GameConstants.INPUT_MOVE_UP, GameConstants.INPUT_MOVE_DOWN)
+	var input_dir = player.input_handler.move_vector
 	if input_dir != Vector2.ZERO:
 		var input_vec3 = Vector3(input_dir.x, 0, input_dir.y)
 		var local_input = player.global_transform.basis.inverse() * input_vec3

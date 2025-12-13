@@ -45,15 +45,18 @@ func physics_update(delta: float) -> void:
 		enemy.handle_rotation(delta, enemy.player.global_position, enemy.combat_rotation_speed)
 		
 		if enemy.attack_component.is_attack_ready():
-			transitioned.emit(self, GameConstants.STATE_ATTACK)
+			if AIDirector.request_attack_token(enemy):
+				transitioned.emit(self, GameConstants.STATE_ATTACK)
+			else:
+				enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
+				# Небольшой трюк: Отталкиваемся от игрока вектором скорости
+				var dir_away = (enemy.global_position - enemy.player.global_position).normalized()
+				enemy.velocity.x = dir_away.x * 0.5 # Медленно пятимся
+				enemy.velocity.z = dir_away.z * 0.5
+				enemy.move_and_slide()
 			return
 		else:
-			# !!! КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ !!!
-			# Если атака не готова, мы явно приказываем врагу
-			# перейти в анимацию боевой стойки. Это остановит
-			# проигрывание анимации ходьбы на месте.
 			enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
-		
 	# --- ЛОГИКА ПОГОНИ (Игрок далеко) ---
 	else:
 		if time_since_player_seen > chase_memory_duration or dist_to_player > enemy.vision_component.lost_sight_range:
@@ -63,7 +66,19 @@ func physics_update(delta: float) -> void:
 		# Движение
 		enemy.nav_agent.target_position = enemy.player.global_position
 		enemy.move_toward_path()
-		enemy.handle_rotation(delta, enemy.player.global_position)
 		
-		# Анимация движения вызывается ТОЛЬКО здесь, когда враг действительно бежит
+		# !!! НОВАЯ УМНАЯ ЛОГИКА ПОВОРОТА !!!
+		var move_direction = enemy.velocity.normalized()
+		var player_direction = (enemy.player.global_position - enemy.global_position).normalized()
+		
+		# Вычисляем угол между направлением движения и направлением на игрока
+		var angle = rad_to_deg(move_direction.angle_to(player_direction))
+		
+		# Если угол большой (значит, мы оббегаем препятствие), смотрим вперед
+		if angle > enemy.strafe_view_angle:
+			enemy.handle_rotation(delta) # Смотрим по направлению velocity
+		# Иначе, если путь более-менее прямой, смотрим на игрока
+		else:
+			enemy.handle_rotation(delta, enemy.player.global_position)
+		
 		enemy.update_movement_animation(delta)

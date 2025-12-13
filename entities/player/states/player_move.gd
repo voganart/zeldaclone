@@ -18,7 +18,6 @@ func enter() -> void:
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
 	
-	# Получаем ввод
 	var input_vec = player.get_movement_vector()
 	
 	if input_vec == Vector2.ZERO:
@@ -26,27 +25,39 @@ func physics_update(delta: float) -> void:
 		player.is_auto_running = false
 		player.is_trying_to_run = false
 	
-	var run_pressed = Input.is_action_pressed(GameConstants.INPUT_RUN)
-	var run_just_released = Input.is_action_just_released(GameConstants.INPUT_RUN)
+	# === ИСПРАВЛЕННЫЙ БЛОК БЕГА И РОЛЛА ===
+	var run_pressed = player.input_handler.is_run_pressed
+	var run_just_released = player.input_handler.is_run_just_released
 	
+	# 1. Сначала обрабатываем отпускание клавиши (попытка ролла)
 	if run_just_released:
+		# Если держали кнопку меньше порога (короткое нажатие) -> Ролл
 		if player.shift_pressed_time <= player.roll_threshold:
 			if player.can_roll():
 				transitioned.emit(self, GameConstants.STATE_ROLL)
 				player.shift_pressed_time = 0.0
-				return
+				return # Важно выйти, чтобы не продолжить логику
+		
+		# Если держали долго -> просто сбрасываем таймер (остановка бега)
 		player.shift_pressed_time = 0.0
 
+	# 2. Обрабатываем удержание клавиши (накопление времени для бега)
 	if run_pressed:
 		player.shift_pressed_time += delta
+		
+		# Если держим дольше порога ролла -> начинаем пытаться бежать
 		if player.shift_pressed_time > player.roll_threshold:
 			player.is_trying_to_run = true
+			
+		# Логика "авто-бега" (если держим очень долго)
 		if player.shift_pressed_time > player.auto_run_latch_time:
 			if player.velocity.length() > 0.1:
 				player.is_auto_running = true
 	else:
+		# Кнопка не нажата
 		if not player.is_auto_running:
 			player.is_trying_to_run = false
+	# ========================================
 
 	var current_speed = player.base_speed
 	if player.is_trying_to_run or player.is_auto_running:
@@ -59,20 +70,18 @@ func physics_update(delta: float) -> void:
 	
 	player.rot_char(delta)
 	player.tilt_character(delta)
-	
-	# !!! ИСПРАВЛЕНИЕ: Передаем input_vec в функцию анимации
 	player.handle_move_animation(delta, input_vec)
 	
 	if not player.is_on_floor():
 		transitioned.emit(self, GameConstants.STATE_AIR)
 		return
 
-	if Input.is_action_just_pressed(GameConstants.INPUT_JUMP):
+	if player.input_handler.is_jump_pressed:
 		player.perform_jump()
 		transitioned.emit(self, GameConstants.STATE_AIR)
 		return
 
-	if Input.is_action_just_pressed(GameConstants.INPUT_ATTACK_PRIMARY):
+	if player.input_handler.is_attack_pressed:
 		if player.ground_slam_ability.can_slam():
 			transitioned.emit(self, GameConstants.STATE_SLAM)
 		elif player.can_attack:

@@ -44,7 +44,7 @@ func physics_update(delta: float) -> void:
 		return
 		
 	# Double / Triple Jump
-	if Input.is_action_just_pressed(GameConstants.INPUT_JUMP):
+	if player.input_handler.is_jump_pressed:
 		var can_jump = false
 		if player.current_jump_count > 0 and player.current_jump_count < 2:
 			can_jump = true
@@ -53,24 +53,21 @@ func physics_update(delta: float) -> void:
 			
 		if can_jump:
 			player.perform_jump()
-			# Сбрасываем фазу анимации для нового прыжка
 			jump_phase = "start"
 			player.anim_player.play(GameConstants.ANIM_PLAYER_JUMP_START, 0.05, 1.0)
 			
-	# Air Dash
-	# Проверяем нажатие Shift (или отпускание, как в оригинале)
-	# В оригинале было: if not is_on_floor() and shift_pressed_time <= roll_threshold:
-	# Здесь упростим: если нажали Run в воздухе
-	if Input.is_action_just_pressed(GameConstants.STATE_RUN): # Или released, как удобнее
+	# Air Dash (Проверяем нажатие бега)
+	if player.input_handler.is_run_pressed: 
+		# Примечание: тут можно использовать is_run_just_pressed, если добавить его в input_handler,
+		# но is_run_pressed тоже сойдет, если ability проверяет кулдауны.
 		if player.air_dash_ability.can_dash():
 			transitioned.emit(self, GameConstants.STATE_DASH)
 			return
 			
 	# Ground Slam
-	if Input.is_action_just_pressed(GameConstants.INPUT_ATTACK_PRIMARY):
+	if player.input_handler.is_attack_pressed:
 		if player.ground_slam_ability.can_slam():
 			transitioned.emit(self, GameConstants.STATE_SLAM)
-		# Можно добавить атаку в воздухе, если нужно
 		return
 
 func _handle_jump_animation() -> void:

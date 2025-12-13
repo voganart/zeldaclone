@@ -12,6 +12,8 @@ extends CharacterBody3D
 @export var punch_hand_r: Area3D
 @export var punch_hand_l: Area3D
 @export var punch_area: Area3D # Основной конус атаки
+@export var can_flee: bool = true # Может ли этот тип врага вообще убегать
+@export_range(0.0, 1.0) var flee_health_threshold: float = 0.25 # Убегает при 25% здоровья или меньше
 
 @export_group("Movement")
 @export var walk_speed: float = 1.5
@@ -19,6 +21,7 @@ extends CharacterBody3D
 @export var retreat_speed: float = 2.5 
 @export var rotation_speed: float = 6.0
 @export var combat_rotation_speed: float = 30.0
+@export_range(0, 180) var strafe_view_angle: float = 45.0
 @export var gravity: float = 100.0
 @export var knockback_strength: float = 2.0
 @export var knockback_duration: float = 0.5
@@ -70,6 +73,7 @@ func _ready() -> void:
 		push_warning("Enemy: VfxPool not found in scene tree!")
 	# Инициализация NavAgent
 	nav_agent.max_speed = walk_speed
+	state_machine.init(self)
 	nav_agent.avoidance_enabled = true
 	nav_agent.velocity_computed.connect(_on_velocity_computed)
 	# Ждем кадр для инициализации карты навигации
@@ -188,7 +192,7 @@ func update_movement_animation(delta: float) -> void:
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
 		return
-
+	AIDirector.return_attack_token(self)
 	# !!! ИСПРАВЛЕНИЕ: Проверка на null
 	if vfx_pull:
 		vfx_pull.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
@@ -205,6 +209,7 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 		velocity += knockback_force
 
 func _on_died() -> void:
+	AIDirector.return_attack_token(self)
 	emit_signal("died")
 	# Скрываем бар через компонент
 	if health_bar:
@@ -247,6 +252,22 @@ func _check_single_hand_hit(hand_area: Area3D) -> bool:
 func _on_health_changed(new_health: float) -> void:
 	if health_bar and health_component:
 		health_bar.update_health(new_health, health_component.get_max_health())
+	
+	# !!! НОВЫЙ ТРИГГЕР БЕГСТВА !!!
+	if not can_flee: return
+	
+	var max_hp = health_component.get_max_health()
+	if max_hp <= 0: return
+	
+	# Проверяем, не мертвы ли мы уже и не убегаем ли уже
+	var current_state_name = state_machine.current_state.name.to_lower()
+	if current_state_name == "dead" or current_state_name == "flee":
+		return
+	
+	# Если здоровье упало ниже порога, переходим в состояние бегства
+	if (new_health / max_hp) <= flee_health_threshold:
+		state_machine.change_state("flee")
+		
 func _on_player_died() -> void:
 	# 1. Если враг уже мертв, ему всё равно
 	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:

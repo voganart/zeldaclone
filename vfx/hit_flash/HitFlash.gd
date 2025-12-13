@@ -1,63 +1,33 @@
 extends Node
 
 @export var mesh_path: NodePath
-@export var flash_shader: ShaderMaterial
-@export var flash_color: Color = Color(1, 0.1, 0.1)
-@export var flash_time := 0.12
-@export var flash_strength := 1.0
+@export var flash_color: Color = Color(1, 1, 1) # Белая вспышка обычно выглядит сочнее
+@export var flash_time := 0.15
 
-var shader_mat: ShaderMaterial
-
+var mesh_instance: MeshInstance3D
 
 func _ready():
-	var mesh: MeshInstance3D = get_node(mesh_path)
-
-	# Если у MeshInstance3D уже стоит Override — заменяем его
-	var override := mesh.material_override
-	if override is ShaderMaterial:
-		shader_mat = override.duplicate()
-		mesh.material_override = shader_mat
-		return
-
-	# Если override есть, но не ShaderMaterial — создаём новый
-	if override != null:
-		shader_mat = flash_shader.duplicate()
-		mesh.material_override = shader_mat
-		return
-
-	# Нет override → ищем surface materials
-	var surf_count := mesh.mesh.get_surface_count()
-	for i in range(surf_count):
-		var mat := mesh.get_active_material(i)
-		if mat is ShaderMaterial:
-			shader_mat = mat.duplicate()
-			mesh.set_surface_override_material(i, shader_mat)
-			return
-
-	# Нет ShaderMaterial вообще → ставим flash_shader
-	shader_mat = flash_shader.duplicate()
-	mesh.set_surface_override_material(0, shader_mat)
-
+	mesh_instance = get_node(mesh_path)
+	
+	# Нам не нужно искать материал или назначать его.
+	# Мы предполагаем, что на меше УЖЕ висит твой крутой шейдер.
 
 func flash():
-	if shader_mat == null:
+	if not mesh_instance:
 		return
 
-	# Сбрасываем предыдущий Tween, если он еще идет (защита от спама ударов)
+	# Сбрасываем предыдущий твин, если спамим ударами
 	var tween = create_tween()
 	
-	# Устанавливаем начальные значения
-	shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_USE, true)
-	shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_COLOR, flash_color)
-	shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_STRENGTH, flash_strength)
-
-	# Анимируем параметр 'hit_flash_strength' от текущего до 0.0
+	# 1. Устанавливаем цвет вспышки для ЭТОГО конкретного монстра
+	# Используем set_instance_shader_parameter
+	mesh_instance.set_instance_shader_parameter("hit_flash_color", flash_color)
+	
+	# 2. Анимируем силу вспышки от 1.0 до 0.0
+	# В шейдере мы поставили дефолт 0.0, поэтому вспышка исчезнет сама.
 	tween.tween_method(
-		func(value): shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_STRENGTH, value),
-		flash_strength,
-		0.0,
+		func(val): mesh_instance.set_instance_shader_parameter("hit_flash_strength", val),
+		1.0, # Начинаем с полной яркости
+		0.0, # Уходим в ноль
 		flash_time
 	)
-	
-	# В конце выключаем эффект
-	tween.tween_callback(func(): shader_mat.set_shader_parameter(GameConstants.SHADER_PARAM_FLASH_USE, false))

@@ -1,38 +1,30 @@
 class_name StateMachine
 extends Node
 
-## Начальное состояние. Должно быть установлено в инспекторе.
 @export var initial_state: State
-
-## Текущее активное состояние.
 var current_state: State
-
-## Словарь всех доступных состояний: {"имя_состояния": узел_состояния}
 var states: Dictionary = {}
 
-func _ready() -> void:
-	# Ожидаем готовности родителя (Entity), чтобы гарантировать доступ к его узлам
-	await owner.ready
-	
-	# Автоматически собираем все дочерние узлы типа State
+# Убираем _ready() и await owner.ready
+# Добавляем явный метод инициализации
+func init(actor: CharacterBody3D) -> void:
 	for child in get_children():
 		if child is State:
-			# Приводим имя к нижнему регистру для удобства (например "Idle" -> "idle")
 			states[child.name.to_lower()] = child
-			
-			# Передаем ссылку на владельца (например, Player или Enemy) в состояние
-			# Предполагаем, что StateMachine является прямым потомком Entity
-			child.entity = get_parent() as CharacterBody3D
+			# Передаем актера явно
+			child.entity = actor
 			child.state_machine = self
-			
-			# Подписываемся на сигнал перехода
 			child.transitioned.connect(on_child_transition)
+			
+			# Если у состояний есть свой метод init, можно вызвать и его
+			# if child.has_method("init"): child.init()
 	
 	if initial_state:
 		initial_state.enter()
 		current_state = initial_state
 	else:
-		push_warning("StateMachine: Initial state not set for " + str(get_parent().name))
+		push_warning("StateMachine: Initial state not set")
+
 
 func _process(delta: float) -> void:
 	if current_state:

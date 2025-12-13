@@ -64,6 +64,7 @@ var vfx_pull: Node3D
 @onready var air_dash_ability: AirDashAbility = $AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $GroundSlamAbility
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
+@onready var input_handler: PlayerInput = $PlayerInput
 @onready var attack_timer: Timer = $FirstAttackTimer
 @onready var sprint_timer: Timer = $SprintTimer
 
@@ -144,6 +145,7 @@ func _ready() -> void:
 		_on_health_changed(health_component.get_health())
 
 	current_roll_charges = roll_max_charges
+	state_machine.init(self)
 
 # ============================================================================
 # PHYSICS PROCESS (CONTROLLER)
@@ -161,9 +163,6 @@ func _physics_process(delta: float) -> void:
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	# ВАЖНО: Мы больше НЕ вызываем handle_movement_input() здесь.
-	# StateMachine управляет скоростью через apply_movement_velocity
-	
 	move_and_slide()
 	
 	push_obj()
@@ -173,9 +172,6 @@ func _physics_process(delta: float) -> void:
 		air_dash_ability.reset_air_state()
 		current_jump_count = 0
 	was_on_floor = is_on_floor()
-
-func get_movement_vector() -> Vector2:
-	return Input.get_vector(GameConstants.INPUT_MOVE_LEFT, GameConstants.INPUT_MOVE_RIGHT, GameConstants.INPUT_MOVE_UP, GameConstants.INPUT_MOVE_DOWN)
 
 func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
 	# Логика авто-бега и попытки бега перенесена в расчет target_speed внутри State
@@ -191,42 +187,16 @@ func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: flo
 # ============================================================================
 # HELPER FUNCTIONS (Called by States)
 # ============================================================================
-
+func get_movement_vector() -> Vector2:
+	if input_handler:
+		return input_handler.move_vector
+	return Vector2.ZERO
 func apply_gravity(delta: float) -> void:
 	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming:
 		return
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta
 
-func handle_movement_input(delta: float) -> void:
-	movement_input = Input.get_vector(GameConstants.INPUT_MOVE_LEFT, GameConstants.INPUT_MOVE_RIGHT, GameConstants.INPUT_MOVE_UP, GameConstants.INPUT_MOVE_DOWN)
-	var velocity_2d = Vector2(velocity.x, velocity.z)
-	
-	# --- ВАЖНО: СБРОС АВТО-БЕГА ПРИ ОСТАНОВКЕ ---
-	if movement_input == Vector2.ZERO:
-		is_running = false
-		is_auto_running = false # <--- ЭТА СТРОКА ОБЯЗАТЕЛЬНА
-		# is_trying_to_run сбрасывается в State, здесь не трогаем
-	# --------------------------------------------
-	
-	# ... (остальной код handle_movement_input без изменений)
-	var run_threshold = lerp(base_speed, run_speed, 0.7)
-	var speed_2d = velocity_2d.length()
-	
-	if is_trying_to_run or is_auto_running:
-		is_running = (speed_2d >= run_threshold)
-	else:
-		is_running = false
-	
-	var current_speed = run_speed if (is_trying_to_run or is_auto_running) else base_speed
-	
-	if movement_input != Vector2.ZERO:
-		velocity_2d = velocity_2d.lerp(movement_input * current_speed, acceleration)
-	else:
-		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
-		
-	velocity.x = velocity_2d.x
-	velocity.z = velocity_2d.y
 
 func perform_jump() -> void:
 	var jump_multiplier = second_jump_multiplier if current_jump_count == 1 else 1.0

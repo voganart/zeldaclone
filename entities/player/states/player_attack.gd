@@ -23,9 +23,9 @@ func physics_update(delta: float) -> void:
 	player.rot_char(delta)
 	
 	# Cancel -> Roll
-	var run_just_released = Input.is_action_just_released(GameConstants.INPUT_RUN)
-	var roll_pressed = Input.is_action_just_pressed(GameConstants.INPUT_RUN)
-	var want_to_roll = roll_pressed or (run_just_released and player.shift_pressed_time <= player.roll_threshold)
+	var run_just_released = player.input_handler.is_run_just_released
+	var roll_pressed = player.input_handler.is_run_pressed # Или добавь just_pressed в хендлер
+	var want_to_roll = roll_pressed
 	
 	if want_to_roll:
 		if player.try_cancel_attack_for_roll() and player.can_roll():

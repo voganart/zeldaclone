@@ -42,6 +42,7 @@ func _perform_attack() -> void:
 	await enemy.anim_player.animation_finished
 	
 	is_performing_attack_anim = false
+	AIDirector.return_attack_token(enemy) 
 	
 	# Если после атаки выпал шанс отступить — вычисляем точку
 	if enemy.attack_component.should_tactical_retreat:
@@ -113,3 +114,6 @@ func on_damage_taken() -> void:
 		enemy.attack_component.clear_retreat_state()
 		# Переходим в Chase, чтобы немедленно переоценить ситуацию и, возможно, контратаковать
 		transitioned.emit(self, GameConstants.STATE_CHASE)
+func exit() -> void:
+	# Всегда возвращаем токен при выходе из состояния атаки
+	AIDirector.return_attack_token(enemy)
