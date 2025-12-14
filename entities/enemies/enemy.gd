@@ -211,21 +211,54 @@ func play_animation(anim_name: String, blend: float = -1.0, speed: float = 1.0) 
 	anim_player.play(anim_name, blend, speed)
 
 func update_movement_animation(delta: float) -> void:
-	var speed_2d := Vector2(velocity.x, velocity.z).length()
-	var blend = inverse_lerp(walk_run_blend_start_speed, walk_run_blend_end_speed, speed_2d)
-	target_movement_blend = clamp(blend, 0.0, 1.0)
-	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
-
-	if speed_2d > 0.1:
-		if current_movement_blend < 0.5:
-			var walk_scale = clamp(speed_2d / walk_speed, 0.5, 1.5) if walk_speed > 0 else 1.0
-			play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, walk_scale)
-		else:
-			var run_scale = clamp(speed_2d / run_speed, 0.5, 1.5) if run_speed > 0 else 1.0
-			play_animation(GameConstants.ANIM_ENEMY_RUN, 0.2, run_scale)
-	else:
+	var speed_length = velocity.length()
+	
+	# 1. Если почти стоим — играем Idle
+	if speed_length < 0.1:
 		play_animation(GameConstants.ANIM_ENEMY_IDLE, 0.2, 1.0)
+		return
 
+	# 2. Переводим глобальную скорость в локальное пространство врага
+	# basis.inverse() * vector позволяет узнать скорость с точки зрения самого врага
+	var local_velocity = global_transform.basis.inverse() * velocity
+	
+	# local_velocity.x -> (+) Вправо, (-) Влево
+	# local_velocity.z -> (-) Вперед, (+) Назад (в Godot -Z это вперед)
+	
+	# 3. Определяем, какое движение доминирует: продольное (бег) или поперечное (стрейф)
+	# Добавляем небольшой порог (bias), чтобы при легком повороте он не срывался в стрейф
+	var is_strafing = abs(local_velocity.x) > abs(local_velocity.z)
+	
+	if is_strafing:
+		# --- ЛОГИКА СТРЕЙФА ---
+		# Нормализуем скорость анимации под скорость движения
+		var strafe_anim_speed = clamp(speed_length / walk_speed, 0.8, 1.5)
+		
+		if local_velocity.x > 0:
+			play_animation(GameConstants.ANIM_ENEMY_STRAFE_R, 0.2, strafe_anim_speed)
+		else:
+			play_animation(GameConstants.ANIM_ENEMY_STRAFE_L, 0.2, strafe_anim_speed)
+			
+	else:
+		# --- ЛОГИКА ДВИЖЕНИЯ ВПЕРЕД (Бег/Ходьба) ---
+		
+		# Если вдруг он пятится назад (Z > 0)
+		if local_velocity.z > 0.1: 
+			# Если есть анимация ходьбы назад — вставь её сюда. Если нет — Walk с реверсом или просто Walk
+			# play_animation("Monstr_walk_back", 0.2, 1.0)
+			play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, 1.0) # Временная заглушка
+		else:
+			# Обычный бег вперед с блендингом
+			var blend = inverse_lerp(walk_run_blend_start_speed, walk_run_blend_end_speed, speed_length)
+			target_movement_blend = clamp(blend, 0.0, 1.0)
+			current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+
+			if current_movement_blend < 0.5:
+				var walk_scale = clamp(speed_length / walk_speed, 0.5, 1.5) if walk_speed > 0 else 1.0
+				play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, walk_scale)
+			else:
+				var run_scale = clamp(speed_length / run_speed, 0.5, 1.5) if run_speed > 0 else 1.0
+				play_animation(GameConstants.ANIM_ENEMY_RUN, 0.2, run_scale)
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================

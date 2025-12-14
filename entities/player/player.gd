@@ -433,3 +433,7 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 		
 		# Передаем вектор
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
+		var recoil_force = 2.0 # Сила отдачи
+		if is_finisher: recoil_force = 4.0
+		# Применяем импульс обратно вектору атаки
+		velocity -= dir * recoil_force

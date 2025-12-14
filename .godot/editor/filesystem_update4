@@ -19,3 +19,9 @@ res://entities/enemies/states/enemy_chase.gd
 res://vfx/blood_splash/VfxPool.gd
 res://entities/enemies/enemy.gd
 res://vfx/blood_splash/blood_splash.tscn
+res://entities/enemies/animations/Monstr_attack_1.res
+res://entities/enemies/animations/Monstr_attack_2.res
+res://entities/enemies/states/enemy_combat_stance.gd
+res://common/autoload/game_constants.gd
+res://entities/player/player.gd
+res://entities/player/player.tscn

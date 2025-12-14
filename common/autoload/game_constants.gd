@@ -30,6 +30,7 @@ const STATE_PATROL = "patrol"
 const STATE_CHASE = "chase"
 const STATE_FRUSTRATED = "frustrated"
 const STATE_DEAD = "dead"
+const STATE_COMBAT_STANCE = "combatstance"
 
 # --- АНИМАЦИИ ИГРОКА (PLAYER ANIMATIONS) ---
 const ANIM_PLAYER_IDLE = "Boy_idle"
@@ -64,7 +65,8 @@ const ANIM_ENEMY_ATTACK_1 = "Monstr_attack_1"
 const ANIM_ENEMY_ATTACK_2 = "Monstr_attack_2"
 const ANIM_ENEMY_KNOCKDOWN = "Monstr_knockdown"
 const ANIM_ENEMY_HIT = "Monstr_hit"
-
+const ANIM_ENEMY_STRAFE_L = "Monstr_walk_strafe_l"
+const ANIM_ENEMY_STRAFE_R = "Monstr_walk_strafe_r"
 # --- ПАРАМЕТРЫ ШЕЙДЕРОВ (SHADER PARAMS) ---
 const SHADER_PARAM_PLAYER_POS = "player_position"
 const SHADER_PARAM_DISSOLVE = "dissolve_amount"

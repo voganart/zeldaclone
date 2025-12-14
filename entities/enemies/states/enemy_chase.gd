@@ -51,15 +51,10 @@ func physics_update(delta: float) -> void:
 			if AIDirector.request_attack_token(enemy):
 				transitioned.emit(self, GameConstants.STATE_ATTACK)
 			else:
-				enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
-				# Небольшой трюк: Отталкиваемся от игрока вектором скорости
-				var dir_away = (enemy.global_position - enemy.player.global_position).normalized()
-				enemy.velocity.x = dir_away.x * 0.5 # Медленно пятимся
-				enemy.velocity.z = dir_away.z * 0.5
-				enemy.move_and_slide()
+				transitioned.emit(self, GameConstants.STATE_COMBAT_STANCE)
 			return
 		else:
-			enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
+			transitioned.emit(self, GameConstants.STATE_COMBAT_STANCE)
 	# --- ЛОГИКА ПОГОНИ (Игрок далеко) ---
 	else:
 		if time_since_player_seen > chase_memory_duration or dist_to_player > enemy.vision_component.lost_sight_range:
