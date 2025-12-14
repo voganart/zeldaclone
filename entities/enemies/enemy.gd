@@ -158,11 +158,14 @@ func move_toward_path() -> void:
 
 ## Callback от NavigationAgent (RVO Avoidance)
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	if is_knocked_back: return # Если нас пнули, навигация не должна мешать
+	if is_knocked_back: return 
 	
-	velocity.x = safe_velocity.x
-	velocity.z = safe_velocity.z
-	# Y не трогаем, он управляется гравитацией в _physics_process
+	# Небольшая интерполяция, чтобы движение было менее дерганым при столкновениях
+	# Но достаточно быстрая (weight 0.2-0.5), чтобы управление было отзывчивым
+	var target_vel = safe_velocity
+	target_vel.y = velocity.y # Сохраняем гравитацию
+	
+	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
 	
 	move_and_slide()
 

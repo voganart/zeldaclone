@@ -1,8 +1,8 @@
 [gd_resource type="ParticleProcessMaterial" load_steps=7 format=3 uid="uid://dqxvq52pjvv1n"]
 
 [sub_resource type="Curve" id="Curve_4g5ld"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5060028, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
-point_count = 3
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -3.023932, 0.0, 0, 0]
+point_count = 2
 
 [sub_resource type="CurveTexture" id="CurveTexture_ptatb"]
 curve = SubResource("Curve_4g5ld")
@@ -16,7 +16,7 @@ point_count = 3
 curve = SubResource("Curve_ptatb")
 
 [sub_resource type="Curve" id="Curve_vcmg4"]
-_data = [Vector2(1e-05, 0), 0.0, 0.0, 0, 0, Vector2(0.4975282, 0.5218343), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+_data = [Vector2(1e-05, 0), 0.0, 0.0, 0, 0, Vector2(0.5002976, 0.7336066), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 3
 
 [sub_resource type="CurveTexture" id="CurveTexture_4g5ld"]
@@ -29,14 +29,16 @@ emission_shape = 2
 emission_sphere_radius = 1.0
 angle_min = -501.3
 angle_max = 483.00003
-inherit_velocity_ratio = 1.0
 direction = Vector3(0, 0, 0)
-spread = 64.462
 initial_velocity_min = 0.5
 initial_velocity_max = 1.0
 angular_velocity_min = -199.30002
-angular_velocity_max = 95.15998
+angular_velocity_max = 73.57998
 angular_velocity_curve = SubResource("CurveTexture_vcmg4")
+radial_velocity_min = -1.0000223
+radial_velocity_max = 0.99997765
+linear_accel_min = -2.2351742e-06
+linear_accel_max = -2.2351742e-06
 radial_accel_min = 0.99999774
 radial_accel_max = 2.9999976
 tangential_accel_min = 0.09999776

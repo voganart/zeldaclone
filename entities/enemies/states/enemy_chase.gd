@@ -2,7 +2,8 @@ extends State
 
 @export var chase_memory_duration: float = 5.0
 @export var stuck_threshold: float = 0.5 # Время без движения, чтобы считать застрявшим
-
+@export var separation_weight: float = 2.0 # Сила отталкивания от своих
+@export var separation_radius: float = 1.5 # Радиус личного пространства
 var time_since_player_seen: float = 0.0
 var time_stuck: float = 0.0
 var unreachable_timer: float = 0.0 # Таймер недосягаемости
@@ -67,7 +68,23 @@ func physics_update(delta: float) -> void:
 
 		# Движение
 		enemy.nav_agent.target_position = enemy.player.global_position
-		enemy.move_toward_path()
+		
+		# 1. Получаем следующую точку пути от навигации
+		var next_path_pos = enemy.nav_agent.get_next_path_position()
+		var dir_to_target = (next_path_pos - enemy.global_position).normalized()
+		
+		# 2. Получаем вектор отталкивания от других врагов
+		var separation = _get_separation_vector()
+		
+		# 3. Смешиваем желание идти к цели и желание отойти от соседа
+		# separation_weight определяет приоритет личного пространства
+		var final_direction = (dir_to_target + (separation * separation_weight)).normalized()
+		
+		# 4. Применяем скорость (игнорируем Y)
+		final_direction.y = 0
+		
+		# Важно: используем set_velocity для NavAgent, чтобы работало избегание препятствий Godot (RVO)
+		enemy.nav_agent.set_velocity(final_direction * enemy.run_speed)
 		
 		# ПРОВЕРКА 1: Застряли ли мы физически?
 		if stuck_detector.check(delta, enemy.velocity):
@@ -99,3 +116,31 @@ func physics_update(delta: float) -> void:
 			enemy.handle_rotation(delta, enemy.player.global_position)
 		
 		enemy.update_movement_animation(delta)
+		
+
+func _get_separation_vector() -> Vector3:
+	var separation = Vector3.ZERO
+	var neighbors = get_tree().get_nodes_in_group("enemies")
+	var count = 0
+	
+	for neighbor in neighbors:
+		# Пропускаем себя или мертвых/невалидных
+		if neighbor == enemy or not is_instance_valid(neighbor):
+			continue
+			
+		# Считаем дистанцию
+		var dist = enemy.global_position.distance_to(neighbor.global_position)
+		
+		# Если сосед слишком близко (в зоне личного пространства)
+		if dist < separation_radius:
+			# Вектор ОТ соседа к нам
+			var push = (enemy.global_position - neighbor.global_position).normalized()
+			# Чем ближе, тем сильнее толкаем (обратно пропорционально)
+			# Добавляем защиту от деления на ноль (max(dist, 0.1))
+			separation += push / max(dist, 0.1)
+			count += 1
+			
+	if count > 0:
+		separation = separation / count # Средний вектор
+		
+	return separation

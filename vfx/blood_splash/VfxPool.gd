@@ -34,17 +34,17 @@ func spawn_effect(effect_idx: int, position: Vector3, rotation: Vector3 = Vector
 	# 1. Сначала ставим позицию и видимость
 	effect.global_position = position
 	effect.global_rotation = rotation
-	effect.scale = Vector3.ONE # На всякий случай сбрасываем масштаб
+	effect.scale = Vector3.ONE 
 	effect.visible = true
 	
-	# 2. !!! КРИТИЧЕСКИ ВАЖНО !!!
-	# Ждем 1 кадр, чтобы движок применил новую позицию и видимость
-	await get_tree().process_frame
-	
-	# 3. Теперь включаем частицы. Если эффект уже вернулся в пул (маловероятно), не включаем.
-	if effect.visible: 
-		_enable_particles(effect)
-		_return_to_pool_later(effect)
+	# 2. ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ТРАНСФОРМАЦИИ (Вместо await)
+	# Это заставляет движок обновить позицию частиц немедленно перед рестартом
+	if effect is Node3D:
+		effect.force_update_transform()
+
+	# 3. Включаем частицы сразу же
+	_enable_particles(effect)
+	_return_to_pool_later(effect)
 	
 	return effect
 
