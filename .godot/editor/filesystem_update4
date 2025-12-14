@@ -28,3 +28,4 @@ res://vfx/CrateExplosion.tscn
 res://entities/interactive/WoodenCrate.tscn
 res://vfx/blood_splash/VfxPool.gd
 res://entities/interactive/breakable_object.gd
+res://vfx/blood_splash/blood_splash.tscn
