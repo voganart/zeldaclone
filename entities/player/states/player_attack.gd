@@ -22,10 +22,21 @@ func physics_update(delta: float) -> void:
 	
 	player.rot_char(delta)
 	
-	# Cancel -> Roll
-	var run_just_released = player.input_handler.is_run_just_released
-	var roll_pressed = player.input_handler.is_run_pressed # Или добавь just_pressed в хендлер
-	var want_to_roll = roll_pressed
+# Cancel -> Roll
+	# Мы хотим делать перекат из атаки, ТОЛЬКО если игрок:
+	# 1. Отпустил кнопку (тапнул)
+	# 2. Или нажал её заново (если бы это была отдельная кнопка)
+	# Но мы НЕ должны делать ролл, если кнопка просто зажата (бег).
+	
+	var want_to_roll = player.input_handler.is_run_just_released
+	
+	if want_to_roll:
+		# Проверяем, можно ли отменить атаку на этой стадии (Animation Cancel)
+		# И есть ли у нас заряды (can_roll)
+		if player.try_cancel_attack_for_roll() and player.can_roll():
+			# Просто переходим. Списание заряда произойдет внутри состояния Roll (в методе enter)
+			transitioned.emit(self, GameConstants.STATE_ROLL)
+			return
 	
 	if want_to_roll:
 		if player.try_cancel_attack_for_roll() and player.can_roll():

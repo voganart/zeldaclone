@@ -164,21 +164,42 @@ func _perform_impact() -> void:
 	_playing_end_anim = false
 
 func _deal_damage() -> void:
-	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
-	for enemy in enemies:
-		if not is_instance_valid(enemy): continue
+	# Используем SphereShape для поиска ВСЕХ физических тел в радиусе
+	# Это надежнее, чем groups, потому что мы найдем и врагов, и ящики
+	var space_state = actor.get_world_3d().direct_space_state
+	var shape = SphereShape3D.new()
+	shape.radius = slam_radius
+	
+	var params = PhysicsShapeQueryParameters3D.new()
+	params.shape = shape
+	params.transform = Transform3D(Basis(), actor.global_position)
+	# Маска коллизий: Враги (3) + Объекты (5) + Мб что-то еще
+	# Если не уверен, можно просто убрать маску или поставить 0xFFFFFFFF (все слои)
+	params.collision_mask = 0xFFFFFFFF 
+	params.exclude = [actor] # Исключаем самого игрока
+	
+	var results = space_state.intersect_shape(params)
+	
+	for result in results:
+		var body = result.collider
 		
-		var dist = actor.global_position.distance_to(enemy.global_position)
-		if dist <= slam_radius:
-			var push_dir = (enemy.global_position - actor.global_position).normalized()
+		# Пропускаем, если объект уничтожен или невалиден
+		if not is_instance_valid(body): continue
+		
+		# Проверяем, можно ли нанести урон
+		if body.has_method("take_damage"):
+			var push_dir = (body.global_position - actor.global_position).normalized()
 			
-			# Формируем вектор отбрасывания: Сильный вертикальный подброс для Knockdown
-			var knockback_vec = push_dir * 8.0 # Горизонтальный разлет
-			knockback_vec.y = 3.0 # Вертикальный подброс (гарантирует анимацию полета)
+			# Вектор отбрасывания (сильно вверх)
+			var knockback_vec = push_dir * 8.0 
+			knockback_vec.y = 3.0
 			
-			if enemy.has_method("receive_push"):
-				enemy.receive_push(push_dir * 3.0)
+			# Если это враг или ящик, толкаем его
+			if body.has_method("receive_push"):
+				body.receive_push(push_dir * 3.0)
+			elif body is RigidBody3D:
+				# Ящики (RigidBody) толкаем через impulse
+				body.apply_central_impulse(push_dir * 10.0) 
 			
-			if enemy.has_method("take_damage"):
-				# is_heavy_attack = true, плюс высокий Y вектор
-				enemy.take_damage(slam_damage, knockback_vec, true)
+			# Наносим урон (is_heavy = true)
+			body.take_damage(slam_damage, knockback_vec, true)

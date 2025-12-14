@@ -1,0 +1,23 @@
+{
+	"asset":{
+		"generator":"Khronos glTF Blender I/O v5.0.21",
+		"version":"2.0"
+	},
+	"scene":0,
+	"scenes":[
+		{
+			"extras":{
+				"wiggle":{
+					"is_rendering":0
+				},
+				"addon_copy_global_transform_mirror_ob":{},
+				"addon_copy_global_transform_relative_ob":{},
+				"mix_source_armature":{},
+				"print3d_toolbox":{
+					"use_scene_scale":0
+				}
+			},
+			"name":"Scene"
+		}
+	]
+}

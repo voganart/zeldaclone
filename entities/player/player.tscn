@@ -1,10 +1,9 @@
-[gd_scene load_steps=39 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=38 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="2_8fjmc"]
-[ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/assets/character.tscn" id="2_635qg"]
-[ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://entities/health_component/HealthComponent.tscn" id="2_fkugw"]
-[ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://entities/player/assets/character.tres" id="4_fkugw"]
+[ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/character.tscn" id="2_635qg"]
+[ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://ui/health_component/HealthComponent.tscn" id="2_fkugw"]
 [ext_resource type="Script" uid="uid://5vc2jye7m3cj" path="res://entities/player/components/input_handler.gd" id="4_yqrof"]
 [ext_resource type="Script" uid="uid://cpfg6vbvk2u7g" path="res://entities/player/abilities/air_dash_ability.gd" id="6_qiwj3"]
 [ext_resource type="Script" uid="uid://nh0l4x1ik4qf" path="res://entities/player/abilities/ground_slam_ability.gd" id="7_26q78"]
@@ -136,7 +135,7 @@ air_control = 0.3
 second_jump_multiplier = 1.4
 acceleration = 0.2
 rot_speed = 10.0
-push_force = 0.2
+push_force = 5.0
 roll_push_multiplier = 0.0
 roll_speed = 4.0
 buffered_jump_max_time = 0.15
@@ -154,6 +153,7 @@ punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("character/root/Skeleton3D/hand_l/punch_hand_l")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_fkugw")]
+max_health = 50.0
 
 [node name="HitFlash" parent="." instance=ExtResource("2_8fjmc")]
 mesh_path = NodePath("../character/root/Skeleton3D/Character_mesh")
@@ -164,9 +164,6 @@ flash_time = 0.2
 script = ExtResource("4_yqrof")
 
 [node name="character" parent="." instance=ExtResource("2_635qg")]
-
-[node name="Character_mesh" parent="character/root/Skeleton3D" index="0"]
-surface_material_override/0 = ExtResource("4_fkugw")
 
 [node name="AnimationTree" type="AnimationTree" parent="character"]
 active = false
@@ -189,7 +186,7 @@ wait_time = 0.6
 one_shot = true
 
 [node name="FirstAttackArea" type="Area3D" parent="."]
-collision_mask = 4
+collision_mask = 20
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="FirstAttackArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9123535, 1.2277644)

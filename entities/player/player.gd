@@ -206,12 +206,29 @@ func perform_jump() -> void:
 	current_jump_count += 1
 
 func rot_char(delta: float) -> void:
-	# if is_knockbacked or is_knockback_stun: return # Отключили, чтобы игрок сохранял контроль поворота
+	# 1. Если мы в стане (только что получили урон), запрещаем вращаться.
+	# Это сохраняет направление взгляда на врага сразу после удара.
+	if is_knockback_stun: return 
+
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
-	var vel_2d = Vector2(velocity.x, -velocity.z)
-	if vel_2d.length_squared() > 0.001:
-		var target_angle = vel_2d.angle() + PI / 2
+	
+	# 2. Получаем вектор ввода (WASD / Стик)
+	var input_dir = Vector2.ZERO
+	if input_handler:
+		input_dir = input_handler.move_vector # (x, y) от джойстика/клавиатуры
+
+	# 3. ГЛАВНОЕ ИЗМЕНЕНИЕ:
+	# Мы вращаемся, ТОЛЬКО если игрок нажимает кнопки.
+	# Мы полностью игнорируем velocity. Если игрока толкают, отбрасывают или он скользит,
+	# но кнопки не нажаты — он сохраняет текущий угол поворота.
+	if input_dir.length_squared() > 0.001:
+		# Превращаем 2D ввод в угол поворота Y (в Godot 2D Y вниз, в 3D Z вниз, поэтому инверсия может быть нужна/не нужна)
+		# Обычно Input Up = (0, -1), Input Right = (1, 0).
+		# Vector2(x, -y) конвертирует это в правильный угол для 3D.
+		var target_vector = Vector2(input_dir.x, -input_dir.y)
+		var target_angle = target_vector.angle() + PI / 2
+		
 		rotation.y = lerp_angle(rotation.y, target_angle, current_rot_speed * delta)
 
 func tilt_character(delta: float) -> void:
@@ -418,14 +435,15 @@ func _check_attack_hit() -> void:
 
 func _check_single_hand_hit(hand: Area3D) -> bool:
 	for body in hand.get_overlapping_bodies():
-		if body.is_in_group(GameConstants.GROUP_ENEMIES):
+		# Проверяем, что это не мы сами и что объект можно ударить
+		if body != self and body.has_method("take_damage"):
 			punch_collision(body, hand)
 			return true
 	return false
 
 func punch_collision(body: Node3D, hand: Area3D) -> void:
 	if not is_attacking: return
-	if not body.is_in_group(GameConstants.GROUP_ENEMIES): return
+	if body == self: return
 	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
 	if body.has_method("take_damage"):
 		var is_finisher = (current_attack_damage >= 2.0)

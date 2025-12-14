@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://81ioj6luekxt"]
 
-[ext_resource type="Texture2D" uid="uid://tj6i1eopydvg" path="res://vfx/blood_splash/vm_splatter01.png" id="1_vcmg4"]
+[ext_resource type="Texture2D" uid="uid://tj6i1eopydvg" path="res://assets/textures/vfx/vm_splatter01.png" id="1_vcmg4"]
 [ext_resource type="Material" uid="uid://dqxvq52pjvv1n" path="res://vfx/blood_splash/blood_splash.tres" id="2_4g5ld"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cekqp"]

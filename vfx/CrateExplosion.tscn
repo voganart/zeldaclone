@@ -1,0 +1,71 @@
+[gd_scene load_steps=8 format=3 uid="uid://bk0jojvlhos42"]
+
+[ext_resource type="ArrayMesh" uid="uid://b58pn5dx7ndbi" path="res://assets/models/interactive/crate_particle_1.res" id="1_f14cs"]
+[ext_resource type="ArrayMesh" uid="uid://tbd3713fgr00" path="res://assets/models/interactive/crate_particle_2.res" id="2_xnfmx"]
+
+[sub_resource type="Curve" id="Curve_vx4m3"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.6423031, 0.7512814), -1.6930369, -1.6930369, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_jenbb"]
+curve = SubResource("Curve_vx4m3")
+
+[sub_resource type="Curve" id="Curve_x55x4"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.19361576, 1), 0.0, 0.0, 0, 0, Vector2(0.8547136, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_1f0tf"]
+curve = SubResource("Curve_x55x4")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_m86cl"]
+lifetime_randomness = 0.44
+particle_flag_rotate_y = true
+emission_shape_offset = Vector3(0, 0.5, 0)
+emission_shape_scale = Vector3(0.5, 0.5, 0.5)
+emission_shape = 3
+emission_box_extents = Vector3(0.5, 0.5, 0.5)
+angle_min = -506.8
+angle_max = 494.50003
+direction = Vector3(0, 8, 0)
+spread = 56.298
+initial_velocity_min = 1.0
+initial_velocity_max = 3.0
+angular_velocity_min = -1.6093254e-05
+angular_velocity_max = 18.539984
+orbit_velocity_min = 9.49949e-08
+orbit_velocity_max = 0.0770001
+radial_velocity_min = 0.09997764
+radial_velocity_max = 0.99997765
+radial_accel_min = -2.2351742e-06
+radial_accel_max = -2.2351742e-06
+tangential_accel_min = -2.2351742e-06
+tangential_accel_max = -2.2351742e-06
+damping_max = 2.1460001
+scale_min = 0.19999999
+scale_curve = SubResource("CurveTexture_1f0tf")
+alpha_curve = SubResource("CurveTexture_jenbb")
+collision_mode = 1
+collision_friction = 0.32
+collision_bounce = 0.04
+
+[node name="CrateExplosion" type="Node3D"]
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+emitting = false
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_m86cl")
+draw_pass_1 = ExtResource("1_f14cs")
+
+[node name="GPUParticles3D2" type="GPUParticles3D" parent="."]
+emitting = false
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_m86cl")
+draw_pass_1 = ExtResource("2_xnfmx")
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05512947, 0)
+size = Vector3(5, 0.1, 5)

@@ -1,0 +1,46 @@
+[gd_resource type="ShaderMaterial" load_steps=7 format=3 uid="uid://c3gmswlr7otco"]
+
+[ext_resource type="Material" uid="uid://dmrecklaxbldq" path="res://assets/_master/x-ray_mat.tres" id="1_70hr8"]
+[ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://assets/shaders/toonShader.gdshader" id="2_4eg5w"]
+[ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://assets/_master/MasterTexture.png" id="3_70hr8"]
+[ext_resource type="Texture2D" uid="uid://cttux46qnikqf" path="res://assets/_master/gradient_overlay.png" id="4_o1p36"]
+
+[sub_resource type="Gradient" id="Gradient_dv3lr"]
+offsets = PackedFloat32Array(0, 0.9563539)
+colors = PackedColorArray(0, 0, 0.15785152, 1, 1, 0.9450674, 0.7841054, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_bj817"]
+gradient = SubResource("Gradient_dv3lr")
+use_hdr = true
+fill_from = Vector2(0, 1)
+fill_to = Vector2(1, 1)
+
+[resource]
+render_priority = 0
+next_pass = ExtResource("1_70hr8")
+shader = ExtResource("2_4eg5w")
+shader_parameter/dissolve_amount = 0.0
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/albedo_texture = ExtResource("3_70hr8")
+shader_parameter/clamp_diffuse_to_max = true
+shader_parameter/cuts = 4
+shader_parameter/wrap = 0.8000001330000002
+shader_parameter/steepness = 1.0
+shader_parameter/use_attenuation = false
+shader_parameter/use_specular = true
+shader_parameter/specular_strength = 0.005
+shader_parameter/specular_shininess = 3.8210001814975
+shader_parameter/use_rim = true
+shader_parameter/rim_width = 11.538000548055
+shader_parameter/rim_color = Color(1, 1, 1, 0.096)
+shader_parameter/use_ramp = false
+shader_parameter/ramp = SubResource("GradientTexture2D_bj817")
+shader_parameter/use_borders = false
+shader_parameter/border_width = 0.01
+shader_parameter/use_gradient = true
+shader_parameter/gradient_texture = ExtResource("4_o1p36")
+shader_parameter/gradient_blend_mode = 1
+shader_parameter/gradient_strength = 0.400000019
+shader_parameter/mesh_min_y = 0.0
+shader_parameter/mesh_max_y = 1.0
+shader_parameter/gradient_uv_set = 1

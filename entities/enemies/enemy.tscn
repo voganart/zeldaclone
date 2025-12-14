@@ -1,9 +1,9 @@
 [gd_scene load_steps=20 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
-[ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://UI/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
-[ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://entities/health_component/HealthComponent.tscn" id="2_wqcwe"]
-[ext_resource type="Script" uid="uid://nqcrxsuj1cdf" path="res://UI/HealthBar3D/enemy_health_bar.gd" id="3_2ggct"]
+[ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://ui/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
+[ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://ui/health_component/HealthComponent.tscn" id="2_wqcwe"]
+[ext_resource type="Script" uid="uid://nqcrxsuj1cdf" path="res://ui/HealthBar3D/enemy_health_bar.gd" id="3_2ggct"]
 [ext_resource type="PackedScene" uid="uid://duk5b06ohkpsc" path="res://entities/enemies/monstr.tscn" id="3_5lf1o"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="4_msovg"]
 [ext_resource type="Script" uid="uid://bms48mt88e42c" path="res://entities/enemies/components/vision_component.gd" id="7_56i32"]

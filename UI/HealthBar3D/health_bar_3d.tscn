@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://b72gnkqh5atrs"]
 
-[ext_resource type="Shader" uid="uid://qk5hrvo8vvv0" path="res://UI/HealthBar3D/health_bar_3d.gdshader" id="1_sjphd"]
+[ext_resource type="Shader" uid="uid://qk5hrvo8vvv0" path="res://assets/shaders/ui_healthbar.gdshader" id="1_sjphd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sjphd"]
 render_priority = 0

@@ -56,6 +56,12 @@ window/size/viewport_height=1080
 
 enabled=PackedStringArray("res://addons/jigglebones/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/proton_scatter/plugin.cfg", "res://addons/script_spliter/plugin.cfg", "res://addons/simplegrasstextured/plugin.cfg", "res://addons/terrain_3d/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://entities/": "red"
+}
+
 [global_group]
 
 player=""

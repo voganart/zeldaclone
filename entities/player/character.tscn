@@ -1,0 +1,43 @@
+[gd_scene load_steps=4 format=3 uid="uid://k5os7k8wlcvf"]
+
+[ext_resource type="PackedScene" uid="uid://csr3wt4d4pa2g" path="res://assets/models/characters/character.glb" id="1_mqt3v"]
+[ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://assets/_master/MasterPalette.tres" id="2_gbq34"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_brhp1"]
+
+[node name="character" instance=ExtResource("1_mqt3v")]
+
+[node name="Character_mesh" parent="root/Skeleton3D" index="0"]
+surface_material_override/0 = ExtResource("2_gbq34")
+
+[node name="hand_r" type="BoneAttachment3D" parent="root/Skeleton3D" index="1"]
+transform = Transform3D(-0.065661415, -0.8471187, -0.5273313, -0.05510868, -0.52458656, 0.8495712, -0.9963187, 0.084844545, -0.012238476, -0.651905, 0.7241137, -0.032812893)
+bone_name = "hand.r"
+bone_idx = 24
+
+[node name="punch_hand_r" type="Area3D" parent="root/Skeleton3D/hand_r" index="0"]
+collision_layer = 2
+collision_mask = 20
+linear_damp_space_override = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_r/punch_hand_r" index="0"]
+transform = Transform3D(1.5, -1.1175868e-08, -5.5879354e-08, 1.1175869e-08, 1.5, 4.4703448e-08, 5.5879354e-08, -4.4703448e-08, 1.5, 0, 0, 0)
+shape = SubResource("SphereShape3D_brhp1")
+
+[node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
+transform = Transform3D(-0.06566147, 0.84711844, 0.5273315, 0.055108495, -0.52458674, 0.84957117, 0.99631876, 0.084844545, -0.012238424, 0.6519048, 0.72411376, -0.032812923)
+bone_name = "hand.l"
+bone_idx = 11
+
+[node name="punch_hand_l" type="Area3D" parent="root/Skeleton3D/hand_l" index="0"]
+transform = Transform3D(1, -7.45058e-09, 6.51926e-09, 3.72529e-08, 1, 9.84874e-08, 1.58325e-08, -9.93023e-08, 1, 0.015425, 0.115577, -0.00846398)
+collision_layer = 2
+collision_mask = 20
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_l/punch_hand_l" index="0"]
+transform = Transform3D(1.5, -3.352755e-08, -5.587939e-09, 3.352755e-08, 1.5, 1.5017548e-07, 5.5879354e-09, -1.5017548e-07, 1.5, 0, 0, 0)
+shape = SubResource("SphereShape3D_brhp1")
+
+[node name="AnimationPlayer" parent="." index="1"]
+autoplay = "Boy_idle"
+playback_default_blend_time = 0.2

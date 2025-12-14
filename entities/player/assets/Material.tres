@@ -1,9 +1,0 @@
-[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://be5qivfhnfc1a"]
-
-[ext_resource type="Texture2D" uid="uid://ccuwg1wn7hyh6" path="res://entities/player/assets/character_character_BaseColorTexture.png" id="1_1n5h1"]
-
-[resource]
-resource_name = "Material"
-cull_mode = 2
-albedo_texture = ExtResource("1_1n5h1")
-roughness = 0.5

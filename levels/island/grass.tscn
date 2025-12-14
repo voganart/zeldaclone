@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://0w8bud5fm0mv"]
+
+[ext_resource type="PackedScene" uid="uid://cvgfcxe7h8grb" path="res://assets/models/environment/grass.blend" id="1_48eqv"]
+[ext_resource type="Shader" uid="uid://b47xmfre5vq1h" path="res://assets/materials/grass.tres" id="2_1blox"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v7g2r"]
+render_priority = 0
+shader = ExtResource("2_1blox")
+shader_parameter/WindSpeed = 0.1
+shader_parameter/WindPower = 0.1
+shader_parameter/BaseColor = Color(0.070498, 0.456553, 0, 1)
+shader_parameter/GrassColor = Color(0.529336, 0.85301, 0.323284, 1)
+
+[node name="grass2" instance=ExtResource("1_48eqv")]
+
+[node name="grass" parent="." index="0"]
+surface_material_override/0 = SubResource("ShaderMaterial_v7g2r")
