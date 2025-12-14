@@ -14,10 +14,10 @@
 [ext_resource type="PackedScene" uid="uid://bs37mw4nd5fcs" path="res://environment/island/grass.glb" id="8_nb3sg"]
 [ext_resource type="Shader" uid="uid://d4cci5dovs27b" path="res://water_shader/shaders/water_style.gdshader" id="9_p7nu3"]
 [ext_resource type="Shader" uid="uid://c8ktwvuun6cjf" path="res://entities/levels/island/grass/grass.tres" id="10_nb3sg"]
-[ext_resource type="Script" uid="uid://8afyhmg3uo5n" path="res://UI/player_ui/player_health_label.gd" id="13_jnjk1"]
-[ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://DebugOverlay/canvas_layer.tscn" id="13_qmhhi"]
+[ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://DebugOverlay/DebugOverlay.tscn" id="13_qmhhi"]
 [ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="14_tfnen"]
 [ext_resource type="Script" uid="uid://cghbw6nlcm2el" path="res://vfx/blood_splash/VfxPool.gd" id="15_bi1di"]
+[ext_resource type="PackedScene" uid="uid://bu1lpanm3apd7" path="res://UI/PlayerHUD.tscn" id="19_427qg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xfgcj"]
 sky_top_color = Color(0.3526861, 0.5895269, 1, 1)
@@ -397,21 +397,15 @@ transform = Transform3D(0.04347826, 0, 0, 0, 0.05, 0, 0, 0, 0.04347826, 0, -0.5,
 [node name="grass" parent="Grass_multi/grass_plane/grass" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.284585, 0)
 
-[node name="Health" type="Label" parent="."]
-offset_right = 24.0
-offset_bottom = 20.0
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 50
-text = "10"
-script = ExtResource("13_jnjk1")
-metadata/_edit_use_anchors_ = true
-
-[node name="CanvasLayer" parent="." instance=ExtResource("13_qmhhi")]
+[node name="DebugOverlay" parent="." instance=ExtResource("13_qmhhi")]
 
 [node name="VfxPull" type="Node3D" parent="." groups=["vfx_pool"]]
 script = ExtResource("15_bi1di")
 effect_scenes = Array[PackedScene]([ExtResource("14_tfnen")])
 pool_size = 20
 auto_expand = true
+
+[node name="PlayerHUD" parent="." instance=ExtResource("19_427qg")]
+player_path = NodePath("../Entities/Player")
 
 [editable path="Grass_multi/grass_plane/grass"]

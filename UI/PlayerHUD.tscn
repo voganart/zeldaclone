@@ -1,0 +1,109 @@
+[gd_scene load_steps=5 format=3 uid="uid://bu1lpanm3apd7"]
+
+[ext_resource type="Script" uid="uid://374j6hiru2t7" path="res://UI/player_hud.gd" id="1_vctn3"]
+[ext_resource type="Texture2D" uid="uid://7fwdfjmywn81" path="res://UI/textures/GroundSlam.png" id="2_mk51h"]
+[ext_resource type="Texture2D" uid="uid://crh0lxy4hljro" path="res://UI/textures/Roll.png" id="3_0y4xh"]
+[ext_resource type="Texture2D" uid="uid://cn7nq1ds3kfix" path="res://UI/textures/Heart.png" id="4_ry604"]
+
+[node name="PlayerHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vctn3")
+pip_texture = ExtResource("3_0y4xh")
+slam_texture = ExtResource("2_mk51h")
+heart_texture = ExtResource("4_ry604")
+color_recharging = Color(0.8659084, 1, 0.773583, 0.89411765)
+color_background = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
+debug_hearts_count = 9
+
+[node name="ActionsContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -132.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ActionsContainer"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+
+[node name="SlamIcon" type="TextureProgressBar" parent="ActionsContainer/VBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.0
+fill_mode = 4
+nine_patch_stretch = true
+texture_under = ExtResource("2_mk51h")
+texture_progress = ExtResource("2_mk51h")
+tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
+
+[node name="RollContainer" type="HBoxContainer" parent="ActionsContainer/VBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+
+[node name="Pip3" type="TextureProgressBar" parent="ActionsContainer/VBoxContainer/RollContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.0
+fill_mode = 4
+nine_patch_stretch = true
+texture_under = ExtResource("3_0y4xh")
+texture_progress = ExtResource("3_0y4xh")
+tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
+
+[node name="Pip2" type="TextureProgressBar" parent="ActionsContainer/VBoxContainer/RollContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.0
+fill_mode = 4
+nine_patch_stretch = true
+texture_under = ExtResource("3_0y4xh")
+texture_progress = ExtResource("3_0y4xh")
+tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
+
+[node name="Pip1" type="TextureProgressBar" parent="ActionsContainer/VBoxContainer/RollContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.0
+fill_mode = 4
+nine_patch_stretch = true
+texture_under = ExtResource("3_0y4xh")
+texture_progress = ExtResource("3_0y4xh")
+tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
+
+[node name="HealthContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 1
+offset_right = 340.0
+offset_bottom = 128.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = -50
+
+[node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2

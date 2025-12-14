@@ -29,7 +29,8 @@ func enter() -> void:
 	else:
 		if player.roll_regen_timer <= 0:
 			player.roll_regen_timer = player.roll_cooldown
-			
+	
+	player.roll_charges_changed.emit(player.current_roll_charges, player.roll_max_charges, player.is_roll_recharging)
 	# --- СОХРАНЕНИЕ ИМПУЛЬСА (MOMENTUM) ---
 	var current_speed_2d = Vector2(player.velocity.x, player.velocity.z).length()
 	

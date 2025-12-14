@@ -154,7 +154,6 @@ punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("character/root/Skeleton3D/hand_l/punch_hand_l")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_fkugw")]
-max_health = 100.0
 
 [node name="HitFlash" parent="." instance=ExtResource("2_8fjmc")]
 mesh_path = NodePath("../character/root/Skeleton3D/Character_mesh")

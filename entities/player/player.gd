@@ -117,6 +117,8 @@ var is_passing_through: bool = false
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 
+signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
+
 func _ready() -> void:
 	# Безопасный поиск пула эффектов
 	var pool_node = get_tree().get_first_node_in_group("vfx_pool")
@@ -345,19 +347,30 @@ func _update_stun_timer(delta: float) -> void:
 			is_knockbacked = false
 
 func _update_roll_timers(delta: float) -> void:
-	# Логика таймеров переката (сокращена для краткости, она такая же)
+	var prev_charges = current_roll_charges
+	var was_recharging = is_roll_recharging
+	
 	if is_roll_recharging:
 		roll_penalty_timer -= delta
 		if roll_penalty_timer <= 0:
 			is_roll_recharging = false
 			current_roll_charges = roll_max_charges
+			# Сигнал: Полностью восстановились после штрафа
+			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
+			
 	elif current_roll_charges < roll_max_charges:
 		roll_regen_timer -= delta
 		if roll_regen_timer <= 0:
 			current_roll_charges += 1
 			roll_regen_timer = roll_cooldown
+			# Сигнал: Восстановили один заряд
+			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
+			
 	if roll_interval_timer > 0:
 		roll_interval_timer -= delta
+
+	# Дополнительная отправка сигнала, если состояние штрафа только началось
+	# (это состояние переключается в player_roll.gd, поэтому там тоже надо добавить emit, но можно отловить и здесь)
 
 # ============================================================================
 # COLLISIONS & MISC

@@ -26,10 +26,19 @@ var _playing_end_anim: bool = false
 @onready var actor: CharacterBody3D = get_parent()
 # Получаем плеер чуть безопаснее
 @onready var anim_player: AnimationPlayer = actor.get_node("character/AnimationPlayer")
+signal cooldown_updated(time_left: float, max_time: float)
 
 func _process(delta: float) -> void:
 	if cooldown_timer > 0:
 		cooldown_timer -= delta
+		# --- ДОБАВИТЬ ---
+		cooldown_updated.emit(cooldown_timer, slam_cooldown)
+	else:
+		# Если таймер только что кончился, отправляем 0, чтобы UI знал, что готово
+		# (можно добавить проверку, чтобы не спамить сигналом каждый кадр, но для одного таймера не критично)
+		if cooldown_timer > -1.0: # Маленький хак, чтобы отправить один раз
+			cooldown_updated.emit(0.0, slam_cooldown)
+			cooldown_timer = -2.0 # Уводим в "спящий" режим
 
 func can_slam() -> bool:
 	if is_slamming or is_recovering: return false # Проверка recovery
