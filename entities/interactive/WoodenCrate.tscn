@@ -17,7 +17,6 @@ linear_damp = 2.0
 angular_damp = 2.0
 script = ExtResource("1_uf1ar")
 health_component = NodePath("HealthComponent")
-debris_vfx_index = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
@@ -33,4 +32,5 @@ max_health = 1.0
 [node name="NavigationObstacle3D" type="NavigationObstacle3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 radius = 0.8
-affect_navigation_mesh = true
+height = 0.5
+vertices = PackedVector3Array(0.504, -0.5, 0.509, 0.492, -0.5, -0.507, -0.512, -0.5, -0.495, -0.506, -0.5, 0.491)

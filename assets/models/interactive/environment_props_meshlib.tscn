@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://cg4n2hb64g4tu"]
+
+[ext_resource type="PackedScene" uid="uid://ceaef6f08aiqs" path="res://assets/models/interactive/environment_props.blend" id="1_b0q3b"]
+
+[node name="environment_props" instance=ExtResource("1_b0q3b")]

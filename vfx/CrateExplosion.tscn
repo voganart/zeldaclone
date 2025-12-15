@@ -1,41 +1,36 @@
 [gd_scene load_steps=6 format=3 uid="uid://bk0jojvlhos42"]
 
 [ext_resource type="ArrayMesh" uid="uid://b58pn5dx7ndbi" path="res://assets/models/interactive/crate_particle_1.res" id="1_f14cs"]
-[ext_resource type="ArrayMesh" uid="uid://tbd3713fgr00" path="res://assets/models/interactive/crate_particle_2.res" id="2_xnfmx"]
+[ext_resource type="ArrayMesh" uid="uid://cfstu8y7gng8i" path="res://assets/models/interactive/crate_particle_2.res" id="2_xnfmx"]
 
 [sub_resource type="Curve" id="Curve_x55x4"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.19361576, 1), 0.0, 0.0, 0, 0, Vector2(0.81414086, 1), 0.2589098, 0.2589098, 0, 0, Vector2(1, 0), -27.303347, 0.0, 0, 0]
-point_count = 4
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.81414086, 1), 0.2589098, 0.2589098, 0, 0, Vector2(1, 0), -27.303347, 0.0, 0, 0]
+point_count = 3
 metadata/_snap_count = 2
 
 [sub_resource type="CurveTexture" id="CurveTexture_1f0tf"]
 curve = SubResource("Curve_x55x4")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_m86cl"]
-lifetime_randomness = 0.44
+lifetime_randomness = 0.53
 particle_flag_rotate_y = true
-emission_shape_offset = Vector3(0, 1, 0)
+emission_shape_offset = Vector3(0, 0.5, 0)
 emission_shape_scale = Vector3(0.5, 1, 0.5)
 emission_shape = 3
 emission_box_extents = Vector3(0.5, 0.5, 0.5)
 angle_min = -506.8
 angle_max = 494.50003
-direction = Vector3(0, 8, 0)
-spread = 56.298
+direction = Vector3(0, 5, 0)
 initial_velocity_min = 1.0
-initial_velocity_max = 3.0
+initial_velocity_max = 5.0
 angular_velocity_min = -1.6093254e-05
-angular_velocity_max = 18.539984
+angular_velocity_max = -1.6093254e-05
 orbit_velocity_min = 9.49949e-08
-orbit_velocity_max = 0.0770001
+orbit_velocity_max = 9.49949e-08
 radial_velocity_min = 0.09997764
 radial_velocity_max = 0.99997765
-radial_accel_min = -2.2351742e-06
-radial_accel_max = -2.2351742e-06
-tangential_accel_min = -2.2351742e-06
-tangential_accel_max = -2.2351742e-06
-damping_max = 2.1460001
-scale_min = 0.19999999
+attractor_interaction_enabled = false
+scale_min = 0.5
 scale_curve = SubResource("CurveTexture_1f0tf")
 collision_mode = 1
 collision_friction = 1.0
@@ -44,9 +39,13 @@ collision_bounce = 0.1
 [node name="CrateExplosion" type="Node3D"]
 
 [node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+cast_shadow = 0
 emitting = false
-lifetime = 2.0
+amount = 10
+lifetime = 3.0
+interp_to_end = 0.01
 one_shot = true
+speed_scale = 2.0
 explosiveness = 1.0
 randomness = 1.0
 local_coords = true
@@ -54,9 +53,13 @@ process_material = SubResource("ParticleProcessMaterial_m86cl")
 draw_pass_1 = ExtResource("1_f14cs")
 
 [node name="GPUParticles3D2" type="GPUParticles3D" parent="."]
+cast_shadow = 0
 emitting = false
-lifetime = 2.0
+amount = 10
+lifetime = 3.0
+interp_to_end = 0.01
 one_shot = true
+speed_scale = 2.0
 explosiveness = 1.0
 randomness = 1.0
 local_coords = true
@@ -65,4 +68,4 @@ draw_pass_1 = ExtResource("2_xnfmx")
 
 [node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-size = Vector3(5, 1, 5)
+size = Vector3(6, 1, 6)

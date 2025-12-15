@@ -41,6 +41,9 @@
 			"doubleSided":true,
 			"name":"Material",
 			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":0
+				},
 				"metallicFactor":0,
 				"roughnessFactor":0.5
 			}
@@ -76,6 +79,19 @@
 					"material":0
 				}
 			]
+		}
+	],
+	"textures":[
+		{
+			"sampler":0,
+			"source":0
+		}
+	],
+	"images":[
+		{
+			"mimeType":"image/png",
+			"name":"MasterTexture.png",
+			"uri":"../../assets/_master/MasterTexture.png"
 		}
 	],
 	"accessors":[
@@ -125,12 +141,12 @@
 			"count":40,
 			"max":[
 				23.999996185302734,
-				9.999999046325684,
+				0,
 				23.999996185302734
 			],
 			"min":[
 				-23.999996185302734,
-				-9.999999046325684,
+				-19.999998092651367,
 				-23.999996185302734
 			],
 			"type":"VEC3"
@@ -220,6 +236,12 @@
 			"byteLength":120,
 			"byteOffset":3144,
 			"target":34963
+		}
+	],
+	"samplers":[
+		{
+			"magFilter":9729,
+			"minFilter":9987
 		}
 	],
 	"buffers":[

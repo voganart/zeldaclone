@@ -143,17 +143,18 @@ auto_run_latch_time = 0.3
 roll_cooldown = 2.0
 roll_recharge_time = 4.0
 roll_chain_delay = 0.2
+attack_roll_cancel_threshold = 0.052
 primary_attack_speed = 1.0
 attack_cooldown = 0.0
 combo_window_time = 0.5
 combo_cooldown_after_combo = 0.8
-running_attack_impulse = 1.5
-walking_attack_impulse = 1.0
+running_attack_impulse = 1.0
+walking_attack_impulse = 0.5
 punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("character/root/Skeleton3D/hand_l/punch_hand_l")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_fkugw")]
-max_health = 50.0
+max_health = 15.0
 
 [node name="HitFlash" parent="." instance=ExtResource("2_8fjmc")]
 mesh_path = NodePath("../character/root/Skeleton3D/Character_mesh")

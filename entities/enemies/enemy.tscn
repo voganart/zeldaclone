@@ -58,7 +58,7 @@ flash_time = 0.2
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 avoidance_enabled = true
-radius = 1.0
+radius = 0.8
 neighbor_distance = 10.0
 time_horizon_obstacles = 1.0
 max_speed = 20.0

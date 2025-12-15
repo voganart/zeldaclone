@@ -68,6 +68,7 @@ player=""
 enemies=""
 fade_objects=""
 vfx_pool=""
+nav_region=""
 
 [gui]
 

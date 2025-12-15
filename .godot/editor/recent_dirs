@@ -1,6 +1,7 @@
-res://vfx
 res://assets/models/interactive
 res://assets/_master
+res://assets/models/environment
+res://vfx
 res://assets/materials
 res://common/autoload
 res://vfx/fade_cutout
