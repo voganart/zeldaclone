@@ -1,19 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://3qeblptfymiv"]
+[gd_scene load_steps=2 format=3 uid="uid://3qeblptfymiv"]
 
 [ext_resource type="PackedScene" uid="uid://c0dbb4xme8cko" path="res://assets/models/environment/island.blend" id="1_ecdf3"]
-[ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://assets/_master/MasterTexture.png" id="2_0ply4"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_djsbw"]
-albedo_texture = ExtResource("2_0ply4")
 
 [node name="island" instance=ExtResource("1_ecdf3")]
-
-[node name="Island" parent="." index="0"]
-surface_material_override/0 = SubResource("StandardMaterial3D_djsbw")
 
 [node name="Island" parent="Island" index="0"]
 collision_layer = 8
 collision_mask = 23
-
-[node name="CollisionShape3D" parent="Island/Island" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)

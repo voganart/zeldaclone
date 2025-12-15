@@ -1,3 +1,6 @@
+SimpleGrassTextured
+MeshInstance3D
+ProtonScatter
 RigidBody3D
 CollisionShape3D
 CSGBox3D
@@ -5,10 +8,7 @@ Node3D
 GridMap
 GPUParticles3D
 GPUParticlesCollisionBox3D
-MeshInstance3D
 Node
 MarginContainer
 TextureProgressBar
 TextureRect
-HBoxContainer
-VBoxContainer

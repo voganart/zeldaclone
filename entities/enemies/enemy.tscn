@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=21 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://ui/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
@@ -22,6 +22,8 @@
 size = Vector3(2.765625, 1.7850952, 2.4552612)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_wy1il"]
 
 [node name="Enemy" type="CharacterBody3D" node_paths=PackedStringArray("punch_hand_r", "punch_hand_l", "punch_area") groups=["enemies"]]
 collision_layer = 4
@@ -171,5 +173,10 @@ flee_speed = 1.0
 
 [node name="CombatStance" type="Node" parent="StateMachine"]
 script = ExtResource("17_53k0f")
+
+[node name="GrassCollision" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+layers = 65536
+mesh = SubResource("SphereMesh_wy1il")
 
 [editable path="Monstr"]

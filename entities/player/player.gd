@@ -153,9 +153,16 @@ func _ready() -> void:
 # PHYSICS PROCESS (CONTROLLER)
 # ============================================================================
 func _physics_process(delta: float) -> void:
+
 	_update_stun_timer(delta)
 	_update_roll_timers(delta)
-	
+	if has_node("/root/SimpleGrass"):
+		var grass_manager = get_node("/root/SimpleGrass")
+		# Обновляем позицию
+		grass_manager.set_player_position(global_position)
+	else:
+		# Если этот принт спамится в консоль - значит, ты не настроил Autoload (Пункт 1)
+		print_rich("[color=red]ERROR: SimpleGrass Autoload не найден! Настрой Project Settings![/color]")
 	if is_knockback_stun:
 		apply_gravity(delta)
 		velocity.x = move_toward(velocity.x, 0, 5.0 * delta)

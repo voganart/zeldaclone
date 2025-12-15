@@ -1,0 +1,249 @@
+[gd_scene load_steps=40 format=3 uid="uid://c364awakh0qqj"]
+
+[ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
+[ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="2_8fjmc"]
+[ext_resource type="PackedScene" uid="uid://k5os7k8wlcvf" path="res://entities/player/character.tscn" id="2_635qg"]
+[ext_resource type="PackedScene" uid="uid://jwhg4beayert" path="res://ui/health_component/HealthComponent.tscn" id="2_fkugw"]
+[ext_resource type="Script" uid="uid://5vc2jye7m3cj" path="res://entities/player/components/input_handler.gd" id="4_yqrof"]
+[ext_resource type="Script" uid="uid://cpfg6vbvk2u7g" path="res://entities/player/abilities/air_dash_ability.gd" id="6_qiwj3"]
+[ext_resource type="Script" uid="uid://nh0l4x1ik4qf" path="res://entities/player/abilities/ground_slam_ability.gd" id="7_26q78"]
+[ext_resource type="Script" uid="uid://cbx8244k71rsk" path="res://common/fsm/state_machine.gd" id="8_bectd"]
+[ext_resource type="Script" uid="uid://d1cawa0quikcd" path="res://entities/player/states/player_move.gd" id="9_wvtmh"]
+[ext_resource type="Script" uid="uid://l6b4unm22n1x" path="res://entities/player/states/player_attack.gd" id="10_7thud"]
+[ext_resource type="Script" uid="uid://xxmseurx6lft" path="res://entities/player/states/player_air.gd" id="11_7thud"]
+[ext_resource type="Script" uid="uid://cq3kpeg122vhm" path="res://entities/player/states/player_roll.gd" id="12_afbqv"]
+[ext_resource type="Script" uid="uid://dsxx25vrqcqm0" path="res://entities/player/states/player_dash.gd" id="13_gx6sm"]
+[ext_resource type="Script" uid="uid://cdkxtoy2v76of" path="res://entities/player/states/player_slam.gd" id="14_yqrof"]
+[ext_resource type="Script" uid="uid://cdk33whhiwihf" path="res://entities/player/states/player_dead.gd" id="15_gx6sm"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_fkugw"]
+animation = &"Boy_jump_mid"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8fjmc"]
+animation = &"Boy_jump_start"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_26q78"]
+animation = &"Boy_run"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bectd"]
+animation = &"Boy_walk"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_wvtmh"]
+animation = &"Boy_stopping"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mtric"]
+animation = &"Boy_roll_loop"
+advance_on_start = true
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_7thud"]
+animation = &"Boy_attack_air_naked_end"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_a1qjk"]
+animation = &"Boy_attack_air_naked_mid"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_j3ovn"]
+animation = &"Boy_attack_air_naked_start"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_afbqv"]
+animation = &"Boy_attack_naked_1"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gx6sm"]
+animation = &"Boy_attack_naked_2"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yqrof"]
+animation = &"Boy_attack_naked_3"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3wlsy"]
+animation = &"Boy_idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_b2kln"]
+animation = &"Boy_jump_end"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_we0b7"]
+animation = &"Boy_air_dash"
+
+[sub_resource type="Curve" id="Curve_fkugw"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_8fjmc"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_eyb6c"]
+sync = true
+fadein_time = 0.1
+fadein_curve = SubResource("Curve_fkugw")
+fadeout_time = 0.1
+fadeout_curve = SubResource("Curve_8fjmc")
+break_loop_at_end = true
+
+[sub_resource type="AnimationNodeBlend3" id="AnimationNodeBlend3_fkugw"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fkugw"]
+nodes/output/position = Vector2(1072, -96)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_we0b7")
+nodes/Animation/position = Vector2(-128, 112)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_7thud")
+"nodes/Animation 2/position" = Vector2(-160, 320)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_a1qjk")
+"nodes/Animation 3/position" = Vector2(-400, 320)
+"nodes/Animation 4/node" = SubResource("AnimationNodeAnimation_j3ovn")
+"nodes/Animation 4/position" = Vector2(-656, 320)
+"nodes/Animation 5/node" = SubResource("AnimationNodeAnimation_afbqv")
+"nodes/Animation 5/position" = Vector2(-624, -80)
+"nodes/Animation 6/node" = SubResource("AnimationNodeAnimation_gx6sm")
+"nodes/Animation 6/position" = Vector2(-416, -80)
+"nodes/Animation 7/node" = SubResource("AnimationNodeAnimation_yqrof")
+"nodes/Animation 7/position" = Vector2(-208, -80)
+"nodes/Animation 8/node" = SubResource("AnimationNodeAnimation_3wlsy")
+"nodes/Animation 8/position" = Vector2(32, -528)
+"nodes/Animation 9/node" = SubResource("AnimationNodeAnimation_b2kln")
+"nodes/Animation 9/position" = Vector2(544, -736)
+"nodes/Animation 10/node" = SubResource("AnimationNodeAnimation_fkugw")
+"nodes/Animation 10/position" = Vector2(384, -736)
+"nodes/Animation 11/node" = SubResource("AnimationNodeAnimation_8fjmc")
+"nodes/Animation 11/position" = Vector2(208, -736)
+"nodes/Animation 16/node" = SubResource("AnimationNodeAnimation_mtric")
+"nodes/Animation 16/position" = Vector2(320, -80)
+"nodes/Animation 13/node" = SubResource("AnimationNodeAnimation_26q78")
+"nodes/Animation 13/position" = Vector2(32, -208)
+"nodes/Animation 14/node" = SubResource("AnimationNodeAnimation_bectd")
+"nodes/Animation 14/position" = Vector2(32, -368)
+"nodes/Animation 15/node" = SubResource("AnimationNodeAnimation_wvtmh")
+"nodes/Animation 15/position" = Vector2(144, 96)
+nodes/locomotion/node = SubResource("AnimationNodeBlend3_fkugw")
+nodes/locomotion/position = Vector2(256, -432)
+nodes/RollLoop/node = SubResource("AnimationNodeOneShot_eyb6c")
+nodes/RollLoop/position = Vector2(688, -256)
+node_connections = [&"output", 0, &"RollLoop", &"locomotion", 0, &"Animation 8", &"locomotion", 1, &"Animation 14", &"locomotion", 2, &"Animation 13", &"RollLoop", 0, &"locomotion", &"RollLoop", 1, &"Animation 16"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
+radius = 0.441262
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_abrql"]
+size = Vector3(1.7636719, 1.746582, 1.5506058)
+
+[sub_resource type="SphereMesh" id="SphereMesh_gx6sm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gx6sm"]
+shading_mode = 0
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("punch_hand_r", "punch_hand_l") groups=["player"]]
+collision_mask = 28
+floor_constant_speed = true
+platform_on_leave = 1
+script = ExtResource("1_1hmtu")
+jump_height = 1.45
+jump_time_to_peak = 0.3
+air_control = 0.3
+second_jump_multiplier = 1.4
+acceleration = 0.2
+rot_speed = 10.0
+push_force = 5.0
+roll_push_multiplier = 0.0
+roll_speed = 4.0
+buffered_jump_max_time = 0.15
+auto_run_latch_time = 0.3
+roll_cooldown = 2.0
+roll_recharge_time = 4.0
+roll_chain_delay = 0.2
+attack_roll_cancel_threshold = 0.4
+primary_attack_speed = 1.0
+attack_cooldown = 0.0
+combo_window_time = 0.5
+combo_cooldown_after_combo = 0.8
+running_attack_impulse = 1.0
+walking_attack_impulse = 0.5
+punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")
+punch_hand_l = NodePath("character/root/Skeleton3D/hand_l/punch_hand_l")
+
+[node name="HealthComponent" parent="." instance=ExtResource("2_fkugw")]
+max_health = 15.0
+
+[node name="HitFlash" parent="." instance=ExtResource("2_8fjmc")]
+mesh_path = NodePath("../character/root/Skeleton3D/Character_mesh")
+flash_color = Color(1, 0.16328245, 0.16328245, 1)
+flash_time = 0.2
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("4_yqrof")
+
+[node name="character" parent="." instance=ExtResource("2_635qg")]
+
+[node name="AnimationTree" type="AnimationTree" parent="character"]
+active = false
+tree_root = SubResource("AnimationNodeBlendTree_fkugw")
+anim_player = NodePath("../AnimationPlayer")
+parameters/locomotion/blend_amount = -0.61
+parameters/RollLoop/active = false
+parameters/RollLoop/internal_active = false
+parameters/RollLoop/request = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_yel1f")
+
+[node name="FirstAttackTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="SprintTimer" type="Timer" parent="."]
+wait_time = 0.6
+one_shot = true
+
+[node name="FirstAttackArea" type="Area3D" parent="."]
+collision_mask = 20
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FirstAttackArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9123535, 1.2277644)
+shape = SubResource("BoxShape3D_abrql")
+
+[node name="AirDashAbility" type="Node" parent="."]
+script = ExtResource("6_qiwj3")
+air_dash_speed = 10.0
+
+[node name="GroundSlamAbility" type="Node" parent="."]
+script = ExtResource("7_26q78")
+slam_radius = 2.5
+slam_descent_speed = 40.0
+slam_cooldown = 1.0
+slam_windup_delay = 0.1
+slam_acceleration = 150.0
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("8_bectd")
+initial_state = NodePath("Move")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("9_wvtmh")
+
+[node name="Air" type="Node" parent="StateMachine"]
+script = ExtResource("11_7thud")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("10_7thud")
+
+[node name="Roll" type="Node" parent="StateMachine"]
+script = ExtResource("12_afbqv")
+
+[node name="Dash" type="Node" parent="StateMachine"]
+script = ExtResource("13_gx6sm")
+
+[node name="Slam" type="Node" parent="StateMachine"]
+script = ExtResource("14_yqrof")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("15_gx6sm")
+
+[node name="GrassCollision" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0.75, 0)
+layers = 65536
+mesh = SubResource("SphereMesh_gx6sm")
+surface_material_override/0 = SubResource("StandardMaterial3D_gx6sm")
+
+[connection signal="body_entered" from="character/root/Skeleton3D/hand_r/punch_hand_r" to="." method="_on_punch_hand_r_body_entered"]
+[connection signal="body_entered" from="character/root/Skeleton3D/hand_l/punch_hand_l" to="." method="_on_punch_hand_l_body_entered"]
+[connection signal="timeout" from="FirstAttackTimer" to="." method="_on_first_attack_timer_timeout"]
+[connection signal="timeout" from="SprintTimer" to="." method="_on_sprint_timer_timeout"]
+
+[editable path="character"]

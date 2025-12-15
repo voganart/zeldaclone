@@ -73,6 +73,15 @@ _subresources={
 "save_to_file/fallback_path": "res://assets/models/interactive/crate_particle_2.res",
 "save_to_file/path": "uid://cfstu8y7gng8i"
 },
+"environment_props_Tree": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/interactive/environment_props_Tree.res",
+"save_to_file/path": "uid://dh2xxdkltcova"
+},
 "environment_props_Wall_Block": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,

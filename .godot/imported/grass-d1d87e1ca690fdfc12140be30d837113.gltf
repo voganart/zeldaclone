@@ -15,7 +15,8 @@
 				"mix_source_armature":{},
 				"print3d_toolbox":{
 					"use_scene_scale":0
-				}
+				},
+				"scatter_properties":{}
 			},
 			"name":"Scene",
 			"nodes":[

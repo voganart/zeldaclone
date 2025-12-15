@@ -25,7 +25,7 @@ op_type = 3
 [sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_v1y0t"]
 parameter_name = "BaseColor"
 default_value_enabled = true
-default_value = Color(0.070497535, 0.45655257, 0, 1)
+default_value = Color(0.26162648, 0.45112163, 0, 1)
 
 [sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_yhpbo"]
 parameter_name = "GrassColor"
@@ -102,7 +102,7 @@ render_mode blend_mix, depth_draw_opaque, depth_test_default, cull_disabled, dif
 uniform float WindSpeed : hint_range(0.0, 0.20000000298023) = 0.10000000149012;
 uniform sampler2D WindNoize;
 uniform float WindPower : hint_range(-1.0, 1.0) = 0.10000000149012;
-uniform vec4 BaseColor : source_color = vec4(0.070498, 0.456553, 0.000000, 1.000000);
+uniform vec4 BaseColor : source_color = vec4(0.261626, 0.451122, 0.000000, 1.000000);
 uniform vec4 GrassColor : source_color = vec4(0.529336, 0.853010, 0.323284, 1.000000);
 
 

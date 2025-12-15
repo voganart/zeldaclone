@@ -36,7 +36,6 @@ func _physics_process(delta: float) -> void:
 			# Включаем радиус, отключаем статику (устанавливая пустые вершины)
 			nav_obstacle.radius = _initial_radius
 			nav_obstacle.vertices = PackedVector3Array([]) # Важно!
-			print(name, " -> Dynamic Obstacle")
 		_time_since_stopped = 0.0
 	else:
 		# Ящик стоит
@@ -48,7 +47,6 @@ func _physics_process(delta: float) -> void:
 			nav_obstacle.radius = 0.0
 			# Чтобы Godot подхватил статические вершины, нужно "пнуть" свойство
 			nav_obstacle.set("vertices", nav_obstacle.get("vertices")) 
-			print(name, " -> Static Obstacle")
 
 # ... (остальные функции take_damage, _on_broken без изменений) ...
 

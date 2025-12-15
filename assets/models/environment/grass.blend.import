@@ -44,6 +44,17 @@ _subresources={
 "use_external/fallback_path": "",
 "use_external/path": "uid://c8ktwvuun6cjf"
 }
+},
+"meshes": {
+"grass_Plane": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/grass_Plane.res",
+"save_to_file/path": "uid://c8cionhhjm4tk"
+}
 }
 }
 blender/nodes/visible=0

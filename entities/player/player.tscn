@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=39 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="2_8fjmc"]
@@ -124,6 +124,8 @@ radius = 0.441262
 [sub_resource type="BoxShape3D" id="BoxShape3D_abrql"]
 size = Vector3(1.7636719, 1.746582, 1.5506058)
 
+[sub_resource type="SphereMesh" id="SphereMesh_gx6sm"]
+
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("punch_hand_r", "punch_hand_l") groups=["player"]]
 collision_mask = 28
 floor_constant_speed = true
@@ -145,6 +147,7 @@ roll_recharge_time = 4.0
 roll_chain_delay = 0.2
 attack_roll_cancel_threshold = 0.4
 primary_attack_speed = 1.0
+attack_movement_influense = 0.0
 attack_cooldown = 0.0
 combo_window_time = 0.5
 combo_cooldown_after_combo = 0.8
@@ -201,7 +204,7 @@ air_dash_speed = 10.0
 script = ExtResource("7_26q78")
 slam_radius = 2.5
 slam_descent_speed = 40.0
-slam_cooldown = 1.0
+slam_cooldown = 3.0
 slam_windup_delay = 0.1
 slam_acceleration = 150.0
 
@@ -229,6 +232,11 @@ script = ExtResource("14_yqrof")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("15_gx6sm")
+
+[node name="GrassCollision" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+layers = 65536
+mesh = SubResource("SphereMesh_gx6sm")
 
 [connection signal="body_entered" from="character/root/Skeleton3D/hand_r/punch_hand_r" to="." method="_on_punch_hand_r_body_entered"]
 [connection signal="body_entered" from="character/root/Skeleton3D/hand_l/punch_hand_l" to="." method="_on_punch_hand_l_body_entered"]

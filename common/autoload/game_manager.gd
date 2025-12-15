@@ -1,7 +1,13 @@
 extends Node
 
 var active_tween: Tween
-
+func _ready() -> void:
+	await get_tree().process_frame
+	if has_node("/root/SimpleGrass"):
+		print("SimpleGrass found, enabling interaction...")
+		get_node("/root/SimpleGrass").set_interactive(true)
+	else:
+		print("SimpleGrass NOT found in Game Manager!")
 ## Плавная глобальная остановка времени
 ## target_scale: до какой скорости замедляем (например 0.05 - почти стоп)
 ## duration_hold: сколько времени держим замедление (в реальных секундах)
