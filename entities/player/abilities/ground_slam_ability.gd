@@ -9,12 +9,12 @@ extends Node
 @export var slam_cooldown: float = 2.0
 @export var slam_windup_delay: float = 0.5
 @export var slam_acceleration: float = 50.0
-@export var slam_min_height: float = 3.0
+@export var slam_min_height: float = 2.5
 @export var slam_end_anim_speed: float = 1.5
 
 # State
 var is_slamming: bool = false
-var is_recovering: bool = false # <--- НОВЫЙ ФЛАГ
+var is_recovering: bool = false
 
 var cooldown_timer: float = 0.0
 var _windup_timer: float = 0.0
@@ -24,40 +24,34 @@ var _impact_processed: bool = false
 var _playing_end_anim: bool = false
 
 @onready var actor: CharacterBody3D = get_parent()
-# Получаем плеер чуть безопаснее
 @onready var anim_player: AnimationPlayer = actor.get_node("character/AnimationPlayer")
 signal cooldown_updated(time_left: float, max_time: float)
 
 func _process(delta: float) -> void:
 	if cooldown_timer > 0:
 		cooldown_timer -= delta
-		# --- ДОБАВИТЬ ---
 		cooldown_updated.emit(cooldown_timer, slam_cooldown)
 	else:
-		# Если таймер только что кончился, отправляем 0, чтобы UI знал, что готово
-		# (можно добавить проверку, чтобы не спамить сигналом каждый кадр, но для одного таймера не критично)
-		if cooldown_timer > -1.0: # Маленький хак, чтобы отправить один раз
+		if cooldown_timer > -1.0:
 			cooldown_updated.emit(0.0, slam_cooldown)
-			cooldown_timer = -2.0 # Уводим в "спящий" режим
+			cooldown_timer = -2.0
 
 func can_slam() -> bool:
-	if is_slamming or is_recovering: return false # Проверка recovery
+	if is_slamming or is_recovering: return false
 	if actor.is_on_floor(): return false
 	if cooldown_timer > 0: return false
 	
+	if "current_jump_count" in actor and actor.current_jump_count < 2:
+		return false
+	
 	var space_state = actor.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(actor.global_position, actor.global_position + Vector3(0, -100, 0))
+	var query = PhysicsRayQueryParameters3D.create(actor.global_position, actor.global_position + Vector3(0, -slam_min_height, 0))
 	query.exclude = [actor]
 	var result = space_state.intersect_ray(query)
 	
 	if result:
-		var dist = actor.global_position.distance_to(result.position)
-		if dist < slam_min_height:
-			return false
-	
-	if "current_jump_count" in actor and actor.current_jump_count < 2:
 		return false
-		
+	
 	return true
 
 func start_slam() -> void:
@@ -78,9 +72,7 @@ func start_slam() -> void:
 	anim_player.play(GameConstants.ANIM_PLAYER_SLAM_START, 0.1, 0.5)
 
 func update_physics(delta: float) -> bool:
-	# 1. Если мы в фазе восстановления (анимация приземления), блокируем физику игрока
 	if is_recovering:
-		# Можно добавить небольшое трение, чтобы игрок не скользил
 		actor.velocity.x = move_toward(actor.velocity.x, 0, 1.0)
 		actor.velocity.z = move_toward(actor.velocity.z, 0, 1.0)
 		return true
@@ -88,12 +80,15 @@ func update_physics(delta: float) -> bool:
 	if not is_slamming:
 		return false
 	
-	# Если коснулись пола — удар
+	# === ЛОГИКА ПРОБИВАНИЯ ЯЩИКОВ ===
+	# Проверяем, что под нами, ДО того как move_and_slide это коснется
+	_break_objects_below()
+	# ================================
+
 	if actor.is_on_floor() and not _impact_processed:
 		_perform_impact()
 		return true
 		
-	# Фаза Windup
 	if _windup_timer > 0:
 		_windup_timer -= delta
 		actor.velocity = Vector3.ZERO
@@ -102,7 +97,6 @@ func update_physics(delta: float) -> bool:
 			anim_player.play(GameConstants.ANIM_PLAYER_SLAM_MID, 0.2, 1.0)
 		return true
 	
-	# Фаза падения
 	_fall_time += delta
 	var current_speed = 5.0 * exp(slam_acceleration * _fall_time)
 	current_speed = min(current_speed, slam_descent_speed)
@@ -115,13 +109,50 @@ func update_physics(delta: float) -> bool:
 	
 	return true
 
+func _break_objects_below() -> void:
+	# Сканируем область чуть ниже игрока
+	var space_state = actor.get_world_3d().direct_space_state
+	# Используем SphereShape для объема, чтобы не промахнуться мимо края ящика
+	var shape = SphereShape3D.new()
+	shape.radius = 0.5 
+	
+	var params = PhysicsShapeQueryParameters3D.new()
+	params.shape = shape
+	# Смещаем сферу вниз по ходу движения
+	params.transform = Transform3D(Basis(), actor.global_position + Vector3(0, -1.0, 0))
+	params.exclude = [actor]
+	# Маска: Враги(3) и Объекты(5, если есть). Или просто все.
+	params.collision_mask = 0xFFFFFFFF 
+	
+	var results = space_state.intersect_shape(params)
+	
+	for result in results:
+		var body = result.collider
+		if not is_instance_valid(body): continue
+		
+		# Если это ящик (RigidBody) или что-то ломаемое
+		# Можно проверить группу, класс или наличие метода take_damage
+		if body is RigidBody3D or body is BreakableObject:
+			if body.has_method("take_damage"):
+				# Наносим смертельный урон
+				body.take_damage(999.0, Vector3.DOWN * 10.0, true)
+				
+				# !!! ГЛАВНОЕ: Мгновенно отключаем коллизию объекта !!!
+				# queue_free() сработает только в конце кадра, а физика игрока (move_and_slide) 
+				# сработает раньше и "стукнется" об ящик.
+				# Поэтому мы принудительно выключаем collision_layer/mask у жертвы.
+				if body.has_method("set_collision_layer_value"):
+					body.collision_layer = 0
+					body.collision_mask = 0
+				elif body is CollisionObject3D:
+					body.collision_layer = 0
+					body.collision_mask = 0
+
 func _check_ground_proximity() -> void:
-	# Если мы уже играем концовку, не перезапускаем
 	if _playing_end_anim: return
 	if _animation_phase != "mid": return
 	
 	var space_state = actor.get_world_3d().direct_space_state
-	# Увеличил длину луча, чтобы анимация точно успевала начаться при высокой скорости
 	var query = PhysicsRayQueryParameters3D.create(actor.global_position, actor.global_position + Vector3(0, 1.5, 0))
 	query.exclude = [actor]
 	var result = space_state.intersect_ray(query)
@@ -135,37 +166,28 @@ func _perform_impact() -> void:
 	if _impact_processed: return
 	_impact_processed = true
 	
-	# Включаем фазу восстановления. 
-	# Теперь update_physics будет возвращать true, блокируя Player.gd
 	is_slamming = false
 	is_recovering = true
 	get_tree().call_group("camera_shaker", "add_trauma", 5.8)
-	# Гарантируем запуск анимации, если Raycast промахнулся
+	
 	if not _playing_end_anim or anim_player.current_animation != GameConstants.ANIM_PLAYER_SLAM_END:
 		anim_player.play(GameConstants.ANIM_PLAYER_SLAM_END, 0.025, slam_end_anim_speed)
 	
-	# Ждем окончания анимации
 	var anim_len = anim_player.get_animation(GameConstants.ANIM_PLAYER_SLAM_END).length
-	# Делим на скорость воспроизведения
 	var wait_time = anim_len / slam_end_anim_speed
 	
-	# Логика урона
 	_deal_damage()
 	
 	actor.set_collision_mask_value(3, true)
-	print("Slam Impact! Waiting for animation: ", wait_time)
+	print("Slam Impact!")
 	
-	# Ждем, пока проиграется анимация
 	await get_tree().create_timer(wait_time).timeout
 	if not is_instance_valid(actor):
 		return
-	# Возвращаем управление игроку
 	is_recovering = false
 	_playing_end_anim = false
 
 func _deal_damage() -> void:
-	# Используем SphereShape для поиска ВСЕХ физических тел в радиусе
-	# Это надежнее, чем groups, потому что мы найдем и врагов, и ящики
 	var space_state = actor.get_world_3d().direct_space_state
 	var shape = SphereShape3D.new()
 	shape.radius = slam_radius
@@ -173,33 +195,23 @@ func _deal_damage() -> void:
 	var params = PhysicsShapeQueryParameters3D.new()
 	params.shape = shape
 	params.transform = Transform3D(Basis(), actor.global_position)
-	# Маска коллизий: Враги (3) + Объекты (5) + Мб что-то еще
-	# Если не уверен, можно просто убрать маску или поставить 0xFFFFFFFF (все слои)
 	params.collision_mask = 0xFFFFFFFF 
-	params.exclude = [actor] # Исключаем самого игрока
+	params.exclude = [actor]
 	
 	var results = space_state.intersect_shape(params)
 	
 	for result in results:
 		var body = result.collider
-		
-		# Пропускаем, если объект уничтожен или невалиден
 		if not is_instance_valid(body): continue
 		
-		# Проверяем, можно ли нанести урон
 		if body.has_method("take_damage"):
 			var push_dir = (body.global_position - actor.global_position).normalized()
-			
-			# Вектор отбрасывания (сильно вверх)
 			var knockback_vec = push_dir * 8.0 
 			knockback_vec.y = 3.0
 			
-			# Если это враг или ящик, толкаем его
 			if body.has_method("receive_push"):
 				body.receive_push(push_dir * 3.0)
 			elif body is RigidBody3D:
-				# Ящики (RigidBody) толкаем через impulse
 				body.apply_central_impulse(push_dir * 10.0) 
 			
-			# Наносим урон (is_heavy = true)
 			body.take_damage(slam_damage, knockback_vec, true)

@@ -22,21 +22,14 @@ func physics_update(delta: float) -> void:
 		transitioned.emit(self, GameConstants.STATE_AIR)
 		return
 
-	# Читаем ввод заранее
-	var attack_pressed = player.input_handler.is_attack_pressed
-	var jump_pressed = player.input_handler.is_jump_pressed
-	var run_just_released = player.input_handler.is_run_just_released
+	# --- ИСПОЛЬЗУЕМ БУФЕРИЗАЦИЮ ---
+	# Читаем буферизированный ввод. 
+	# Важно: check_attack() и check_jump() "съедают" ввод, возвращая true только один раз.
 	
-	# === ХАК: БЛОКИРОВКА РОЛЛА ПРИ АТАКЕ ===
-	# Если мы хотим атаковать или прыгнуть, мы ОБНУЛЯЕМ событие отпускания шифта.
-	# Это предотвратит случайный ролл, если игрок дернул пальцем.
-	if attack_pressed or jump_pressed:
-		run_just_released = false
-		player.shift_pressed_time = 0.0 # Сбрасываем таймер ролла, будто мы его и не копили
-	# =======================================
-
 	# 1. АТАКА
-	if attack_pressed:
+	# Если атака была нажата за последние 0.2 сек, сработает сейчас.
+	# Это позволяет нажимать атаку чуть раньше окончания предыдущей анимации или приземления.
+	if player.input_handler.check_attack():
 		if player.ground_slam_ability.can_slam():
 			transitioned.emit(self, GameConstants.STATE_SLAM)
 			return
@@ -45,12 +38,23 @@ func physics_update(delta: float) -> void:
 			return
 
 	# 2. ПРЫЖОК
-	if jump_pressed:
+	# Позволяет прыгнуть сразу в момент касания земли (Bunny Hop)
+	if player.input_handler.check_jump():
 		player.perform_jump()
 		transitioned.emit(self, GameConstants.STATE_AIR)
 		return
 
-	# ... (дальше код движения и ролла, использующий переменную run_just_released) ...
+	# 3. РОЛЛ (Логика таппинга остается сложной из-за механики Sprint/Roll на одной кнопке)
+	# Но мы можем добавить проверку буфера для мгновенной реакции
+	
+	var run_just_released = player.input_handler.is_run_just_released
+	
+	# Хак для предотвращения случайного ролла, если нажали атаку или прыжок
+	# (Здесь мы используем is_attack_pressed как свойство геттера для проверки наличия буфера без потребления, 
+	# но так как мы выше уже потребили буфер через check_*, здесь это условие сработает корректно, 
+	# если ввод был обработан)
+	
+	# ... (дальше код движения и ролла практически без изменений, используем новые методы) ...
 	
 	var input_vec = player.get_movement_vector()
 	if input_vec == Vector2.ZERO:
@@ -60,7 +64,6 @@ func physics_update(delta: float) -> void:
 	
 	var run_pressed = player.input_handler.is_run_pressed
 	
-	# Используем нашу переменную run_just_released (которую мы могли сбросить выше)
 	if run_just_released:
 		if player.shift_pressed_time <= player.roll_threshold:
 			if player.can_roll():
@@ -84,7 +87,7 @@ func physics_update(delta: float) -> void:
 	# Расчет скорости
 	var current_speed = player.base_speed
 	var wants_to_run = (player.is_trying_to_run or player.is_auto_running)
-	# (Здесь твоя логика стамины, если ты её оставил, или просто проверка)
+
 	if wants_to_run: 
 		current_speed = player.run_speed
 		player.is_running = (player.velocity.length() >= player.base_speed)

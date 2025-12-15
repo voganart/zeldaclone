@@ -15,39 +15,26 @@ func enter() -> void:
 
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
-	
-	# Торможение во время атаки
 	player.velocity.x = move_toward(player.velocity.x, 0, player.stop_speed * delta)
 	player.velocity.z = move_toward(player.velocity.z, 0, player.stop_speed * delta)
-	
 	player.rot_char(delta)
 	
-# Cancel -> Roll
-	# Мы хотим делать перекат из атаки, ТОЛЬКО если игрок:
-	# 1. Отпустил кнопку (тапнул)
-	# 2. Или нажал её заново (если бы это была отдельная кнопка)
-	# Но мы НЕ должны делать ролл, если кнопка просто зажата (бег).
-	
-	var want_to_roll = player.input_handler.is_run_just_released
-	
-	if want_to_roll:
-		# Проверяем, можно ли отменить атаку на этой стадии (Animation Cancel)
-		# И есть ли у нас заряды (can_roll)
+	# === ОТМЕНА АТАКИ В РОЛЛ ===
+	# 1. Сначала проверяем, есть ли желание (кнопка нажата), НЕ СТИРАЯ буфер.
+	if player.input_handler.is_roll_buffered:
+		# 2. Проверяем, достигла ли анимация точки отмены (threshold)
+		# И есть ли у нас стамина/заряды.
 		if player.try_cancel_attack_for_roll() and player.can_roll():
-			# Просто переходим. Списание заряда произойдет внутри состояния Roll (в методе enter)
-			transitioned.emit(self, GameConstants.STATE_ROLL)
-			return
-	
-	if want_to_roll:
-		if player.try_cancel_attack_for_roll() and player.can_roll():
+			# 3. Если всё ок — "Тратим" нажатие и переходим.
+			player.input_handler.check_roll()
 			transitioned.emit(self, GameConstants.STATE_ROLL)
 			return
 			
+	# Завершение атаки
 	if not player.anim_player.is_playing() or player.anim_player.current_animation != anim_name:
 		_finish_attack()
 
 func _setup_combo_parameters() -> void:
-	# ... (без изменений)
 	var combo_step = player.combo_count % 3
 	if combo_step == 0:
 		anim_name = GameConstants.ANIM_PLAYER_ATTACK_1
@@ -66,24 +53,14 @@ func _setup_combo_parameters() -> void:
 	player.combo_count = (player.combo_count + 1) % 3
 
 func _finish_attack() -> void:
-	# Нормальное завершение — переходим в Move, а exit() сделает очистку
 	transitioned.emit(self, GameConstants.STATE_MOVE)
 
 func exit() -> void:
-	# !!! ИЗМЕНЕНИЕ: Гарантированная очистка флагов
 	player.is_attacking = false
-	
-	# Сбрасываем параметры урона, чтобы они не перенеслись случайно
 	player.current_attack_knockback_enabled = false
 	
-	# Если мы прервали атаку (например, кувырком), таймер сброса комбо должен пойти
 	if player.combo_reset_timer.is_stopped():
 		player.combo_reset_timer.start()
 
-	# Логика кулдауна
 	if not player.combo_cooldown_active:
 		player.can_attack = true
-	
-	# На всякий случай отключаем хитбоксы рук, если анимация прервалась на середине
-	# (Если Area3D управляются через AnimationPlayer, при смене анимации они сами сбросятся,
-	# но если через код - нужно добавить здесь: player.punch_hand_r.monitoring = false)

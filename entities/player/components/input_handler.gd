@@ -1,18 +1,20 @@
 class_name PlayerInput
 extends Node
 
-# Вектор движения
+@export var buffer_window: float = 0.2
+
 var move_vector: Vector2 = Vector2.ZERO
-# Флаги действий
-var is_jump_pressed: bool = false
 var is_run_pressed: bool = false
 var is_run_just_released: bool = false
-var is_attack_pressed: bool = false
 
-# Можно добавить флаг для блокировки ввода (катсцены, инвентарь)
+# Таймеры буфера
+var _jump_buffer_timer: float = 0.0
+var _attack_buffer_timer: float = 0.0
+var _roll_buffer_timer: float = 0.0
+
 var input_enabled: bool = true
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if not input_enabled:
 		_clear_input()
 		return
@@ -24,14 +26,57 @@ func _physics_process(_delta: float) -> void:
 		GameConstants.INPUT_MOVE_DOWN
 	)
 	
-	is_jump_pressed = Input.is_action_just_pressed(GameConstants.INPUT_JUMP)
 	is_run_pressed = Input.is_action_pressed(GameConstants.INPUT_RUN)
 	is_run_just_released = Input.is_action_just_released(GameConstants.INPUT_RUN)
-	is_attack_pressed = Input.is_action_just_pressed(GameConstants.INPUT_ATTACK_PRIMARY)
+	
+	_update_timers(delta)
+	
+	if Input.is_action_just_pressed(GameConstants.INPUT_JUMP):
+		_jump_buffer_timer = buffer_window
+		
+	if Input.is_action_just_pressed(GameConstants.INPUT_ATTACK_PRIMARY):
+		_attack_buffer_timer = buffer_window
+		
+	if Input.is_action_just_pressed(GameConstants.INPUT_RUN):
+		_roll_buffer_timer = buffer_window
+
+func _update_timers(delta: float) -> void:
+	if _jump_buffer_timer > 0: _jump_buffer_timer -= delta
+	if _attack_buffer_timer > 0: _attack_buffer_timer -= delta
+	if _roll_buffer_timer > 0: _roll_buffer_timer -= delta
 
 func _clear_input() -> void:
 	move_vector = Vector2.ZERO
-	is_jump_pressed = false
 	is_run_pressed = false
 	is_run_just_released = false
-	is_attack_pressed = false
+	_jump_buffer_timer = 0.0
+	_attack_buffer_timer = 0.0
+	_roll_buffer_timer = 0.0
+
+# --- ПУБЛИЧНЫЕ МЕТОДЫ ---
+
+func check_jump() -> bool:
+	if _jump_buffer_timer > 0:
+		_jump_buffer_timer = 0.0
+		return true
+	return false
+
+func check_attack() -> bool:
+	if _attack_buffer_timer > 0:
+		_attack_buffer_timer = 0.0
+		return true
+	return false
+
+func check_roll() -> bool:
+	if _roll_buffer_timer > 0:
+		_roll_buffer_timer = 0.0
+		return true
+	return false
+
+# Геттеры для "подсматривания" в буфер без очистки
+var is_attack_pressed: bool:
+	get: return _attack_buffer_timer > 0
+
+# !!! ДОБАВИЛИ ЭТО !!!
+var is_roll_buffered: bool:
+	get: return _roll_buffer_timer > 0
