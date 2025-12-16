@@ -169,7 +169,8 @@ func _perform_impact() -> void:
 	is_slamming = false
 	is_recovering = true
 	get_tree().call_group("camera_shaker", "add_trauma", 5.8)
-	
+	if actor.get("sfx_slam_impact"):
+		actor.sfx_slam_impact.play_random()
 	if not _playing_end_anim or anim_player.current_animation != GameConstants.ANIM_PLAYER_SLAM_END:
 		anim_player.play(GameConstants.ANIM_PLAYER_SLAM_END, 0.025, slam_end_anim_speed)
 	

@@ -26,6 +26,8 @@ func enter() -> void:
 	
 	enemy.play_animation(GameConstants.ANIM_ENEMY_RUN, 0.2, 1.0)
 	stuck_detector.init(stuck_threshold)
+	MusicBrain.set_combat_state(true)
+	
 	# print("[FSM] Enter Chase")
 
 func physics_update(delta: float) -> void:
@@ -139,3 +141,7 @@ func _get_separation_vector() -> Vector3:
 		separation = separation / count # Средний вектор
 		
 	return separation
+func exit() -> void:
+	# Враг вышел из погони -> -1 к счетчику
+	# (Даже если он переходит в Attack, логика ниже обработает это)
+	MusicBrain.set_combat_state(false)

@@ -17,6 +17,7 @@ var collision_restored: bool = false
 func enter() -> void:
 	player = entity as Player
 	player.is_rolling = true
+	player.sfx_roll.play_random()
 	player.is_invincible = true
 	
 	# === 1. ОТКЛЮЧАЕМ ВСЕ СЛОИ ИЗ СПИСКА ===

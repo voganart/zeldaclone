@@ -16,7 +16,8 @@ func enter() -> void:
 	# Выбираем случайное направление при входе
 	strafe_dir = 1 if randf() > 0.5 else -1
 	change_dir_timer = randf_range(change_dir_time_min, change_dir_time_max)
-	
+	MusicBrain.set_combat_state(true)
+
 	# Играем анимацию боевой стойки
 	#enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
 
@@ -73,5 +74,6 @@ func _handle_strafing(delta: float) -> void:
 	enemy.update_movement_animation(delta)
 
 func exit() -> void:
+	MusicBrain.set_combat_state(false)
 	# Сброс скорости на дефолтную при выходе
 	pass

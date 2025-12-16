@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cdxlc24gyvm4v"
+path="res://.godot/imported/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.wav-ba3a14f467bedd4f4b91512afd281a01.sample"
+
+[deps]
+
+source_file="res://assets/audio/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.wav"
+dest_files=["res://.godot/imported/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.wav-ba3a14f467bedd4f4b91512afd281a01.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

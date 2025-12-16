@@ -6,6 +6,7 @@ func enter() -> void:
 	player = entity as Player
 	# Логика запуска уже в компоненте, просто дергаем его
 	player.air_dash_ability.perform_dash()
+	player.sfx_dash.play_random()
 	# print("[FSM] Player Dash")
 
 func physics_update(_delta: float) -> void:

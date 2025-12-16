@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://csvu7l0q7xvit"]
+[gd_scene load_steps=7 format=3 uid="uid://csvu7l0q7xvit"]
 
 [ext_resource type="Script" uid="uid://tb6xtkrjbiys" path="res://ui/health_component/health_component.gd" id="1_njo25"]
 [ext_resource type="Script" uid="uid://ddapxe0483vqb" path="res://entities/interactive/breakable_object.gd" id="1_uf1ar"]
 [ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
+[ext_resource type="AudioStream" uid="uid://cdxlc24gyvm4v" path="res://assets/audio/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.wav" id="2_uoloi"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
 friction = 0.5
@@ -19,6 +20,7 @@ linear_damp = 2.0
 angular_damp = 2.0
 script = ExtResource("1_uf1ar")
 health_component = NodePath("HealthComponent")
+break_sound = ExtResource("2_uoloi")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

@@ -3,6 +3,9 @@ extends State
 var player: Player
 var anim_name: String = ""
 
+# Настройка трения специально для атаки
+var attack_friction: float = 25.0 # Намного больше, чем обычный stop_speed (8.0)
+
 func enter() -> void:
 	player = entity as Player
 	player.is_attacking = true
@@ -10,27 +13,38 @@ func enter() -> void:
 	player.combo_reset_timer.stop()
 	
 	_setup_combo_parameters()
+	
+	# Импульс применяется ОДИН раз при входе
+	# Внутри него velocity обнуляется и задается новый рывок
 	player.apply_attack_impulse()
+	
+	# ЗВУК АТАКИ
+	player.sfx_attack.play_random()
+	
 	player.anim_player.play(anim_name, 0.0, player.primary_attack_speed)
 
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
-	player.velocity.x = move_toward(player.velocity.x, 0, player.stop_speed * delta)
-	player.velocity.z = move_toward(player.velocity.z, 0, player.stop_speed * delta)
+	
+	# === АГРЕССИВНОЕ ТОРМОЖЕНИЕ ===
+	# Вместо плавного скольжения, мы быстро гасим импульс.
+	# Это создает ощущение "Snappy" (резкости).
+	# Игрок делает рывок (в enter) и почти сразу останавливается.
+	player.velocity.x = move_toward(player.velocity.x, 0, attack_friction * delta)
+	player.velocity.z = move_toward(player.velocity.z, 0, attack_friction * delta)
+	
+	# Вращение во время атаки (обычно замедленное или отключенное)
+	# Если мы используем Soft Lock, то мы уже повернулись в начале.
+	# Можно оставить небольшую возможность корректировки.
 	player.rot_char(delta)
 	
 	# === ОТМЕНА АТАКИ В РОЛЛ ===
-	# 1. Сначала проверяем, есть ли желание (кнопка нажата), НЕ СТИРАЯ буфер.
 	if player.input_handler.is_roll_buffered:
-		# 2. Проверяем, достигла ли анимация точки отмены (threshold)
-		# И есть ли у нас стамина/заряды.
 		if player.try_cancel_attack_for_roll() and player.can_roll():
-			# 3. Если всё ок — "Тратим" нажатие и переходим.
 			player.input_handler.check_roll()
 			transitioned.emit(self, GameConstants.STATE_ROLL)
 			return
 			
-	# Завершение атаки
 	if not player.anim_player.is_playing() or player.anim_player.current_animation != anim_name:
 		_finish_attack()
 

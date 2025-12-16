@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://m4u3iwb18gff"
+path="res://.godot/imported/WHSH_Pure SciFi-Whoosh Fast 03_RSCPC_DW.mp3-84ebc1b4d583f249a7620dff35198453.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/WHSH_Pure SciFi-Whoosh Fast 03_RSCPC_DW.mp3"
+dest_files=["res://.godot/imported/WHSH_Pure SciFi-Whoosh Fast 03_RSCPC_DW.mp3-84ebc1b4d583f249a7620dff35198453.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

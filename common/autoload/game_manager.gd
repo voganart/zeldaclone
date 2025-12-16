@@ -2,6 +2,11 @@ extends Node
 
 var active_tween: Tween
 func _ready() -> void:
+	MusicBrain.bpm = 110
+	MusicBrain.setup_track("Base", load("res://assets/audio/music/Music_layer_base.mp3"))
+	MusicBrain.setup_track("Flute", load("res://assets/audio/music/Music_layer_calm.mp3"))
+	MusicBrain.setup_track("Drums", load("res://assets/audio/music/Music_layer_combat.mp3"))
+	MusicBrain.start_music()
 	await get_tree().process_frame
 	if has_node("/root/SimpleGrass"):
 		print("SimpleGrass found, enabling interaction...")

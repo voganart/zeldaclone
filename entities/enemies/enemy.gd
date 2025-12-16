@@ -52,6 +52,9 @@ extends CharacterBody3D
 var vfx_pull: Node3D
 @onready var player: Node3D = get_tree().get_first_node_in_group(GameConstants.GROUP_PLAYER)
 @onready var patrol_zone: Area3D = get_parent() as Area3D
+@onready var sfx_hurt_voice: RandomAudioPlayer3D = $SoundBank/SfxHurtVoice
+@onready var sfx_flesh_hit: RandomAudioPlayer3D = $SoundBank/SfxFleshHit
+@onready var sfx_death_impact: RandomAudioPlayer3D = $SoundBank/SfxDeathImpact
 
 # UI References
 @onready var health_bar: EnemyHealthBar = $HealthBar3D
@@ -274,7 +277,7 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	# Нокдаун если это Финишер/Слэм (Heavy) ИЛИ сила подбрасывания реальная (> 2.0)
 	var is_knockdown = is_heavy_attack or (knockback_force.y > 2.0)
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
-	
+	if sfx_hurt_voice: sfx_hurt_voice.play_random()
 	# --- 1. АНИМАЦИЯ ---
 	if not is_lethal:
 		if is_knockdown:
@@ -292,11 +295,14 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	
 	# --- 2. VFX и Камера ---
 	if is_lethal:
+		if sfx_death_impact: sfx_death_impact.play_random()
 		get_tree().call_group("camera_shaker", "add_trauma", 0.8)
 	elif is_heavy_attack:
 		get_tree().call_group("camera_shaker", "add_trauma", 0.6)
 	else:
 		get_tree().call_group("camera_shaker", "add_trauma", 0.2)
+		if sfx_flesh_hit: sfx_flesh_hit.play_random()
+		if sfx_hurt_voice: sfx_hurt_voice.play_random()
 	
 	if vfx_pull:
 		vfx_pull.spawn_effect(0, global_position + Vector3(0, 1.5, 0))

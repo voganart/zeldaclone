@@ -8,6 +8,7 @@ extends RigidBody3D
 @onready var nav_obstacle: NavigationObstacle3D = $NavigationObstacle3D
 
 @export var stop_velocity_threshold: float = 0.1 
+@export var break_sound: AudioStream # Перетащи сюда звук ломания дерева
 var _time_since_stopped: float = 0.0
 var _is_static_mode: bool = true
 var _initial_radius: float = 0.0
@@ -59,6 +60,10 @@ func take_damage(amount: float, knockback_force: Vector3, _is_heavy: bool = fals
 		health_component.take_damage(amount)
 
 func _on_broken() -> void:
+	if break_sound:
+		# Передаем -10.0 (или сколько нужно) последним аргументом
+		AudioManager.play_sfx_3d(break_sound, global_position, true, 0.0)
+	
 	var pool = get_tree().get_first_node_in_group("vfx_pool")
 	if pool:
 		pool.spawn_effect(debris_vfx_index, to_global(vfx_offset))

@@ -54,6 +54,10 @@ var vfx_pull: Node3D
 @export var idle_attack_impulse: float = 0.5
 @export var attack_rotation_influence: float = 0.5
 
+@export_group("Combat Assist")
+@export var soft_lock_range: float = 4.0 ## Дистанция, на которой работает автонаведение
+@export var soft_lock_angle: float = 90.0 ## Угол обзора для автонаведения (в градусах)
+ 
 @export_group("Components")
 @export var punch_hand_r: Area3D
 @export var punch_hand_l: Area3D
@@ -67,7 +71,13 @@ var vfx_pull: Node3D
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var attack_timer: Timer = $FirstAttackTimer
 @onready var sprint_timer: Timer = $SprintTimer
-
+@onready var sfx_footsteps: RandomAudioPlayer3D = $SoundBank/SfxFootsteps
+@onready var sfx_attack: RandomAudioPlayer3D = $SoundBank/SfxAttack
+@onready var sfx_jump: RandomAudioPlayer3D = $SoundBank/SfxJump
+@onready var sfx_roll: RandomAudioPlayer3D = $SoundBank/SfxRoll
+@onready var sfx_hurt: RandomAudioPlayer3D = $SoundBank/SfxHurt
+@onready var sfx_dash: RandomAudioPlayer3D = $SoundBank/SfxDash
+@onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
 # ============================================================================
 # RUNTIME VARIABLES
 # ============================================================================
@@ -211,7 +221,7 @@ func perform_jump() -> void:
 	var jump_multiplier = second_jump_multiplier if current_jump_count == 1 else 1.0
 	velocity.y = - jump_velocity * jump_multiplier
 	current_jump_count += 1
-
+	sfx_jump.play_random()
 func rot_char(delta: float) -> void:
 	# 1. Если мы в стане (только что получили урон), запрещаем вращаться.
 	# Это сохраняет направление взгляда на врага сразу после удара.
@@ -245,16 +255,90 @@ func tilt_character(delta: float) -> void:
 	var target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)
 	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 15 * delta)
 
+# ============================================================================
+# COMBAT HELPERS
+# ============================================================================
+
 func apply_attack_impulse() -> void:
-	# (Код без изменений)
-	var forward = global_transform.basis.z.normalized()
-	var impulse = 0.0
-	var speed_2d = Vector2(velocity.x, velocity.z).length()
-	if is_running: impulse = running_attack_impulse
-	elif get_movement_vector().length() > 0.1 and speed_2d > base_speed * 0.5: impulse = walking_attack_impulse
-	else: impulse = idle_attack_impulse
-	velocity.x += forward.x * impulse
-	velocity.z += forward.z * impulse
+	# 1. СБРОС СТАРОЙ ИНЕРЦИИ
+	velocity.x = 0
+	velocity.z = 0
+	
+	var target = _find_soft_lock_target()
+	
+	# Определяем "Желаемый угол" (куда игрок жмет стик ИЛИ куда он смотрит сейчас)
+	var desired_angle = rotation.y
+	
+	if input_handler.move_vector.length() > 0.1:
+		var input_vec = input_handler.move_vector
+		# Для +Z: atan2(x, y)
+		desired_angle = atan2(input_vec.x, input_vec.y)
+	
+	# 2. ДОВОДКА ПОВОРОТА (Aim Assist)
+	if target:
+		var dir_to_enemy = (target.global_position - global_position).normalized()
+		var enemy_angle = atan2(dir_to_enemy.x, dir_to_enemy.z)
+		
+		# Смешиваем угол игрока и угол на врага.
+		# attack_rotation_influence берется из Инспектора (0.0 - нет доводки, 1.0 - жесткий лок)
+		# Ты просил ~0.5, настрой это в инспекторе.
+		rotation.y = lerp_angle(desired_angle, enemy_angle, attack_rotation_influence)
+		
+	else:
+		# Если врага нет, просто поворачиваемся куда хотели
+		rotation.y = desired_angle
+
+	# 3. РЫВОК
+	# Бьем строго вперед (+Z), куда мы в итоге повернулись
+	var attack_dir = global_transform.basis.z.normalized()
+	
+	var base_impulse = 0.0
+	if is_trying_to_run: 
+		base_impulse = running_attack_impulse
+	elif input_handler.move_vector.length() > 0.1:
+		base_impulse = walking_attack_impulse
+	else:
+		base_impulse = idle_attack_impulse
+		
+	# Применяем импульс (без бонусного притягивания по дистанции, как ты просил)
+	velocity += attack_dir * base_impulse
+
+
+func _find_soft_lock_target() -> Node3D:
+	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
+	var best_target: Node3D = null
+	var min_dist: float = soft_lock_range
+	
+	var search_dir = Vector3.ZERO
+	
+	if input_handler.move_vector.length() > 0.1:
+		var input_vec = input_handler.move_vector
+		search_dir = Vector3(input_vec.x, 0, input_vec.y).normalized()
+	else:
+		search_dir = global_transform.basis.z.normalized()
+
+	for enemy in enemies:
+		if not is_instance_valid(enemy): continue
+		if enemy.has_method("is_dead") and enemy.is_dead(): continue
+		
+		var dir_to_enemy = (enemy.global_position - global_position).normalized()
+		var dist = global_position.distance_to(enemy.global_position)
+		
+		if dist > soft_lock_range: continue
+		
+		var angle_to = rad_to_deg(search_dir.angle_to(dir_to_enemy))
+		
+		# Широкий угол захвата, чтобы "подтягивало" даже боковых врагов
+		var current_fov = soft_lock_angle
+		if dist < 2.5: current_fov = 160.0
+			
+		if angle_to > (current_fov / 2.0): continue
+		
+		if dist < min_dist:
+			min_dist = dist
+			best_target = enemy
+			
+	return best_target
 
 func start_combo_cooldown() -> void:
 	combo_cooldown_active = true
@@ -336,7 +420,7 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
-	
+	sfx_hurt.play_random() 
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 	
@@ -475,3 +559,6 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 		if is_finisher: recoil_force = 4.0
 		# Применяем импульс обратно вектору атаки
 		velocity -= dir * recoil_force
+func play_step_sound():
+	if is_on_floor():
+		sfx_footsteps.play_random()

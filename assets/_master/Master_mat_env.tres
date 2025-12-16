@@ -20,6 +20,7 @@ fill_from = Vector2(1, 1)
 [resource]
 depth_draw_mode = 1
 albedo_texture = ExtResource("1_6si8k")
+metallic_specular = 0.15
 roughness = 0.42
 rim = 0.73
 rim_tint = 0.27

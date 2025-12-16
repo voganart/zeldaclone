@@ -42,10 +42,12 @@ config/icon="res://icon.svg"
 [autoload]
 
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
-SimpleGrass="res://addons/simplegrasstextured/singleton.tscn"
+SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
 GameEvents="*res://common/autoload/game_events.gd"
 AIDirector="*res://common/autoload/ai_director.gd"
 GameManager="*res://common/autoload/game_manager.gd"
+AudioManager="*res://common/autoload/audio_manager.gd"
+MusicBrain="*res://common/autoload/music_brain.gd"
 
 [display]
 
@@ -54,7 +56,7 @@ window/size/viewport_height=1080
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/jigglebones/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/proton_scatter/plugin.cfg", "res://addons/script_spliter/plugin.cfg", "res://addons/simplegrasstextured/plugin.cfg", "res://addons/terrain_3d/plugin.cfg")
+enabled=PackedStringArray("res://addons/jigglebones/plugin.cfg", "res://addons/phantom_camera/plugin.cfg", "res://addons/proton_scatter/plugin.cfg", "res://addons/script_spliter/plugin.cfg", "res://addons/simplegrasstextured/plugin.cfg")
 
 [file_customization]
 
@@ -195,11 +197,11 @@ sgt_wind_movement={
 }
 sgt_wind_strength={
 "type": "float",
-"value": 0.338
+"value": 0.246
 }
 sgt_wind_turbulence={
 "type": "float",
-"value": 2.22
+"value": 1.0
 }
 sgt_wind_pattern={
 "type": "sampler2D",

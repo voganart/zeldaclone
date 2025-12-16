@@ -14432,10 +14432,10 @@ _subresources={
 "slices/amount": 0
 },
 "Boy_run": {
-"save_to_file/enabled": false,
-"save_to_file/fallback_path": "",
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://entities/player/animations/Boy_run.res",
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "",
+"save_to_file/path": "uid://coeihf3pqfbah",
 "settings/loop_mode": 1,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
@@ -16488,10 +16488,10 @@ _subresources={
 "slices/amount": 0
 },
 "Boy_walk": {
-"save_to_file/enabled": false,
-"save_to_file/fallback_path": "",
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://entities/player/animations/Boy_walk.res",
 "save_to_file/keep_custom_tracks": "",
-"save_to_file/path": "",
+"save_to_file/path": "uid://bdr5tqwa1k0xv",
 "settings/loop_mode": 1,
 "slice_1/end_frame": 0,
 "slice_1/loop_mode": 0,
