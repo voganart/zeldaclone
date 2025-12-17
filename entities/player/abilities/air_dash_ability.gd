@@ -14,7 +14,7 @@ var cooldown_timer: float = 0.0
 
 var _start_position: Vector3 = Vector3.ZERO
 var _dash_direction: Vector3 = Vector3.ZERO
-
+var is_unlocked: bool = false # По умолчанию закрыто!
 # Ссылка на игрока
 @onready var actor: CharacterBody3D = get_parent()
 
@@ -41,6 +41,7 @@ func reset_air_state() -> void:
 
 ## Проверка условий запуска
 func can_dash() -> bool:
+	if not is_unlocked: return false
 	if is_dashing: return false
 	if actor.is_on_floor(): return false
 	if dash_used_in_air: return false

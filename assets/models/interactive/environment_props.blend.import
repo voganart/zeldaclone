@@ -46,6 +46,15 @@ _subresources={
 }
 },
 "meshes": {
+"environment_props_Chest_1": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/interactive/environment_props_Chest_1.res",
+"save_to_file/path": "uid://bxh617lj0pbaa"
+},
 "environment_props_Crate_Wooden": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,
@@ -72,6 +81,15 @@ _subresources={
 "save_to_file/enabled": true,
 "save_to_file/fallback_path": "res://assets/models/interactive/crate_particle_2.res",
 "save_to_file/path": "uid://cfstu8y7gng8i"
+},
+"environment_props_Lid": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/interactive/environment_props_Lid.res",
+"save_to_file/path": "uid://ctin75rb4712y"
 },
 "environment_props_Tree": {
 "generate/lightmap_uv": 0,

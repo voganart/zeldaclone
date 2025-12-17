@@ -80,11 +80,6 @@ signal died
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
-	var pool_node = get_tree().get_first_node_in_group("vfx_pool")
-	if pool_node:
-		vfx_pull = pool_node
-	else:
-		push_warning("Enemy: VfxPool not found in scene tree!")
 	# Инициализация NavAgent
 	nav_agent.max_speed = walk_speed
 	state_machine.init(self)
@@ -304,8 +299,7 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 		if sfx_flesh_hit: sfx_flesh_hit.play_random()
 		if sfx_hurt_voice: sfx_hurt_voice.play_random()
 	
-	if vfx_pull:
-		vfx_pull.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
+	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()
 
 	# --- 3. HIT STOP ---

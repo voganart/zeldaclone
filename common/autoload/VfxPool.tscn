@@ -1,0 +1,11 @@
+[gd_scene load_steps=5 format=3 uid="uid://b7dqtyei1ggjx"]
+
+[ext_resource type="Script" uid="uid://cghbw6nlcm2el" path="res://vfx/blood_splash/VfxPool.gd" id="1_8cm2a"]
+[ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="2_mpjbu"]
+[ext_resource type="PackedScene" uid="uid://bk0jojvlhos42" path="res://vfx/CrateExplosion.tscn" id="3_ooko2"]
+[ext_resource type="PackedScene" uid="uid://b6nelwbpeak8a" path="res://vfx/VfxGroundSlam/vfx_ground_slam.tscn" id="4_17fw4"]
+
+[node name="VfxPooll" type="Node" groups=["vfx_pool"]]
+script = ExtResource("1_8cm2a")
+effect_scenes = Array[PackedScene]([ExtResource("2_mpjbu"), ExtResource("3_ooko2"), ExtResource("4_17fw4")])
+auto_expand = true

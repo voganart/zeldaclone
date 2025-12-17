@@ -2,7 +2,6 @@ class_name Player
 extends CharacterBody3D
 
 @onready var _mesh: Node3D = $character
-var vfx_pull: Node3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
@@ -130,11 +129,6 @@ var target_movement_blend: float = 0.0
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
-	# Безопасный поиск пула эффектов
-	var pool_node = get_tree().get_first_node_in_group("vfx_pool")
-	if pool_node:
-		vfx_pull = pool_node
-	
 	# Инициализация таймеров комбо (оставляем как было)
 	combo_reset_timer = Timer.new()
 	combo_reset_timer.one_shot = true
@@ -413,10 +407,8 @@ func calculate_walk_run_blend(speed: float) -> float:
 # ============================================================================
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
-	
-	# !!! ИСПРАВЛЕНИЕ: Проверка на null перед использованием
-	if vfx_pull:
-		vfx_pull.spawn_effect(0, self.global_position + Vector3(0, 1.5, 0))
+
+	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()

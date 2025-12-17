@@ -66,6 +66,7 @@ mesh_path = NodePath("../Monstr/root/Skeleton3D/Monstr")
 flash_time = 0.2
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.75
 avoidance_enabled = true
 radius = 0.8
 neighbor_distance = 10.0

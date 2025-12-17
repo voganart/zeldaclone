@@ -31,39 +31,34 @@ func _create_instance(scene: PackedScene):
 	return inst
 
 func spawn_effect(effect_idx: int, position: Vector3, rotation: Vector3 = Vector3.ZERO):
-	# Проверка на дурака (чтобы игра не крашнулась, если индекс неверный)
 	if effect_idx < 0 or effect_idx >= available_queues.size():
-		print("VfxPool Error: Index ", effect_idx, " does not exist in pool!")
 		return null
 		
-	# Берем КОНКРЕТНУЮ очередь для этого индекса
 	var queue = available_queues[effect_idx]
 	var effect
 	
 	if queue.is_empty():
 		if auto_expand:
-			# Если кончились, создаем новый именно этого типа
 			effect = _create_instance(effect_scenes[effect_idx])
 		else:
-			# Лимиты превышены, эффект не играем
 			return null
 	else:
-		# Берем из конкретной очереди
 		effect = queue.pop_front()
 		
-	# Настройка позиции
 	effect.global_position = position
 	effect.global_rotation = rotation
 	effect.scale = Vector3.ONE
 	effect.visible = true
 	
-	# Фикс лага (обновляем трансформ мгновенно)
 	if effect is Node3D:
 		effect.force_update_transform()
 		
 	_enable_particles(effect)
 	
-	# Важно: передаем индекс, чтобы знать, в какую очередь возвращать!
+	# !!! ДОБАВЛЕНО: Перезапуск анимации !!!
+	_restart_animation(effect)
+	# --------------------------------------
+	
 	_return_to_pool_later(effect, effect_idx)
 	
 	return effect
@@ -99,3 +94,24 @@ func _return_to_pool_later(effect, effect_idx: int):
 			# Если вдруг пул изменился (маловероятно), просто удаляем
 			effect.queue_free()
 	)
+func _restart_animation(node):
+	# Ищем AnimationPlayer прямо в корне эффекта
+	var anim = node.get_node_or_null("AnimationPlayer")
+	if anim:
+		anim.stop()
+		
+		# Пытаемся найти анимацию по умолчанию
+		var anim_name = ""
+		if anim.has_animation("play"): # Обычно называют "play"
+			anim_name = "play"
+		elif anim.has_animation("default"):
+			anim_name = "default"
+		elif anim.get_animation_list().size() > 0:
+			# Если не нашли стандартных имен, берем первую попавшуюся
+			anim_name = anim.get_animation_list()[0]
+			
+		if anim_name != "":
+			anim.play(anim_name)
+			# ВАЖНО: seek(0, true) заставляет шейдер обновиться МГНОВЕННО, 
+			# иначе 1 кадр будет виден старый результат
+			anim.seek(0.0, true)

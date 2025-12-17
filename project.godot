@@ -48,12 +48,14 @@ AIDirector="*res://common/autoload/ai_director.gd"
 GameManager="*res://common/autoload/game_manager.gd"
 AudioManager="*res://common/autoload/audio_manager.gd"
 MusicBrain="*res://common/autoload/music_brain.gd"
+InteractionManager="*res://common/interaction/interaction_manager.gd"
+ItemPool="*res://common/autoload/ItemPool.tscn"
+VfxPool="*res://common/autoload/VfxPool.tscn"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=3
 
 [editor_plugins]
 
@@ -134,6 +136,11 @@ first_attack={
 spawn={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":47,"key_label":0,"unicode":47,"location":0,"echo":false,"script":null)
+]
+}
+interact={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":69,"key_label":0,"unicode":101,"location":0,"echo":false,"script":null)
 ]
 }
 

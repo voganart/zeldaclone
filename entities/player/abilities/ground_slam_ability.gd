@@ -12,7 +12,6 @@ extends Node
 @export var slam_min_height: float = 2.5
 @export var slam_end_anim_speed: float = 1.5
 @export var slam_vfx_index: int = 2
-@onready var vfx_pull: Node3D = $"../../../VfxPull"
 
 # State
 var is_slamming: bool = false
@@ -24,7 +23,7 @@ var _fall_time: float = 0.0
 var _animation_phase: String = ""
 var _impact_processed: bool = false
 var _playing_end_anim: bool = false
-
+var is_unlocked: bool = false # По умолчанию закрыто!
 @onready var actor: CharacterBody3D = get_parent()
 @onready var anim_player: AnimationPlayer = actor.get_node("character/AnimationPlayer")
 signal cooldown_updated(time_left: float, max_time: float)
@@ -39,6 +38,7 @@ func _process(delta: float) -> void:
 			cooldown_timer = -2.0
 
 func can_slam() -> bool:
+	if not is_unlocked: return false
 	if is_slamming or is_recovering: return false
 	if actor.is_on_floor(): return false
 	if cooldown_timer > 0: return false
@@ -190,10 +190,7 @@ func _perform_impact() -> void:
 	is_recovering = false
 	_playing_end_anim = false
 	var vfx = null
-	
-	if vfx_pull:
-		vfx = vfx_pull.spawn_effect(slam_vfx_index, actor.global_position + Vector3(0, 0.05, 0))
-	
+	VfxPool.spawn_effect(slam_vfx_index, actor.global_position + Vector3(0, 0.05, 0))
 	# Если пул вернул эффект, запускаем анимацию
 	if vfx and vfx.has_node("AnimationPlayer"):
 		vfx.get_node("AnimationPlayer").play("play")

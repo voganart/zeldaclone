@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://csvu7l0q7xvit"]
+
+[ext_resource type="Script" uid="uid://tb6xtkrjbiys" path="res://ui/health_component/health_component.gd" id="1_njo25"]
+[ext_resource type="Script" uid="uid://ddapxe0483vqb" path="res://entities/interactive/WoodenCrate/breakable_object.gd" id="1_uf1ar"]
+[ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
+friction = 0.5
+rough = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uf1ar"]
+
+[node name="WoodenCrate" type="RigidBody3D" node_paths=PackedStringArray("health_component")]
+collision_layer = 16
+collision_mask = 31
+mass = 5.0
+physics_material_override = SubResource("PhysicsMaterial_uf1ar")
+linear_damp = 2.0
+angular_damp = 2.0
+script = ExtResource("1_uf1ar")
+health_component = NodePath("HealthComponent")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_uf1ar")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_l4mhh")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("1_njo25")
+max_health = 1.0

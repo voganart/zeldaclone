@@ -1,0 +1,161 @@
+[gd_scene load_steps=21 format=3 uid="uid://tvcq0ve33rtx"]
+
+[ext_resource type="Script" uid="uid://363vi8q1enpq" path="res://entities/interactive/Chest_1/chest.gd" id="1_2d6lx"]
+[ext_resource type="PackedScene" uid="uid://du3p1kgaroc81" path="res://assets/models/interactive/Chest_1.glb" id="2_2d6lx"]
+[ext_resource type="Script" uid="uid://bhtun1q0dxlh2" path="res://common/interaction/interaction_area.gd" id="2_v43xn"]
+[ext_resource type="Texture2D" uid="uid://wefl13au7wey" path="res://assets/textures/vfx/fly_star.png" id="2_w6sjs"]
+
+[sub_resource type="Curve" id="Curve_1q2x1"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_g4f04"]
+curve = SubResource("Curve_1q2x1")
+
+[sub_resource type="Curve" id="Curve_7fbej"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, -360), 0.0, 0.0, 0, 0, Vector2(1, 360), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_2q02b"]
+curve = SubResource("Curve_7fbej")
+
+[sub_resource type="Gradient" id="Gradient_qo75x"]
+colors = PackedColorArray(2.737214, 1.927651, 0, 1, 0.7587512, 0.6649819, 0.5016418, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_p21v5"]
+gradient = SubResource("Gradient_qo75x")
+
+[sub_resource type="Curve" id="Curve_extvm"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.51748025, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_4wr8l"]
+curve = SubResource("Curve_extvm")
+
+[sub_resource type="Curve" id="Curve_2nxn3"]
+_data = [Vector2(0, 0.33110917), 0.0, 0.0, 0, 0, Vector2(0.51484174, 0.92739224), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_uft2i"]
+curve = SubResource("Curve_2nxn3")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_2d6lx"]
+lifetime_randomness = 0.17
+emission_shape_offset = Vector3(0, 0.475, 0)
+emission_shape_scale = Vector3(1, -0.095, 1)
+emission_shape = 3
+emission_box_extents = Vector3(0.525, 0.51, 0.285)
+angle_min = -720.0
+angle_max = 720.0
+angle_curve = SubResource("CurveTexture_2q02b")
+angular_velocity_min = -1.6093254e-05
+angular_velocity_max = -1.6093254e-05
+gravity = Vector3(0, 1, 0)
+radial_accel_min = -2.2351742e-06
+radial_accel_max = -2.2351742e-06
+tangential_accel_min = -1.0000023
+tangential_accel_max = 0.99999774
+damping_min = 0.1
+damping_max = 0.5
+scale_min = 0.099999994
+scale_max = 0.19999999
+scale_curve = SubResource("CurveTexture_uft2i")
+color = Color(1, 0.8795517, 0.7314933, 1)
+color_ramp = SubResource("GradientTexture1D_p21v5")
+alpha_curve = SubResource("CurveTexture_g4f04")
+emission_curve = SubResource("CurveTexture_4wr8l")
+hue_variation_min = -0.20000002
+hue_variation_max = 0.19999997
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2d6lx"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(2.319559, 2.319559, 2.319559, 1)
+albedo_texture = ExtResource("2_w6sjs")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_2d6lx"]
+material = SubResource("StandardMaterial3D_2d6lx")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2d6lx"]
+size = Vector3(1.2480469, 0.53393555, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w6sjs"]
+size = Vector3(1.7822266, 0.6758385, 1.0549316)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_m4fme"]
+
+[node name="Chest" type="Node3D"]
+script = ExtResource("1_2d6lx")
+
+[node name="Base" type="AnimatableBody3D" parent="."]
+transform = Transform3D(0.99999565, 5.891226e-20, 1.1102229e-16, -1.8626368e-09, 0.99999887, 0, 0, -6.9388852e-18, 1, 0, 0, 0)
+collision_layer = 8
+collision_mask = 31
+
+[node name="VFX_Particles" type="GPUParticles3D" parent="Base"]
+transform = Transform3D(1, -5.8912327e-20, -1.11022296e-16, 1.8626458e-09, 1.0000005, -2.067952e-25, 1.2924694e-26, 6.938893e-18, 1, 0, 0, 0)
+emitting = false
+amount = 50
+randomness = 0.37
+transform_align = 1
+process_material = SubResource("ParticleProcessMaterial_2d6lx")
+draw_pass_1 = SubResource("QuadMesh_2d6lx")
+
+[node name="VFX_Light" type="OmniLight3D" parent="Base"]
+transform = Transform3D(0.99999255, -0.004043184, 0, 0.0040431917, 0.99999255, -1.7347235e-17, 0, 2.7755576e-17, 1, 0.007947724, 0.66524976, -4.0641854e-11)
+light_color = Color(1, 0.9164553, 0.29481274, 1)
+light_energy = 0.0
+distance_fade_enabled = true
+omni_range = 0.782
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Base"]
+transform = Transform3D(0.99999994, -3.3527613e-08, -3.996803e-15, 3.3527613e-08, 0.99999994, -2.4286129e-17, 0, 1.2836954e-16, 1, 3.7252903e-09, 0.27023607, 6.938894e-18)
+shape = SubResource("BoxShape3D_2d6lx")
+
+[node name="Lid" type="AnimatableBody3D" parent="."]
+transform = Transform3D(0.9999897, 0, 2.3841692e-07, 0, 0.99999505, 0, -2.3841609e-07, 0, 0.99999315, -9.5501886e-17, 0.43010226, 0.4359145)
+collision_layer = 8
+collision_mask = 31
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Lid"]
+transform = Transform3D(0.9999918, -8.881711e-16, -3.463896e-14, 0, 0.9999918, 0, 0, 2.9802322e-08, 1.0000001, 0, 0.36, -0.375)
+shape = SubResource("BoxShape3D_w6sjs")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+script = ExtResource("2_v43xn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0.5158441, 0)
+shape = SubResource("SphereShape3D_m4fme")
+
+[node name="Chest_1" parent="." instance=ExtResource("2_2d6lx")]
+
+[node name="Base" type="BoneAttachment3D" parent="Chest_1/Chest_1_rig/Skeleton3D" index="0"]
+bone_name = "Chest_1_2"
+bone_idx = 0
+
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Chest_1/Chest_1_rig/Skeleton3D/Base"]
+transform = Transform3D(1.0000001, 5.891233e-20, 1.110223e-16, -1.8626451e-09, 1.0000001, 0, 0, -6.938894e-18, 1.0000001, 0, 0, 0)
+remote_path = NodePath("../../../../../Base")
+update_scale = false
+
+[node name="LootSpawnPoint" type="Marker3D" parent="Chest_1/Chest_1_rig/Skeleton3D/Base"]
+transform = Transform3D(0.99999994, 4.656613e-10, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0.005008226, 0.4881267, 0)
+
+[node name="Lid" type="BoneAttachment3D" parent="Chest_1/Chest_1_rig/Skeleton3D" index="1"]
+transform = Transform3D(1, 0, 2.3841855e-07, 0, 0.99999994, 0, -2.3841855e-07, 0, 1, -9.5501886e-17, 0.43010226, 0.4359145)
+bone_name = "Lid"
+bone_idx = 1
+
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="Chest_1/Chest_1_rig/Skeleton3D/Lid"]
+remote_path = NodePath("../../../../../Lid")
+update_scale = false
+
+[editable path="Chest_1"]
