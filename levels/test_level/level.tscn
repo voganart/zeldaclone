@@ -1,4 +1,4 @@
-[gd_scene load_steps=88 format=4 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=89 format=4 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://levels/test_level/enemy_spawner.tscn" id="1_nb3sg"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://35ri7723h3wb" path="res://vfx/camera_shaker/camera_shaker.gd" id="5_dev6b"]
 [ext_resource type="Shader" uid="uid://dmd7y6fsoqikt" path="res://assets/shaders/clouds.gdshader" id="5_oy4pa"]
 [ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemies/enemy.tscn" id="5_u71mg"]
+[ext_resource type="PackedScene" uid="uid://b6nelwbpeak8a" path="res://vfx/VfxGroundSlam/vfx_ground_slam.tscn" id="5_xbjnq"]
 [ext_resource type="PackedScene" uid="uid://3qeblptfymiv" path="res://levels/island/island.tscn" id="7_owp05"]
 [ext_resource type="Shader" uid="uid://d4cci5dovs27b" path="res://assets/shaders/water_style.gdshader" id="9_p7nu3"]
 [ext_resource type="Shader" uid="uid://c8ktwvuun6cjf" path="res://assets/materials/grass.tres" id="10_nb3sg"]
@@ -74,6 +75,7 @@ ssil_enabled = true
 sdfgi_enabled = true
 sdfgi_use_occlusion = true
 sdfgi_energy = 0.2
+glow_enabled = true
 volumetric_fog_length = 1.0
 adjustment_enabled = true
 adjustment_brightness = 0.9
@@ -486,27 +488,27 @@ item/5/navigation_layers = 1
 item/5/preview = SubResource("ImageTexture_8imjf")
 metadata/_editor_source_scene = "res://assets/models/interactive/environment_props_meshlib.tscn"
 
-[sub_resource type="Resource" id="Resource_dsao6"]
+[sub_resource type="Resource" id="Resource_xbjnq"]
 script = ExtResource("24_xbjnq")
 amount = 5000
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_mtvxm"]
+[sub_resource type="Resource" id="Resource_e3h7t"]
 script = ExtResource("25_e3h7t")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(5, 360, 5)
 scale = Vector3(0.5, 0.5, 0.5)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_fwvrn"]
+[sub_resource type="Resource" id="Resource_j2se1"]
 script = ExtResource("26_84ugw")
 iterations = 4
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_4n1ev"]
+[sub_resource type="Resource" id="Resource_dsao6"]
 script = ExtResource("27_8ftol")
 ray_length = 5.0
 ray_offset = 5.0
@@ -514,9 +516,9 @@ align_with_collision_normal = true
 collision_mask = 8
 exclude_mask = 7
 
-[sub_resource type="Resource" id="Resource_osjvn"]
+[sub_resource type="Resource" id="Resource_mtvxm"]
 script = ExtResource("22_mnooe")
-stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_dsao6"), SubResource("Resource_mtvxm"), SubResource("Resource_fwvrn"), SubResource("Resource_4n1ev")])
+stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_xbjnq"), SubResource("Resource_e3h7t"), SubResource("Resource_j2se1"), SubResource("Resource_dsao6")])
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mnooe"]
 
@@ -565,7 +567,7 @@ fill_from = Vector2(1, 1)
 
 [node name="VfxPull" type="Node3D" parent="." groups=["vfx_pool"]]
 script = ExtResource("15_bi1di")
-effect_scenes = Array[PackedScene]([ExtResource("14_tfnen"), ExtResource("18_jenbb")])
+effect_scenes = Array[PackedScene]([ExtResource("14_tfnen"), ExtResource("18_jenbb"), ExtResource("5_xbjnq")])
 auto_expand = true
 
 [node name="Lights" type="Node3D" parent="."]
@@ -575,9 +577,13 @@ transform = Transform3D(-0.62753147, -0.7536719, 0.19540508, 0.46462527, -0.1611
 light_color = Color(1, 0.991251, 0.907744, 1)
 light_angular_distance = 0.2
 shadow_enabled = true
-shadow_opacity = 0.9
-shadow_blur = 3.0
+shadow_opacity = 0.8
+shadow_blur = 2.0
+directional_shadow_mode = 0
+directional_shadow_split_1 = 0.5
 directional_shadow_blend_splits = true
+directional_shadow_max_distance = 20.0
+directional_shadow_pancake_size = 10.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Lights"]
 environment = SubResource("Environment_k5f4k")
@@ -772,7 +778,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6690078, 0, 11.678664)
 visible = false
 script = ExtResource("21_ov4tj")
 global_seed = 2
-modifier_stack = SubResource("Resource_osjvn")
+modifier_stack = SubResource("Resource_mtvxm")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"

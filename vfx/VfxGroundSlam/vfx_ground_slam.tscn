@@ -1,0 +1,195 @@
+[gd_scene load_steps=15 format=3 uid="uid://b6nelwbpeak8a"]
+
+[ext_resource type="Shader" uid="uid://cnxuikwvwd4kn" path="res://assets/shaders/Cracks.gdshader" id="1_us532"]
+[ext_resource type="Texture2D" uid="uid://ittdhwhhwu8w" path="res://assets/textures/vfx/Ground_slam.png" id="2_xsjy0"]
+
+[sub_resource type="Animation" id="Animation_us532"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Cracks:mesh:material:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Cracks:mesh:material:shader_parameter/dissolve")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("DustRing:emitting")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_xsjy0"]
+resource_name = "VfxGroundSlamPlay"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Cracks:mesh:material:shader_parameter/progress")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.10000001),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Cracks:mesh:material:shader_parameter/dissolve")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.4, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 0.9333334, 1.0]
+}
+tracks/2/type = "method"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"values": []
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("DustRing:emitting")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_u35oc"]
+_data = {
+&"RESET": SubResource("Animation_us532"),
+&"play": SubResource("Animation_xsjy0")
+}
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h2j1y"]
+render_priority = 0
+shader = ExtResource("1_us532")
+shader_parameter/crack_texture = ExtResource("2_xsjy0")
+shader_parameter/color_inner = Color(1.7765642, 1.4293482, 0, 1)
+shader_parameter/color_outer = Color(4.203, 0.39999992, 0, 1)
+shader_parameter/progress = 0.0
+shader_parameter/dissolve = 0.0
+shader_parameter/emission_strength = 5.0
+
+[sub_resource type="QuadMesh" id="QuadMesh_k8bem"]
+material = SubResource("ShaderMaterial_h2j1y")
+
+[sub_resource type="Gradient" id="Gradient_sq17s"]
+colors = PackedColorArray(2.1519775, 1.8914768, 1.3857988, 1, 0.7769773, 0.7769773, 0.7769773, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_h2j1y"]
+gradient = SubResource("Gradient_sq17s")
+use_hdr = true
+
+[sub_resource type="Curve" id="Curve_k8bem"]
+_data = [Vector2(0, 0.41069162), 0.0, 3.1958742, 0, 0, Vector2(0.2674303, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -2.3941152, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_tm15h"]
+curve = SubResource("Curve_k8bem")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sq17s"]
+emission_shape_offset = Vector3(0, 0.11, 0)
+emission_shape_scale = Vector3(0.5, 0, 0.5)
+emission_shape = 6
+emission_ring_axis = Vector3(0, 1, 0)
+emission_ring_height = 1.0
+emission_ring_radius = 2.0
+emission_ring_inner_radius = 3.0
+emission_ring_cone_angle = 90.0
+angle_min = 1.0728835e-05
+angle_max = 1.0728835e-05
+direction = Vector3(0, 1, 0)
+spread = 90.0
+initial_velocity_min = 3.0
+initial_velocity_max = 4.0
+orbit_velocity_min = 0.7370001
+orbit_velocity_max = 1.2480001
+radial_velocity_min = 0.09997764
+radial_velocity_max = 0.99997765
+gravity = Vector3(0, 5, 0)
+linear_accel_min = 0.66999775
+linear_accel_max = 8.719997
+radial_accel_min = -2.2351742e-06
+radial_accel_max = -2.2351742e-06
+damping_min = 40.605003
+damping_max = 44.967003
+scale_min = 0.5
+scale_curve = SubResource("CurveTexture_tm15h")
+color_ramp = SubResource("GradientTexture1D_h2j1y")
+collision_mode = 1
+collision_friction = 0.06
+collision_bounce = 0.0
+collision_use_scale = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k8bem"]
+transparency = 1
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.8149938, 0.75533986, 0.68191963, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_tm15h"]
+material = SubResource("StandardMaterial3D_k8bem")
+radius = 0.3
+height = 0.6
+
+[node name="VfxGroundSlam" type="Node3D"]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_u35oc")
+}
+
+[node name="Cracks" type="MeshInstance3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, -1.3113416e-07, 3, 0, -3, -1.3113416e-07, 0, 0, 0)
+mesh = SubResource("QuadMesh_k8bem")
+
+[node name="DustRing" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 50
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.9
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_sq17s")
+draw_pass_1 = SubResource("SphereMesh_tm15h")
+
+[node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(4, 1, 4)

@@ -3,6 +3,11 @@ extends Node
 var music_player: AudioStreamPlayer
 
 func _ready() -> void:
+	MusicBrain.bpm = 110
+	MusicBrain.setup_track("Base", load("res://assets/audio/music/Music_layer_base.mp3"))
+	MusicBrain.setup_track("Flute", load("res://assets/audio/music/Music_layer_calm.mp3"))
+	MusicBrain.setup_track("Drums", load("res://assets/audio/music/Music_layer_combat.mp3"))
+	MusicBrain.start_music()
 	music_player = AudioStreamPlayer.new()
 	music_player.bus = "Music" # Убедись, что создал шину Music в настройках аудио
 	add_child(music_player)

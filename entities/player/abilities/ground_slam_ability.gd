@@ -11,6 +11,8 @@ extends Node
 @export var slam_acceleration: float = 50.0
 @export var slam_min_height: float = 2.5
 @export var slam_end_anim_speed: float = 1.5
+@export var slam_vfx_index: int = 2
+@onready var vfx_pull: Node3D = $"../../../VfxPull"
 
 # State
 var is_slamming: bool = false
@@ -187,7 +189,16 @@ func _perform_impact() -> void:
 		return
 	is_recovering = false
 	_playing_end_anim = false
-
+	var vfx = null
+	
+	if vfx_pull:
+		vfx = vfx_pull.spawn_effect(slam_vfx_index, actor.global_position + Vector3(0, 0.05, 0))
+	
+	# Если пул вернул эффект, запускаем анимацию
+	if vfx and vfx.has_node("AnimationPlayer"):
+		vfx.get_node("AnimationPlayer").play("play")
+		# ВАЖНО: Сбрось анимацию в начало, т.к. эффект переиспользуется
+		vfx.get_node("AnimationPlayer").seek(0, true)
 func _deal_damage() -> void:
 	var space_state = actor.get_world_3d().direct_space_state
 	var shape = SphereShape3D.new()
