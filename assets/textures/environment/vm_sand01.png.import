@@ -2,29 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkt643nhk50oo"
-path="res://.godot/imported/MasterTexture.png-f5742e2950d809e5cc4135e3fdd1b252.ctex"
+uid="uid://1myamfmt75ax"
+path="res://.godot/imported/vm_sand01.png-461bb75cfd261cde2cf1aabbf67e7b48.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "67ab9c6e92e9922834840b68066c8146"
 }
 
 [deps]
 
-source_file="res://assets/_master/MasterTexture.png"
-dest_files=["res://.godot/imported/MasterTexture.png-f5742e2950d809e5cc4135e3fdd1b252.ctex"]
+source_file="res://assets/textures/environment/vm_sand01.png"
+dest_files=["res://.godot/imported/vm_sand01.png-461bb75cfd261cde2cf1aabbf67e7b48.ctex"]
 
 [params]
 
 compress/mode=3
-compress/high_quality=true
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

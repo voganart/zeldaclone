@@ -3,8 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://assets/_master/MasterTexture.png" id="1_6si8k"]
 
 [sub_resource type="Gradient" id="Gradient_6si8k"]
-offsets = PackedFloat32Array(0, 0.7831573)
-colors = PackedColorArray(0.14346193, 0, 0.49, 0.74509805, 1, 0.78061914, 0.43686545, 0.50980395)
+colors = PackedColorArray(0.21209882, 0, 0.6727494, 0.23921569, 1.353256, 1.0624245, 0.5785255, 0.8235294)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_3ueak"]
 gradient = SubResource("Gradient_6si8k")
@@ -18,14 +17,12 @@ gradient = SubResource("Gradient_14vba")
 fill_from = Vector2(1, 1)
 
 [resource]
-depth_draw_mode = 1
+shading_mode = 2
 albedo_texture = ExtResource("1_6si8k")
-metallic_specular = 0.15
-roughness = 0.42
+roughness = 0.7
 rim = 0.73
 rim_tint = 0.27
 rim_texture = SubResource("GradientTexture2D_qdf5j")
-anisotropy = 0.35
 detail_enabled = true
 detail_blend_mode = 3
 detail_uv_layer = 1

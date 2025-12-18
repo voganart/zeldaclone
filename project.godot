@@ -150,6 +150,11 @@ interact={
 
 [layer_names]
 
+3d_render/layer_1="GridMap"
+3d_render/layer_2="Characters"
+3d_render/layer_3="Walls"
+3d_render/layer_4="Objects"
+3d_render/layer_5="Floor"
 3d_physics/layer_1="Player"
 3d_physics/layer_2="Punches"
 3d_physics/layer_3="Enemies"

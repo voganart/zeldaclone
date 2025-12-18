@@ -129,7 +129,8 @@ transform = Transform3D(0.9999965, -3.3527407e-08, -3.9967783e-15, 3.3527538e-08
 shape = SubResource("BoxShape3D_2d6lx")
 
 [node name="Lid" type="AnimatableBody3D" parent="."]
-transform = Transform3D(0.9998942, 0.011450572, -0.00649873, 0.0016842609, -0.6007767, -0.7994039, -0.0130579, 0.79932433, -0.6007434, -9.5501886e-17, 0.43010226, 0.4359145)
+transform = Transform3D(0.9998942, 0.011450581, -0.0064987247, 0.0016842609, -0.60077715, -0.79940325, -0.0130579, 0.7993249, -0.600743, -9.5501886e-17, 0.43010226, 0.4359145)
+visible = false
 collision_layer = 0
 collision_mask = 0
 physics_material_override = SubResource("PhysicsMaterial_w6sjs")
@@ -171,6 +172,9 @@ bone_idx = 1
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="Chest_1/Chest_1_rig/Skeleton3D/Lid"]
 remote_path = NodePath("../../../../../Lid")
 update_scale = false
+
+[node name="Chest_1" parent="Chest_1/Chest_1_rig/Skeleton3D" index="2"]
+layers = 8
 
 [node name="AnimationPlayer" parent="Chest_1" index="1"]
 autoplay = "Chest_idle"

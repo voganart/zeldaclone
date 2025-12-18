@@ -105,15 +105,6 @@ _subresources={
 "save_to_file/fallback_path": "res://assets/models/interactive/environment_props_Tree.res",
 "save_to_file/path": "uid://dh2xxdkltcova"
 },
-"environment_props_Wall_Block": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://assets/models/interactive/environment_props_Wall_Block.res",
-"save_to_file/path": "uid://bw0w7vaiqp27c"
-},
 "environment_props_Wall_Block_001": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,

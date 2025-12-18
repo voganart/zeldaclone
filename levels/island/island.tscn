@@ -1,9 +1,144 @@
-[gd_scene load_steps=2 format=3 uid="uid://3qeblptfymiv"]
+[gd_scene load_steps=6 format=3 uid="uid://3qeblptfymiv"]
 
 [ext_resource type="PackedScene" uid="uid://c0dbb4xme8cko" path="res://assets/models/environment/island.blend" id="1_ecdf3"]
+[ext_resource type="Texture2D" uid="uid://yy0u5thsudiw" path="res://assets/textures/environment/alphas_02_0002s_0001_873.png" id="2_0ply4"]
+[ext_resource type="Texture2D" uid="uid://1myamfmt75ax" path="res://assets/textures/environment/vm_sand01.png" id="3_djsbw"]
+[ext_resource type="Texture2D" uid="uid://bd1xops0rrmdn" path="res://assets/textures/environment/alphas_01_0007s_0001_495.png" id="4_uunxy"]
+[ext_resource type="Texture2D" uid="uid://df476k6ksv24v" path="res://assets/textures/environment/alphas_01__0000s_0001_249.png" id="5_2vh1l"]
 
 [node name="island" instance=ExtResource("1_ecdf3")]
+
+[node name="Island" parent="." index="0"]
+layers = 16
+metadata/_edit_lock_ = true
 
 [node name="Island" parent="Island" index="0"]
 collision_layer = 8
 collision_mask = 23
+
+[node name="Decal4" type="Decal" parent="." index="1"]
+transform = Transform3D(-0.58228886, 0, -2.1731315, 0, 3.6259918, 0, 2.1731315, 0, -0.58228886, 2.4454026, 0.21018103, 7.504413)
+layers = 16
+size = Vector3(5.720581, 0.8100586, 6.116577)
+texture_albedo = ExtResource("3_djsbw")
+texture_orm = ExtResource("3_djsbw")
+modulate = Color(0.880165, 0.69076246, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal6" type="Decal" parent="." index="2"]
+transform = Transform3D(2.0737867, 0, 0.872336, 0, 3.6259918, 0, -0.872336, 0, 2.0737867, 6.1217504, 0.21018103, -4.728654)
+layers = 16
+size = Vector3(5.720581, 0.8100586, 6.116577)
+texture_albedo = ExtResource("3_djsbw")
+texture_orm = ExtResource("3_djsbw")
+modulate = Color(0.880165, 0.69076246, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal7" type="Decal" parent="." index="3"]
+transform = Transform3D(0.9468866, 0, -2.0408254, 0, 3.6259923, 0, 2.0408254, 0, 0.9468866, -9.016094, -0.02052188, -3.0919373)
+layers = 16
+size = Vector3(5.3065796, 0.8100586, 5.796112)
+texture_albedo = ExtResource("3_djsbw")
+texture_orm = ExtResource("3_djsbw")
+modulate = Color(0.880165, 0.69076246, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal" type="Decal" parent="." index="4"]
+transform = Transform3D(3.3332863, 0, -0.52698654, 0, 1.8147081, 0, 0.52698654, 0, 3.3332863, -7.645514, -1.0891464, -6.7048054)
+layers = 16
+size = Vector3(5.2244873, 2, 5.761902)
+texture_albedo = ExtResource("2_0ply4")
+texture_normal = ExtResource("2_0ply4")
+modulate = Color(0.50396526, 0.33577383, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal2" type="Decal" parent="." index="5"]
+transform = Transform3D(-1.5120096, 0, -3.5928655, 0, 1.8147081, 0, 3.5368137, 0, -1.535972, -3.676395, -1.0891457, 6.2312717)
+layers = 16
+size = Vector3(5.328125, 2, 5.449005)
+texture_albedo = ExtResource("2_0ply4")
+texture_normal = ExtResource("2_0ply4")
+modulate = Color(0.50396526, 0.33577383, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal5" type="Decal" parent="." index="6"]
+transform = Transform3D(0.34440175, 0, -3.8917205, 0, 1.8147081, 0, 3.8310068, 0, 0.34985995, 4.3331933, -0.9538435, 7.4621935)
+layers = 16
+size = Vector3(4.460785, 2, 4.11602)
+texture_albedo = ExtResource("2_0ply4")
+texture_normal = ExtResource("2_0ply4")
+modulate = Color(0.50396526, 0.33577383, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal3" type="Decal" parent="." index="7"]
+transform = Transform3D(0.5650506, 0, -3.641991, 0, 1.814708, 0, 3.8026304, 0, 0.5411806, 4.973899, -0.940908, -5.4510937)
+layers = 16
+size = Vector3(3.9473267, 2, 4.571869)
+texture_albedo = ExtResource("2_0ply4")
+texture_normal = ExtResource("2_0ply4")
+modulate = Color(0.50396526, 0.33577383, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal8" type="Decal" parent="." index="8"]
+transform = Transform3D(0.5650506, 0, -3.641991, 0, 1.814708, 0, 3.8026304, 0, 0.5411806, -0.017562285, -0.7568929, -0.68439746)
+layers = 16
+size = Vector3(6.519043, 2, 7.475525)
+texture_albedo = ExtResource("4_uunxy")
+texture_orm = ExtResource("4_uunxy")
+modulate = Color(0.39978123, 0.48235294, 0, 1)
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal9" type="Decal" parent="." index="9"]
+transform = Transform3D(-3.79003, 0, -0.61695385, 0, 1.814708, 0, 0.64416635, 0, -3.6299233, -2.7345662, -0.7568929, 2.228119)
+layers = 16
+size = Vector3(7.598633, 2, 8.560181)
+texture_albedo = ExtResource("4_uunxy")
+texture_orm = ExtResource("4_uunxy")
+modulate = Color(0.27006343, 0.57060206, 0, 0.8627451)
+albedo_mix = 0.65
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal10" type="Decal" parent="." index="10"]
+transform = Transform3D(0.85819036, 0, -0.51333153, 0, 1, 0, 0.51333153, 0, 0.85819036, -11.231101, -0.2971592, 1.2987349)
+layers = 16
+size = Vector3(7.736328, 2, 8.560181)
+texture_albedo = ExtResource("5_2vh1l")
+texture_normal = ExtResource("5_2vh1l")
+texture_orm = ExtResource("5_2vh1l")
+modulate = Color(0.39138144, 0.16196242, 0, 1)
+normal_fade = 0.545
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal11" type="Decal" parent="." index="11"]
+transform = Transform3D(-0.986202, 0, -0.1655469, 0, 1, 0, 0.1655469, 0, -0.986202, 10.294111, -0.2971592, 4.7510757)
+layers = 16
+size = Vector3(10.586914, 2, 11.927429)
+texture_albedo = ExtResource("5_2vh1l")
+texture_normal = ExtResource("5_2vh1l")
+texture_orm = ExtResource("5_2vh1l")
+modulate = Color(0.39138144, 0.16196242, 0, 1)
+normal_fade = 0.545
+distance_fade_enabled = true
+cull_mask = 16
+
+[node name="Decal12" type="Decal" parent="." index="12"]
+transform = Transform3D(0.54792833, 0, -0.8365253, 0, 1, 0, 0.8365253, 0, 0.54792833, -10.069191, -0.2971592, -10.544066)
+layers = 16
+size = Vector3(10.586914, 2, 11.927429)
+texture_albedo = ExtResource("5_2vh1l")
+texture_normal = ExtResource("5_2vh1l")
+texture_orm = ExtResource("5_2vh1l")
+modulate = Color(0.39138144, 0.16196242, 0, 1)
+normal_fade = 0.545
+distance_fade_enabled = true
+cull_mask = 16

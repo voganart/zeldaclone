@@ -127,6 +127,9 @@ bones/26/scale = Vector3(1.0000002, 1.0000001, 1.0000002)
 bones/27/rotation = Quaternion(-6.5217785e-07, 0.8308839, 0.55644584, 1.4726841e-06)
 bones/28/rotation = Quaternion(-1.07930475e-07, 0.116495565, 1.910336e-07, 0.9931913)
 
+[node name="Monstr" parent="Monstr/root/Skeleton3D" index="0"]
+layers = 2
+
 [node name="hand_r" parent="Monstr/root/Skeleton3D" index="1"]
 transform = Transform3D(-0.15728866, -0.07266774, -0.98487484, -0.2248954, -0.9684476, 0.10737243, -0.96160275, 0.23838258, 0.13598347, -0.5846616, 0.52681744, -0.015321486)
 
