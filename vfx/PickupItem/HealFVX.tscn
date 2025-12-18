@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://dhw5djf47hw8l"]
+
+[ext_resource type="Material" uid="uid://b76idu5166tte" path="res://vfx/PickupItem/HealFVX.tres" id="1_ho4l8"]
+[ext_resource type="ArrayMesh" uid="uid://m4v3idtk408p" path="res://assets/models/interactive/environment_props_Plus.res" id="2_ho4l8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b3r45"]
+transparency = 1
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.07998133, 1, 0, 1)
+emission_enabled = true
+emission = Color(0, 9.223616, 0.16848437, 1)
+emission_energy_multiplier = 0.94
+
+[node name="HealFVX" type="GPUParticles3D"]
+material_override = SubResource("StandardMaterial3D_b3r45")
+cast_shadow = 0
+emitting = false
+amount = 30
+interp_to_end = 0.03
+one_shot = true
+preprocess = 0.79
+randomness = 0.63
+use_fixed_seed = true
+seed = 479382075
+process_material = ExtResource("1_ho4l8")
+draw_pass_1 = ExtResource("2_ho4l8")

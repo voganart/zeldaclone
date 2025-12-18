@@ -28,10 +28,10 @@ func take_damage(amount: float, knockback_force: Vector3, _is_heavy: bool = fals
 
 func _on_broken() -> void:
 	# 1. VFX
-	VfxPool.spawn_effect(debris_vfx_index, global_position + Vector3(0, 1.5, 0))
+	VfxPool.spawn_effect(debris_vfx_index, global_position + Vector3(0, 0, 0))
 	# 2. ЗВУК
 	if break_sound:
-		AudioManager.play_sfx_3d(break_sound, global_position, true, -10.0)
+		AudioManager.play_sfx_3d(break_sound, global_position, true, +5.0)
 
 	# 3. ФИКС ЛЕВИТАЦИИ (Будим верхние ящики)
 	_wake_up_objects_above()

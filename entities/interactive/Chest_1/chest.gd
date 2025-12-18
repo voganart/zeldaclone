@@ -9,9 +9,13 @@ extends Node3D
 # Например: [0, 0, 0, 1] означает 3 предмета с индексом 0 (монеты) и 1 предмет с индексом 1 (сердце)
 @export var loot_indices: Array[int] = [0, 0, 0] 
 
+@export_group("Fountain Settings")
+@export var up_velocity_min: float = 5.0  # Минимальная высота подлета
+@export var up_velocity_max: float = 8.0  # Максимальная высота подлета
+@export var spread_velocity: float = 3.0  # Насколько широко разлетаются в стороны
 @export var launch_force_min: float = 4.0
 @export var launch_force_max: float = 8.0
-
+@export var spawn_interval: float = 0.1
 # Ссылки
 @onready var anim_player = $Chest_1/AnimationPlayer
 @onready var interaction_area = $InteractionArea
@@ -38,43 +42,35 @@ func open_chest():
 
 # Эта функция вызывается из AnimationPlayer
 func spawn_loot():
-	# 1. Выдача способности
 	if ability_to_unlock != "":
 		_unlock_ability_logic()
 	
-	# 2. Спавн предметов через Пул
 	if loot_indices.is_empty(): return
 	
 	for index in loot_indices:
-		# Просим пул выдать предмет по индексу
-		# Убедись, что ItemPool добавлен в Autoload!
-		var item = ItemPool.spawn_item(index, spawn_point.global_position)
+		if not is_instance_valid(spawn_point): return
 		
+		# 1. Спавним
+		var item = ItemPool.spawn_item(index, spawn_point.global_position)
 		if not item: continue
 		
-		# --- Анимация появления (Скейл из 0.1 в 1.0) ---
-		item.scale = Vector3.ONE * 0.1
-		var tween = create_tween()
-		tween.tween_property(item, "scale", Vector3.ONE, 0.5)\
-			.set_trans(Tween.TRANS_ELASTIC)\
-			.set_ease(Tween.EASE_OUT)
-		# -----------------------------------------------
-			
-		# Физика вылета (Фонтанчик)
-		var random_dir = Vector3(
-			randf_range(-0.5, 0.5),
-			1.0, # Вверх
-			randf_range(-0.5, 0.5)
-		).normalized()
+		# (Тут твой код скейла/твина, если он есть)
 		
-		var force = randf_range(launch_force_min, launch_force_max)
+		# 2. Считаем математику
+		var angle = randf() * TAU 
+		var horizontal_dir = Vector3(cos(angle), 0, sin(angle))
 		
-		# Сбрасываем старую скорость (важно для пула!)
+		var up_speed = randf_range(up_velocity_min, up_velocity_max)
+		var side_speed = randf_range(spread_velocity * 0.5, spread_velocity)
+		
+		# 3. ПРИМЕНЯЕМ СИЛУ СРАЗУ ЖЕ
 		item.linear_velocity = Vector3.ZERO
 		item.angular_velocity = Vector3.ZERO
 		
-		item.apply_central_impulse(random_dir * force)
-		item.apply_torque_impulse(Vector3.ONE * randf() * 1.0)
+		item.linear_velocity = Vector3(0, up_speed, 0) + (horizontal_dir * side_speed)
+		
+		# 4. И ТОЛЬКО ТЕПЕРЬ ЖДЕМ перед следующим предметом
+		await get_tree().create_timer(spawn_interval).timeout
 
 func _unlock_ability_logic():
 	var player = get_tree().get_first_node_in_group("player")

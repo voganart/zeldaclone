@@ -39,6 +39,10 @@ run/main_scene="uid://dj30vac7b3xou"
 config/features=PackedStringArray("4.5", "Mobile")
 config/icon="res://icon.svg"
 
+[audio]
+
+buses/default_bus_layout="res://assets/audio/default_bus_layout.tres"
+
 [autoload]
 
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
@@ -151,6 +155,7 @@ interact={
 3d_physics/layer_3="Enemies"
 3d_physics/layer_4="Environment"
 3d_physics/layer_5="RigidObjects"
+3d_physics/layer_6="Items"
 avoidance/layer_1="enemies"
 
 [physics]

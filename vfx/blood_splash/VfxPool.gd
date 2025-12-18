@@ -79,19 +79,55 @@ func _stop_particles(node):
 	for child in node.get_children():
 		_stop_particles(child)
 
-func _return_to_pool_later(effect, effect_idx: int):
+# Спавнит эффект и прикрепляет его к родителю (например, к игроку)
+func spawn_attached_effect(effect_idx: int, parent: Node3D, local_offset: Vector3 = Vector3.ZERO):
+	if effect_idx < 0 or effect_idx >= available_queues.size(): return null
+	
+	# ... (код получения effect из очереди такой же, как в spawn_effect) ...
+	# Копипаст получения effect из очереди, или вынеси это в отд. функцию _get_from_queue
+	var queue = available_queues[effect_idx]
+	var effect
+	if queue.is_empty():
+		if auto_expand: effect = _create_instance(effect_scenes[effect_idx])
+		else: return null
+	else: effect = queue.pop_front()
+	
+	# --- ОТЛИЧИЕ ТУТ ---
+	# Меняем родителя на игрока!
+	if effect.get_parent():
+		effect.get_parent().remove_child(effect)
+	parent.add_child(effect)
+	
+	effect.position = local_offset # Локальная позиция относительно игрока
+	effect.rotation = Vector3.ZERO
+	effect.visible = true
+	
+	_enable_particles(effect)
+	_restart_animation(effect)
+	
+	# Возвращаем в пул (но сначала отцепляем от игрока!)
+	_return_to_pool_later(effect, effect_idx, true) # true = нужно отцепить
+	
+	return effect
+
+# Обнови функцию возврата
+func _return_to_pool_later(effect, effect_idx: int, attached: bool = false):
 	var tween = create_tween()
 	tween.tween_interval(effect_lifetime)
 	tween.tween_callback(func():
 		effect.visible = false
-		effect.global_position = Vector3(0, -1000, 0)
 		_stop_particles(effect)
 		
-		# Возвращаем эффект в ЕГО РОДНУЮ очередь
+		# Если был прикреплен - возвращаем обратно в VfxPool как ребенка
+		if attached:
+			effect.get_parent().remove_child(effect)
+			add_child(effect)
+		
+		effect.global_position = Vector3(0, -1000, 0)
+		
 		if effect_idx < available_queues.size():
 			available_queues[effect_idx].append(effect)
 		else:
-			# Если вдруг пул изменился (маловероятно), просто удаляем
 			effect.queue_free()
 	)
 func _restart_animation(node):

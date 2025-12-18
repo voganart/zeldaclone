@@ -1,8 +1,8 @@
 [gd_scene load_steps=3 format=3 uid="uid://c6y3552hoxdre"]
 
 [ext_resource type="Script" uid="uid://k8xh1bwsr08e" path="res://common/autoload/ItemPool.gd" id="1_pb3oc"]
-[ext_resource type="PackedScene" uid="uid://csvu7l0q7xvit" path="res://entities/interactive/WoodenCrate/WoodenCrate.tscn" id="2_kmc2t"]
+[ext_resource type="PackedScene" uid="uid://c7bvbtr2h28fh" path="res://entities/PickupItems/HeartPickup/HeartPickup.tscn" id="2_pb3oc"]
 
 [node name="ItemPool" type="Node"]
 script = ExtResource("1_pb3oc")
-item_scenes = Array[PackedScene]([ExtResource("2_kmc2t"), ExtResource("2_kmc2t"), ExtResource("2_kmc2t")])
+item_scenes = Array[PackedScene]([ExtResource("2_pb3oc")])

@@ -53,7 +53,8 @@ func spawn_item(index: int, pos: Vector3) -> RigidBody3D:
 	item.angular_velocity = Vector3.ZERO
 	item.visible = true
 	item.process_mode = Node.PROCESS_MODE_INHERIT
-	
+	if item.has_method("reset_state"):
+		item.reset_state()
 	# Сброс физики (важно для RigidBody!)
 	# Мы просто надеемся, что позиция применится, но для гарантии можно использовать PhysicsServer
 	# item.global_transform.origin = pos (сделано выше)
@@ -62,17 +63,29 @@ func spawn_item(index: int, pos: Vector3) -> RigidBody3D:
 
 ## Возвращает предмет обратно в пул
 func return_item(item: RigidBody3D, index: int):
-	# Отключаем твины, если они были на объекте
+	# Вызываем внутреннюю логику отложенно, чтобы выйти из физического шага
+	call_deferred("_return_item_deferred", item, index)
+
+# Внутренняя функция, которая выполнится в безопасное время (в конце кадра)
+func _return_item_deferred(item: RigidBody3D, index: int):
+	# Проверка на случай, если предмет удалили до вызова
+	if not is_instance_valid(item): return
+
+	# 1. Останавливаем твины
 	var tween = item.create_tween()
-	tween.kill()
+	if tween: tween.kill()
 	
+	# 2. Скрываем и отключаем
 	item.visible = false
 	item.process_mode = Node.PROCESS_MODE_DISABLED
 	
-	item.get_parent().remove_child(item)
-	add_child(item) # Возвращаем в дерево пула
+	# 3. Переносим в дерево пула (Безопасно, так как мы в deferred вызове)
+	if item.get_parent():
+		item.get_parent().remove_child(item)
+	add_child(item) 
 	
+	# 4. Возвращаем в очередь
 	if index >= 0 and index < queues.size():
 		queues[index].append(item)
 	else:
-		item.queue_free() # Если индекс кривой, просто удаляем
+		item.queue_free()

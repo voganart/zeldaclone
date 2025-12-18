@@ -4,8 +4,8 @@ render_mode blend_mix, depth_prepass_alpha;
 // ======================================================
 // Original uniforms
 // ======================================================
-instance uniform float hit_flash_strength : hint_range(0.0, 1.0) = 0.0; 
-instance uniform vec4 hit_flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0); 
+instance uniform float hit_flash_strength : hint_range(0.0, 1.0) = 0.0;
+instance uniform vec4 hit_flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 
 uniform float dissolve_amount : hint_range(0.0, 1.0) = 0.0;
 
@@ -171,10 +171,22 @@ void fragment() {
 // ======================================================
 void light() {
 	float attenuation = use_attenuation ? ATTENUATION : 1.0;
-
 	float NdotL = dot(NORMAL, LIGHT);
-	float diffuse_amount = NdotL + (attenuation - 1.0) + wrap;
-	diffuse_amount *= steepness;
+
+	// --- ИЗМЕНЕНИЕ НАЧАЛО ---
+
+	// Вместо линейного сложения, используем умножение для attenuation
+	// Но сохраняем wrap логику
+
+	// 1. Считаем "сырой" свет с учетом обертки
+	float raw_light = (NdotL + wrap) / (1.0 + wrap);
+
+	// 2. Применяем затухание (умножаем, а не вычитаем!)
+	float diffuse_amount = raw_light * attenuation;
+
+	// 3. Применяем steepness (резкость перехода)
+	// Делаем переход более жестким вокруг 0.5
+	diffuse_amount = (diffuse_amount - 0.5) * steepness + 0.5;
 
 	float cuts_inv = 1.0 / float(cuts);
 	float diffuse_stepped = clamp(

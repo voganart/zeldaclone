@@ -1,0 +1,46 @@
+[gd_resource type="ParticleProcessMaterial" load_steps=7 format=3 uid="uid://b76idu5166tte"]
+
+[sub_resource type="Curve" id="Curve_4g5ld"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -0.2455963, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_ptatb"]
+curve = SubResource("Curve_4g5ld")
+
+[sub_resource type="Curve" id="Curve_ptatb"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, 360), 0.0, 0.0, 0, 0, Vector2(0.4918785, 159.62842), 0.0, 0.0, 0, 0, Vector2(1, 360), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_vcmg4"]
+curve = SubResource("Curve_ptatb")
+
+[sub_resource type="Curve" id="Curve_vcmg4"]
+_data = [Vector2(1e-05, 0), 0.0, 0.0, 0, 0, Vector2(0.50164914, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_4g5ld"]
+curve = SubResource("Curve_vcmg4")
+
+[resource]
+lifetime_randomness = 0.34
+particle_flag_rotate_y = true
+emission_shape_scale = Vector3(0.5, 0.5, 0.5)
+emission_shape = 2
+emission_sphere_radius = 1.0
+angle_min = -277.19998
+angle_max = 344.80002
+direction = Vector3(0, 0, 0)
+angular_velocity_curve = SubResource("CurveTexture_vcmg4")
+radial_velocity_min = -1.0000223
+radial_velocity_max = 0.99997765
+gravity = Vector3(0, 5, 0)
+linear_accel_min = -2.2351742e-06
+linear_accel_max = -2.2351742e-06
+scale_min = 0.099999994
+scale_max = 0.14999999
+scale_curve = SubResource("CurveTexture_4g5ld")
+alpha_curve = SubResource("CurveTexture_ptatb")
+turbulence_noise_strength = 9.23
+turbulence_noise_scale = 8.01
+turbulence_noise_speed_random = 1.17

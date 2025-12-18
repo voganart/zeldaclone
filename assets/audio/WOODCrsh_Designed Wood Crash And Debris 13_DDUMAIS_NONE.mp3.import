@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b1kl4cjk8vu1u"
+path="res://.godot/imported/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.mp3-eafabe944f71eafb5ea7bea0758ed4f7.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.mp3"
+dest_files=["res://.godot/imported/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.mp3-eafabe944f71eafb5ea7bea0758ed4f7.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
