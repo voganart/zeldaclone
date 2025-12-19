@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=54 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="2_8fjmc"]
@@ -25,6 +25,7 @@
 [ext_resource type="AudioStream" uid="uid://bsjnq837dpfv2" path="res://assets/audio/mixkit-boxer-getting-hit-2055.wav" id="24_wuv6x"]
 [ext_resource type="AudioStream" uid="uid://ifvl6v3uurrr" path="res://assets/audio/mixkit-effort-of-a-hit-given-2056.wav" id="25_qpopc"]
 [ext_resource type="AudioStream" uid="uid://dcy134nnxc32n" path="res://assets/audio/mixkit-boxer-punch-exhaling-2054.wav" id="27_wq0jh"]
+[ext_resource type="Shader" uid="uid://bxxg6h5x5fm3t" path="res://assets/shaders/GrassCollisionSphere.gdshader" id="28_24ehl"]
 [ext_resource type="AudioStream" uid="uid://m4u3iwb18gff" path="res://assets/audio/WHSH_Pure SciFi-Whoosh Fast 03_RSCPC_DW.mp3" id="28_gt4e4"]
 [ext_resource type="AudioStream" uid="uid://y1i8ggjoibst" path="res://assets/audio/mixkit-golem-stomp-c-3046.mp3" id="28_wq0jh"]
 
@@ -137,6 +138,10 @@ radius = 0.441262
 size = Vector3(1.7636719, 1.746582, 1.5506058)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_qpopc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bwdx1"]
+render_priority = 0
+shader = ExtResource("28_24ehl")
 
 [sub_resource type="SphereMesh" id="SphereMesh_gx6sm"]
 
@@ -406,6 +411,8 @@ shape = SubResource("SphereShape3D_qpopc")
 [node name="GrassCollision" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 layers = 65536
+material_override = SubResource("ShaderMaterial_bwdx1")
+cast_shadow = 0
 mesh = SubResource("SphereMesh_gx6sm")
 
 [connection signal="body_entered" from="character/root/Skeleton3D/hand_r/punch_hand_r" to="." method="_on_punch_hand_r_body_entered"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://d8g64g8viihh"]
+[gd_scene load_steps=30 format=3 uid="uid://d8g64g8viihh"]
 
 [ext_resource type="Script" uid="uid://ba6qmt80akqib" path="res://entities/enemies/enemy.gd" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b72gnkqh5atrs" path="res://ui/HealthBar3D/health_bar_3d.tscn" id="2_twyc1"]
@@ -24,11 +24,16 @@
 [ext_resource type="AudioStream" uid="uid://dctdgj0rwbvj5" path="res://assets/audio/mixkit-strong-punches-to-the-body-2198-2.mp3" id="22_y4tt3"]
 [ext_resource type="AudioStream" uid="uid://brbtr34dd38x8" path="res://assets/audio/mixkit-strong-punches-to-the-body-2198-1.mp3" id="23_21xsh"]
 [ext_resource type="AudioStream" uid="uid://q382v6423pvu" path="res://assets/audio/mixkit-impact-of-a-strong-punch-2155.mp3" id="24_y4tt3"]
+[ext_resource type="Shader" uid="uid://bxxg6h5x5fm3t" path="res://assets/shaders/GrassCollisionSphere.gdshader" id="25_21xsh"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_msovg"]
 size = Vector3(2.765625, 1.7850952, 2.4552612)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lw7nh"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rag6w"]
+render_priority = 0
+shader = ExtResource("25_21xsh")
 
 [sub_resource type="SphereMesh" id="SphereMesh_wy1il"]
 
@@ -218,6 +223,7 @@ streams = Array[AudioStream]([ExtResource("24_y4tt3")])
 [node name="GrassCollision" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 layers = 65536
+material_override = SubResource("ShaderMaterial_rag6w")
 mesh = SubResource("SphereMesh_wy1il")
 
 [editable path="Monstr"]

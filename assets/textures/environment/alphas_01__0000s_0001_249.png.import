@@ -16,7 +16,7 @@ dest_files=["res://.godot/imported/alphas_01__0000s_0001_249.png-4bd54623ea180a5
 [params]
 
 compress/mode=3
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

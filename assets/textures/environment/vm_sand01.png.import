@@ -16,7 +16,7 @@ dest_files=["res://.godot/imported/vm_sand01.png-461bb75cfd261cde2cf1aabbf67e7b4
 [params]
 
 compress/mode=3
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

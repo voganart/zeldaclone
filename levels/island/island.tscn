@@ -9,24 +9,21 @@
 [node name="island" instance=ExtResource("1_ecdf3")]
 
 [node name="Island" parent="." index="0"]
-layers = 16
-metadata/_edit_lock_ = true
-
-[node name="Island" parent="Island" index="0"]
 collision_layer = 8
-collision_mask = 23
+collision_mask = 31
 
 [node name="Decal4" type="Decal" parent="." index="1"]
-transform = Transform3D(-0.58228886, 0, -2.1731315, 0, 3.6259918, 0, 2.1731315, 0, -0.58228886, 2.4454026, 0.21018103, 7.504413)
+transform = Transform3D(-0.58228886, 0, -2.1731315, 0, 5.430597, 0, 2.1731315, 0, -0.58228886, 2.4454026, -0.49331978, 7.504413)
 layers = 16
-size = Vector3(5.720581, 0.8100586, 6.116577)
+size = Vector3(5.720581, 0.9421387, 6.116577)
 texture_albedo = ExtResource("3_djsbw")
-modulate = Color(0.880165, 0.69076246, 0, 1)
+texture_normal = ExtResource("3_djsbw")
+modulate = Color(0.6249113, 0.48993042, 0, 1)
 distance_fade_enabled = true
 cull_mask = 16
 
 [node name="Decal6" type="Decal" parent="." index="2"]
-transform = Transform3D(2.0737867, 0, 0.872336, 0, 3.6259918, 0, -0.872336, 0, 2.0737867, 6.1217504, 0.21018103, -4.728654)
+transform = Transform3D(2.0737867, 0, 0.872336, 0, 3.6259918, 0, -0.872336, 0, 2.0737867, 6.1217504, 0.3259516, -4.728654)
 layers = 16
 size = Vector3(5.720581, 0.8100586, 6.116577)
 texture_albedo = ExtResource("3_djsbw")
@@ -137,3 +134,6 @@ modulate = Color(0.39138144, 0.16196242, 0, 1)
 normal_fade = 0.545
 distance_fade_enabled = true
 cull_mask = 16
+
+[node name="Island_001" parent="." index="13"]
+layers = 16
