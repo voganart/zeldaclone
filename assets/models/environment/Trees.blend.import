@@ -43,6 +43,11 @@ _subresources={
 "use_external/enabled": true,
 "use_external/fallback_path": "res://assets/_master/TreeShader.tres",
 "use_external/path": "uid://br1nrjywyx4pb"
+},
+"Material.001": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/_master/TreeShader.tres",
+"use_external/path": "uid://br1nrjywyx4pb"
 }
 }
 }

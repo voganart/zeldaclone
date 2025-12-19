@@ -2,20 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gmparmhc3ukd"
-path.s3tc="res://.godot/imported/grass_grass.png-3c5ccf77ebaf6a593fa6b2e23f6cd251.s3tc.ctex"
+uid="uid://bgsr0vuv36lst"
+path.s3tc="res://.godot/imported/alphas_01__0004s_0008_214.png-947b8622020cd1346321c0c793bf3ed8.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={
-"md5": "7efea55b3c366b25ecf7439c18bc48fb"
-}
 
 [deps]
 
-source_file="res://assets/models/environment/grass_grass.png"
-dest_files=["res://.godot/imported/grass_grass.png-3c5ccf77ebaf6a593fa6b2e23f6cd251.s3tc.ctex"]
+source_file="res://assets/textures/environment/alphas_01__0004s_0008_214.png"
+dest_files=["res://.godot/imported/alphas_01__0004s_0008_214.png-947b8622020cd1346321c0c793bf3ed8.s3tc.ctex"]
 
 [params]
 
