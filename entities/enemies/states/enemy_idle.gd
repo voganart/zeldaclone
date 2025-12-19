@@ -36,7 +36,14 @@ func update(delta: float) -> void:
 	# Таймер истек -> Патруль
 	if timer <= 0:
 		transitioned.emit(self, GameConstants.STATE_PATROL)
-
+	idle_look_timer -= delta
+	if idle_look_timer <= 0:
+		# Раз в 2-4 секунды чуть-чуть меняем угол поворота (на 30-45 градусов)
+		var random_angle = randf_range(-0.7, 0.7) 
+		var target_rot = enemy.rotation.y + random_angle
+		# Плавный поворот к новому случайному углу
+		enemy.rotation.y = lerp_angle(enemy.rotation.y, target_rot, delta * 1.0)
+		idle_look_timer = randf_range(2.0, 4.0)
 func _handle_looking_around(delta: float) -> void:
 	idle_look_timer -= delta
 	if idle_look_timer <= 0:

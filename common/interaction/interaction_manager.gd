@@ -1,7 +1,5 @@
 extends Node
 
-# Ссылка на метку "Press E", которую мы будем показывать над объектом
-var label_prefab: Label3D 
 var active_areas: Array[InteractionArea] = []
 var player: Player
 
@@ -14,20 +12,27 @@ func register_area(area: InteractionArea):
 func unregister_area(area: InteractionArea):
 	active_areas.erase(area)
 
-func _process(delta):
-	if active_areas.size() > 0 and is_instance_valid(active_areas[0]):
-		# Сортируем, чтобы найти ближайшую зону
-		active_areas.sort_custom(_sort_by_distance)
-		var closest = active_areas[0]
-		
-		# Если нажали E (нужно добавить Action "interact" в Input Map)
-		if Input.is_action_just_pressed("interact"):
-			closest.interact.call()
-			
-func _sort_by_distance(a, b):
-	if not player: 
+func _process(_delta):
+	# 1. Очищаем список от удаленных объектов (на всякий случай)
+	active_areas = active_areas.filter(func(area): return is_instance_valid(area))
+	
+	if active_areas.is_empty():
+		return
+
+	# 2. Проверяем игрока ДО сортировки
+	if not is_instance_valid(player):
 		player = get_tree().get_first_node_in_group("player")
-		return false
-	var dist_a = a.global_position.distance_squared_to(player.global_position)
-	var dist_b = b.global_position.distance_squared_to(player.global_position)
-	return dist_a < dist_b
+		return # Если игрока всё еще нет, сортировать нет смысла
+
+	# 3. Сортируем только если областей больше одной
+	if active_areas.size() > 1:
+		var p_pos = player.global_position
+		active_areas.sort_custom(func(a, b):
+			var dist_a = a.global_position.distance_squared_to(p_pos)
+			var dist_b = b.global_position.distance_squared_to(p_pos)
+			return dist_a < dist_b
+		)
+	
+	# 4. Взаимодействие с ближайшим
+	if Input.is_action_just_pressed("interact"):
+		active_areas[0].interact.call()

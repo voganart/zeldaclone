@@ -130,7 +130,7 @@ func _physics_process(delta: float) -> void:
 	# 3. Обычное поведение (управляется через StateMachine -> NavAgent)
 	
 	if frustrated_cooldown > 0:
-		frustrated_cooldown = max(frustrated_cooldown - delta, 0.0)
+		frustrated_cooldown -= delta
 
 	var state_name = state_machine.current_state.name.to_lower()
 	if state_name != "chase" and state_name != "patrol":
@@ -202,11 +202,24 @@ func receive_push(push: Vector3) -> void:
 # ANIMATION HELPERS
 # ============================================================================
 func play_animation(anim_name: String, blend: float = -1.0, speed: float = 1.0) -> void:
+	# Если эта анимация уже играет - ничего не делаем, чтобы не сбрасывать её каждый кадр
 	if anim_player.current_animation == anim_name:
-		# Если уже играет, можно обновить параметры, но не перезапускать
-		# anim_player.play(anim_name, blend, speed) 
 		return
+	
+	# Запускаем анимацию
 	anim_player.play(anim_name, blend, speed)
+	
+	# --- ГЛОБАЛЬНАЯ РАНДОМИЗАЦИЯ ---
+	if anim_player.has_animation(anim_name):
+		var anim_resource = anim_player.get_animation(anim_name)
+		# Не рандомизируем слишком короткие анимации (например, получение урона)
+		if anim_resource.length > 0.2:
+			var random_start = randf() * anim_resource.length
+			anim_player.seek(random_start, true)
+			
+			# Микро-сдвиг скорости (от 0.95 до 1.05)
+			# Чтобы даже зацикленные анимации со временем расходились по фазе
+			anim_player.speed_scale = randf_range(0.95, 1.05)
 
 func update_movement_animation(delta: float) -> void:
 	var speed_length = velocity.length()
@@ -263,6 +276,7 @@ func update_movement_animation(delta: float) -> void:
 func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
 	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
 		return
+	frustrated_cooldown = 0.0 
 	# --- ЛОГИКА СМЕРТЕЛЬНОГО УДАРА ---
 	# Проверяем, убьет ли этот удар врага
 	var current_hp = health_component.get_health()
@@ -412,3 +426,7 @@ func _on_player_died() -> void:
 	
 	# Опционально: Можно проиграть анимацию "Победы" или просто постоять
 	# state_machine.change_state(GameConstants.STATE_IDLE)
+func is_dead() -> bool:
+	if state_machine and state_machine.current_state:
+		return state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD
+	return false
