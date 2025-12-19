@@ -91,7 +91,7 @@ func physics_update(delta: float) -> void:
 
 	if current_time >= roll_duration:
 		transitioned.emit(self, GameConstants.STATE_MOVE)
-
+		return
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false

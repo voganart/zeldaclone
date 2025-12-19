@@ -50,6 +50,7 @@ func _perform_attack() -> void:
 	else:
 		# Если не отступаем, немедленно возвращаемся в Chase для переоценки обстановки.
 		transitioned.emit(self, GameConstants.STATE_CHASE)
+		return
 
 func _handle_retreat(delta: float) -> void:
 	# !!! НОВЫЙ БЛОК ПРОВЕРКИ В САМОМ НАЧАЛЕ
@@ -76,6 +77,7 @@ func _handle_retreat(delta: float) -> void:
 		if enemy.attack_component.tactical_retreat_pause_timer <= 0:
 			enemy.attack_component.clear_retreat_state()
 			transitioned.emit(self, GameConstants.STATE_CHASE)
+			return
 		return
 
 	# Фаза 2: Движение к точке отступления (пятится назад)
@@ -114,6 +116,7 @@ func on_damage_taken() -> void:
 		enemy.attack_component.clear_retreat_state()
 		# Переходим в Chase, чтобы немедленно переоценить ситуацию и, возможно, контратаковать
 		transitioned.emit(self, GameConstants.STATE_CHASE)
+		return
 func exit() -> void:
 	# Всегда возвращаем токен при выходе из состояния атаки
 	AIDirector.return_attack_token(enemy)

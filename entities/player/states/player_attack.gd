@@ -19,32 +19,37 @@ func enter() -> void:
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
 	
-	# --- ПРЕРЫВАНИЕ АТАКИ РОЛЛОМ (Dodge Cancel) ---
-	if player.input_handler.check_roll():
-		if player.can_roll():
-			var current_pos = player.anim_player.current_animation_position
-			var total_len = player.anim_player.current_animation_length
-			var progress = current_pos / total_len
-			
-			# Если dodge_cancel_attack_threshold = 1.0, то (1.0 - 1.0) = 0, прерывание разрешено сразу
-			if progress >= (1.0 - player.dodge_cancel_attack_threshold):
-				transitioned.emit(self, GameConstants.STATE_ROLL)
-				return
-
-	# Трение (торможение)
-	player.velocity.x = move_toward(player.velocity.x, 0, attack_friction * delta)
-	player.velocity.z = move_toward(player.velocity.z, 0, attack_friction * delta)
-	
+	# Получаем данные анимации ОДИН РАЗ в начале функции
 	var current_pos = player.anim_player.current_animation_position
 	var total_len = player.anim_player.current_animation_length
 	
-	# Буферизация следующего удара
+	# Защита от деления на ноль, если анимация еще не загрузилась
+	var progress = 0.0
+	if total_len > 0:
+		progress = current_pos / total_len
+
+	# --- 1. ПРЕРЫВАНИЕ АТАКИ РОЛЛОМ (Dodge Cancel) ---
+	if player.input_handler.check_roll():
+		if player.can_roll():
+			# Используем уже рассчитанный progress
+			if progress >= (1.0 - player.dodge_cancel_attack_threshold):
+				transitioned.emit(self, GameConstants.STATE_ROLL)
+				return # Прерываем выполнение, так как состояние сменилось
+
+	# --- 2. ТРЕНИЕ (ТОРМОЖЕНИЕ) ---
+	player.velocity.x = move_toward(player.velocity.x, 0, attack_friction * delta)
+	player.velocity.z = move_toward(player.velocity.z, 0, attack_friction * delta)
+	
+	# --- 3. БУФЕРИЗАЦИЯ СЛЕДУЮЩЕГО УДАРА ---
+	# Если до конца анимации осталось меньше 0.2 сек, запоминаем нажатие для комбо
 	if (total_len - current_pos) <= 0.2:
 		if player.input_handler.check_attack():
 			next_combo_queued = true
 
+	# --- 4. ЗАВЕРШЕНИЕ АТАКИ ---
 	if not player.anim_player.is_playing() or current_pos >= total_len:
 		transitioned.emit(self, GameConstants.STATE_MOVE)
+		return
 
 func _setup_combo_parameters() -> void:
 	var combo_step = player.combo_count % 3

@@ -60,7 +60,7 @@ func _give_up():
 	enemy.frustrated_cooldown = 10.0
 	MusicBrain.set_combat_state(false)
 	transitioned.emit(self, GameConstants.STATE_PATROL)
-	
+	return
 func exit() -> void:
 	# ВСЕГДА возвращаем скорость анимации в 1.0 при выходе, чтобы не сломать другие стейты
 	enemy.anim_player.speed_scale = 1.0

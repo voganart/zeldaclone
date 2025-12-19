@@ -16,3 +16,4 @@ func physics_update(_delta: float) -> void:
 	if not player.air_dash_ability.is_dashing:
 		# Переходим в падение
 		transitioned.emit(self, GameConstants.STATE_AIR)
+		return

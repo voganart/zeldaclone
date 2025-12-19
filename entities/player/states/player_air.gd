@@ -58,6 +58,7 @@ func physics_update(delta: float) -> void:
 			# 3. Если разрешена — "тратим" нажатие из буфера
 			player.input_handler.check_attack()
 			transitioned.emit(self, GameConstants.STATE_SLAM)
+			return
 		# Если can_slam() вернул false (например, еще низко), мы НЕ трогаем буфер.
 		# Он сработает в следующем кадре (или через кадр), когда игрок подлетит выше.
 		return

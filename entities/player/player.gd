@@ -219,29 +219,17 @@ func perform_jump() -> void:
 	current_jump_count += 1
 	sfx_jump.play_random()
 func rot_char(delta: float) -> void:
-	# 1. Если мы в стане (только что получили урон), запрещаем вращаться.
-	# Это сохраняет направление взгляда на врага сразу после удара.
 	if is_knockback_stun: return 
 
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
 	
-	# 2. Получаем вектор ввода (WASD / Стик)
-	var input_dir = Vector2.ZERO
-	if input_handler:
-		input_dir = input_handler.move_vector # (x, y) от джойстика/клавиатуры
+	# Берем чистый вектор ввода из инпут-хендлера, а не из velocity
+	var input_dir = input_handler.move_vector 
 
-	# 3. ГЛАВНОЕ ИЗМЕНЕНИЕ:
-	# Мы вращаемся, ТОЛЬКО если игрок нажимает кнопки.
-	# Мы полностью игнорируем velocity. Если игрока толкают, отбрасывают или он скользит,
-	# но кнопки не нажаты — он сохраняет текущий угол поворота.
 	if input_dir.length_squared() > 0.001:
-		# Превращаем 2D ввод в угол поворота Y (в Godot 2D Y вниз, в 3D Z вниз, поэтому инверсия может быть нужна/не нужна)
-		# Обычно Input Up = (0, -1), Input Right = (1, 0).
-		# Vector2(x, -y) конвертирует это в правильный угол для 3D.
-		var target_vector = Vector2(input_dir.x, -input_dir.y)
-		var target_angle = target_vector.angle() + PI / 2
-		
+		# Вычисляем угол на основе ввода
+		var target_angle = atan2(input_dir.x, input_dir.y)
 		rotation.y = lerp_angle(rotation.y, target_angle, current_rot_speed * delta)
 
 func tilt_character(delta: float) -> void:
@@ -256,49 +244,25 @@ func tilt_character(delta: float) -> void:
 # ============================================================================
 
 func apply_attack_impulse() -> void:
-	# 1. СБРОС СТАРОЙ ИНЕРЦИИ
+	# 1. Сбрасываем текущую инерцию для резкости
 	velocity.x = 0
 	velocity.z = 0
 	
+	# 2. Ищем цель для автонаведения
 	var target = _find_soft_lock_target()
 	
-	# Определяем "Желаемый угол" (куда игрок жмет стик ИЛИ куда он смотрит сейчас)
-	var desired_angle = rotation.y
-	
-	if input_handler.move_vector.length() > 0.1:
-		var input_vec = input_handler.move_vector
-		# Для +Z: atan2(x, y)
-		desired_angle = atan2(input_vec.x, input_vec.y)
-	
-	# 2. ДОВОДКА ПОВОРОТА (Aim Assist)
 	if target:
+		# Плавно поворачиваем игрока к врагу ПЕРЕД рывком
 		var dir_to_enemy = (target.global_position - global_position).normalized()
-		var enemy_angle = atan2(dir_to_enemy.x, dir_to_enemy.z)
-		
-		# Смешиваем угол игрока и угол на врага.
-		# attack_rotation_influence берется из Инспектора (0.0 - нет доводки, 1.0 - жесткий лок)
-		# Ты просил ~0.5, настрой это в инспекторе.
-		rotation.y = lerp_angle(desired_angle, enemy_angle, attack_rotation_influence)
-		
-	else:
-		# Если врага нет, просто поворачиваемся куда хотели
-		rotation.y = desired_angle
-
-	# 3. РЫВОК
-	# Бьем строго вперед (+Z), куда мы в итоге повернулись
-	var attack_dir = global_transform.basis.z.normalized()
+		var target_angle = atan2(dir_to_enemy.x, dir_to_enemy.z)
+		rotation.y = target_angle # Мгновенный разворот к цели для точности
 	
-	var base_impulse = 0.0
-	if is_trying_to_run: 
-		base_impulse = running_attack_impulse
-	elif input_handler.move_vector.length() > 0.1:
-		base_impulse = walking_attack_impulse
-	else:
-		base_impulse = idle_attack_impulse
-		
-	# Применяем импульс (без бонусного притягивания по дистанции, как ты просил)
-	velocity += attack_dir * base_impulse
-
+	# 3. Применяем импульс вперед (теперь мы точно смотрим на врага)
+	var attack_dir = global_transform.basis.z.normalized()
+	var impulse = walking_attack_impulse
+	if is_trying_to_run: impulse = running_attack_impulse
+	
+	velocity += attack_dir * impulse
 
 func _find_soft_lock_target() -> Node3D:
 	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
@@ -449,9 +413,6 @@ func _update_stun_timer(delta: float) -> void:
 			is_knockbacked = false
 
 func _update_roll_timers(delta: float) -> void:
-	var prev_charges = current_roll_charges
-	var was_recharging = is_roll_recharging
-	
 	if is_roll_recharging:
 		roll_penalty_timer -= delta
 		if roll_penalty_timer <= 0:

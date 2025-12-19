@@ -14,3 +14,4 @@ func physics_update(delta: float) -> void:
 	# Проверяем флаги: если способность закончила работу
 	if not player.ground_slam_ability.is_slamming and not player.ground_slam_ability.is_recovering:
 		transitioned.emit(self, GameConstants.STATE_MOVE)
+		return

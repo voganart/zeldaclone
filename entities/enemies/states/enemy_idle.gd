@@ -36,6 +36,7 @@ func update(delta: float) -> void:
 	# Таймер истек -> Патруль
 	if timer <= 0:
 		transitioned.emit(self, GameConstants.STATE_PATROL)
+		return
 	idle_look_timer -= delta
 	if idle_look_timer <= 0:
 		# Раз в 2-4 секунды чуть-чуть меняем угол поворота (на 30-45 градусов)
