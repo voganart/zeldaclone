@@ -111,6 +111,7 @@ physics_material_override = SubResource("PhysicsMaterial_w6sjs")
 
 [node name="VFX_Particles" type="GPUParticles3D" parent="Base"]
 transform = Transform3D(1, -5.8912327e-20, -1.11022296e-16, 1.8626458e-09, 1.0000005, -2.067952e-25, 1.2924694e-26, 6.938893e-18, 1, 0, 0, 0)
+emitting = false
 amount = 50
 randomness = 0.37
 transform_align = 1
@@ -120,7 +121,7 @@ draw_pass_1 = SubResource("QuadMesh_2d6lx")
 [node name="VFX_Light" type="OmniLight3D" parent="Base"]
 transform = Transform3D(0.99999255, -0.004043184, 0, 0.0040431917, 0.99999255, -1.7347235e-17, 0, 2.7755576e-17, 1, 0.007947724, 0.66524976, -4.0641854e-11)
 light_color = Color(2.478988, 2.2811856, 0.7835402, 1)
-light_energy = 3.0
+light_energy = 0.0
 distance_fade_enabled = true
 omni_range = 0.782
 
@@ -129,7 +130,7 @@ transform = Transform3D(0.9999965, -3.3527407e-08, -3.9967783e-15, 3.3527538e-08
 shape = SubResource("BoxShape3D_2d6lx")
 
 [node name="Lid" type="AnimatableBody3D" parent="."]
-transform = Transform3D(0.9998942, 0.011450581, -0.0064987247, 0.0016842609, -0.60077715, -0.79940325, -0.0130579, 0.7993249, -0.600743, -9.5501886e-17, 0.43010226, 0.4359145)
+transform = Transform3D(0.99998087, 0, 2.384161e-07, 0, 0.99999255, 0, -2.3841399e-07, 0, 0.99998975, -9.5501886e-17, 0.43010226, 0.4359145)
 visible = false
 collision_layer = 0
 collision_mask = 0
@@ -148,10 +149,6 @@ shape = SubResource("SphereShape3D_m4fme")
 
 [node name="Chest_1" parent="." instance=ExtResource("2_2d6lx")]
 
-[node name="Skeleton3D" parent="Chest_1/Chest_1_rig" index="0"]
-bones/1/rotation = Quaternion(0.894629, 0.0036705055, -0.0054650977, 0.4467613)
-bones/1/scale = Vector3(1, 1.0589004, 1)
-
 [node name="Base" type="BoneAttachment3D" parent="Chest_1/Chest_1_rig/Skeleton3D" index="0"]
 bone_name = "Chest_1_2"
 bone_idx = 0
@@ -165,7 +162,7 @@ update_scale = false
 transform = Transform3D(0.99999994, 4.656613e-10, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0.005008226, 0.46689034, 0)
 
 [node name="Lid" type="BoneAttachment3D" parent="Chest_1/Chest_1_rig/Skeleton3D" index="1"]
-transform = Transform3D(0.99991333, 0.012125119, -0.0064987903, 0.0016842932, -0.63616806, -0.79941136, -0.013058149, 0.846412, -0.600749, -9.5501886e-17, 0.43010226, 0.4359145)
+transform = Transform3D(1, 0, 2.3841855e-07, 0, 0.99999994, 0, -2.3841855e-07, 0, 1, -9.5501886e-17, 0.43010226, 0.4359145)
 bone_name = "Lid"
 bone_idx = 1
 

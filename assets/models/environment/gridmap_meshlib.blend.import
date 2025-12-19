@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cvgfcxe7h8grb"
-path="res://.godot/imported/grass.blend-d1d87e1ca690fdfc12140be30d837113.scn"
+uid="uid://d041og4cvl2cr"
+path="res://.godot/imported/gridmap_meshlib.blend-8f74f8fd1c5473bca54cbea395162f1e.scn"
 
 [deps]
 
-source_file="res://assets/models/environment/grass.blend"
-dest_files=["res://.godot/imported/grass.blend-d1d87e1ca690fdfc12140be30d837113.scn"]
+source_file="res://assets/models/environment/gridmap_meshlib.blend"
+dest_files=["res://.godot/imported/gridmap_meshlib.blend-8f74f8fd1c5473bca54cbea395162f1e.scn"]
 
 [params]
 
@@ -36,27 +36,8 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 materials/extract=0
 materials/extract_format=0
-materials/extract_path="res://assets/materials"
-_subresources={
-"materials": {
-"Material": {
-"use_external/enabled": true,
-"use_external/fallback_path": "res://addons/simplegrasstextured/grass.material",
-"use_external/path": "uid://dpe8k78jbuhdk"
-}
-},
-"meshes": {
-"grass_Plane": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://assets/models/environment/grass_Plane.res",
-"save_to_file/path": "uid://c8cionhhjm4tk"
-}
-}
-}
+materials/extract_path=""
+_subresources={}
 blender/nodes/visible=0
 blender/nodes/active_collection_only=false
 blender/nodes/punctual_lights=true

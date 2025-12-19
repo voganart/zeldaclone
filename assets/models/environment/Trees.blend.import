@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cvgfcxe7h8grb"
-path="res://.godot/imported/grass.blend-d1d87e1ca690fdfc12140be30d837113.scn"
+uid="uid://bhluu6qvmt4x6"
+path="res://.godot/imported/Trees.blend-1419f38485f7df11f91dae180c3b5b0b.scn"
 
 [deps]
 
-source_file="res://assets/models/environment/grass.blend"
-dest_files=["res://.godot/imported/grass.blend-d1d87e1ca690fdfc12140be30d837113.scn"]
+source_file="res://assets/models/environment/Trees.blend"
+dest_files=["res://.godot/imported/Trees.blend-1419f38485f7df11f91dae180c3b5b0b.scn"]
 
 [params]
 
@@ -23,8 +23,8 @@ nodes/use_name_suffixes=true
 nodes/use_node_type_suffixes=true
 meshes/ensure_tangents=true
 meshes/generate_lods=true
-meshes/create_shadow_meshes=true
-meshes/light_baking=1
+meshes/create_shadow_meshes=false
+meshes/light_baking=0
 meshes/lightmap_texel_size=0.2
 meshes/force_disable_compression=false
 skins/use_named_skins=true
@@ -33,27 +33,16 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="uid://cnqxe0y663qco"
 materials/extract=0
 materials/extract_format=0
-materials/extract_path="res://assets/materials"
+materials/extract_path=""
 _subresources={
 "materials": {
 "Material": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://addons/simplegrasstextured/grass.material",
-"use_external/path": "uid://dpe8k78jbuhdk"
-}
-},
-"meshes": {
-"grass_Plane": {
-"generate/lightmap_uv": 0,
-"generate/lods": 0,
-"generate/shadow_meshes": 0,
-"lods/normal_merge_angle": 20.0,
-"save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://assets/models/environment/grass_Plane.res",
-"save_to_file/path": "uid://c8cionhhjm4tk"
+"use_external/fallback_path": "res://assets/_master/TreeShader.tres",
+"use_external/path": "uid://br1nrjywyx4pb"
 }
 }
 }
@@ -63,7 +52,7 @@ blender/nodes/punctual_lights=true
 blender/nodes/cameras=true
 blender/nodes/custom_properties=true
 blender/nodes/modifiers=1
-blender/meshes/colors=false
+blender/meshes/colors=true
 blender/meshes/uvs=true
 blender/meshes/normals=true
 blender/meshes/export_geometry_nodes_instances=false

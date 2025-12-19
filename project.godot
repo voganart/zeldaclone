@@ -225,3 +225,7 @@ sgt_wind_pattern={
 "type": "sampler2D",
 "value": "res://addons/simplegrasstextured/images/wind_pattern.png"
 }
+global_wind_power={
+"type": "float",
+"value": 0.0
+}
