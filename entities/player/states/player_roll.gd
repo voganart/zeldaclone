@@ -3,105 +3,68 @@ extends State
 var player: Player
 var roll_duration: float = 0.0
 var current_time: float = 0.0
-
-var has_buffered_jump: bool = false
-var jump_buffer_timer: float = 0.0
-
-var collision_restored: bool = false
-
-# === НОВАЯ НАСТРОЙКА ===
-# Сюда в Инспекторе добавь номера слоев.
-# Например: [3] (Враги) и [5] (Ящики, если они на 5 слое).
-@export var pass_through_layers: Array[int] = [3,5] 
+var ghost_layers: Array[int] = [3, 5] 
 
 func enter() -> void:
 	player = entity as Player
 	player.is_rolling = true
-	player.sfx_roll.play_random()
 	player.is_invincible = true
 	
-	# === 1. ОТКЛЮЧАЕМ ВСЕ СЛОИ ИЗ СПИСКА ===
-	# Проходимся по массиву и отключаем маску для каждого слоя
-	for layer_idx in pass_through_layers:
-		player.set_collision_mask_value(layer_idx, false)
-		
-	collision_restored = false
-	
-	has_buffered_jump = false
-	jump_buffer_timer = 0.0
-	
+	# --- ТРАТА ЗАРЯДОВ ---
 	player.current_roll_charges -= 1
 	if player.current_roll_charges <= 0:
 		player.is_roll_recharging = true
 		player.roll_penalty_timer = player.roll_recharge_time
-		player.roll_regen_timer = 0.0
 	else:
 		if player.roll_regen_timer <= 0:
 			player.roll_regen_timer = player.roll_cooldown
 	
 	player.roll_charges_changed.emit(player.current_roll_charges, player.roll_max_charges, player.is_roll_recharging)
 	
-	var current_speed_2d = Vector2(player.velocity.x, player.velocity.z).length()
-	var bonus = 0.0
-	if player.is_trying_to_run or player.is_auto_running or player.shift_pressed_time > player.roll_threshold:
-		bonus = player.run_speed * 0.2
-		
-	var target_roll_speed = player.roll_speed + bonus
-	var final_speed = max(current_speed_2d, target_roll_speed)
+	# --- ФИЗИКА И СЛОИ ---
+	for layer in ghost_layers:
+		player.set_collision_mask_value(layer, false)
 	
-	var forward = player.global_transform.basis.z.normalized()
-	player.velocity.x = forward.x * final_speed
-	player.velocity.z = forward.z * final_speed
-	
+	if player.shape_cast:
+		player.shape_cast.enabled = true
+
 	player.anim_player.play(GameConstants.ANIM_PLAYER_ROLL, 0.1, 1.0)
 	roll_duration = player.anim_player.get_animation(GameConstants.ANIM_PLAYER_ROLL).length
 	current_time = 0.0
 	
-	var iframe_time = roll_duration * player.roll_invincibility_duration
-	get_tree().create_timer(iframe_time).timeout.connect(func(): player.is_invincible = false)
+	# Начальный импульс
+	var speed = max(Vector2(player.velocity.x, player.velocity.z).length(), player.roll_speed)
+	var forward = player.global_transform.basis.z.normalized()
+	player.velocity.x = forward.x * speed
+	player.velocity.z = forward.z * speed
+	
+	player.sfx_roll.play_random()
 
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
 	current_time += delta
-	
-	var progress = 0.0
-	if roll_duration > 0:
-		progress = current_time / roll_duration
-	
-	# === 2. ВОЗВРАЩАЕМ КОЛЛИЗИЮ ДЛЯ ВСЕХ СЛОЕВ ===
-	if not collision_restored and progress >= 0.7:
-		for layer_idx in pass_through_layers:
-			player.set_collision_mask_value(layer_idx, true)
-		collision_restored = true
-	
-	# --- БУФЕР ПРЫЖКА ---
+	var progress = current_time / roll_duration
+
+	# --- 1. ПРЕРЫВАНИЕ ПРЫЖКОМ (JUMP CANCEL) ---
+	# Если нажата кнопка прыжка и мы прошли порог (напр. 75% анимации)
 	if player.input_handler.check_jump():
-		has_buffered_jump = true
-		jump_buffer_timer = 0.0
-	
-	if has_buffered_jump:
-		jump_buffer_timer += delta
-		if jump_buffer_timer > player.buffered_jump_max_time:
-			has_buffered_jump = false
+		if progress >= player.roll_jump_cancel_threshold:
+			player.perform_jump()
+			transitioned.emit(self, GameConstants.STATE_AIR)
+			return
 
-	var can_cancel_jump = progress >= player.roll_jump_cancel_threshold
-	if current_time < player.buffered_jump_min_time:
-		can_cancel_jump = false
-		
-	if has_buffered_jump and can_cancel_jump:
-		_perform_roll_jump()
-		return
-		
-	# --- ОТМЕНА В АТАКУ ---
+	# --- 2. ПРЕРЫВАНИЕ АТАКОЙ (ATTACK CANCEL) ---
+	# Если нажата атака и мы прошли порог отмены
 	if player.input_handler.is_attack_pressed:
-		var required_progress = 1.0 - player.attack_roll_cancel_threshold
-		if progress >= required_progress:
-			if player.can_attack:
-				player.input_handler.check_attack()
-				transitioned.emit(self, GameConstants.STATE_ATTACK)
-				return
+		# Обычно порог отмены атаки считается как "последняя часть анимации"
+		# Если attack_roll_cancel_threshold = 0.2, значит последние 20% можно отменить
+		var can_cancel_attack = progress >= (1.0 - player.attack_roll_cancel_threshold)
+		if can_cancel_attack and player.can_attack:
+			player.input_handler.check_attack() # Потребляем ввод из буфера
+			transitioned.emit(self, GameConstants.STATE_ATTACK)
+			return
 
-	# --- STEERING ---
+	# --- УПРАВЛЕНИЕ (STEERING) ---
 	var input_dir = player.input_handler.move_vector
 	if input_dir != Vector2.ZERO:
 		var input_vec3 = Vector3(input_dir.x, 0, input_dir.y)
@@ -116,26 +79,24 @@ func physics_update(delta: float) -> void:
 			var new_forward = player.global_transform.basis.z.normalized()
 			player.velocity.x = new_forward.x * speed
 			player.velocity.z = new_forward.z * speed
-	
+
 	player.move_and_slide()
-	player.push_obj()
+
+	# Безопасный выход (проверка застревания)
+	if progress >= 0.9:
+		if player.shape_cast and player.shape_cast.is_colliding():
+			var nav_point = player.get_closest_nav_point()
+			var push_dir = (nav_point - player.global_position).normalized()
+			player.velocity += push_dir * 5.0
 
 	if current_time >= roll_duration:
-		if has_buffered_jump:
-			_perform_roll_jump()
-		else:
-			if player.roll_chain_delay > 0:
-				player.roll_interval_timer = player.roll_chain_delay
-			transitioned.emit(self, GameConstants.STATE_MOVE)
-
-func _perform_roll_jump() -> void:
-	player.perform_jump()
-	transitioned.emit(self, GameConstants.STATE_AIR)
+		transitioned.emit(self, GameConstants.STATE_MOVE)
 
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false
-	
-	# === 3. ГАРАНТИРОВАННО ВКЛЮЧАЕМ ВСЕ СЛОИ ОБРАТНО ===
-	for layer_idx in pass_through_layers:
-		player.set_collision_mask_value(layer_idx, true)
+	# ВСЕГДА возвращаем коллизии при выходе из состояния
+	for layer in ghost_layers:
+		player.set_collision_mask_value(layer, true)
+	if player.shape_cast: 
+		player.shape_cast.enabled = false
