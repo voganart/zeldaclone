@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://b6nelwbpeak8a"]
+[gd_scene load_steps=16 format=3 uid="uid://b6nelwbpeak8a"]
 
 [ext_resource type="Shader" uid="uid://cnxuikwvwd4kn" path="res://assets/shaders/Cracks.gdshader" id="1_us532"]
 [ext_resource type="Texture2D" uid="uid://ittdhwhhwu8w" path="res://assets/textures/vfx/Ground_slam.png" id="2_xsjy0"]
@@ -40,6 +40,18 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("GrassCollision:scale")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
 }
 
 [sub_resource type="Animation" id="Animation_xsjy0"]
@@ -90,6 +102,18 @@ tracks/3/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 1,
 "values": [true, false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("GrassCollision:scale")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0.1, 0.1, 0.1), Vector3(5, 5, 5)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_u35oc"]
@@ -169,6 +193,8 @@ material = SubResource("StandardMaterial3D_k8bem")
 radius = 0.3
 height = 0.6
 
+[sub_resource type="SphereMesh" id="SphereMesh_xsjy0"]
+
 [node name="VfxGroundSlam" type="Node3D"]
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -193,3 +219,8 @@ draw_pass_1 = SubResource("SphereMesh_tm15h")
 [node name="GPUParticlesCollisionBox3D" type="GPUParticlesCollisionBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 size = Vector3(4, 1, 4)
+
+[node name="GrassCollision" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+layers = 65536
+mesh = SubResource("SphereMesh_xsjy0")

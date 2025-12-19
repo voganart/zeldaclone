@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=52 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="2_8fjmc"]
@@ -136,6 +136,8 @@ radius = 0.441262
 [sub_resource type="BoxShape3D" id="BoxShape3D_abrql"]
 size = Vector3(1.7636719, 1.746582, 1.5506058)
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_qpopc"]
+
 [sub_resource type="SphereMesh" id="SphereMesh_gx6sm"]
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("punch_hand_r", "punch_hand_l") groups=["player"]]
@@ -151,12 +153,13 @@ rot_speed = 10.0
 push_force = 5.0
 roll_push_multiplier = 0.0
 roll_speed = 4.0
+roll_jump_cancel_threshold = 0.6
 buffered_jump_max_time = 0.15
 auto_run_latch_time = 0.3
 roll_cooldown = 2.0
 roll_recharge_time = 4.0
 roll_chain_delay = 0.2
-attack_roll_cancel_threshold = 0.4
+attack_roll_cancel_threshold = 0.3
 primary_attack_speed = 1.0
 attack_movement_influense = 0.0
 attack_cooldown = 0.0
@@ -395,6 +398,9 @@ volume_db = -5.0
 bus = &"SFX"
 script = ExtResource("16_yqrof")
 streams = Array[AudioStream]([ExtResource("28_wq0jh")])
+
+[node name="RollSafetyCast" type="ShapeCast3D" parent="."]
+shape = SubResource("SphereShape3D_qpopc")
 
 [node name="GrassCollision" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

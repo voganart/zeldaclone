@@ -77,6 +77,7 @@ extends CharacterBody3D
 @onready var sfx_hurt: RandomAudioPlayer3D = $SoundBank/SfxHurt
 @onready var sfx_dash: RandomAudioPlayer3D = $SoundBank/SfxDash
 @onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
+@onready var shape_cast: ShapeCast3D = $RollSafetyCast # Нужно добавить в сцену игрока (цилиндр/сфера)
 # ============================================================================
 # RUNTIME VARIABLES
 # ============================================================================
@@ -554,3 +555,11 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 func play_step_sound():
 	if is_on_floor():
 		sfx_footsteps.play_random()
+func get_closest_nav_point() -> Vector3:
+	var map = get_world_3d().navigation_map
+	return NavigationServer3D.map_get_closest_point(map, global_position)
+
+# Метод для "выталкивания" игрока
+func apply_safety_nudge(direction: Vector3, force: float = 5.0):
+	velocity = direction * force
+	move_and_slide()
