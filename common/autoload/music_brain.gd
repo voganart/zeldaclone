@@ -55,42 +55,30 @@ func set_combat_state(enemy_entering_combat: bool):
 	else:
 		combat_agents_count = max(0, combat_agents_count - 1)
 	
-	# ЛОГИКА ЗАДЕРЖКИ
 	if combat_agents_count > 0:
-		# Если есть враги - немедленно включаем бой и отменяем таймер выхода
+		# Если хоть один враг в бою - музыка играет
 		combat_exit_timer.stop()
 		_update_music_layers(true)
 	else:
-		# Если врагов стало 0 - НЕ выключаем музыку сразу!
-		# Запускаем таймер. Если за это время никто не нападет снова, музыка утихнет.
+		# Если врагов 0 - запускаем таймер задержки (например, на 4 сек)
+		# Это позволит музыке не обрываться мгновенно, если вы убили последнего врага
 		if combat_exit_timer.is_stopped():
 			combat_exit_timer.start(combat_cooldown_time)
 
 func _on_combat_cooldown_ended():
-	# Двойная проверка: точно ли врагов нет?
+	# Если за время таймера никто не напал снова - выключаем боевые слои
 	if combat_agents_count == 0:
 		_update_music_layers(false)
 
 func _update_music_layers(is_combat: bool):
 	if is_combat:
-		# --- ВХОД В БОЙ ---
-		# Атака (Вступление) должно быть резким и быстрым
-		_fade_layer("Drums", true, 0.5)   # Барабаны врываются за полсекунды
-		_fade_layer("Strings", true, 1.0) # Скрипки подтягиваются
-		
-		# Релиз (Уход) мирной музыки должен быть медленным, 
-		# чтобы она еще звучала, пока барабаны разгоняются
-		_fade_layer("Base", false, 4.0)   # Пианино уходит очень долго
-		_fade_layer("Flute", false, 2.0)
+		# Боевые слои - громко, спокойные - тихо
+		_fade_layer("Drums", true, 0.5)
+		_fade_layer("Base", false, 2.0)
 	else:
-		# --- ВЫХОД ИЗ БОЯ ---
-		# Мирная музыка возвращается довольно быстро, чтобы заполнить пустоту
+		# Возвращаем спокойствие
+		_fade_layer("Drums", false, 4.0) # Барабаны затихают долго
 		_fade_layer("Base", true, 1.5)
-		_fade_layer("Flute", true, 2.0)
-		
-		# Боевая музыка уходит очень-очень плавно (эхо войны)
-		_fade_layer("Drums", false, 5.0)
-		_fade_layer("Strings", false, 5.0)
 
 func _fade_layer(layer_name: String, active: bool, duration: float):
 	var player = layers.get(layer_name)

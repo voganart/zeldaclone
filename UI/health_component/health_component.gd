@@ -35,9 +35,8 @@ func take_damage(amount: float) -> void:
 		
 ## Восстанавливает здоровье
 func heal(amount: float) -> void:
-	# Проверяем, что лечение положительное
 	if amount > 0:
-		current_health += amount
+		current_health = min(current_health + amount, max_health)
 
 ## Возвращает текущее здоровье
 func get_health() -> float:

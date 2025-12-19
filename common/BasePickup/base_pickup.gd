@@ -4,7 +4,9 @@ extends RigidBody3D
 @export var pool_index: int = 0
 @export var immunity_time: float = 0.5
 @export var collect_vfx_index: int = 2 # Индекс эффекта "подбора" в VfxPool
-
+@export var attraction_speed: float = 12.0
+@export var attraction_radius: float = 4.0
+var target_player: Player = null
 var is_collectable: bool = false
 var is_being_collected: bool = false # Защита от двойного подбора
 var timer: float = 0.0
@@ -17,7 +19,22 @@ func _process(delta):
 		timer -= delta
 		if timer <= 0:
 			is_collectable = true
-
+	if is_collectable and not is_being_collected:
+		if target_player == null:
+			# Ищем игрока поблизости
+			var p = get_tree().get_first_node_in_group("player")
+			if p and global_position.distance_to(p.global_position) < attraction_radius:
+				target_player = p
+		else:
+			# Если игрок найден - летим к нему, игнорируя физику
+			freeze = true # Отключаем гравитацию RigidBody для плавного полета
+			var dir = (target_player.global_position + Vector3(0, 1, 0) - global_position).normalized()
+			global_position += dir * attraction_speed * delta
+			
+			# Если мы совсем близко - подбираем автоматически
+			if global_position.distance_to(target_player.global_position + Vector3(0, 1, 0)) < 0.5:
+				_on_pickup(target_player)
+				
 func _on_pickup(body):
 	# Проверяем, можно ли собирать И не собираем ли мы его прямо сейчас
 	if not is_collectable or is_being_collected: return
@@ -61,3 +78,5 @@ func reset_state():
 	# Запуск анимации появления
 	$AnimationPlayer.play("Spawn")
 	$AnimationPlayer.queue("Idle")
+	freeze = false
+	target_player = null

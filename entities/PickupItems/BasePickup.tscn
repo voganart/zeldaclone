@@ -13,6 +13,22 @@ bounce = 0.5
 [sub_resource type="SphereShape3D" id="SphereShape3D_ke677"]
 radius = 0.65570736
 
+[sub_resource type="Animation" id="Animation_0v0pw"]
+resource_name = "Collect"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(0.26794323, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(0, 0, 0)]
+}
+
 [sub_resource type="Animation" id="Animation_84q7j"]
 resource_name = "Idle"
 length = 2.0
@@ -97,22 +113,6 @@ tracks/0/keys = {
 "values": [Vector3(0.1, 0.1, 0.1), Vector3(0.9, 1.1, 0.9), Vector3(1, 1, 1)]
 }
 
-[sub_resource type="Animation" id="Animation_0v0pw"]
-resource_name = "Collect"
-length = 0.2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals:scale")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.06666667, 0.2),
-"transitions": PackedFloat32Array(0.26794323, 2.4622886, 1),
-"update": 0,
-"values": [Vector3(1, 1, 1), Vector3(1.2, 1.3, 1.2), Vector3(0, 0, 0)]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_4r2wo"]
 _data = {
 &"Collect": SubResource("Animation_0v0pw"),
@@ -130,6 +130,8 @@ axis_lock_angular_z = true
 physics_material_override = SubResource("PhysicsMaterial_ke677")
 script = ExtResource("1_84q7j")
 collect_vfx_index = 0
+attraction_speed = 8.0
+attraction_radius = 3.0
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7595782, 0)

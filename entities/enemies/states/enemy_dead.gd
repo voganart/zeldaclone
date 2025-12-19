@@ -4,6 +4,8 @@ var enemy: Enemy
 
 func enter() -> void:
 	enemy = entity as Enemy
+	AIDirector.release_slot(enemy) # Освобождаем место для других!
+	AIDirector.return_attack_token(enemy)
 	
 	# Останавливаем все
 	enemy.nav_agent.set_velocity(Vector3.ZERO)

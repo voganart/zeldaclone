@@ -17,8 +17,18 @@ func enter() -> void:
 	# print("[FSM] Enter Patrol")
 
 func physics_update(delta: float) -> void:
-	# Проверка на обнаружение игрока (с учетом кулдауна фрустрации)
-	if enemy.frustrated_cooldown <= 0:
+	# 1. Проверяем "экстренную" агрессию (игрок подошел в упор и он досягаем)
+	var force_aggro = false
+	if is_instance_valid(enemy.player):
+		var dist = enemy.global_position.distance_to(enemy.player.global_position)
+		# Если игрок ближе 3 метров И навигация говорит, что до него можно дойти
+		if dist < 3.0:
+			enemy.nav_agent.target_position = enemy.player.global_position
+			if enemy.nav_agent.is_target_reachable():
+				force_aggro = true
+
+	# 2. Если кулдаун кончился ИЛИ сработала экстренная агрессия
+	if enemy.frustrated_cooldown <= 0 or force_aggro:
 		if enemy.vision_component.can_see_target(enemy.player):
 			transitioned.emit(self, GameConstants.STATE_CHASE)
 			return

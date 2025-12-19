@@ -33,6 +33,7 @@ extends CharacterBody3D
 @export var roll_chain_delay: float = 0.0
 @export_range(0.0, 1.0) var roll_invincibility_duration: float = 0.6
 @export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0
+@export_range(0.0, 1.0) var dodge_cancel_attack_threshold: float = 0.1
 
 @export_group("Animation Blending")
 @export var walk_run_blend_smoothing: float = 8.0
