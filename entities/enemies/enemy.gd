@@ -156,7 +156,7 @@ func move_toward_path() -> void:
 
 ## Callback от NavigationAgent (RVO Avoidance)
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	if is_knocked_back: return 
+	if is_knocked_back: return
 	
 	# Небольшая интерполяция, чтобы движение было менее дерганым при столкновениях
 	# Но достаточно быстрая (weight 0.2-0.5), чтобы управление было отзывчивым
@@ -252,9 +252,8 @@ func update_movement_animation(delta: float) -> void:
 			
 	else:
 		# --- ЛОГИКА ДВИЖЕНИЯ ВПЕРЕД (Бег/Ходьба) ---
-		
 		# Если вдруг он пятится назад (Z > 0)
-		if local_velocity.z > 0.1: 
+		if local_velocity.z > 0.1:
 			# Если есть анимация ходьбы назад — вставь её сюда. Если нет — Walk с реверсом или просто Walk
 			# play_animation("Monstr_walk_back", 0.2, 1.0)
 			play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, 1.0) # Временная заглушка
@@ -274,73 +273,53 @@ func update_movement_animation(delta: float) -> void:
 # COMBAT & DAMAGE
 # ============================================================================
 func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
-	if state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD:
-		return
-	frustrated_cooldown = 0.0 
-	# --- ЛОГИКА СМЕРТЕЛЬНОГО УДАРА ---
-	# Проверяем, убьет ли этот удар врага
-	var current_hp = health_component.get_health()
-	var is_lethal = (current_hp - amount) <= 0
+	if is_dead(): return
 	
-	# === ФИКС ПРОБЛЕМЫ 1: Точное определение нокдауна ===
-	# Нокдаун если это Финишер/Слэм (Heavy) ИЛИ сила подбрасывания реальная (> 2.0)
-	var is_knockdown = is_heavy_attack or (knockback_force.y > 2.0)
+	# Сбрасываем кулдаун фрустрации
+	frustrated_cooldown = 0.0
+	
+	var is_lethal = (health_component.current_health - amount) <= 0
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
-	if sfx_hurt_voice: sfx_hurt_voice.play_random()
-	# --- 1. АНИМАЦИЯ ---
+
+	# --- ЛОГИКА СБИВАНИЯ АТАКИ ---
 	if not is_lethal:
-		if is_knockdown:
-			anim_player.play(GameConstants.ANIM_ENEMY_KNOCKDOWN, 0.0, 1.0)
-			hurt_lock_timer = 0.3
-			anim_player.advance(0)
-		elif is_attacking:
-			# "Layered Hit": Если враг атакует, не сбиваем анимацию, но даем фриз (см. ниже)
-			# Можно добавить короткий таймер, чтобы нельзя было спамить
-			pass
+		if is_heavy_attack:
+			# УДАР 3: Полностью сбиваем атаку
+			if is_attacking:
+				AIDirector.return_attack_token(self) # Возвращаем токен
+				# Переключаем состояние, чтобы остановить скрипт атаки
+				state_machine.change_state(GameConstants.STATE_CHASE)
+			
+			anim_player.play(GameConstants.ANIM_ENEMY_KNOCKDOWN, 0.1)
+			hurt_lock_timer = 0.5 # Запрет на действия
 		else:
-			anim_player.play(GameConstants.ANIM_ENEMY_HIT, 0.1, 1.0)
-			hurt_lock_timer = 0.15
-			anim_player.advance(0)
-	
-	# --- 2. VFX и Камера ---
-	if is_lethal:
-		if sfx_death_impact: sfx_death_impact.play_random()
-		get_tree().call_group("camera_shaker", "add_trauma", 0.8)
-	elif is_heavy_attack:
-		get_tree().call_group("camera_shaker", "add_trauma", 0.6)
-	else:
-		get_tree().call_group("camera_shaker", "add_trauma", 0.2)
-		if sfx_flesh_hit: sfx_flesh_hit.play_random()
-		if sfx_hurt_voice: sfx_hurt_voice.play_random()
-	
+			# УДАР 1 и 2: "Ступор" (Stutter)
+			if is_attacking:
+				# Замораживаем текущую анимацию атаки на 0.15 сек
+				# Это удлиняет время до нанесения урона монстром
+				GameManager.hit_stop_local([anim_player], 0.15)
+			else:
+				anim_player.play(GameConstants.ANIM_ENEMY_HIT, 0.1)
+				hurt_lock_timer = 0.2
+
+	# Блок отключения хитбоксов удален, так как он вызывал баг "промахов" (застревание в false)
+	# Phantom hits можно лечить проверкой состояния (если мы в Knockdown - урон не наносим)
+	# Но пока просто убираем этот код.
+
+	# Остальной код (VFX, Health, Flash)
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()
-
-	# --- 3. HIT STOP ---
-	if is_lethal:
-		GameManager.hit_stop_smooth(hit_stop_lethal_duration, hit_stop_lethal_time_scale, 0.0, 0.3)
-	elif is_knockdown:
-		# При нокдауне полагаемся на глобальный фриз игрока
-		pass
-	else:
-		# Для обычных ударов и для "layered" ударов во время атаки
-		GameManager.hit_stop_local([anim_player], hit_stop_local_duration)
-	
-	AIDirector.return_attack_token(self)
+	if sfx_hurt_voice: sfx_hurt_voice.play_random()
+	if sfx_flesh_hit: sfx_flesh_hit.play_random()
 	
 	if health_component:
 		health_component.take_damage(amount)
-		
-	if state_machine and state_machine.current_state:
-		state_machine.current_state.on_damage_taken()
-		
+	
+	# Применяем отталкивание
 	if knockback_force.length() > 0.5:
-		velocity = knockback_force # Заменяем скорость, чтобы был резкий рывок
-		if is_heavy_attack or knockback_force.y > 5.0:
-			is_knocked_back = true
-			knockback_timer = 0.1 # Чуть больше полсекунды на полет
-			# NavAgent нужно сбросить, чтобы он не тянул к цели
-			nav_agent.set_velocity(Vector3.ZERO)
+		velocity = knockback_force
+		is_knocked_back = true
+		knockback_timer = 0.2
 
 func _on_died() -> void:
 	# Если мы сейчас летим в нокдауне, откладываем смерть до приземления
@@ -366,7 +345,7 @@ func _check_attack_hit() -> void:
 func _check_single_hand_hit(hand_area: Area3D) -> bool:
 	if not hand_area.monitoring: return false
 	
-	# Проверка конуса атаки
+	# Проверка конуса атаки (чтобы не бить спиной)
 	if punch_area:
 		var valid_targets = punch_area.get_overlapping_bodies()
 		if not valid_targets.has(player):

@@ -568,7 +568,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.143113, -3.8146973e-06, 1.
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.70905, 0, -5.067836)
 
 [node name="Enemy43" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
-transform = Transform3D(-0.9901805, 0, 0.13979536, 0, 1, 0, -0.13979536, 0, -0.9901805, -19.932447, 3.8146973e-06, 14.5328)
+transform = Transform3D(-0.9901805, 0, 0.13979536, 0, 1, 0, -0.13979536, 0, -0.9901805, -22.864944, 2.861023e-06, 14.785156)
 
 [node name="Enemy45" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(-0.86140764, 0, -0.5079142, 0, 1, 0, 0.5079142, 0, -0.86140764, -9.77413, 0, -3.0678263)
@@ -590,7 +590,7 @@ navigation_mesh = SubResource("NavigationMesh_u71mg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003982544, -0.013222218, 0.0002708435)
 
 [node name="Chest1" parent="NavigationRegion3D/Chests" instance=ExtResource("34_e3h7t")]
-transform = Transform3D(-0.9988775, 0, -0.04736796, 0, 1, 0, 0.04736796, 0, -0.9988775, -8.430888, 0, 10.868105)
+transform = Transform3D(-0.9988775, 0, -0.04736796, 0, 1, 0, 0.04736796, 0, -0.9988775, -9.22284, 0, 10.550349)
 ability_to_unlock = "air_dash"
 
 [node name="Chest5" parent="NavigationRegion3D/Chests" instance=ExtResource("34_e3h7t")]
@@ -602,7 +602,7 @@ transform = Transform3D(-0.047367916, 0, 0.9988775, 0, 1, 0, -0.9988775, 0, -0.0
 ability_to_unlock = "air_dash"
 
 [node name="Chest2" parent="NavigationRegion3D/Chests" instance=ExtResource("34_e3h7t")]
-transform = Transform3D(-0.9862914, 0, 0.16501322, 0, 1, 0, -0.16501322, 0, -0.9862914, -6.2250595, 1.9073486e-06, 10.908004)
+transform = Transform3D(-0.9862914, 0, 0.16501322, 0, 1, 0, -0.16501322, 0, -0.9862914, -5.6871133, 1.9073486e-06, 10.622539)
 ability_to_unlock = "ground_slam"
 
 [node name="Chest3" parent="NavigationRegion3D/Chests" instance=ExtResource("34_e3h7t")]

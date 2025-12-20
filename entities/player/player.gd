@@ -107,6 +107,7 @@ var current_attack_knockback_enabled: bool = false
 var combo_reset_timer: Timer
 var combo_cooldown_active: bool = false
 var combo_cooldown_timer: Timer
+var attack_interval_timer: Timer
 
 # Roll / Dodge Data
 var is_rolling: bool = false
@@ -146,6 +147,16 @@ func _ready() -> void:
 		can_attack = true
 		print("Combo cooldown ended"))
 	add_child(combo_cooldown_timer)
+	
+	# Новый таймер для задержки между ударами (attack_cooldown)
+	attack_interval_timer = Timer.new()
+	attack_interval_timer.one_shot = true
+	# wait_time будет устанавливаться динамически или из start_attack_cooldown
+	attack_interval_timer.timeout.connect(func():
+		if not combo_cooldown_active:
+			can_attack = true)
+	add_child(attack_interval_timer)
+
 
 	if health_component:
 		health_component.health_changed.connect(_on_health_changed)
@@ -159,7 +170,6 @@ func _ready() -> void:
 # PHYSICS PROCESS (CONTROLLER)
 # ============================================================================
 func _physics_process(delta: float) -> void:
-
 	_update_stun_timer(delta)
 	_update_roll_timers(delta)
 	if has_node("/root/SimpleGrass"):
@@ -219,13 +229,13 @@ func perform_jump() -> void:
 	current_jump_count += 1
 	sfx_jump.play_random()
 func rot_char(delta: float) -> void:
-	if is_knockback_stun: return 
+	if is_knockback_stun: return
 
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
 	
 	# Берем чистый вектор ввода из инпут-хендлера, а не из velocity
-	var input_dir = input_handler.move_vector 
+	var input_dir = input_handler.move_vector
 
 	if input_dir.length_squared() > 0.001:
 		# Вычисляем угол на основе ввода
@@ -303,7 +313,13 @@ func _find_soft_lock_target() -> Node3D:
 func start_combo_cooldown() -> void:
 	combo_cooldown_active = true
 	can_attack = false
-	combo_cooldown_timer.start()
+	combo_cooldown_timer.start(combo_cooldown_after_combo) # Явно используем переменную, на случай если она поменялась в инспекторе
+
+func start_attack_cooldown() -> void:
+	# Обычная задержка между ударами
+	can_attack = false
+	attack_interval_timer.start(attack_cooldown)
+
 
 func can_roll() -> bool:
 	if current_roll_charges <= 0: return false
@@ -378,7 +394,7 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
-	sfx_hurt.play_random() 
+	sfx_hurt.play_random()
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 	
