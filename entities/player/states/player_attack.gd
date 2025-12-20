@@ -28,6 +28,7 @@ func enter() -> void:
 
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
+	player.rot_char(delta)
 	
 	var current_pos = player.anim_player.current_animation_position
 	var total_len = player.anim_player.current_animation_length
@@ -81,13 +82,10 @@ func exit() -> void:
 	
 	if player.combo_count >= 3:
 		# Серия завершена - сброс и запуск долгого кулдауна
-		player.combo_count = 0
-		player.combo_cooldown_active = true
-		player.can_attack = false
-		player.combo_cooldown_timer.start() # combo_cooldown_after_combo
+		player.start_combo_cooldown()
 	else:
 		# Серия продолжается
 		player.combo_cooldown_active = false
-		player.can_attack = true
+		player.start_attack_cooldown()
 		# Запускаем окно для следующего удара
 		player.combo_reset_timer.start() # combo_window_time

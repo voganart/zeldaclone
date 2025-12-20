@@ -30,10 +30,9 @@ extends CharacterBody3D
 @export var roll_max_charges: int = 3
 @export var roll_cooldown: float = 0.5
 @export var roll_recharge_time: float = 3.0
-@export var roll_chain_delay: float = 0.0
-@export_range(0.0, 1.0) var roll_invincibility_duration: float = 0.6
 @export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0
 @export_range(0.0, 1.0) var dodge_cancel_attack_threshold: float = 0.1
+
 
 @export_group("Animation Blending")
 @export var walk_run_blend_smoothing: float = 8.0
@@ -42,7 +41,7 @@ extends CharacterBody3D
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
-@export var attack_movement_influense: float = 0.15
+
 @export var attack_cooldown: float = 0.15
 @export var combo_window_time: float = 2.0
 @export var combo_cooldown_after_combo: float = 0.5
@@ -51,7 +50,7 @@ extends CharacterBody3D
 @export var knockback_duration: float = 0.2
 @export var running_attack_impulse: float = 3.0
 @export var walking_attack_impulse: float = 1.5
-@export var idle_attack_impulse: float = 0.5
+
 @export var attack_rotation_influence: float = 0.5
 
 @export_group("Combat Assist")
@@ -70,7 +69,7 @@ extends CharacterBody3D
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var attack_timer: Timer = $FirstAttackTimer
-@onready var sprint_timer: Timer = $SprintTimer
+
 @onready var sfx_footsteps: RandomAudioPlayer3D = $SoundBank/SfxFootsteps
 @onready var sfx_attack: RandomAudioPlayer3D = $SoundBank/SfxAttack
 @onready var sfx_jump: RandomAudioPlayer3D = $SoundBank/SfxJump
@@ -311,9 +310,11 @@ func _find_soft_lock_target() -> Node3D:
 	return best_target
 
 func start_combo_cooldown() -> void:
+	combo_count = 0
 	combo_cooldown_active = true
 	can_attack = false
 	combo_cooldown_timer.start(combo_cooldown_after_combo) # Явно используем переменную, на случай если она поменялась в инспекторе
+
 
 func start_attack_cooldown() -> void:
 	# Обычная задержка между ударами

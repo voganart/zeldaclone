@@ -23,6 +23,11 @@ func enter() -> void:
 	if enemy.punch_hand_r: enemy.punch_hand_r.set_deferred("monitoring", false)
 	if enemy.punch_hand_l: enemy.punch_hand_l.set_deferred("monitoring", false)
 	
+	# СБРОС СКОРОСТИ АНИМАЦИИ (Фикс бага с HitStop)
+	# Если врага убили во время HitStop, скорость могла остаться 0.0
+	enemy.anim_player.speed_scale = 1.0
+	enemy.anim_player.stop()
+	
 	# Анимация
 	enemy.play_animation(GameConstants.ANIM_ENEMY_DEATH, 0.2, 0.7)
 	

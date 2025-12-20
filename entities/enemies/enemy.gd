@@ -18,9 +18,9 @@ extends CharacterBody3D
 
 @export_group("Hit Stop Settings")
 ## Насколько замедляется время при смертельном ударе (0.0 - стоп, 1.0 - норма)
-@export var hit_stop_lethal_time_scale: float = 0.15
+@export var hit_stop_lethal_time_scale: float = 0.5
 ## Длительность замедления при смерти
-@export var hit_stop_lethal_duration: float = 0.5
+@export var hit_stop_lethal_duration: float = 0.2
 ## Длительность микро-фриза анимации при обычном ударе
 @export var hit_stop_local_duration: float = 0.08
 
@@ -212,8 +212,8 @@ func play_animation(anim_name: String, blend: float = -1.0, speed: float = 1.0) 
 	# --- ГЛОБАЛЬНАЯ РАНДОМИЗАЦИЯ ---
 	if anim_player.has_animation(anim_name):
 		var anim_resource = anim_player.get_animation(anim_name)
-		# Не рандомизируем слишком короткие анимации (например, получение урона)
-		if anim_resource.length > 0.2:
+		# Не рандомизируем слишком короткие анимации и СМЕРТЬ
+		if anim_resource.length > 0.2 and anim_name != GameConstants.ANIM_ENEMY_DEATH:
 			var random_start = randf() * anim_resource.length
 			anim_player.seek(random_start, true)
 			
@@ -282,7 +282,12 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
 
 	# --- ЛОГИКА СБИВАНИЯ АТАКИ ---
-	if not is_lethal:
+	if is_lethal:
+		# ЭПИЧНОЕ ЗАМЕДЛЕНИЕ ПРИ СМЕРТИ
+		if hit_stop_lethal_time_scale < 1.0:
+			GameManager.hit_stop_smooth(hit_stop_lethal_time_scale, hit_stop_lethal_duration)
+	
+	elif not is_lethal:
 		if is_heavy_attack:
 			# УДАР 3: Полностью сбиваем атаку
 			if is_attacking:
