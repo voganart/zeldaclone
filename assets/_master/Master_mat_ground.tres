@@ -17,7 +17,7 @@ gradient = SubResource("Gradient_14vba")
 fill_from = Vector2(1, 1)
 
 [resource]
-albedo_color = Color(0.34423286, 0.6412041, 0.030480135, 1)
+albedo_color = Color(0.35486993, 0.64663506, 0.04774874, 1)
 albedo_texture = ExtResource("1_mqara")
 metallic_specular = 0.33
 metallic_texture = ExtResource("1_mqara")

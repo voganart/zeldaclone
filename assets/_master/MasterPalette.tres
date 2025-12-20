@@ -1,9 +1,15 @@
-[gd_resource type="ShaderMaterial" load_steps=7 format=3 uid="uid://c3gmswlr7otco"]
+[gd_resource type="ShaderMaterial" load_steps=8 format=3 uid="uid://c3gmswlr7otco"]
 
 [ext_resource type="Material" uid="uid://dmrecklaxbldq" path="res://assets/_master/x-ray_mat.tres" id="1_70hr8"]
 [ext_resource type="Shader" uid="uid://cjpfd2tbkieq0" path="res://assets/shaders/toonShader.gdshader" id="2_4eg5w"]
 [ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://assets/_master/MasterTexture.png" id="3_70hr8"]
-[ext_resource type="Texture2D" uid="uid://cttux46qnikqf" path="res://assets/_master/gradient_overlay.png" id="4_o1p36"]
+
+[sub_resource type="Gradient" id="Gradient_vx83k"]
+colors = PackedColorArray(0.045833137, 0, 0.57060206, 1, 1, 0.85260534, 0.5052612, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_70hr8"]
+gradient = SubResource("Gradient_vx83k")
+fill_from = Vector2(1, 1)
 
 [sub_resource type="Gradient" id="Gradient_dv3lr"]
 offsets = PackedFloat32Array(0, 0.9563539)
@@ -20,7 +26,7 @@ render_priority = 0
 next_pass = ExtResource("1_70hr8")
 shader = ExtResource("2_4eg5w")
 shader_parameter/dissolve_amount = 0.0
-shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/albedo = Color(1, 0.92324847, 0.773583, 1)
 shader_parameter/albedo_texture = ExtResource("3_70hr8")
 shader_parameter/clamp_diffuse_to_max = true
 shader_parameter/cuts = 4
@@ -38,9 +44,9 @@ shader_parameter/ramp = SubResource("GradientTexture2D_bj817")
 shader_parameter/use_borders = false
 shader_parameter/border_width = 0.01
 shader_parameter/use_gradient = true
-shader_parameter/gradient_texture = ExtResource("4_o1p36")
+shader_parameter/gradient_texture = SubResource("GradientTexture2D_70hr8")
 shader_parameter/gradient_blend_mode = 1
-shader_parameter/gradient_strength = 0.400000019
+shader_parameter/gradient_strength = 0.7170000340575
 shader_parameter/mesh_min_y = 0.0
 shader_parameter/mesh_max_y = 1.0
 shader_parameter/gradient_uv_set = 1

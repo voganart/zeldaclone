@@ -41,6 +41,11 @@ _subresources={
 "materials": {
 "Material": {
 "use_external/enabled": true,
+"use_external/fallback_path": "res://assets/_master/Master_mat_props.tres",
+"use_external/path": "uid://bhbpq6ww32ymc"
+},
+"Material.001": {
+"use_external/enabled": true,
 "use_external/fallback_path": "res://assets/_master/Master_mat_meshlib_walls.tres",
 "use_external/path": "uid://duxxstyaaagod"
 }

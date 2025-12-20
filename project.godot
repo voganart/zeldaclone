@@ -218,11 +218,11 @@ sgt_wind_movement={
 }
 sgt_wind_strength={
 "type": "float",
-"value": 0.246
+"value": 0.3
 }
 sgt_wind_turbulence={
 "type": "float",
-"value": 1.0
+"value": 0.1
 }
 sgt_wind_pattern={
 "type": "sampler2D",
