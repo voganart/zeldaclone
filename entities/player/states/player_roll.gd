@@ -3,7 +3,9 @@ extends State
 var player: Player
 var roll_duration: float = 0.0
 var current_time: float = 0.0
-var ghost_layers: Array[int] = [3, 5] 
+var ghost_layers: Array[int] = [3, 5]
+
+var current_roll_speed: float = 0.0
 
 func enter() -> void:
 	player = entity as Player
@@ -33,10 +35,10 @@ func enter() -> void:
 	current_time = 0.0
 	
 	# Начальный импульс
-	var speed = max(Vector2(player.velocity.x, player.velocity.z).length(), player.roll_speed)
+	current_roll_speed = max(Vector2(player.velocity.x, player.velocity.z).length(), player.roll_speed)
 	var forward = player.global_transform.basis.z.normalized()
-	player.velocity.x = forward.x * speed
-	player.velocity.z = forward.z * speed
+	player.velocity.x = forward.x * current_roll_speed
+	player.velocity.z = forward.z * current_roll_speed
 	
 	player.sfx_roll.play_random()
 
@@ -71,15 +73,20 @@ func physics_update(delta: float) -> void:
 		var local_input = player.global_transform.basis.inverse() * input_vec3
 		var steer_amount = local_input.x
 		
+		# Поворот персонажа
 		if abs(steer_amount) > 0.1:
 			var rotation_strength = player.rot_speed * player.roll_control * delta
 			player.rotate_y(steer_amount * rotation_strength)
-			
-			var speed = Vector2(player.velocity.x, player.velocity.z).length()
-			var new_forward = player.global_transform.basis.z.normalized()
-			player.velocity.x = new_forward.x * speed
-			player.velocity.z = new_forward.z * speed
-
+	
+	# Обновляем скорость в направлении взгляда, НО используем текущую скорость
+	# Это позволяет внешним силам (столкновениям) замедлять нас
+	var forward = player.global_transform.basis.z.normalized()
+	
+	# Плавное поддержание скорости или затухание, если нужно
+	# Но главное - мы применяем current_roll_speed к нашему направлению
+	player.velocity.x = forward.x * current_roll_speed
+	player.velocity.z = forward.z * current_roll_speed
+	
 	player.move_and_slide()
 
 	# Безопасный выход (проверка застревания)
@@ -98,5 +105,5 @@ func exit() -> void:
 	# ВСЕГДА возвращаем коллизии при выходе из состояния
 	for layer in ghost_layers:
 		player.set_collision_mask_value(layer, true)
-	if player.shape_cast: 
+	if player.shape_cast:
 		player.shape_cast.enabled = false

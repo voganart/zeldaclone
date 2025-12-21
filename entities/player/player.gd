@@ -457,13 +457,34 @@ func _update_roll_timers(delta: float) -> void:
 # ============================================================================
 func push_obj():
 	var force = push_force * (roll_push_multiplier if is_rolling else 1.0)
-	for i in range(get_slide_collision_count()):
+	var collision_count = get_slide_collision_count()
+	
+	for i in range(collision_count):
 		var c = get_slide_collision(i)
 		var collider = c.get_collider()
+		
+		# Толкаем физические объекты
 		if collider is RigidBody3D:
 			collider.apply_central_impulse(-c.get_normal() * force)
+			
+		# Толкаем врагов (CharacterBody3D)
 		if collider is CharacterBody3D and collider.has_method("receive_push"):
-			collider.receive_push(-c.get_normal() * force)
+			# 1. Применяем толчок врагу
+			# (Вектор толчка берем от нашего движения + нормаль)
+			var push_dir = -c.get_normal()
+			push_dir.y = 0 # Не подбрасываем вверх при толчке
+			collider.receive_push(push_dir.normalized() * force)
+			
+			# 2. ЭФФЕКТ СТОЛКНОВЕНИЯ (Recoil)
+			# Если мы катимся и врезались во врага - мы должны потерять скорость!
+			if is_rolling:
+				# Гасим физическую скорость
+				velocity *= 0.5
+				
+				# Гасим скорость внутри стейта (чтобы она не восстановилась в след. кадре)
+				var current_state = state_machine.current_state
+				if "current_roll_speed" in current_state:
+					current_state.current_roll_speed *= 0.5
 
 func check_jump_pass_through() -> void:
 	# 1. Если мы уже "проваливаемся" (маска врагов отключена)

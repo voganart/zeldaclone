@@ -155,9 +155,8 @@ jump_time_to_peak = 0.3
 air_control = 0.3
 second_jump_multiplier = 1.4
 rot_speed = 10.0
-push_force = 5.0
-roll_push_multiplier = 0.0
-roll_speed = 4.0
+roll_push_multiplier = 1.1
+roll_speed = 1.0
 roll_jump_cancel_threshold = 0.7
 buffered_jump_max_time = 0.15
 auto_run_latch_time = 0.3
@@ -177,7 +176,7 @@ punch_hand_r = NodePath("character/root/Skeleton3D/hand_r/punch_hand_r")
 punch_hand_l = NodePath("character/root/Skeleton3D/hand_l/punch_hand_l")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_fkugw")]
-max_health = 5.0
+max_health = 50.0
 
 [node name="HitFlash" parent="." instance=ExtResource("2_8fjmc")]
 mesh_path = NodePath("../character/root/Skeleton3D/Character_mesh")
