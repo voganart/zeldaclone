@@ -21,7 +21,9 @@ extends CharacterBody3D
 @export var rot_speed: float = 5.0
 @export var push_force: float = 0.5
 @export var roll_push_multiplier: float = 2.5
-@export var roll_speed: float = 6.0
+@export var roll_min_speed: float = 8.0
+@export var roll_max_speed: float = 12.0
+@export var roll_speed: float = 6.0 # Deprecated
 @export var roll_control: float = 0.5
 @export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75
 @export var buffered_jump_min_time: float = 0.0

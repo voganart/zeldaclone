@@ -34,8 +34,15 @@ func enter() -> void:
 	roll_duration = player.anim_player.get_animation(GameConstants.ANIM_PLAYER_ROLL).length
 	current_time = 0.0
 	
-	# Начальный импульс
-	current_roll_speed = max(Vector2(player.velocity.x, player.velocity.z).length(), player.roll_speed)
+	# 1. Расчет скорости на основе текущего движения
+	var current_speed_2d = Vector2(player.velocity.x, player.velocity.z).length()
+	# Фактор скорости 0..1 (где 0 = стоя, 1 = полный бег)
+	var speed_factor = clamp(current_speed_2d / player.run_speed, 0.0, 1.0)
+	
+	# Интерполируем между мин и макс скоростью переката
+	current_roll_speed = lerp(player.roll_min_speed, player.roll_max_speed, speed_factor)
+	
+	# Применяем скорость вперед
 	var forward = player.global_transform.basis.z.normalized()
 	player.velocity.x = forward.x * current_roll_speed
 	player.velocity.z = forward.z * current_roll_speed
