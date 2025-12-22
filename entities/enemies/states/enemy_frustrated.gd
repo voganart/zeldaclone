@@ -15,7 +15,8 @@ func enter() -> void:
 	
 	# 1. Переключаем состояние дерева
 	enemy.set_tree_state("angry")
-	
+	enemy.set_move_mode("chase") 
+	enemy.set_locomotion_blend(0.0) # 0.0 в режиме chase = Combat Idle
 	# 2. РАНДОМИЗАЦИЯ СТАРТА через TimeSeek
 	var anim_name = GameConstants.ANIM_ENEMY_ANGRY
 	if enemy.anim_player.has_animation(anim_name):

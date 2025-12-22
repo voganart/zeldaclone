@@ -8,6 +8,9 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS
 # ============================================================================
+@export_group("Debug")
+@export var show_debug_label: bool = true
+
 @export_group("Components")
 @export var punch_hand_r: Area3D
 @export var punch_hand_l: Area3D
@@ -40,6 +43,7 @@ extends CharacterBody3D
 # ============================================================================
 # NODE REFERENCES
 # ============================================================================
+@onready var debug_label: Label3D = $DebugLabel
 @onready var state_machine: StateMachine = $StateMachine
 @onready var vision_component: VisionComponent = $VisionComponent
 @onready var attack_component: EnemyAttackComponent = $EnemyAttackComponent
@@ -73,6 +77,7 @@ const TREE_ONE_SHOT_KNOCKDOWN = "parameters/knockdown_oneshot/request"
 const TREE_BLEND_LOCOMOTION = "parameters/locomotion_blend/blend_position"
 const TREE_BLEND_STRAFE = "parameters/strafe_blend/blend_position"
 const TREE_ANGRY_SEEK = "parameters/TimeSeek/seek_request"
+const TREE_BLEND_CHASE = "parameters/chase_blend/blend_position"
 
 # ============================================================================
 # SHARED DATA
@@ -117,6 +122,12 @@ func _ready() -> void:
 	set_move_mode("normal")
 
 func _physics_process(delta: float) -> void:
+	if show_debug_label and debug_label:
+		debug_label.visible = true
+		_update_debug_info()
+	elif debug_label:
+		debug_label.visible = false
+		
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
@@ -203,6 +214,7 @@ func set_move_mode(mode_name: String):
 
 func set_locomotion_blend(value: float):
 	anim_tree.set(TREE_BLEND_LOCOMOTION, value)
+	anim_tree.set(TREE_BLEND_CHASE, value)
 
 func set_strafe_blend(value: float):
 	anim_tree.set(TREE_BLEND_STRAFE, value)
@@ -379,3 +391,46 @@ func is_dead() -> bool:
 	if state_machine and state_machine.current_state:
 		return state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD
 	return false
+
+
+func _update_debug_info() -> void:
+	var state_name = "None"
+	if state_machine.current_state:
+		state_name = state_machine.current_state.name
+	
+	# Получаем параметры из дерева
+	# Приводим к int, чтобы избежать ошибки типов
+	var raw_move_mode = anim_tree.get(TREE_MOVE_MODE)
+	var move_mode_idx = 0
+	
+	# Безопасная проверка типа
+	if typeof(raw_move_mode) == TYPE_INT:
+		move_mode_idx = raw_move_mode
+	
+	var move_mode_str = "Normal" # index 0
+	if move_mode_idx == 1: 
+		move_mode_str = "Strafe"
+	elif move_mode_idx == 2: 
+		move_mode_str = "Chase"
+	
+	# Получаем текущий бленд
+	var blend_val = current_movement_blend
+	
+	# Если режим Strafe (индекс 1), читаем другой параметр
+	if move_mode_idx == 1:
+		blend_val = anim_tree.get(TREE_BLEND_STRAFE)
+
+	var hp = 0
+	if health_component: 
+		hp = ceil(health_component.current_health)
+	
+	debug_label.text = "State: %s\nMode: %s (%d)\nBlend: %.2f\nHP: %d" % [state_name, move_mode_str, move_mode_idx, blend_val, hp]
+	
+	if state_name.to_lower() == "attack":
+		debug_label.modulate = Color.RED
+	elif state_name.to_lower() == "chase":
+		debug_label.modulate = Color.ORANGE
+	elif state_name.to_lower() == "patrol":
+		debug_label.modulate = Color.GREEN
+	else:
+		debug_label.modulate = Color.WHITE

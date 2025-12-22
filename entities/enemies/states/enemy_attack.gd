@@ -73,17 +73,22 @@ func _handle_retreat(delta: float) -> void:
 
 	var dist_to_player = enemy.global_position.distance_to(enemy.player.global_position)
 	
+	# Если игрок подошел слишком близко — прерываем отступление и атакуем/преследуем
 	if dist_to_player < enemy.attack_component.retreat_interrupt_range:
 		enemy.attack_component.clear_retreat_state()
 		transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 
-	# Фаза 1: Пауза
+	# --- Фаза 1: Пауза (Стоим и смотрим) ---
 	if enemy.attack_component.tactical_retreat_pause_timer > 0:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
-		enemy.set_move_mode("normal")
-		# В паузе стоим - бленд 0
+		
+		# !!! ИСПРАВЛЕНИЕ !!!
+		# Используем "chase", чтобы проигрывался Combat Idle, а не обычный
+		enemy.set_move_mode("chase") 
+		
+		# Плавно сводим анимацию к 0 (Combat Idle)
 		enemy.current_movement_blend = move_toward(enemy.current_movement_blend, 0.0, delta * 5.0)
 		enemy.set_locomotion_blend(enemy.current_movement_blend)
 		
@@ -94,19 +99,22 @@ func _handle_retreat(delta: float) -> void:
 			transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 
-	# Фаза 2: Движение
+	# --- Фаза 2: Движение (Отход) ---
 	enemy.nav_agent.target_position = enemy.attack_component.tactical_retreat_target
 	enemy.nav_agent.max_speed = enemy.retreat_speed 
 	enemy.move_toward_path()
 	enemy.handle_rotation(delta, enemy.player.global_position)
 	
-	# Вот здесь вызываем update_movement_animation. 
-	# Так как мы пятимся, скорость по Z будет положительной, и сработает логика "Backwards" из enemy.gd
+	# !!! ИСПРАВЛЕНИЕ !!!
+	# Убеждаемся, что мы в боевом режиме движения
+	enemy.set_move_mode("chase")
+	
+	# Обновляем анимацию (enemy.gd сам определит, что мы идем назад, 
+	# и выставит отрицательный бленд, если скорость по Z положительная)
 	enemy.update_movement_animation(delta) 
 	
 	if enemy.nav_agent.is_navigation_finished():
 		enemy.attack_component.tactical_retreat_pause_timer = enemy.attack_component.get_random_retreat_pause_time()
-
 func on_damage_taken() -> void:
 	if enemy.attack_component.should_tactical_retreat:
 		enemy.attack_component.clear_retreat_state()
