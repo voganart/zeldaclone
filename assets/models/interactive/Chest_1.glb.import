@@ -4155,7 +4155,7 @@ _subresources={
 "materials": {
 "Material": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/_master/Master_mat_env.tres",
+"use_external/fallback_path": "res://assets/_master/Master_mat_props.tres",
 "use_external/path": "uid://bhbpq6ww32ymc"
 },
 "Material-metal": {

@@ -1,5 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8oyx32a6m1dp"]
+[gd_scene load_steps=3 format=3 uid="uid://c8oyx32a6m1dp"]
 
 [ext_resource type="PackedScene" uid="uid://d041og4cvl2cr" path="res://assets/models/environment/gridmap_meshlib.blend" id="1_3v7yt"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_3v7yt"]
+size = Vector3(1.9108887, 3.0409546, 1.7927856)
+
 [node name="gridmap_meshlib" instance=ExtResource("1_3v7yt")]
+
+[node name="OcclusionVolume" type="StaticBody3D" parent="Column" index="1"]
+collision_layer = 2147483648
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Column/OcclusionVolume" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.019042969, 1.5399475, -0.07772827)
+shape = SubResource("BoxShape3D_3v7yt")

@@ -135,7 +135,7 @@ node_connections = [&"output", 0, &"RollLoop", &"locomotion", 0, &"Animation 8",
 radius = 0.441262
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_abrql"]
-size = Vector3(1.7636719, 1.746582, 1.5506058)
+size = Vector3(1.7636719, 1.4440918, 1.5506058)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_qpopc"]
 
@@ -308,7 +308,7 @@ one_shot = true
 collision_mask = 20
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="FirstAttackArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9123535, 1.2277644)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0635986, 1.2277644)
 shape = SubResource("BoxShape3D_abrql")
 
 [node name="AirDashAbility" type="Node" parent="."]
