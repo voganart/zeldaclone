@@ -1,7 +1,7 @@
 extends State
 
-@export var flee_duration: float = 5.0 # Сколько секунд враг будет убегать
-@export var flee_speed: float = 0.5
+@export var flee_duration: float = 5.0
+@export var flee_speed: float = 4.0 # Убегать надо быстро!
 var timer: float = 0.0
 var enemy: Enemy
 
@@ -10,38 +10,38 @@ func enter() -> void:
 	enemy.nav_agent.max_speed = flee_speed
 	timer = flee_duration
 	
+	# --- ANIMATION TREE ---
+	enemy.set_tree_state("alive")
+	enemy.set_move_mode("normal")
+	# ----------------------
+	
 	_set_flee_target()
-	enemy.play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, flee_speed) # Анимация бега чуть быстрее обычной
-	print("AI: Fleeing!")
+	# Анимация обновится в update_movement_animation на основе скорости
 
 func physics_update(delta: float) -> void:
 	timer -= delta
 	
-	# Если время бегства истекло, переходим в патруль
 	if timer <= 0:
 		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 		
-	# Если достигли точки, а время еще есть, выбираем новую
 	if enemy.nav_agent.is_navigation_finished():
 		_set_flee_target()
 
-	# Движение
 	enemy.move_toward_path()
-	# Во время панического бегства смотрим вперед, а не на игрока
+	# При бегстве смотрим по направлению движения
 	enemy.handle_rotation(delta) 
+	
+	# Обновляем блендинг (Walk/Run) в зависимости от текущей скорости
 	enemy.update_movement_animation(delta)
 
 func _set_flee_target() -> void:
 	if not is_instance_valid(enemy.player):
-		return # Не от кого убегать
+		return
 		
-	# Находим направление ОТ игрока
 	var flee_direction = (enemy.global_position - enemy.player.global_position).normalized()
-	# Выбираем точку далеко в этом направлении
-	var target_point = enemy.global_position + flee_direction * 20.0 # 20 метров - условная дистанция
+	var target_point = enemy.global_position + flee_direction * 15.0
 	
-	# Находим ближайшую валидную точку на навмеше
 	var nav_map = enemy.nav_agent.get_navigation_map()
 	var valid_point = NavigationServer3D.map_get_closest_point(nav_map, target_point)
 	enemy.nav_agent.target_position = valid_point

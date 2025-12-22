@@ -8,6 +8,9 @@ func enter() -> void:
 	enemy.nav_agent.max_speed = enemy.run_speed
 	unreachable_timer = 0.0
 	MusicBrain.set_combat_state(true)
+	
+	# Убеждаемся, что мы в нормальном режиме движения
+	enemy.set_move_mode("normal")
 
 func physics_update(delta: float) -> void:
 	if not is_instance_valid(enemy.player):
@@ -16,7 +19,6 @@ func physics_update(delta: float) -> void:
 
 	enemy.nav_agent.target_position = enemy.player.global_position
 	
-	# ПРОВЕРКА: Доступен ли игрок?
 	if not enemy.nav_agent.is_target_reachable():
 		unreachable_timer += delta
 		if unreachable_timer > 1.5:
@@ -25,17 +27,14 @@ func physics_update(delta: float) -> void:
 	else:
 		unreachable_timer = 0.0
 
-	# Логика перехода к атаке
 	var dist = enemy.global_position.distance_to(enemy.player.global_position)
 	if dist <= enemy.attack_component.attack_range:
 		transitioned.emit(self, GameConstants.STATE_COMBAT_STANCE)
 		return
 
-	# Обычное движение
 	enemy.move_toward_path()
 	enemy.handle_rotation(delta, enemy.player.global_position)
 	enemy.update_movement_animation(delta)
 
 func exit() -> void:
 	MusicBrain.set_combat_state(false)
-	pass
