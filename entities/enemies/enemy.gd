@@ -222,40 +222,59 @@ func trigger_angry_seek(time: float):
 	anim_tree.set(TREE_ANGRY_SEEK, time)
 
 func update_movement_animation(delta: float) -> void:
+	var current_state_name = state_machine.current_state.name.to_lower()
 	var speed_length = velocity.length()
+
+	# --- ЛОГИКА БЛОКИРОВКИ НОГ ---
+	# 1. Если нас ударили (Hit) или откинули (Knockback) -> всегда Idle.
+	# 2. Если мы в Attack, но стоим на месте (наносим удар) -> тоже Idle.
+	#    (Порог 0.5 позволяет игнорировать микро-сдвиги, но пропускает бегство со скоростью 2.5)
+	var should_force_idle = is_knocked_back or current_state_name == "hit"
 	
-	# Получаем локальную скорость для стрейфа
+	if current_state_name == "attack" and speed_length < 0.5:
+		should_force_idle = true
+
+	if should_force_idle:
+		# Плавный сброс в 0 (Idle)
+		current_movement_blend = move_toward(current_movement_blend, 0.0, delta * 5.0)
+		set_locomotion_blend(current_movement_blend)
+		return
+	# -----------------------------
+
+	# --- ЛОГИКА ДВИЖЕНИЯ ---
 	var local_velocity = global_transform.basis.inverse() * velocity
 	
-	# Проверяем текущий режим в дереве, но это сложно, лучше полагаться на состояние FSM
-	# Если мы в режиме стрейфа:
-	if state_machine.current_state.name.to_lower() == "combatstance":
-		# Strafe Logic: Left (-1) / Right (1)
-		# Нормализуем локальную X скорость
+	# Combat Stance (Стрейфы)
+	if current_state_name == "combatstance":
 		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
-		# Инвертируем, если анимация требует (зависит от рига), обычно Left = +1 или -1
-		# Предположим blend: -1 Left, 1 Right
 		set_strafe_blend(-strafe_val) 
+		
+	# Locomotion (Idle / Walk / Run / Backward)
 	else:
-		# Locomotion Logic: Idle (0) -> Walk (1) -> Run (2) (примерно)
-		# Используем твой блендинг
-		var blend = inverse_lerp(walk_run_blend_start_speed, walk_run_blend_end_speed, speed_length)
-		target_movement_blend = clamp(blend, 0.0, 1.0)
-		current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+		var target_val = 0.0
 		
-		# Маппинг на BlendSpace1D (предположим: 0=Idle, 1=Walk, 2=Run)
-		# Если в blendspace 0..1, то просто передаем нормализованную скорость
-		var tree_blend_val = 0.0
+		# Проверка движения назад (Local Z > 0.1)
+		var is_moving_backwards = local_velocity.z > 0.1
+		
 		if speed_length < 0.1:
-			tree_blend_val = 0.0
-		elif current_movement_blend < 0.5:
-			tree_blend_val = clamp(speed_length / walk_speed, 0.0, 1.0) # Walk zone
+			target_val = 0.0
 		else:
-			tree_blend_val = 1.0 + clamp(speed_length / run_speed, 0.0, 1.0) # Run zone (если space до 2.0)
-		
-		# Упрощенно, если BlendSpace от 0 до 1:
-		set_locomotion_blend(speed_length / run_speed)
+			if is_moving_backwards:
+				# Движение НАЗАД
+				# Если у вас BlendSpace настроен от -1 до 1, где -1 (или -0.5) это ход назад:
+				var back_intensity = clamp(speed_length / walk_speed, 0.0, 1.0)
+				# Умножаем на -1, чтобы уйти в левую часть графика BlendSpace
+				target_val = -back_intensity 
+			else:
+				# Движение ВПЕРЕД
+				if speed_length <= walk_speed * 1.2:
+					target_val = clamp(speed_length / walk_speed, 0.0, 1.0)
+				else:
+					target_val = 1.0 + clamp((speed_length - walk_speed) / (run_speed - walk_speed), 0.0, 1.0)
 
+		# Применяем
+		current_movement_blend = lerp(current_movement_blend, target_val, walk_run_blend_smoothing * delta)
+		set_locomotion_blend(current_movement_blend)
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================

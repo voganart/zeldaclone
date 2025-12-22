@@ -11,10 +11,18 @@ func enter() -> void:
 	
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
 	enemy.attack_component.clear_retreat_state()
-	enemy.set_move_mode("normal") # Для надежности
+	
+	# СБРОС БЛЕНДА ПРИ ВХОДЕ
+	# Это гарантирует, что под анимацией атаки будет проигрываться Idle, а не бег
+	enemy.set_move_mode("normal")
+	enemy.current_movement_blend = 0.0 
+	enemy.set_locomotion_blend(0.0)
 
 func physics_update(delta: float) -> void:
-	# Если таймер атаки тикает
+	# Принудительно обновляем анимацию (которая внутри enemy.gd теперь будет сводить бленд к 0)
+	# Это нужно, чтобы если враг получил импульс от атаки, ноги не начали "бежать"
+	enemy.update_movement_animation(delta) 
+	
 	if is_performing_attack_anim:
 		attack_timer -= delta
 		if attack_timer <= 0:
@@ -30,33 +38,24 @@ func physics_update(delta: float) -> void:
 func _perform_attack() -> void:
 	is_performing_attack_anim = true
 	
-	# 1. Получаем имя анимации (например "Monstr_attack_1")
 	var anim_name_full = enemy.attack_component.get_next_attack_animation()
-	
-	# 2. Маппим имя на индекс в дереве ("Attack1" или "Attack2")
 	var tree_attack_idx = "Attack1"
 	if "2" in anim_name_full:
 		tree_attack_idx = "Attack2"
 	
-	# 3. Применяем импульс
 	var impulse = enemy.attack_component.register_attack()
 	var forward = -enemy.global_transform.basis.z.normalized()
 	enemy.receive_push(forward * impulse)
 	
-	# 4. Запускаем OneShot в дереве
 	enemy.trigger_attack_oneshot(tree_attack_idx)
 	
-	# 5. Рассчитываем длительность анимации
-	# AnimationTree не дает сигнала finished для веток, поэтому используем таймер
-	var anim_length = 1.0 # Дефолт
+	var anim_length = 1.0
 	if enemy.anim_player.has_animation(anim_name_full):
 		anim_length = enemy.anim_player.get_animation(anim_name_full).length
 	
-	# Учитываем скорость атаки (если мы меняем TimeScale в дереве, но пока просто делим)
 	attack_timer = anim_length / enemy.attack_component.attack_speed
 
 func _finish_attack() -> void:
-	# Проверка на то, что мы всё еще в этом стейте
 	if state_machine.current_state != self: return
 
 	is_performing_attack_anim = false
@@ -83,9 +82,11 @@ func _handle_retreat(delta: float) -> void:
 	if enemy.attack_component.tactical_retreat_pause_timer > 0:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
-		# Idle в дереве (move_mode normal, blend 0)
 		enemy.set_move_mode("normal")
-		enemy.set_locomotion_blend(0.0)
+		# В паузе стоим - бленд 0
+		enemy.current_movement_blend = move_toward(enemy.current_movement_blend, 0.0, delta * 5.0)
+		enemy.set_locomotion_blend(enemy.current_movement_blend)
+		
 		enemy.handle_rotation(delta, enemy.player.global_position)
 		
 		if enemy.attack_component.tactical_retreat_pause_timer <= 0:
@@ -99,8 +100,8 @@ func _handle_retreat(delta: float) -> void:
 	enemy.move_toward_path()
 	enemy.handle_rotation(delta, enemy.player.global_position)
 	
-	# Анимация: просто ставим Blend Walk, так как "Walking Backwards" нет в дереве пока
-	# Если бы была, нужна была бы ветка в BlendSpace (-1)
+	# Вот здесь вызываем update_movement_animation. 
+	# Так как мы пятимся, скорость по Z будет положительной, и сработает логика "Backwards" из enemy.gd
 	enemy.update_movement_animation(delta) 
 	
 	if enemy.nav_agent.is_navigation_finished():
