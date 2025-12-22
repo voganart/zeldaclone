@@ -8,10 +8,6 @@
 
 [node name="island" instance=ExtResource("1_ecdf3")]
 
-[node name="Island" parent="." index="0"]
-collision_layer = 8
-collision_mask = 31
-
 [node name="Decal4" type="Decal" parent="." index="1"]
 transform = Transform3D(-0.58228886, 0, -2.1731315, 0, 5.430597, 0, 2.1731315, 0, -0.58228886, 2.4454026, -0.49331978, 7.504413)
 layers = 16
@@ -135,5 +131,6 @@ normal_fade = 0.545
 distance_fade_enabled = true
 cull_mask = 16
 
-[node name="Island_001" parent="." index="13"]
-layers = 16
+[node name="Island" parent="." index="15"]
+collision_layer = 8
+collision_mask = 31

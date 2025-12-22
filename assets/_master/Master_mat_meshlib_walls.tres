@@ -15,7 +15,9 @@ fill_from = Vector2(1, 1)
 
 [resource]
 diffuse_mode = 2
+albedo_color = Color(0.9490196, 0.8509804, 0.70980394, 1)
 albedo_texture = ExtResource("1_l8351")
+roughness = 0.86
 roughness_texture = ExtResource("6_6v83s")
 roughness_texture_channel = 4
 normal_enabled = true
@@ -33,6 +35,7 @@ detail_blend_mode = 3
 detail_uv_layer = 1
 detail_albedo = ExtResource("2_2yqfp")
 detail_normal = ExtResource("2_jmof2")
+uv1_scale = Vector3(2, 2, 2)
 uv1_triplanar_sharpness = 4.3735766
 uv2_scale = Vector3(0, 0, 0)
 uv2_triplanar = true

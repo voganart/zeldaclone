@@ -14,7 +14,7 @@ fill_from = Vector2(1, 1)
 [resource]
 albedo_color = Color(0.87473404, 0.83124983, 0.722701, 1)
 albedo_texture = ExtResource("1_4y567")
-roughness = 0.63
+roughness = 0.86
 roughness_texture = ExtResource("4_edufu")
 roughness_texture_channel = 4
 normal_enabled = true

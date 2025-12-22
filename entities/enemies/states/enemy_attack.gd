@@ -12,15 +12,19 @@ func enter() -> void:
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
 	enemy.attack_component.clear_retreat_state()
 	
-	# СБРОС БЛЕНДА ПРИ ВХОДЕ
-	# Это гарантирует, что под анимацией атаки будет проигрываться Idle, а не бег
-	enemy.set_move_mode("normal")
+	# --- ИСПРАВЛЕНИЕ ---
+	# Раньше тут было "normal", из-за чего враг "расслаблялся" перед ударом.
+	# Ставим "chase", чтобы использовалась ветка анимаций с боевой стойкой (Combat Idle).
+	enemy.set_move_mode("chase")
+	
+	# Сбрасываем скорость анимации в 0 (это будет Combat Idle внутри BlendSpace Chase)
 	enemy.current_movement_blend = 0.0 
 	enemy.set_locomotion_blend(0.0)
 
 func physics_update(delta: float) -> void:
-	# Принудительно обновляем анимацию (которая внутри enemy.gd теперь будет сводить бленд к 0)
-	# Это нужно, чтобы если враг получил импульс от атаки, ноги не начали "бежать"
+	# Принудительно обновляем анимацию
+	# (в enemy.gd логика увидит state "attack" и будет держать blend около 0, 
+	# но теперь в режиме "chase")
 	enemy.update_movement_animation(delta) 
 	
 	if is_performing_attack_anim:
@@ -47,6 +51,7 @@ func _perform_attack() -> void:
 	var forward = -enemy.global_transform.basis.z.normalized()
 	enemy.receive_push(forward * impulse)
 	
+	# Запускаем OneShot анимацию атаки поверх Combat Idle
 	enemy.trigger_attack_oneshot(tree_attack_idx)
 	
 	var anim_length = 1.0
@@ -73,7 +78,6 @@ func _handle_retreat(delta: float) -> void:
 
 	var dist_to_player = enemy.global_position.distance_to(enemy.player.global_position)
 	
-	# Если игрок подошел слишком близко — прерываем отступление и атакуем/преследуем
 	if dist_to_player < enemy.attack_component.retreat_interrupt_range:
 		enemy.attack_component.clear_retreat_state()
 		transitioned.emit(self, GameConstants.STATE_CHASE)
@@ -84,11 +88,9 @@ func _handle_retreat(delta: float) -> void:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
 		
-		# !!! ИСПРАВЛЕНИЕ !!!
-		# Используем "chase", чтобы проигрывался Combat Idle, а не обычный
+		# Убеждаемся, что мы в боевой стойке
 		enemy.set_move_mode("chase") 
 		
-		# Плавно сводим анимацию к 0 (Combat Idle)
 		enemy.current_movement_blend = move_toward(enemy.current_movement_blend, 0.0, delta * 5.0)
 		enemy.set_locomotion_blend(enemy.current_movement_blend)
 		
@@ -105,16 +107,14 @@ func _handle_retreat(delta: float) -> void:
 	enemy.move_toward_path()
 	enemy.handle_rotation(delta, enemy.player.global_position)
 	
-	# !!! ИСПРАВЛЕНИЕ !!!
-	# Убеждаемся, что мы в боевом режиме движения
+	# Боевой режим движения
 	enemy.set_move_mode("chase")
 	
-	# Обновляем анимацию (enemy.gd сам определит, что мы идем назад, 
-	# и выставит отрицательный бленд, если скорость по Z положительная)
 	enemy.update_movement_animation(delta) 
 	
 	if enemy.nav_agent.is_navigation_finished():
 		enemy.attack_component.tactical_retreat_pause_timer = enemy.attack_component.get_random_retreat_pause_time()
+
 func on_damage_taken() -> void:
 	if enemy.attack_component.should_tactical_retreat:
 		enemy.attack_component.clear_retreat_state()
