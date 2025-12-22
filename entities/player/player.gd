@@ -23,7 +23,7 @@ extends CharacterBody3D
 @export var roll_push_multiplier: float = 2.5
 @export var roll_min_speed: float = 8.0
 @export var roll_max_speed: float = 12.0
-@export var roll_speed: float = 6.0 # Deprecated
+@export var roll_speed: float = 6.0 
 @export var roll_control: float = 0.5
 @export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75
 @export var buffered_jump_min_time: float = 0.0
@@ -43,7 +43,6 @@ extends CharacterBody3D
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
-
 @export var attack_cooldown: float = 0.15
 @export var combo_window_time: float = 2.0
 @export var combo_cooldown_after_combo: float = 0.5
@@ -52,12 +51,11 @@ extends CharacterBody3D
 @export var knockback_duration: float = 0.2
 @export var running_attack_impulse: float = 3.0
 @export var walking_attack_impulse: float = 1.5
-
 @export var attack_rotation_influence: float = 0.5
 
 @export_group("Combat Assist")
-@export var soft_lock_range: float = 4.0 ## Дистанция, на которой работает автонаведение
-@export var soft_lock_angle: float = 90.0 ## Угол обзора для автонаведения (в градусах)
+@export var soft_lock_range: float = 4.0 
+@export var soft_lock_angle: float = 90.0 
  
 @export_group("Components")
 @export var punch_hand_r: Area3D
@@ -69,6 +67,7 @@ extends CharacterBody3D
 @onready var air_dash_ability: AirDashAbility = $AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $GroundSlamAbility
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
+@onready var anim_tree: AnimationTree = $character/AnimationTree # <-- НОВОЕ
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var attack_timer: Timer = $FirstAttackTimer
 
@@ -79,16 +78,15 @@ extends CharacterBody3D
 @onready var sfx_hurt: RandomAudioPlayer3D = $SoundBank/SfxHurt
 @onready var sfx_dash: RandomAudioPlayer3D = $SoundBank/SfxDash
 @onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
-@onready var shape_cast: ShapeCast3D = $RollSafetyCast # Нужно добавить в сцену игрока (цилиндр/сфера)
+@onready var shape_cast: ShapeCast3D = $RollSafetyCast
+
 # ============================================================================
 # RUNTIME VARIABLES
 # ============================================================================
-# Physics cache
 @onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
 
-# Movement State Data
 var current_jump_count: int = 0
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
@@ -99,7 +97,6 @@ var shift_pressed_time: float = 0.0
 var was_on_floor: bool = true
 var air_speed: float = 0.0
 
-# Combat State Data
 var is_attacking: bool = false
 var can_attack: bool = true
 var combo_count: int = 0
@@ -110,7 +107,6 @@ var combo_cooldown_active: bool = false
 var combo_cooldown_timer: Timer
 var attack_interval_timer: Timer
 
-# Roll / Dodge Data
 var is_rolling: bool = false
 var current_roll_charges: int = 3
 var roll_penalty_timer: float = 0.0
@@ -120,20 +116,21 @@ var roll_interval_timer: float = 0.0
 var is_invincible: bool = false
 var roll_threshold: float = 0.18
 
-# Stun / Damage Data
 var current_knockback_timer: float = 0.0
 var is_knockbacked: bool = false
 var is_knockback_stun: bool = false
 var is_passing_through: bool = false
+var hit_enemies_current_attack: Dictionary = {}
 
-# Animation Blending
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
-	# Инициализация таймеров комбо (оставляем как было)
+	# Активация AnimationTree
+	anim_tree.active = true
+	
 	combo_reset_timer = Timer.new()
 	combo_reset_timer.one_shot = true
 	combo_reset_timer.wait_time = combo_window_time
@@ -149,20 +146,17 @@ func _ready() -> void:
 		print("Combo cooldown ended"))
 	add_child(combo_cooldown_timer)
 	
-	# Новый таймер для задержки между ударами (attack_cooldown)
 	attack_interval_timer = Timer.new()
 	attack_interval_timer.one_shot = true
-	# wait_time будет устанавливаться динамически или из start_attack_cooldown
 	attack_interval_timer.timeout.connect(func():
 		if not combo_cooldown_active:
 			can_attack = true)
 	add_child(attack_interval_timer)
 
-
 	if health_component:
 		health_component.health_changed.connect(_on_health_changed)
 		health_component.died.connect(_on_died)
-		_on_health_changed(health_component.get_health())
+		_on_health_changed(health_component.get_health(), health_component.get_max_health())
 
 	current_roll_charges = roll_max_charges
 	state_machine.init(self)
@@ -173,13 +167,14 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
 	_update_roll_timers(delta)
+	
 	if has_node("/root/SimpleGrass"):
 		var grass_manager = get_node("/root/SimpleGrass")
-		# Обновляем позицию
 		grass_manager.set_player_position(global_position)
 	else:
-		# Если этот принт спамится в консоль - значит, ты не настроил Autoload (Пункт 1)
-		print_rich("[color=red]ERROR: SimpleGrass Autoload не найден! Настрой Project Settings![/color]")
+		# print_rich("[color=red]ERROR: SimpleGrass Autoload не найден![/color]")
+		pass
+
 	if is_knockback_stun:
 		apply_gravity(delta)
 		velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
@@ -200,7 +195,6 @@ func _physics_process(delta: float) -> void:
 	was_on_floor = is_on_floor()
 
 func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
-	# Логика авто-бега и попытки бега перенесена в расчет target_speed внутри State
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	
 	if input_dir != Vector2.ZERO:
@@ -210,65 +204,144 @@ func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: flo
 		
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
+
 # ============================================================================
-# HELPER FUNCTIONS (Called by States)
+# ANIMATION TREE WRAPPERS (UPDATED FOR SCREENSHOT)
+# ============================================================================
+
+## Главное состояние: "alive" или "dead"
+func set_life_state(state_name: String) -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_STATE, state_name)
+
+## Переключатель Земля/Воздух: "ground" или "air"
+func set_air_state(state_name: String) -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_AIR_TRANSITION, state_name)
+
+## Смешивание бега: -1..1
+func set_locomotion_blend(value: float) -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_LOCOMOTION, value)
+
+## Торможение
+func trigger_stopping() -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_STOPPING_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+## Состояние прыжка: "Start", "Mid", "End" (Важно: С большой буквы, как на скрине)
+func set_jump_state(state_name: String) -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_JUMP_STATE, state_name)
+
+## Атака
+func trigger_attack(combo_index: int) -> void:
+	# 0 -> Attack1, 1 -> Attack2, 2 -> Attack3
+	var idx_str = "Attack1"
+	if combo_index == 1: idx_str = "Attack2"
+	elif combo_index == 2: idx_str = "Attack3"
+	
+	anim_tree.set(GameConstants.TREE_PARAM_ATTACK_IDX, idx_str)
+	anim_tree.set(GameConstants.TREE_PARAM_ATTACK_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+func set_tree_attack_speed(value: float) -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_ATTACK_SPEED, value)
+## Перекат
+func trigger_roll() -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_ROLL_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+## Рывок в воздухе
+func trigger_air_dash() -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_DASH_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+## Ground Slam: "start", "mid", "end", "off"
+func set_slam_state(state_name: String) -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_SLAM_STATE, state_name)
+
+## Получение урона
+func trigger_hit() -> void:
+	anim_tree.set(GameConstants.TREE_PARAM_HIT_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
+# ============================================================================
+# HELPER FUNCTIONS
 # ============================================================================
 func get_movement_vector() -> Vector2:
 	if input_handler:
 		return input_handler.move_vector
 	return Vector2.ZERO
+
 func apply_gravity(delta: float) -> void:
 	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming:
 		return
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta
 
-
 func perform_jump() -> void:
 	var jump_multiplier = second_jump_multiplier if current_jump_count == 1 else 1.0
 	velocity.y = - jump_velocity * jump_multiplier
 	current_jump_count += 1
 	sfx_jump.play_random()
+
 func rot_char(delta: float) -> void:
 	if is_knockback_stun: return
 
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
 	
-	# Берем чистый вектор ввода из инпут-хендлера, а не из velocity
 	var input_dir = input_handler.move_vector
-
 	if input_dir.length_squared() > 0.001:
-		# Вычисляем угол на основе ввода
 		var target_angle = atan2(input_dir.x, input_dir.y)
 		rotation.y = lerp_angle(rotation.y, target_angle, current_rot_speed * delta)
 
 func tilt_character(delta: float) -> void:
-	var tilt_angle = 10 if is_running and velocity.length() > base_speed + 1 else 3
-	var move_vec = Vector3(velocity.x, 0, velocity.z)
-	var local_move = global_transform.basis.inverse() * move_vec
-	var target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)
-	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 15 * delta)
+	# 1. Если мы не двигаемся или стоим на месте - выравниваемся в 0
+	if input_handler.move_vector.length() < 0.1 or not is_running:
+		_mesh.rotation.z = lerp_angle(_mesh.rotation.z, 0.0, 10.0 * delta)
+		return
+
+	# 2. Получаем вектор ввода в 3D (относительно камеры, как в get_movement_vector)
+	# Нам нужно понять, жмет ли игрок "влево/вправо" относительно того, куда смотрит модель.
+	
+	# Вектор, куда смотрит модель персонажа (Z - вперед, X - право)
+	var char_basis = global_transform.basis
+	
+	# Вектор, куда хочет идти игрок (из input_handler)
+	var input_dir_2d = input_handler.move_vector
+	var input_dir_3d = Vector3(input_dir_2d.x, 0, input_dir_2d.y).normalized()
+	
+	# Если камера вращается, нужно скорректировать input_dir_3d под камеру, 
+	# но обычно move_and_slide уже учитывает это в velocity. 
+	# Давай возьмем velocity, но нормализованную (чистое направление).
+	var move_dir = velocity.normalized()
+	
+	# Переводим глобальное движение в локальное пространство персонажа
+	# local_move.x > 0 — движение вправо
+	# local_move.x < 0 — движение влево
+	var local_move = char_basis.inverse() * move_dir
+	
+	# 3. Настройка силы наклона
+	var tilt_amount = 0.0
+	
+	# Если мы бежим и есть боковая составляющая движения (поворот)
+	if abs(local_move.x) > 0.1:
+		# Угол наклона в градусах (можно вынести в export var tilt_angle = 15.0)
+		var max_tilt_deg = 15.0 
+		
+		# -local_move.x: инвертируем, чтобы наклон был "внутрь" поворота (как мотоцикл)
+		# Если персонаж наклоняется не туда — убери минус перед local_move.x
+		tilt_amount = deg_to_rad(max_tilt_deg) * -sign(local_move.x)
+	
+	# 4. Применяем вращение к Visuals
+	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, tilt_amount, 10.0 * delta)
 
 # ============================================================================
 # COMBAT HELPERS
 # ============================================================================
-
 func apply_attack_impulse() -> void:
-	# 1. Сбрасываем текущую инерцию для резкости
 	velocity.x = 0
 	velocity.z = 0
 	
-	# 2. Ищем цель для автонаведения
 	var target = _find_soft_lock_target()
-	
 	if target:
-		# Плавно поворачиваем игрока к врагу ПЕРЕД рывком
 		var dir_to_enemy = (target.global_position - global_position).normalized()
 		var target_angle = atan2(dir_to_enemy.x, dir_to_enemy.z)
-		rotation.y = target_angle # Мгновенный разворот к цели для точности
+		rotation.y = target_angle
 	
-	# 3. Применяем импульс вперед (теперь мы точно смотрим на врага)
 	var attack_dir = global_transform.basis.z.normalized()
 	var impulse = walking_attack_impulse
 	if is_trying_to_run: impulse = running_attack_impulse
@@ -279,7 +352,6 @@ func _find_soft_lock_target() -> Node3D:
 	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
 	var best_target: Node3D = null
 	var min_dist: float = soft_lock_range
-	
 	var search_dir = Vector3.ZERO
 	
 	if input_handler.move_vector.length() > 0.1:
@@ -296,13 +368,9 @@ func _find_soft_lock_target() -> Node3D:
 		var dist = global_position.distance_to(enemy.global_position)
 		
 		if dist > soft_lock_range: continue
-		
 		var angle_to = rad_to_deg(search_dir.angle_to(dir_to_enemy))
-		
-		# Широкий угол захвата, чтобы "подтягивало" даже боковых врагов
 		var current_fov = soft_lock_angle
 		if dist < 2.5: current_fov = 160.0
-			
 		if angle_to > (current_fov / 2.0): continue
 		
 		if dist < min_dist:
@@ -315,14 +383,11 @@ func start_combo_cooldown() -> void:
 	combo_count = 0
 	combo_cooldown_active = true
 	can_attack = false
-	combo_cooldown_timer.start(combo_cooldown_after_combo) # Явно используем переменную, на случай если она поменялась в инспекторе
-
+	combo_cooldown_timer.start(combo_cooldown_after_combo)
 
 func start_attack_cooldown() -> void:
-	# Обычная задержка между ударами
 	can_attack = false
 	attack_interval_timer.start(attack_cooldown)
-
 
 func can_roll() -> bool:
 	if current_roll_charges <= 0: return false
@@ -330,65 +395,101 @@ func can_roll() -> bool:
 	if is_roll_recharging: return false
 	return true
 
-func try_cancel_attack_for_roll() -> bool:
+func try_cancel_attack_for_roll(progress_ratio: float) -> bool:
 	if attack_roll_cancel_threshold >= 1.0: return true
 	if attack_roll_cancel_threshold <= 0.0: return false
-	
-	var ratio = anim_player.current_animation_position / anim_player.current_animation_length
-	return ratio >= (1.0 - attack_roll_cancel_threshold)
+	return progress_ratio >= (1.0 - attack_roll_cancel_threshold)
 
-# ============================================================================
-# ANIMATION & VISUALS (ИСПРАВЛЕНИЕ БАГА)
-# ============================================================================
+func start_hitbox_monitoring() -> void:
+	hit_enemies_current_attack.clear()
+	# Включаем мониторинг хитбоксов принудительно
+	if punch_hand_r: punch_hand_r.monitoring = true
+	if punch_hand_l: punch_hand_l.monitoring = true
 
-# !!! ИСПРАВЛЕНИЕ: Добавили аргумент current_input
+## Вызывается в конце атаки (из стейта Attack)
+func stop_hitbox_monitoring() -> void:
+	hit_enemies_current_attack.clear()
+	# Выключаем, чтобы не тратить ресурсы
+	if punch_hand_r: punch_hand_r.set_deferred("monitoring", false)
+	if punch_hand_l: punch_hand_l.set_deferred("monitoring", false)
+
+## Вызывается каждый кадр во время атаки (из стейта Attack)
+func process_hitbox_check() -> void:
+	var hits_occurred = false
+	if punch_hand_r: hits_occurred = _check_hand_overlap(punch_hand_r) or hits_occurred
+	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
+
+func _check_hand_overlap(hand: Area3D) -> bool:
+	var hit_something = false
+	for body in hand.get_overlapping_bodies():
+		# Пропускаем себя
+		if body == self: continue
+		
+		# Пропускаем тех, кого уже ударили в этом замахе
+		if hit_enemies_current_attack.has(body.get_instance_id()): continue
+		
+		if body.has_method("take_damage") or body is RigidBody3D:
+			# Наносим урон
+			punch_collision(body, hand)
+			# Запоминаем, что этого врага ударили
+			hit_enemies_current_attack[body.get_instance_id()] = true
+			hit_something = true
+			
+	return hit_something
+# ============================================================================
+# ANIMATION LOGIC (UPDATED FOR TREE)
+# ============================================================================
 func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	var speed_2d = Vector2(velocity.x, velocity.z).length()
-	
-	# !!! ИСПРАВЛЕНИЕ: Используем переданный аргумент, а не старую переменную movement_input
 	var has_input = current_input.length_squared() > 0.01
 	
-	if speed_2d > 0.1:
-		var blend = calculate_walk_run_blend(speed_2d)
-		target_movement_blend = blend
-		current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+	# !!! ИСПРАВЛЕНИЕ: !!!
+	if has_input:
+		# Если жмем кнопки — считаем анимацию от скорости
+		target_movement_blend = calculate_walk_run_blend(speed_2d)
+	else:
+		# Если кнопки отпустили — анимация должна стремиться к Idle (0.0), 
+		# даже если персонаж еще немного скользит по инерции.
+		target_movement_blend = 0.0
 	
-	# 1. Если есть ввод - бежим/идем
+	# Плавная интерполяция
+	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+	
+	# Если значение очень маленькое, обрубаем его в 0, чтобы не висело 0.001
+	if current_movement_blend < 0.01:
+		current_movement_blend = 0.0
+
+	set_locomotion_blend(current_movement_blend)
+	
+	# Логика анимации остановки (Stopping)
 	if has_input:
 		is_stopping = false
-		if current_movement_blend < 0.5:
-			var walk_scale = lerp(0.5, 1.5, speed_2d / base_speed) if base_speed > 0 else 1.0
-			play_anim(GameConstants.ANIM_PLAYER_WALK, 0.2, walk_scale)
-		else:
-			var run_scale = lerp(0.5, 1.5, speed_2d / run_speed) if run_speed > 0 else 1.0
-			play_anim(GameConstants.ANIM_PLAYER_RUN, 0.2, run_scale)
-			
-	# 2. Ввода нет, но скорость еще есть - тормозим
-	elif speed_2d > 3.0:
+	elif speed_2d > 3.0: # Если скорость все еще большая, но ввода нет — тормозим
 		if not is_stopping:
 			is_stopping = true
-			anim_player.play(GameConstants.ANIM_PLAYER_STOPPING, 0.2, 0.1)
-			
-	# 3. Стоим
+			trigger_stopping()
 	else:
 		is_stopping = false
-		play_anim(GameConstants.ANIM_PLAYER_IDLE, 0.2)
-
-# !!! ИСПРАВЛЕНИЕ: Переименовали аргумент name -> anim_name
-func play_anim(anim_name: String, blend: float = -1.0, speed: float = 1.0) -> void:
-	if anim_player.current_animation == anim_name:
-		anim_player.play(anim_name, blend, speed)
-		return
-	anim_player.play(anim_name, blend, speed)
-	if anim_player.current_animation_length > 0:
-		anim_player.seek(randf() * anim_player.current_animation_length)
 
 func calculate_walk_run_blend(speed: float) -> float:
-	var blend = inverse_lerp(walk_run_blend_start_speed, walk_run_blend_end_speed, speed)
-	return clamp(blend, 0.0, 1.0)
+	# Если скорость мизерная — считаем, что стоим
+	if speed < 0.1:
+		return 0.0
 
+	# 1. Зона от ИДЛА (0.0) до ХОДЬБЫ (0.5)
+	if speed <= base_speed:
+		if base_speed <= 0: return 0.0
+		return (speed / base_speed) * 0.5
+		
+	# 2. Зона от ХОДЬБЫ (0.5) до БЕГА (1.0)
+	else:
+		var speed_range = run_speed - base_speed
+		if speed_range <= 0: return 1.0
+		var excess_speed = speed - base_speed
+		var t = excess_speed / speed_range
+		return clamp(0.5 + (t * 0.5), 0.5, 1.0)
 # ============================================================================
-# HEALTH & DAMAGE (ИСПРАВЛЕНИЕ КРАША)
+# HEALTH & DAMAGE
 # ============================================================================
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
@@ -398,6 +499,9 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
 	sfx_hurt.play_random()
+	
+	trigger_hit() # <-- Триггер анимации получения урона
+	
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 	
@@ -405,23 +509,13 @@ func take_damage(amount: float, knockback_force: Vector3) -> void:
 	is_knockbacked = true
 	current_knockback_timer = knockback_duration
 
-func _on_health_changed(val: float) -> void:
-	if health_component:
-		GameEvents.player_health_changed.emit(val, health_component.get_max_health())
+func _on_health_changed(val: float, max_hp: float) -> void:
+	GameEvents.player_health_changed.emit(val, max_hp)
 
 func _on_died() -> void:
-	print("Player Died Signal Received")
-	
-	# 1. Отправляем глобальный сигнал всем врагам
 	GameEvents.player_died.emit()
-	
-	# 2. Удаляем игрока из группы "player"
-	# Это автоматически заставит VisionComponent врагов перестать "видеть" игрока,
-	# так как они обычно ищут цели в этой группе.
 	if is_in_group(GameConstants.GROUP_PLAYER):
 		remove_from_group(GameConstants.GROUP_PLAYER)
-	
-	# 3. Переход в состояние смерти (анимация и отключение управления)
 	state_machine.change_state(GameConstants.STATE_DEAD)
 
 func _update_stun_timer(delta: float) -> void:
@@ -437,7 +531,6 @@ func _update_roll_timers(delta: float) -> void:
 		if roll_penalty_timer <= 0:
 			is_roll_recharging = false
 			current_roll_charges = roll_max_charges
-			# Сигнал: Полностью восстановились после штрафа
 			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
 			
 	elif current_roll_charges < roll_max_charges:
@@ -445,14 +538,10 @@ func _update_roll_timers(delta: float) -> void:
 		if roll_regen_timer <= 0:
 			current_roll_charges += 1
 			roll_regen_timer = roll_cooldown
-			# Сигнал: Восстановили один заряд
 			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
 			
 	if roll_interval_timer > 0:
 		roll_interval_timer -= delta
-
-	# Дополнительная отправка сигнала, если состояние штрафа только началось
-	# (это состояние переключается в player_roll.gd, поэтому там тоже надо добавить emit, но можно отловить и здесь)
 
 # ============================================================================
 # COLLISIONS & MISC
@@ -465,52 +554,34 @@ func push_obj():
 		var c = get_slide_collision(i)
 		var collider = c.get_collider()
 		
-		# Толкаем физические объекты
 		if collider is RigidBody3D:
 			collider.apply_central_impulse(-c.get_normal() * force)
 			
-		# Толкаем врагов (CharacterBody3D)
 		if collider is CharacterBody3D and collider.has_method("receive_push"):
-			# 1. Применяем толчок врагу
-			# (Вектор толчка берем от нашего движения + нормаль)
 			var push_dir = -c.get_normal()
-			push_dir.y = 0 # Не подбрасываем вверх при толчке
+			push_dir.y = 0
 			collider.receive_push(push_dir.normalized() * force)
 			
-			# 2. ЭФФЕКТ СТОЛКНОВЕНИЯ (Recoil)
-			# Если мы катимся и врезались во врага - мы должны потерять скорость!
 			if is_rolling:
-				# Гасим физическую скорость
 				velocity *= 0.5
-				
-				# Гасим скорость внутри стейта (чтобы она не восстановилась в след. кадре)
 				var current_state = state_machine.current_state
 				if "current_roll_speed" in current_state:
 					current_state.current_roll_speed *= 0.5
 
 func check_jump_pass_through() -> void:
-	# 1. Если мы уже "проваливаемся" (маска врагов отключена)
 	if is_passing_through:
-		# Ждем, пока коснемся "настоящего" пола (World/Ground)
-		# Так как маска врагов отключена, is_on_floor() вернет true ИСКЛЮЧИТЕЛЬНО от земли/стен
 		if is_on_floor():
 			is_passing_through = false
-			set_collision_mask_value(3, true) # Включаем врагов обратно
+			set_collision_mask_value(3, true)
 		return
 
-	# 2. Если мы стоим на чем-то (проверяем, не враг ли это)
 	if is_on_floor():
 		for i in get_slide_collision_count():
 			var c = get_slide_collision(i)
 			if c.get_collider().is_in_group(GameConstants.GROUP_ENEMIES):
-				# Если мы сверху (нормаль вверх)
 				if c.get_normal().y > 0.6:
-					# !!! FIX: Pass Through !!!
-					# Отключаем коллизию с врагами, чтобы провалиться сквозь них
 					is_passing_through = true
 					set_collision_mask_value(3, false)
-					
-					# Чуть сдвигаем вниз, чтобы гарантированно "войти" в коллайдер врага и не застрять на грани
 					global_position.y -= 0.05
 					break
 
@@ -521,7 +592,6 @@ func _check_attack_hit() -> void:
 
 func _check_single_hand_hit(hand: Area3D) -> bool:
 	for body in hand.get_overlapping_bodies():
-		# Проверяем, что это не мы сами и что объект можно ударить
 		if body != self and body.has_method("take_damage"):
 			punch_collision(body, hand)
 			return true
@@ -537,31 +607,25 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 		if current_attack_knockback_enabled:
 			knockback_vec = dir * attack_knockback_strength
 			if is_finisher:
-				# Подбрасываем вверх!
-				# Было 10.0, уменьшаем по просьбе (например до 6.0)
 				knockback_vec.y = 6.0
-				
-				# Можно немного уменьшить отталкивание назад, чтобы он подлетел "на месте"
 				knockback_vec.x *= 0.5
 				knockback_vec.z *= 0.5
 			else:
-				# Обычный удар - легкий подскок
-				knockback_vec.y = attack_knockback_height # (например 2.0)
+				knockback_vec.y = attack_knockback_height
 		
-		# Передаем вектор
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
-		var recoil_force = 2.0 # Сила отдачи
+		var recoil_force = 2.0
 		if is_finisher: recoil_force = 4.0
-		# Применяем импульс обратно вектору атаки
 		velocity -= dir * recoil_force
+
 func play_step_sound():
 	if is_on_floor():
 		sfx_footsteps.play_random()
+
 func get_closest_nav_point() -> Vector3:
 	var map = get_world_3d().navigation_map
 	return NavigationServer3D.map_get_closest_point(map, global_position)
 
-# Метод для "выталкивания" игрока
 func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()

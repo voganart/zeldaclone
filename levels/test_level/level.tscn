@@ -414,27 +414,27 @@ item/2/navigation_layers = 1
 item/2/preview = SubResource("ImageTexture_6wlbj")
 metadata/_editor_source_scene = "res://assets/models/environment/gridmap_meshlib.tscn"
 
-[sub_resource type="Resource" id="Resource_j2se1"]
+[sub_resource type="Resource" id="Resource_mtvxm"]
 script = ExtResource("24_xbjnq")
 amount = 5000
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_dsao6"]
+[sub_resource type="Resource" id="Resource_fwvrn"]
 script = ExtResource("25_e3h7t")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(5, 360, 5)
 scale = Vector3(0.5, 0.5, 0.5)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_mtvxm"]
+[sub_resource type="Resource" id="Resource_4n1ev"]
 script = ExtResource("26_84ugw")
 iterations = 4
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_fwvrn"]
+[sub_resource type="Resource" id="Resource_osjvn"]
 script = ExtResource("27_8ftol")
 ray_length = 5.0
 ray_offset = 5.0
@@ -442,9 +442,9 @@ align_with_collision_normal = true
 collision_mask = 8
 exclude_mask = 7
 
-[sub_resource type="Resource" id="Resource_4n1ev"]
+[sub_resource type="Resource" id="Resource_llhr3"]
 script = ExtResource("22_mnooe")
-stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_j2se1"), SubResource("Resource_dsao6"), SubResource("Resource_mtvxm"), SubResource("Resource_fwvrn")])
+stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_mtvxm"), SubResource("Resource_fwvrn"), SubResource("Resource_4n1ev"), SubResource("Resource_osjvn")])
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mnooe"]
 
@@ -550,7 +550,7 @@ trauma_decay = 1.5
 transform = Transform3D(0.847057, 0, -0.5315021, 0, 1, 0, 0.5315021, 0, 0.847057, -5.4363027, 0.028638959, 12.086688)
 
 [node name="PatrolZone" type="Area3D" parent="Entities"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9447, 0, -2.46294)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.070804, 0, -2.3100004)
 collision_layer = 4
 collision_mask = 4
 
@@ -800,7 +800,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6690078, 0, 11.678664)
 visible = false
 script = ExtResource("21_ov4tj")
 global_seed = 2
-modifier_stack = SubResource("Resource_4n1ev")
+modifier_stack = SubResource("Resource_llhr3")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"

@@ -4,14 +4,14 @@ var player: Player
 
 func enter() -> void:
 	player = entity as Player
+	# Компонент вызовет player.set_slam_state("start")
 	player.ground_slam_ability.start_slam()
-	# print("[FSM] Player Slam")
 
 func physics_update(delta: float) -> void:
-	# ЯВНО вызываем обновление физики компонента
 	player.ground_slam_ability.update_physics(delta)
 	
-	# Проверяем флаги: если способность закончила работу
 	if not player.ground_slam_ability.is_slamming and not player.ground_slam_ability.is_recovering:
+		# Перед выходом обязательно выключаем стейт в дереве!
+		player.set_slam_state("off")
 		transitioned.emit(self, GameConstants.STATE_MOVE)
 		return

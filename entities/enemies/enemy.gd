@@ -366,7 +366,8 @@ func _check_single_hand_hit(hand_area: Area3D) -> bool:
 # ============================================================================
 # UI & MISC
 # ============================================================================
-func _on_health_changed(new_health: float) -> void:
+func _on_health_changed(new_health: float, _max_hp: float) -> void:
+	# Мы просто добавили _max_hp в аргументы, чтобы соответствовать сигналу
 	if health_bar and health_component:
 		health_bar.update_health(new_health, health_component.get_max_health())
 	
