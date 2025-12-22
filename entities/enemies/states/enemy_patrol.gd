@@ -12,7 +12,7 @@ func enter() -> void:
 	
 	time_stuck = 0.0
 	_set_random_patrol_target()
-	enemy.play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, 1.0)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_WALK)
 	
 	# print("[FSM] Enter Patrol")
 

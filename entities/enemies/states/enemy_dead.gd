@@ -29,10 +29,15 @@ func enter() -> void:
 	enemy.anim_player.stop()
 	
 	# Анимация
-	enemy.play_animation(GameConstants.ANIM_ENEMY_DEATH, 0.2, 0.7)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_DEATH)
 	
 	# Ждем окончания анимации + время лежания
-	await enemy.anim_player.animation_finished
+	var anim_len = 1.0
+	if enemy.anim_player.has_animation(GameConstants.ANIM_ENEMY_DEATH):
+		# Если нужно учесть скорость 0.7, делили бы на 0.7, но сейчас играет с 1.0
+		anim_len = enemy.anim_player.get_animation(GameConstants.ANIM_ENEMY_DEATH).length
+	
+	await get_tree().create_timer(anim_len).timeout
 	await get_tree().create_timer(2.0).timeout
 	
 	_fade_out_and_free()

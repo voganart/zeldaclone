@@ -29,20 +29,32 @@ func _perform_attack() -> void:
 	var impulse = enemy.attack_component.register_attack()
 	
 	# Рывок вперед при атаке
-	var forward = -enemy.global_transform.basis.z.normalized()
+	var forward = - enemy.global_transform.basis.z.normalized()
 	enemy.receive_push(forward * impulse)
 	
-	enemy.play_animation(anim_name, 0.2, enemy.attack_component.attack_speed)
+	# ЗАПУСК АНИМАЦИИ (через AnimationTree)
+	# 1. Выбираем, какой удар играть
+	var idx_name = "Attack1" if anim_name == GameConstants.ANIM_ENEMY_ATTACK_1 else "Attack2"
+	# 2. Устанавливаем Transition
+	enemy.set_anim_param("attack_idx/transition_request", idx_name)
+	# 3. Активируем OneShot
+	enemy.set_anim_param("attack_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 	
-	# Ждем окончания анимации
-	await enemy.anim_player.animation_finished
+	# Ждем окончания (рассчитываем время)
+	var anim_len = 1.0
+	if enemy.anim_player.has_animation(anim_name):
+		anim_len = enemy.anim_player.get_animation(anim_name).length
+	
+	# Учитываем скорость атаки
+	var duration = anim_len / enemy.attack_component.attack_speed
+	await get_tree().create_timer(duration).timeout
 	
 	# ЗАЩИТА: Если за время анимации нас "выбили" из этого состояния (например, ударом 3)
 	if state_machine.current_state != self:
 		return
 
 	is_performing_attack_anim = false
-	AIDirector.return_attack_token(enemy) 
+	AIDirector.return_attack_token(enemy)
 	
 	# Проверяем, нужно ли отступать после удара
 	if enemy.attack_component.should_tactical_retreat:
@@ -67,7 +79,7 @@ func _handle_retreat(delta: float) -> void:
 	if enemy.attack_component.tactical_retreat_pause_timer > 0:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
-		enemy.play_animation(GameConstants.ANIM_ENEMY_ATTACK_IDLE, 0.2, 1.0)
+		enemy.play_animation(GameConstants.ANIM_ENEMY_IDLE, 0.2, 1.0)
 		enemy.handle_rotation(delta, enemy.player.global_position)
 		
 		if enemy.attack_component.tactical_retreat_pause_timer <= 0:
@@ -77,17 +89,14 @@ func _handle_retreat(delta: float) -> void:
 
 	# Фаза 2: Движение к точке отступления
 	enemy.nav_agent.target_position = enemy.attack_component.tactical_retreat_target
-	enemy.nav_agent.max_speed = enemy.retreat_speed 
+	enemy.nav_agent.max_speed = enemy.retreat_speed
 	enemy.move_toward_path()
 	
 	# Поворот к игроку во время отхода (пятится назад)
 	enemy.handle_rotation(delta, enemy.player.global_position)
 	
-	# Анимация движения (назад или обычная, если нет специальной)
-	if enemy.anim_player.has_animation("Monstr_walk_backwards"):
-		enemy.play_animation("Monstr_walk_backwards", 0.2)
-	else:
-		enemy.update_movement_animation(delta) 
+	# Анимация движения (теперь через Tree)
+	enemy.update_movement_animation(delta)
 	
 	# Если достигли точки отхода — включаем таймер паузы
 	if enemy.nav_agent.is_navigation_finished():

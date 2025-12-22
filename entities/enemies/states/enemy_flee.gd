@@ -11,7 +11,7 @@ func enter() -> void:
 	timer = flee_duration
 	
 	_set_flee_target()
-	enemy.play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, flee_speed) # Анимация бега чуть быстрее обычной
+	enemy.play_animation(GameConstants.ANIM_ENEMY_WALK)
 	print("AI: Fleeing!")
 
 func physics_update(delta: float) -> void:
@@ -29,7 +29,7 @@ func physics_update(delta: float) -> void:
 	# Движение
 	enemy.move_toward_path()
 	# Во время панического бегства смотрим вперед, а не на игрока
-	enemy.handle_rotation(delta) 
+	enemy.handle_rotation(delta)
 	enemy.update_movement_animation(delta)
 
 func _set_flee_target() -> void:

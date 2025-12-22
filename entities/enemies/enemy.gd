@@ -49,6 +49,7 @@ extends CharacterBody3D
 @onready var health_component: Node = $HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
+@onready var anim_tree: AnimationTree = $Monstr/AnimationTree
 var vfx_pull: Node3D
 @onready var player: Node3D = get_tree().get_first_node_in_group(GameConstants.GROUP_PLAYER)
 @onready var patrol_zone: Area3D = get_parent() as Area3D
@@ -201,74 +202,83 @@ func receive_push(push: Vector3) -> void:
 # ============================================================================
 # ANIMATION HELPERS
 # ============================================================================
-func play_animation(anim_name: String, blend: float = -1.0, speed: float = 1.0) -> void:
-	# Если эта анимация уже играет - ничего не делаем, чтобы не сбрасывать её каждый кадр
-	if anim_player.current_animation == anim_name:
-		return
+func set_anim_param(param_path: String, value: Variant) -> void:
+	anim_tree.set("parameters/" + param_path, value)
+
+func play_animation(anim_name: String, _blend: float = -1.0, _speed: float = 1.0) -> void:
+	# Управляем глобальным состоянием дерева
+	match anim_name:
+		GameConstants.ANIM_ENEMY_DEATH:
+			set_anim_param("state/transition_request", "dead")
+		GameConstants.ANIM_ENEMY_ANGRY:
+			set_anim_param("state/transition_request", "angry")
+		GameConstants.ANIM_ENEMY_IDLE, GameConstants.ANIM_ENEMY_WALK, GameConstants.ANIM_ENEMY_RUN:
+			set_anim_param("state/transition_request", "alive")
 	
-	# Запускаем анимацию
-	anim_player.play(anim_name, blend, speed)
-	
-	# --- ГЛОБАЛЬНАЯ РАНДОМИЗАЦИЯ ---
-	if anim_player.has_animation(anim_name):
-		var anim_resource = anim_player.get_animation(anim_name)
-		# Не рандомизируем слишком короткие анимации и СМЕРТЬ
-		if anim_resource.length > 0.2 and anim_name != GameConstants.ANIM_ENEMY_DEATH:
-			var random_start = randf() * anim_resource.length
-			anim_player.seek(random_start, true)
-			
-			# Микро-сдвиг скорости (от 0.95 до 1.05)
-			# Чтобы даже зацикленные анимации со временем расходились по фазе
-			anim_player.speed_scale = randf_range(0.95, 1.05)
+	# Для ваншотов (если вдруг вызовут через play_animation)
+	if anim_name == GameConstants.ANIM_ENEMY_HIT:
+		set_anim_param("hit_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+	elif anim_name == GameConstants.ANIM_ENEMY_KNOCKDOWN:
+		set_anim_param("knockdown_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 func update_movement_animation(delta: float) -> void:
-	var speed_length = velocity.length()
-	
-	# 1. Если почти стоим — играем Idle
-	if speed_length < 0.1:
-		play_animation(GameConstants.ANIM_ENEMY_IDLE, 0.2, 1.0)
-		return
-
-	# 2. Переводим глобальную скорость в локальное пространство врага
-	# basis.inverse() * vector позволяет узнать скорость с точки зрения самого врага
 	var local_velocity = global_transform.basis.inverse() * velocity
-	
-	# local_velocity.x -> (+) Вправо, (-) Влево
-	# local_velocity.z -> (-) Вперед, (+) Назад (в Godot -Z это вперед)
-	
-	# 3. Определяем, какое движение доминирует: продольное (бег) или поперечное (стрейф)
-	# Добавляем небольшой порог (bias), чтобы при легком повороте он не срывался в стрейф
-	var is_strafing = abs(local_velocity.x) > abs(local_velocity.z)
+	var speed_length = velocity.length()
+	var state_name = state_machine.current_state.name.to_lower()
+
+	# 1. Рассчитываем целевой бленд
+	# Если мы в Idle/Dead/Angry — скорость 0. 
+	# (Attack и CombatStance теперь тут, потому что они могут двигаться: отступление или стрейф)
+	if state_name not in ["chase", "patrol", "flee", "attack", "combatstance"]:
+		target_movement_blend = 0.0
+		# HARD SNAP для мгновенной остановки
+		current_movement_blend = 0.0
+	else:
+		# Если патруль завершен — тоже 0
+		if state_name == "patrol" and nav_agent.is_navigation_finished():
+			target_movement_blend = 0.0
+		else:
+			# Иначе считаем от реальной скорости
+			var h_speed = Vector2(velocity.x, velocity.z).length()
+			
+			# Нормализованная скорость (0..1)
+			var blend_val = clamp(inverse_lerp(0.0, run_speed, h_speed), 0.0, 1.0)
+			
+			# Если движемся назад (в локальных координатах Z > 0), делаем бленд отрицательным.
+			# В BlendSpace: положительные = вперед, отрицательные = назад.
+			if local_velocity.z > 0.1:
+				target_movement_blend = - blend_val
+			else:
+				target_movement_blend = blend_val
+			
+			# Если скорость совсем маленькая — ноль
+			if h_speed < 0.1: target_movement_blend = 0.0
+
+	# 2. Плавная интерполяция
+	if target_movement_blend == 0.0:
+		current_movement_blend = 0.0
+	else:
+		current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+
+	# 3. Применяем параметры в дерево
+	# Locomotion Blend
+	anim_tree.set("parameters/locomotion_blend/blend_position", current_movement_blend)
+
+	# Определяем режим: Strafe или Normal
+	# Стрейфим только в CombatStance (или если явно задано)
+	var is_strafing = (state_name == "combatstance")
 	
 	if is_strafing:
-		# --- ЛОГИКА СТРЕЙФА ---
-		# Нормализуем скорость анимации под скорость движения
-		var strafe_anim_speed = clamp(speed_length / walk_speed, 0.8, 1.5)
+		anim_tree.set("parameters/move_mode/transition_request", "strafe")
 		
-		if local_velocity.x > 0:
-			play_animation(GameConstants.ANIM_ENEMY_STRAFE_R, 0.2, strafe_anim_speed)
-		else:
-			play_animation(GameConstants.ANIM_ENEMY_STRAFE_L, 0.2, strafe_anim_speed)
-			
+		# Считаем направление стрейфа
+		# local.x > 0 (Right), < 0 (Left)
+		# Нормализуем относительно скорости ходьбы
+		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
+		anim_tree.set("parameters/strafe_blend/blend_position", strafe_val)
 	else:
-		# --- ЛОГИКА ДВИЖЕНИЯ ВПЕРЕД (Бег/Ходьба) ---
-		# Если вдруг он пятится назад (Z > 0)
-		if local_velocity.z > 0.1:
-			# Если есть анимация ходьбы назад — вставь её сюда. Если нет — Walk с реверсом или просто Walk
-			# play_animation("Monstr_walk_back", 0.2, 1.0)
-			play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, 1.0) # Временная заглушка
-		else:
-			# Обычный бег вперед с блендингом
-			var blend = inverse_lerp(walk_run_blend_start_speed, walk_run_blend_end_speed, speed_length)
-			target_movement_blend = clamp(blend, 0.0, 1.0)
-			current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+		anim_tree.set("parameters/move_mode/transition_request", "normal")
 
-			if current_movement_blend < 0.5:
-				var walk_scale = clamp(speed_length / walk_speed, 0.5, 1.5) if walk_speed > 0 else 1.0
-				play_animation(GameConstants.ANIM_ENEMY_WALK, 0.2, walk_scale)
-			else:
-				var run_scale = clamp(speed_length / run_speed, 0.5, 1.5) if run_speed > 0 else 1.0
-				play_animation(GameConstants.ANIM_ENEMY_RUN, 0.2, run_scale)
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================
@@ -283,33 +293,28 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 
 	# --- ЛОГИКА СБИВАНИЯ АТАКИ ---
 	if is_lethal:
-		# ЭПИЧНОЕ ЗАМЕДЛЕНИЕ ПРИ СМЕРТИ
 		if hit_stop_lethal_time_scale < 1.0:
 			GameManager.hit_stop_smooth(hit_stop_lethal_time_scale, hit_stop_lethal_duration)
 	
 	elif not is_lethal:
 		if is_heavy_attack:
-			# УДАР 3: Полностью сбиваем атаку
+			# УДАР 3: Полностью сбиваем атаку (Knockdown)
 			if is_attacking:
-				AIDirector.return_attack_token(self) # Возвращаем токен
-				# Переключаем состояние, чтобы остановить скрипт атаки
+				AIDirector.return_attack_token(self)
 				state_machine.change_state(GameConstants.STATE_CHASE)
 			
-			anim_player.play(GameConstants.ANIM_ENEMY_KNOCKDOWN, 0.1)
-			hurt_lock_timer = 0.5 # Запрет на действия
+			# !!! TRIGGER KNOCKDOWN ONESHOT
+			set_anim_param("knockdown_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			hurt_lock_timer = 0.5
 		else:
-			# УДАР 1 и 2: "Ступор" (Stutter)
+			# УДАР 1 и 2: Hit Reaction
 			if is_attacking:
-				# Замораживаем текущую анимацию атаки на 0.15 сек
-				# Это удлиняет время до нанесения урона монстром
+				# Если атакуем — просто фризим (Stutter), чтобы не сбивать замах полностью
 				GameManager.hit_stop_local([anim_player], 0.15)
 			else:
-				anim_player.play(GameConstants.ANIM_ENEMY_HIT, 0.1)
+				# !!! TRIGGER HIT ONESHOT
+				set_anim_param("hit_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 				hurt_lock_timer = 0.2
-
-	# Блок отключения хитбоксов удален, так как он вызывал баг "промахов" (застревание в false)
-	# Phantom hits можно лечить проверкой состояния (если мы в Knockdown - урон не наносим)
-	# Но пока просто убираем этот код.
 
 	# Остальной код (VFX, Health, Flash)
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))

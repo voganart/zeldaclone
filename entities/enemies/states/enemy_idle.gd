@@ -14,7 +14,7 @@ func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
 	
-	enemy.play_animation(GameConstants.ANIM_ENEMY_IDLE, 0.2, 1.0)
+	enemy.play_animation(GameConstants.ANIM_ENEMY_IDLE)
 	
 	timer = randf_range(idle_duration_min, idle_duration_max)
 	idle_look_timer = randf_range(1.5, 4.0)
@@ -40,7 +40,7 @@ func update(delta: float) -> void:
 	idle_look_timer -= delta
 	if idle_look_timer <= 0:
 		# Раз в 2-4 секунды чуть-чуть меняем угол поворота (на 30-45 градусов)
-		var random_angle = randf_range(-0.7, 0.7) 
+		var random_angle = randf_range(-0.7, 0.7)
 		var target_rot = enemy.rotation.y + random_angle
 		# Плавный поворот к новому случайному углу
 		enemy.rotation.y = lerp_angle(enemy.rotation.y, target_rot, delta * 1.0)
