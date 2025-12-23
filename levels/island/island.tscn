@@ -1,105 +1,175 @@
-[gd_scene load_steps=6 format=3 uid="uid://3qeblptfymiv"]
+[gd_scene load_steps=12 format=4 uid="uid://3qeblptfymiv"]
 
 [ext_resource type="PackedScene" uid="uid://c0dbb4xme8cko" path="res://assets/models/environment/island.blend" id="1_ecdf3"]
 [ext_resource type="Texture2D" uid="uid://yy0u5thsudiw" path="res://assets/textures/environment/decales/alphas_02_0002s_0001_873.png" id="2_0ply4"]
+[ext_resource type="Script" uid="uid://daxuj4lrlupen" path="res://addons/zylann.hterrain/hterrain.gd" id="2_24qil"]
+[ext_resource type="Resource" uid="uid://b73vnc6nyv3ww" path="res://levels/island/dd/data.hterrain" id="3_b8vkk"]
 [ext_resource type="Texture2D" uid="uid://1myamfmt75ax" path="res://assets/textures/environment/decales/vm_sand01.png" id="3_djsbw"]
+[ext_resource type="Script" uid="uid://3nr0s4y2e8oy" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="4_3gi4u"]
 [ext_resource type="Texture2D" uid="uid://bd1xops0rrmdn" path="res://assets/textures/environment/decales/alphas_01_0007s_0001_495.png" id="4_uunxy"]
 [ext_resource type="Texture2D" uid="uid://df476k6ksv24v" path="res://assets/textures/environment/decales/alphas_01__0000s_0001_249.png" id="5_2vh1l"]
 
+[sub_resource type="Resource" id="Resource_24qil"]
+script = ExtResource("4_3gi4u")
+mode = 0
+textures = [[], []]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_24qil"]
+_surfaces = [{
+"aabb": AABB(0, 1.0299562, 0, 60, 6.419065, 60),
+"format": 34359742465,
+"index_count": 864,
+"index_data": PackedByteArray("AAAOAA0AAAABAA4AAQACAA4AAgAPAA4AAgAQAA8AAgADABAAAwAEABAABAARABAABAASABEABAAFABIABQAGABIABgATABIABgAUABMABgAHABQABwAIABQACAAVABQACAAWABUACAAJABYACQAKABYACgAXABYACgAYABcACgALABgACwAMABgADAAZABgADQAOABoADgAbABoADgAcABsADgAPABwADwAQABwAEAAdABwAEAAeAB0AEAARAB4AEQASAB4AEgAfAB4AEgAgAB8AEgATACAAEwAUACAAFAAhACAAFAAiACEAFAAVACIAFQAWACIAFgAjACIAFgAkACMAFgAXACQAFwAYACQAGAAlACQAGAAmACUAGAAZACYAGgAoACcAGgAbACgAGwAcACgAHAApACgAHAAqACkAHAAdACoAHQAeACoAHgArACoAHgAsACsAHgAfACwAHwAgACwAIAAtACwAIAAuAC0AIAAhAC4AIQAiAC4AIgAvAC4AIgAwAC8AIgAjADAAIwAkADAAJAAxADAAJAAyADEAJAAlADIAJQAmADIAJgAzADIAJwAoADQAKAA1ADQAKAA2ADUAKAApADYAKQAqADYAKgA3ADYAKgA4ADcAKgArADgAKwAsADgALAA5ADgALAA6ADkALAAtADoALQAuADoALgA7ADoALgA8ADsALgAvADwALwAwADwAMAA9ADwAMAA+AD0AMAAxAD4AMQAyAD4AMgA/AD4AMgBAAD8AMgAzAEAANABCAEEANAA1AEIANQA2AEIANgBDAEIANgBEAEMANgA3AEQANwA4AEQAOABFAEQAOABGAEUAOAA5AEYAOQA6AEYAOgBHAEYAOgBIAEcAOgA7AEgAOwA8AEgAPABJAEgAPABKAEkAPAA9AEoAPQA+AEoAPgBLAEoAPgBMAEsAPgA/AEwAPwBAAEwAQABNAEwAQQBCAE4AQgBPAE4AQgBQAE8AQgBDAFAAQwBEAFAARABRAFAARABSAFEARABFAFIARQBGAFIARgBTAFIARgBUAFMARgBHAFQARwBIAFQASABVAFQASABWAFUASABJAFYASQBKAFYASgBXAFYASgBYAFcASgBLAFgASwBMAFgATABZAFgATABaAFkATABNAFoATgBcAFsATgBPAFwATwBQAFwAUABdAFwAUABeAF0AUABRAF4AUQBSAF4AUgBfAF4AUgBgAF8AUgBTAGAAUwBUAGAAVABhAGAAVABiAGEAVABVAGIAVQBWAGIAVgBjAGIAVgBkAGMAVgBXAGQAVwBYAGQAWABlAGQAWABmAGUAWABZAGYAWQBaAGYAWgBnAGYAWwBcAGgAXABpAGgAXABqAGkAXABdAGoAXQBeAGoAXgBrAGoAXgBsAGsAXgBfAGwAXwBgAGwAYABtAGwAYABuAG0AYABhAG4AYQBiAG4AYgBvAG4AYgBwAG8AYgBjAHAAYwBkAHAAZABxAHAAZAByAHEAZABlAHIAZQBmAHIAZgBzAHIAZgB0AHMAZgBnAHQAaAB2AHUAaABpAHYAaQBqAHYAagB3AHYAagB4AHcAagBrAHgAawBsAHgAbAB5AHgAbAB6AHkAbABtAHoAbQBuAHoAbgB7AHoAbgB8AHsAbgBvAHwAbwBwAHwAcAB9AHwAcAB+AH0AcABxAH4AcQByAH4AcgB/AH4AcgCAAH8AcgBzAIAAcwB0AIAAdACBAIAAdQB2AIIAdgCDAIIAdgCEAIMAdgB3AIQAdwB4AIQAeACFAIQAeACGAIUAeAB5AIYAeQB6AIYAegCHAIYAegCIAIcAegB7AIgAewB8AIgAfACJAIgAfACKAIkAfAB9AIoAfQB+AIoAfgCLAIoAfgCMAIsAfgB/AIwAfwCAAIwAgACNAIwAgACOAI0AgACBAI4AggCQAI8AggCDAJAAgwCEAJAAhACRAJAAhACSAJEAhACFAJIAhQCGAJIAhgCTAJIAhgCUAJMAhgCHAJQAhwCIAJQAiACVAJQAiACWAJUAiACJAJYAiQCKAJYAigCXAJYAigCYAJcAigCLAJgAiwCMAJgAjACZAJgAjACaAJkAjACNAJoAjQCOAJoAjgCbAJoAjwCQAJwAkACdAJwAkACeAJ0AkACRAJ4AkQCSAJ4AkgCfAJ4AkgCgAJ8AkgCTAKAAkwCUAKAAlAChAKAAlACiAKEAlACVAKIAlQCWAKIAlgCjAKIAlgCkAKMAlgCXAKQAlwCYAKQAmAClAKQAmACmAKUAmACZAKYAmQCaAKYAmgCnAKYAmgCoAKcAmgCbAKgA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 169,
+"vertex_data": PackedByteArray("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")
+}]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_b8vkk"]
+data = PackedVector3Array(0, 1.7163999, 0, 5, 1.4247999, 5, 0, 1.9681, 5, 0, 1.7163999, 0, 5, 1.3691, 0, 5, 1.4247999, 5, 5, 1.3691, 0, 10, 1.4071, 0, 5, 1.4247999, 5, 10, 1.4071, 0, 10, 1.1783, 5, 5, 1.4247999, 5, 10, 1.4071, 0, 15, 1.3428, 5, 10, 1.1783, 5, 10, 1.4071, 0, 15, 1.3416, 0, 15, 1.3428, 5, 15, 1.3416, 0, 20, 2.0279999, 0, 15, 1.3428, 5, 20, 2.0279999, 0, 20, 1.6107, 5, 15, 1.3428, 5, 20, 2.0279999, 0, 25, 2.0930998, 5, 20, 1.6107, 5, 20, 2.0279999, 0, 25, 1.5997, 0, 25, 2.0930998, 5, 25, 1.5997, 0, 30, 1.3580999, 0, 25, 2.0930998, 5, 30, 1.3580999, 0, 30, 1.7689999, 5, 25, 2.0930998, 5, 30, 1.3580999, 0, 35, 1.681, 5, 30, 1.7689999, 5, 30, 1.3580999, 0, 35, 1.6456, 0, 35, 1.681, 5, 35, 1.6456, 0, 40, 2.2396998, 0, 35, 1.681, 5, 40, 2.2396998, 0, 40, 2.3767, 5, 35, 1.681, 5, 40, 2.2396998, 0, 45, 1.9188, 5, 40, 2.3767, 5, 40, 2.2396998, 0, 45, 1.8967999, 0, 45, 1.9188, 5, 45, 1.8967999, 0, 50, 1.6457, 0, 45, 1.9188, 5, 50, 1.6457, 0, 50, 1.7317, 5, 45, 1.9188, 5, 50, 1.6457, 0, 55, 1.9956, 5, 50, 1.7317, 5, 50, 1.6457, 0, 55, 1.4909999, 0, 55, 1.9956, 5, 55, 1.4909999, 0, 60, 1.4794999, 0, 55, 1.9956, 5, 60, 1.4794999, 0, 60, 1.5297999, 5, 55, 1.9956, 5, 0, 1.9681, 5, 5, 1.4247999, 5, 0, 1.7461, 10, 5, 1.4247999, 5, 5, 1.03, 10, 0, 1.7461, 10, 5, 1.4247999, 5, 10, 1.0862, 10, 5, 1.03, 10, 5, 1.4247999, 5, 10, 1.1783, 5, 10, 1.0862, 10, 10, 1.1783, 5, 15, 1.3428, 5, 10, 1.0862, 10, 15, 1.3428, 5, 15, 1.8700999, 10, 10, 1.0862, 10, 15, 1.3428, 5, 20, 2.4257, 10, 15, 1.8700999, 10, 15, 1.3428, 5, 20, 1.6107, 5, 20, 2.4257, 10, 20, 1.6107, 5, 25, 2.0930998, 5, 20, 2.4257, 10, 25, 2.0930998, 5, 25, 3.3485, 10, 20, 2.4257, 10, 25, 2.0930998, 5, 30, 3.5474, 10, 25, 3.3485, 10, 25, 2.0930998, 5, 30, 1.7689999, 5, 30, 3.5474, 10, 30, 1.7689999, 5, 35, 1.681, 5, 30, 3.5474, 10, 35, 1.681, 5, 35, 2.7639, 10, 30, 3.5474, 10, 35, 1.681, 5, 40, 2.2668, 10, 35, 2.7639, 10, 35, 1.681, 5, 40, 2.3767, 5, 40, 2.2668, 10, 40, 2.3767, 5, 45, 1.9188, 5, 40, 2.2668, 10, 45, 1.9188, 5, 45, 1.7781, 10, 40, 2.2668, 10, 45, 1.9188, 5, 50, 2.1426, 10, 45, 1.7781, 10, 45, 1.9188, 5, 50, 1.7317, 5, 50, 2.1426, 10, 50, 1.7317, 5, 55, 1.9956, 5, 50, 2.1426, 10, 55, 1.9956, 5, 55, 2.3969, 10, 50, 2.1426, 10, 55, 1.9956, 5, 60, 1.6595999, 10, 55, 2.3969, 10, 55, 1.9956, 5, 60, 1.5297999, 5, 60, 1.6595999, 10, 0, 1.7461, 10, 5, 1.3170999, 15, 0, 1.4979, 15, 0, 1.7461, 10, 5, 1.03, 10, 5, 1.3170999, 15, 5, 1.03, 10, 10, 1.0862, 10, 5, 1.3170999, 15, 10, 1.0862, 10, 10, 1.111, 15, 5, 1.3170999, 15, 10, 1.0862, 10, 15, 2.3525, 15, 10, 1.111, 15, 10, 1.0862, 10, 15, 1.8700999, 10, 15, 2.3525, 15, 15, 1.8700999, 10, 20, 2.4257, 10, 15, 2.3525, 15, 20, 2.4257, 10, 20, 4.3169, 15, 15, 2.3525, 15, 20, 2.4257, 10, 25, 5.3578997, 15, 20, 4.3169, 15, 20, 2.4257, 10, 25, 3.3485, 10, 25, 5.3578997, 15, 25, 3.3485, 10, 30, 3.5474, 10, 25, 5.3578997, 15, 30, 3.5474, 10, 30, 5.5129, 15, 25, 5.3578997, 15, 30, 3.5474, 10, 35, 3.8530998, 15, 30, 5.5129, 15, 30, 3.5474, 10, 35, 2.7639, 10, 35, 3.8530998, 15, 35, 2.7639, 10, 40, 2.2668, 10, 35, 3.8530998, 15, 40, 2.2668, 10, 40, 1.9370999, 15, 35, 3.8530998, 15, 40, 2.2668, 10, 45, 2.0906, 15, 40, 1.9370999, 15, 40, 2.2668, 10, 45, 1.7781, 10, 45, 2.0906, 15, 45, 1.7781, 10, 50, 2.1426, 10, 45, 2.0906, 15, 50, 2.1426, 10, 50, 2.5865, 15, 45, 2.0906, 15, 50, 2.1426, 10, 55, 2.6545, 15, 50, 2.5865, 15, 50, 2.1426, 10, 55, 2.3969, 10, 55, 2.6545, 15, 55, 2.3969, 10, 60, 1.6595999, 10, 55, 2.6545, 15, 60, 1.6595999, 10, 60, 2.1199, 15, 55, 2.6545, 15, 0, 1.4979, 15, 5, 1.3170999, 15, 0, 1.7257999, 20, 5, 1.3170999, 15, 5, 1.4781, 20, 0, 1.7257999, 20, 5, 1.3170999, 15, 10, 1.4966999, 20, 5, 1.4781, 20, 5, 1.3170999, 15, 10, 1.111, 15, 10, 1.4966999, 20, 10, 1.111, 15, 15, 2.3525, 15, 10, 1.4966999, 20, 15, 2.3525, 15, 15, 2.5565, 20, 10, 1.4966999, 20, 15, 2.3525, 15, 20, 4.8445, 20, 15, 2.5565, 20, 15, 2.3525, 15, 20, 4.3169, 15, 20, 4.8445, 20, 20, 4.3169, 15, 25, 5.3578997, 15, 20, 4.8445, 20, 25, 5.3578997, 15, 25, 7.449, 20, 20, 4.8445, 20, 25, 5.3578997, 15, 30, 7.1095996, 20, 25, 7.449, 20, 25, 5.3578997, 15, 30, 5.5129, 15, 30, 7.1095996, 20, 30, 5.5129, 15, 35, 3.8530998, 15, 30, 7.1095996, 20, 35, 3.8530998, 15, 35, 5.8514, 20, 30, 7.1095996, 20, 35, 3.8530998, 15, 40, 3.6246998, 20, 35, 5.8514, 20, 35, 3.8530998, 15, 40, 1.9370999, 15, 40, 3.6246998, 20, 40, 1.9370999, 15, 45, 2.0906, 15, 40, 3.6246998, 20, 45, 2.0906, 15, 45, 3.1257, 20, 40, 3.6246998, 20, 45, 2.0906, 15, 50, 2.5577, 20, 45, 3.1257, 20, 45, 2.0906, 15, 50, 2.5865, 15, 50, 2.5577, 20, 50, 2.5865, 15, 55, 2.6545, 15, 50, 2.5577, 20, 55, 2.6545, 15, 55, 2.967, 20, 50, 2.5577, 20, 55, 2.6545, 15, 60, 2.1529999, 20, 55, 2.967, 20, 55, 2.6545, 15, 60, 2.1199, 15, 60, 2.1529999, 20, 0, 1.7257999, 20, 5, 1.9036, 25, 0, 1.9523, 25, 0, 1.7257999, 20, 5, 1.4781, 20, 5, 1.9036, 25, 5, 1.4781, 20, 10, 1.4966999, 20, 5, 1.9036, 25, 10, 1.4966999, 20, 10, 3.2745, 25, 5, 1.9036, 25, 10, 1.4966999, 20, 15, 4.6082997, 25, 10, 3.2745, 25, 10, 1.4966999, 20, 15, 2.5565, 20, 15, 4.6082997, 25, 15, 2.5565, 20, 20, 4.8445, 20, 15, 4.6082997, 25, 20, 4.8445, 20, 20, 5.3469996, 25, 15, 4.6082997, 25, 20, 4.8445, 20, 25, 6.3743997, 25, 20, 5.3469996, 25, 20, 4.8445, 20, 25, 7.449, 20, 25, 6.3743997, 25, 25, 7.449, 20, 30, 7.1095996, 20, 25, 6.3743997, 25, 30, 7.1095996, 20, 30, 6.3234, 25, 25, 6.3743997, 25, 30, 7.1095996, 20, 35, 6.5807, 25, 30, 6.3234, 25, 30, 7.1095996, 20, 35, 5.8514, 20, 35, 6.5807, 25, 35, 5.8514, 20, 40, 3.6246998, 20, 35, 6.5807, 25, 40, 3.6246998, 20, 40, 5.0257, 25, 35, 6.5807, 25, 40, 3.6246998, 20, 45, 3.1994, 25, 40, 5.0257, 25, 40, 3.6246998, 20, 45, 3.1257, 20, 45, 3.1994, 25, 45, 3.1257, 20, 50, 2.5577, 20, 45, 3.1994, 25, 50, 2.5577, 20, 50, 3.031, 25, 45, 3.1994, 25, 50, 2.5577, 20, 55, 3.0261, 25, 50, 3.031, 25, 50, 2.5577, 20, 55, 2.967, 20, 55, 3.0261, 25, 55, 2.967, 20, 60, 2.1529999, 20, 55, 3.0261, 25, 60, 2.1529999, 20, 60, 2.1418, 25, 55, 3.0261, 25, 0, 1.9523, 25, 5, 1.9036, 25, 0, 1.6527, 30, 5, 1.9036, 25, 5, 2.2838, 30, 0, 1.6527, 30, 5, 1.9036, 25, 10, 4.4497, 30, 5, 2.2838, 30, 5, 1.9036, 25, 10, 3.2745, 25, 10, 4.4497, 30, 10, 3.2745, 25, 15, 4.6082997, 25, 10, 4.4497, 30, 15, 4.6082997, 25, 15, 5.1263, 30, 10, 4.4497, 30, 15, 4.6082997, 25, 20, 4.8024, 30, 15, 5.1263, 30, 15, 4.6082997, 25, 20, 5.3469996, 25, 20, 4.8024, 30, 20, 5.3469996, 25, 25, 6.3743997, 25, 20, 4.8024, 30, 25, 6.3743997, 25, 25, 3.8876, 30, 20, 4.8024, 30, 25, 6.3743997, 25, 30, 4.6917, 30, 25, 3.8876, 30, 25, 6.3743997, 25, 30, 6.3234, 25, 30, 4.6917, 30, 30, 6.3234, 25, 35, 6.5807, 25, 30, 4.6917, 30, 35, 6.5807, 25, 35, 5.6057, 30, 30, 4.6917, 30, 35, 6.5807, 25, 40, 5.6640997, 30, 35, 5.6057, 30, 35, 6.5807, 25, 40, 5.0257, 25, 40, 5.6640997, 30, 40, 5.0257, 25, 45, 3.1994, 25, 40, 5.6640997, 30, 45, 3.1994, 25, 45, 3.8804, 30, 40, 5.6640997, 30, 45, 3.1994, 25, 50, 3.0179, 30, 45, 3.8804, 30, 45, 3.1994, 25, 50, 3.031, 25, 50, 3.0179, 30, 50, 3.031, 25, 55, 3.0261, 25, 50, 3.0179, 30, 55, 3.0261, 25, 55, 3.3771, 30, 50, 3.0179, 30, 55, 3.0261, 25, 60, 2.2410998, 30, 55, 3.3771, 30, 55, 3.0261, 25, 60, 2.1418, 25, 60, 2.2410998, 30, 0, 1.6527, 30, 5, 1.6856999, 35, 0, 1.5218999, 35, 0, 1.6527, 30, 5, 2.2838, 30, 5, 1.6856999, 35, 5, 2.2838, 30, 10, 4.4497, 30, 5, 1.6856999, 35, 10, 4.4497, 30, 10, 3.4478998, 35, 5, 1.6856999, 35, 10, 4.4497, 30, 15, 4.3248997, 35, 10, 3.4478998, 35, 10, 4.4497, 30, 15, 5.1263, 30, 15, 4.3248997, 35, 15, 5.1263, 30, 20, 4.8024, 30, 15, 4.3248997, 35, 20, 4.8024, 30, 20, 4.6089, 35, 15, 4.3248997, 35, 20, 4.8024, 30, 25, 3.5435, 35, 20, 4.6089, 35, 20, 4.8024, 30, 25, 3.8876, 30, 25, 3.5435, 35, 25, 3.8876, 30, 30, 4.6917, 30, 25, 3.5435, 35, 30, 4.6917, 30, 30, 4.2237997, 35, 25, 3.5435, 35, 30, 4.6917, 30, 35, 5.2244, 35, 30, 4.2237997, 35, 30, 4.6917, 30, 35, 5.6057, 30, 35, 5.2244, 35, 35, 5.6057, 30, 40, 5.6640997, 30, 35, 5.2244, 35, 40, 5.6640997, 30, 40, 5.0583997, 35, 35, 5.2244, 35, 40, 5.6640997, 30, 45, 4.2019, 35, 40, 5.0583997, 35, 40, 5.6640997, 30, 45, 3.8804, 30, 45, 4.2019, 35, 45, 3.8804, 30, 50, 3.0179, 30, 45, 4.2019, 35, 50, 3.0179, 30, 50, 3.7428, 35, 45, 4.2019, 35, 50, 3.0179, 30, 55, 4.1500998, 35, 50, 3.7428, 35, 50, 3.0179, 30, 55, 3.3771, 30, 55, 4.1500998, 35, 55, 3.3771, 30, 60, 2.2410998, 30, 55, 4.1500998, 35, 60, 2.2410998, 30, 60, 2.363, 35, 55, 4.1500998, 35, 0, 1.5218999, 35, 5, 1.6856999, 35, 0, 1.5913, 40, 5, 1.6856999, 35, 5, 1.4168, 40, 0, 1.5913, 40, 5, 1.6856999, 35, 10, 3.041, 40, 5, 1.4168, 40, 5, 1.6856999, 35, 10, 3.4478998, 35, 10, 3.041, 40, 10, 3.4478998, 35, 15, 4.3248997, 35, 10, 3.041, 40, 15, 4.3248997, 35, 15, 3.3467, 40, 10, 3.041, 40, 15, 4.3248997, 35, 20, 3.3673, 40, 15, 3.3467, 40, 15, 4.3248997, 35, 20, 4.6089, 35, 20, 3.3673, 40, 20, 4.6089, 35, 25, 3.5435, 35, 20, 3.3673, 40, 25, 3.5435, 35, 25, 3.0173, 40, 20, 3.3673, 40, 25, 3.5435, 35, 30, 2.0646, 40, 25, 3.0173, 40, 25, 3.5435, 35, 30, 4.2237997, 35, 30, 2.0646, 40, 30, 4.2237997, 35, 35, 5.2244, 35, 30, 2.0646, 40, 35, 5.2244, 35, 35, 3.3161, 40, 30, 2.0646, 40, 35, 5.2244, 35, 40, 3.5456998, 40, 35, 3.3161, 40, 35, 5.2244, 35, 40, 5.0583997, 35, 40, 3.5456998, 40, 40, 5.0583997, 35, 45, 4.2019, 35, 40, 3.5456998, 40, 45, 4.2019, 35, 45, 4.1559, 40, 40, 3.5456998, 40, 45, 4.2019, 35, 50, 4.3879, 40, 45, 4.1559, 40, 45, 4.2019, 35, 50, 3.7428, 35, 50, 4.3879, 40, 50, 3.7428, 35, 55, 4.1500998, 35, 50, 4.3879, 40, 55, 4.1500998, 35, 55, 4.0297, 40, 50, 4.3879, 40, 55, 4.1500998, 35, 60, 2.4097, 40, 55, 4.0297, 40, 55, 4.1500998, 35, 60, 2.363, 35, 60, 2.4097, 40, 0, 1.5913, 40, 5, 1.5985, 45, 0, 1.7788999, 45, 0, 1.5913, 40, 5, 1.4168, 40, 5, 1.5985, 45, 5, 1.4168, 40, 10, 3.041, 40, 5, 1.5985, 45, 10, 3.041, 40, 10, 2.06, 45, 5, 1.5985, 45, 10, 3.041, 40, 15, 2.9745998, 45, 10, 2.06, 45, 10, 3.041, 40, 15, 3.3467, 40, 15, 2.9745998, 45, 15, 3.3467, 40, 20, 3.3673, 40, 15, 2.9745998, 45, 20, 3.3673, 40, 20, 3.3132, 45, 15, 2.9745998, 45, 20, 3.3673, 40, 25, 3.0888, 45, 20, 3.3132, 45, 20, 3.3673, 40, 25, 3.0173, 40, 25, 3.0888, 45, 25, 3.0173, 40, 30, 2.0646, 40, 25, 3.0888, 45, 30, 2.0646, 40, 30, 2.6052, 45, 25, 3.0888, 45, 30, 2.0646, 40, 35, 3.6845, 45, 30, 2.6052, 45, 30, 2.0646, 40, 35, 3.3161, 40, 35, 3.6845, 45, 35, 3.3161, 40, 40, 3.5456998, 40, 35, 3.6845, 45, 40, 3.5456998, 40, 40, 2.8156, 45, 35, 3.6845, 45, 40, 3.5456998, 40, 45, 3.4589, 45, 40, 2.8156, 45, 40, 3.5456998, 40, 45, 4.1559, 40, 45, 3.4589, 45, 45, 4.1559, 40, 50, 4.3879, 40, 45, 3.4589, 45, 50, 4.3879, 40, 50, 3.0672, 45, 45, 3.4589, 45, 50, 4.3879, 40, 55, 2.8218, 45, 50, 3.0672, 45, 50, 4.3879, 40, 55, 4.0297, 40, 55, 2.8218, 45, 55, 4.0297, 40, 60, 2.4097, 40, 55, 2.8218, 45, 60, 2.4097, 40, 60, 1.8337, 45, 55, 2.8218, 45, 0, 1.7788999, 45, 5, 1.5985, 45, 0, 1.6359999, 50, 5, 1.5985, 45, 5, 1.6104, 50, 0, 1.6359999, 50, 5, 1.5985, 45, 10, 1.5502, 50, 5, 1.6104, 50, 5, 1.5985, 45, 10, 2.06, 45, 10, 1.5502, 50, 10, 2.06, 45, 15, 2.9745998, 45, 10, 1.5502, 50, 15, 2.9745998, 45, 15, 2.3155, 50, 10, 1.5502, 50, 15, 2.9745998, 45, 20, 3.7236998, 50, 15, 2.3155, 50, 15, 2.9745998, 45, 20, 3.3132, 45, 20, 3.7236998, 50, 20, 3.3132, 45, 25, 3.0888, 45, 20, 3.7236998, 50, 25, 3.0888, 45, 25, 4.1272, 50, 20, 3.7236998, 50, 25, 3.0888, 45, 30, 3.9413, 50, 25, 4.1272, 50, 25, 3.0888, 45, 30, 2.6052, 45, 30, 3.9413, 50, 30, 2.6052, 45, 35, 3.6845, 45, 30, 3.9413, 50, 35, 3.6845, 45, 35, 3.6908998, 50, 30, 3.9413, 50, 35, 3.6845, 45, 40, 3.165, 50, 35, 3.6908998, 50, 35, 3.6845, 45, 40, 2.8156, 45, 40, 3.165, 50, 40, 2.8156, 45, 45, 3.4589, 45, 40, 3.165, 50, 45, 3.4589, 45, 45, 2.5749, 50, 40, 3.165, 50, 45, 3.4589, 45, 50, 2.2928, 50, 45, 2.5749, 50, 45, 3.4589, 45, 50, 3.0672, 45, 50, 2.2928, 50, 50, 3.0672, 45, 55, 2.8218, 45, 50, 2.2928, 50, 55, 2.8218, 45, 55, 2.29, 50, 50, 2.2928, 50, 55, 2.8218, 45, 60, 1.5223999, 50, 55, 2.29, 50, 55, 2.8218, 45, 60, 1.8337, 45, 60, 1.5223999, 50, 0, 1.6359999, 50, 5, 1.3349999, 55, 0, 1.4824, 55, 0, 1.6359999, 50, 5, 1.6104, 50, 5, 1.3349999, 55, 5, 1.6104, 50, 10, 1.5502, 50, 5, 1.3349999, 55, 10, 1.5502, 50, 10, 1.2386999, 55, 5, 1.3349999, 55, 10, 1.5502, 50, 15, 1.9879999, 55, 10, 1.2386999, 55, 10, 1.5502, 50, 15, 2.3155, 50, 15, 1.9879999, 55, 15, 2.3155, 50, 20, 3.7236998, 50, 15, 1.9879999, 55, 20, 3.7236998, 50, 20, 3.2974, 55, 15, 1.9879999, 55, 20, 3.7236998, 50, 25, 3.1801999, 55, 20, 3.2974, 55, 20, 3.7236998, 50, 25, 4.1272, 50, 25, 3.1801999, 55, 25, 4.1272, 50, 30, 3.9413, 50, 25, 3.1801999, 55, 30, 3.9413, 50, 30, 3.2875, 55, 25, 3.1801999, 55, 30, 3.9413, 50, 35, 3.4183, 55, 30, 3.2875, 55, 30, 3.9413, 50, 35, 3.6908998, 50, 35, 3.4183, 55, 35, 3.6908998, 50, 40, 3.165, 50, 35, 3.4183, 55, 40, 3.165, 50, 40, 2.4626, 55, 35, 3.4183, 55, 40, 3.165, 50, 45, 1.7796999, 55, 40, 2.4626, 55, 40, 3.165, 50, 45, 2.5749, 50, 45, 1.7796999, 55, 45, 2.5749, 50, 50, 2.2928, 50, 45, 1.7796999, 55, 50, 2.2928, 50, 50, 1.3852999, 55, 45, 1.7796999, 55, 50, 2.2928, 50, 55, 1.7174, 55, 50, 1.3852999, 55, 50, 2.2928, 50, 55, 2.29, 50, 55, 1.7174, 55, 55, 2.29, 50, 60, 1.5223999, 50, 55, 1.7174, 55, 60, 1.5223999, 50, 60, 1.5778999, 55, 55, 1.7174, 55, 0, 1.4824, 55, 5, 1.3349999, 55, 0, 1.2433, 60, 5, 1.3349999, 55, 5, 1.4568, 60, 0, 1.2433, 60, 5, 1.3349999, 55, 10, 1.594, 60, 5, 1.4568, 60, 5, 1.3349999, 55, 10, 1.2386999, 55, 10, 1.594, 60, 10, 1.2386999, 55, 15, 1.9879999, 55, 10, 1.594, 60, 15, 1.9879999, 55, 15, 2.0312998, 60, 10, 1.594, 60, 15, 1.9879999, 55, 20, 2.6276999, 60, 15, 2.0312998, 60, 15, 1.9879999, 55, 20, 3.2974, 55, 20, 2.6276999, 60, 20, 3.2974, 55, 25, 3.1801999, 55, 20, 2.6276999, 60, 25, 3.1801999, 55, 25, 2.3518999, 60, 20, 2.6276999, 60, 25, 3.1801999, 55, 30, 2.0953, 60, 25, 2.3518999, 60, 25, 3.1801999, 55, 30, 3.2875, 55, 30, 2.0953, 60, 30, 3.2875, 55, 35, 3.4183, 55, 30, 2.0953, 60, 35, 3.4183, 55, 35, 2.2649999, 60, 30, 2.0953, 60, 35, 3.4183, 55, 40, 1.9483999, 60, 35, 2.2649999, 60, 35, 3.4183, 55, 40, 2.4626, 55, 40, 1.9483999, 60, 40, 2.4626, 55, 45, 1.7796999, 55, 40, 1.9483999, 60, 45, 1.7796999, 55, 45, 1.2342, 60, 40, 1.9483999, 60, 45, 1.7796999, 55, 50, 1.1481999, 60, 45, 1.2342, 60, 45, 1.7796999, 55, 50, 1.3852999, 55, 50, 1.1481999, 60, 50, 1.3852999, 55, 55, 1.7174, 55, 50, 1.1481999, 60, 55, 1.7174, 55, 55, 1.3109, 60, 50, 1.1481999, 60, 55, 1.7174, 55, 60, 1.1424, 60, 55, 1.3109, 60, 55, 1.7174, 55, 60, 1.5778999, 55, 60, 1.1424, 60)
+
 [node name="island" instance=ExtResource("1_ecdf3")]
 
-[node name="Decal4" type="Decal" parent="." index="1"]
-transform = Transform3D(-0.58228886, 0, -2.1731315, 0, 5.430597, 0, 2.1731315, 0, -0.58228886, 2.4454026, -0.49331978, 7.504413)
+[node name="Node3D" type="Node3D" parent="." index="0"]
+transform = Transform3D(0.5138062, 0, 0, 0, 0.5138062, 0, 0, 0, 0.5138062, -0.5739193, -1.9034376, -0.6962929)
+
+[node name="HTerrain" type="Node3D" parent="Node3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.223652, 0, -26.54406)
+script = ExtResource("2_24qil")
+_terrain_data = ExtResource("3_b8vkk")
+chunk_size = 32
+collision_enabled = true
+collision_layer = 8
+collision_mask = 63
+shader_type = "Classic4Lite"
+custom_shader = null
+custom_globalmap_shader = null
+texture_set = SubResource("Resource_24qil")
+render_layers = 1
+cast_shadow = 1
+shader_params/u_ground_uv_scale = 20
+shader_params/u_depth_blending = true
+shader_params/u_triplanar = null
+shader_params/u_tile_reduction = null
+metadata/_custom_type_script = "uid://daxuj4lrlupen"
+
+[node name="HTerrain_FullMesh" type="MeshInstance3D" parent="Node3D" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.223652, 0, -26.54406)
+mesh = SubResource("ArrayMesh_24qil")
+skeleton = NodePath("../..")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Node3D" index="2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node3D/StaticBody3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.223652, 0, -26.54406)
+shape = SubResource("ConcavePolygonShape3D_b8vkk")
+
+[node name="Ground" parent="." index="1"]
+visible = false
+
+[node name="Decal4" type="Decal" parent="." index="2"]
+transform = Transform3D(-0.58228886, 0, -2.1731315, 0, 5.430597, 0, 2.1731315, 0, -0.58228886, 3.331112, 0.3639388, 7.7781296)
+visible = false
 layers = 16
 size = Vector3(5.720581, 0.9421387, 6.116577)
 texture_albedo = ExtResource("3_djsbw")
 texture_normal = ExtResource("3_djsbw")
 modulate = Color(0.6249113, 0.48993042, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal6" type="Decal" parent="." index="2"]
-transform = Transform3D(2.0737867, 0, 0.872336, 0, 3.6259918, 0, -0.872336, 0, 2.0737867, 6.1217504, 0.3259516, -4.728654)
+[node name="Decal6" type="Decal" parent="." index="3"]
+transform = Transform3D(2.0737867, 0, 0.872336, 0, 3.6259918, 0, -0.872336, 0, 2.0737867, 7.0074577, 1.1832101, -4.454937)
+visible = false
 layers = 16
 size = Vector3(5.720581, 0.8100586, 6.116577)
 texture_albedo = ExtResource("3_djsbw")
 texture_normal = ExtResource("3_djsbw")
 modulate = Color(0.57060206, 0.334011, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal7" type="Decal" parent="." index="3"]
-transform = Transform3D(0.9468866, 0, -2.0408254, 0, 3.6259923, 0, 2.0408254, 0, 0.9468866, -9.016094, -0.02052188, -3.0919373)
+[node name="Decal7" type="Decal" parent="." index="4"]
+transform = Transform3D(0.9468866, 0, -2.0408254, 0, 3.6259923, 0, 2.0408254, 0, 0.9468866, -8.130386, 0.8367367, -2.818222)
+visible = false
 layers = 16
 size = Vector3(5.3065796, 0.8100586, 5.796112)
 texture_albedo = ExtResource("3_djsbw")
 texture_normal = ExtResource("3_djsbw")
 modulate = Color(0.6249113, 0.49100175, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal" type="Decal" parent="." index="4"]
-transform = Transform3D(3.3332863, 0, -0.52698654, 0, 1.8147081, 0, 0.52698654, 0, 3.3332863, -7.645514, -1.0891464, -6.7048054)
+[node name="Decal" type="Decal" parent="." index="5"]
+transform = Transform3D(3.3332863, 0, -0.52698654, 0, 1.8147081, 0, 0.52698654, 0, 3.3332863, -6.7598057, -0.23188782, -6.4310894)
+visible = false
 layers = 16
 size = Vector3(5.2244873, 2, 5.761902)
 texture_albedo = ExtResource("2_0ply4")
 texture_normal = ExtResource("2_0ply4")
 modulate = Color(0.50396526, 0.33577383, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal2" type="Decal" parent="." index="5"]
-transform = Transform3D(-1.5120096, 0, -3.5928655, 0, 1.8147081, 0, 3.5368137, 0, -1.535972, -3.676395, -1.0891457, 6.2312717)
+[node name="Decal2" type="Decal" parent="." index="6"]
+transform = Transform3D(-1.5120096, 0, -3.5928655, 0, 1.8147081, 0, 3.5368137, 0, -1.535972, -2.7906876, -0.2318871, 6.504986)
+visible = false
 layers = 16
 size = Vector3(5.328125, 2, 5.449005)
 texture_albedo = ExtResource("2_0ply4")
 texture_normal = ExtResource("2_0ply4")
 modulate = Color(0.50396526, 0.33577383, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal5" type="Decal" parent="." index="6"]
-transform = Transform3D(0.34440175, 0, -3.8917205, 0, 1.8147081, 0, 3.8310068, 0, 0.34985995, 4.3331933, -0.9538435, 7.4621935)
+[node name="Decal5" type="Decal" parent="." index="7"]
+transform = Transform3D(0.34440175, 0, -3.8917205, 0, 1.8147081, 0, 3.8310068, 0, 0.34985995, 5.2189026, -0.096584916, 7.7359085)
+visible = false
 layers = 16
 size = Vector3(4.460785, 2, 4.11602)
 texture_albedo = ExtResource("2_0ply4")
 texture_normal = ExtResource("2_0ply4")
 modulate = Color(0.50396526, 0.33577383, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal3" type="Decal" parent="." index="7"]
-transform = Transform3D(0.5650506, 0, -3.641991, 0, 1.814708, 0, 3.8026304, 0, 0.5411806, 4.973899, -0.940908, -5.4510937)
+[node name="Decal3" type="Decal" parent="." index="8"]
+transform = Transform3D(0.5650506, 0, -3.641991, 0, 1.814708, 0, 3.8026304, 0, 0.5411806, 5.8596077, -0.0836494, -5.1773777)
+visible = false
 layers = 16
 size = Vector3(3.9473267, 2, 4.571869)
 texture_albedo = ExtResource("2_0ply4")
 texture_normal = ExtResource("2_0ply4")
 modulate = Color(0.50396526, 0.33577383, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal8" type="Decal" parent="." index="8"]
-transform = Transform3D(0.5650506, 0, -3.641991, 0, 1.814708, 0, 3.8026304, 0, 0.5411806, -0.017562285, -0.7568929, -0.68439746)
+[node name="Decal8" type="Decal" parent="." index="9"]
+transform = Transform3D(0.5650506, 0, -3.641991, 0, 1.814708, 0, 3.8026304, 0, 0.5411806, 0.868145, 0.10036564, -0.41068077)
+visible = false
 layers = 16
 size = Vector3(6.519043, 2, 7.475525)
 texture_albedo = ExtResource("4_uunxy")
 texture_normal = ExtResource("4_uunxy")
 modulate = Color(0.10428016, 0.38051957, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal9" type="Decal" parent="." index="9"]
-transform = Transform3D(-3.79003, 0, -0.61695385, 0, 1.814708, 0, 0.64416635, 0, -3.6299233, -2.7345662, -0.7568929, 2.228119)
+[node name="Decal9" type="Decal" parent="." index="10"]
+transform = Transform3D(-3.79003, 0, -0.61695385, 0, 1.814708, 0, 0.64416635, 0, -3.6299233, -1.8488579, 0.10036564, 2.5018349)
+visible = false
 layers = 16
 size = Vector3(7.598633, 2, 8.560181)
 texture_albedo = ExtResource("4_uunxy")
 texture_normal = ExtResource("4_uunxy")
 modulate = Color(0.1394507, 0.5271546, 0, 1)
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal10" type="Decal" parent="." index="10"]
-transform = Transform3D(0.85819036, 0, -0.51333153, 0, 1, 0, 0.51333153, 0, 0.85819036, -11.231101, -0.2971592, 1.2987349)
+[node name="Decal10" type="Decal" parent="." index="11"]
+transform = Transform3D(0.85819036, 0, -0.51333153, 0, 1, 0, 0.51333153, 0, 0.85819036, -10.345394, 0.56009936, 1.5724525)
+visible = false
 layers = 16
 size = Vector3(7.736328, 2, 8.560181)
 texture_albedo = ExtResource("5_2vh1l")
@@ -107,10 +177,11 @@ texture_normal = ExtResource("5_2vh1l")
 modulate = Color(0.39138144, 0.16196242, 0, 1)
 normal_fade = 0.545
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal11" type="Decal" parent="." index="11"]
-transform = Transform3D(-0.986202, 0, -0.1655469, 0, 1, 0, 0.1655469, 0, -0.986202, 10.294111, -0.2971592, 4.7510757)
+[node name="Decal11" type="Decal" parent="." index="12"]
+transform = Transform3D(-0.986202, 0, -0.1655469, 0, 1, 0, 0.1655469, 0, -0.986202, 11.179821, 0.56009936, 5.0247917)
+visible = false
 layers = 16
 size = Vector3(10.586914, 2, 11.927429)
 texture_albedo = ExtResource("5_2vh1l")
@@ -118,10 +189,11 @@ texture_normal = ExtResource("5_2vh1l")
 modulate = Color(0.39138144, 0.16196242, 0, 1)
 normal_fade = 0.545
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Decal12" type="Decal" parent="." index="12"]
-transform = Transform3D(0.54792833, 0, -0.8365253, 0, 1, 0, 0.8365253, 0, 0.54792833, -10.069191, -0.2971592, -10.544066)
+[node name="Decal12" type="Decal" parent="." index="13"]
+transform = Transform3D(0.54792833, 0, -0.8365253, 0, 1, 0, 0.8365253, 0, 0.54792833, -9.183483, 0.56009936, -10.270351)
+visible = false
 layers = 16
 size = Vector3(10.586914, 2, 11.927429)
 texture_albedo = ExtResource("5_2vh1l")
@@ -129,8 +201,14 @@ texture_normal = ExtResource("5_2vh1l")
 modulate = Color(0.39138144, 0.16196242, 0, 1)
 normal_fade = 0.545
 distance_fade_enabled = true
-cull_mask = 16
+cull_mask = 1
 
-[node name="Island" parent="." index="15"]
+[node name="Sand" parent="." index="15"]
+visible = false
+
+[node name="Island" parent="." index="16"]
 collision_layer = 8
 collision_mask = 31
+
+[node name="CollisionShape3D" parent="Island" index="0"]
+debug_color = Color(0, 0.6, 0.69803923, 1)

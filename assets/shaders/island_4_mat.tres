@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bp4pwf0t0xtv0"]
+
+[ext_resource type="Shader" uid="uid://d07lmnan1rsao" path="res://assets/shaders/island_4_layers.gdshader" id="1_uqh13"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_uqh13")
+shader_parameter/uv_scale = 0.5
+shader_parameter/blend_softness = 0.2
