@@ -838,22 +838,29 @@ func _reset_ground_chunks():
 
 	_pending_chunk_updates.clear()
 
+	# Эта функция теперь будет использовать исправленный compute_lod_count
 	_lodder.create_from_sizes(_chunk_size, _data.get_resolution())
 
-	_chunks.resize(_lodder.get_lod_count())
+	var lod_count = _lodder.get_lod_count()
+	_chunks.resize(lod_count)
 
-	var cres := _data.get_resolution() / _chunk_size
-	var csize_x := cres
-	var csize_y := cres
+	# Рассчитываем размер сетки для LOD 0, округленный до степени двойки.
+	# Эта логика теперь будет СИНХРОНИЗИРОВАНА с тем, что _lodder вычислил внутри себя.
+	var lod0_chunk_count = HT_Grid.up_div(_data.get_resolution() - 1, _chunk_size)
+	var csize = HT_Util.next_power_of_two(lod0_chunk_count)
+	if csize == 0:
+		csize = 1
 
-	for lod in _lodder.get_lod_count():
-		_logger.debug(str("Create grid for lod ", lod, ", ", csize_x, "x", csize_y))
-		var grid = HT_Grid.create_grid(csize_x, csize_y)
+	for lod in lod_count:
+		var grid_size = csize >> lod
+		if grid_size == 0:
+			grid_size = 1
+			
+		_logger.debug(str("Create grid for lod ", lod, ", ", grid_size, "x", grid_size))
+		var grid = HT_Grid.create_grid(grid_size, grid_size)
 		_chunks[lod] = grid
-		csize_x /= 2
-		csize_y /= 2
 
-	_mesher.configure(_chunk_size, _chunk_size, _lodder.get_lod_count())
+	_mesher.configure(_chunk_size, _chunk_size, lod_count)
 
 
 func _on_data_region_changed(min_x, min_y, size_x, size_y, channel):

@@ -1,7 +1,6 @@
-[gd_resource type="StandardMaterial3D" load_steps=7 format=3 uid="uid://bhbpq6ww32ymc"]
+[gd_resource type="StandardMaterial3D" load_steps=6 format=3 uid="uid://bhbpq6ww32ymc"]
 
 [ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://assets/_master/MasterTexture.png" id="1_6d4vr"]
-[ext_resource type="Texture2D" uid="uid://ktrpvuyn3ew8" path="res://assets/textures/environment/RustPlain007_COL_VAR2_3K.jpg" id="2_a7jy4"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_w3ib2"]
 noise_type = 2
@@ -32,7 +31,6 @@ detail_enabled = true
 detail_mask = SubResource("NoiseTexture2D_t4066")
 detail_blend_mode = 3
 detail_uv_layer = 1
-detail_albedo = ExtResource("2_a7jy4")
 uv2_scale = Vector3(0.1, 0.1, 0.1)
 uv2_triplanar = true
 uv2_triplanar_sharpness = 1.9318748

@@ -1,0 +1,29 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://bcm4f73ive6kt"
+path.s3tc="res://.godot/imported/island_albedo_bump_array.png-77a58908d6a8bfb628271449f75a8429.s3tc.ctexarray"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://levels/island/island_albedo_bump_array.png"
+dest_files=["res://.godot/imported/island_albedo_bump_array.png-77a58908d6a8bfb628271449f75a8429.s3tc.ctexarray"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+slices/horizontal=2
+slices/vertical=1

@@ -48,11 +48,21 @@ func clear():
 
 
 static func compute_lod_count(base_size: int, full_size: int) -> int:
-	var po : int = 0
-	while full_size > base_size:
-		full_size = full_size >> 1
-		po += 1
-	return po
+	if base_size == 0:
+		return 0
+	# Считаем, сколько чанков нужно на LOD 0. Используем деление с округлением вверх.
+	var chunk_count = (full_size - 1 + base_size - 1) / base_size
+	if chunk_count == 0:
+		return 0
+	
+	# Находим глубину квадродерева, необходимую для покрытия этого количества чанков.
+	# Это ceil(log2(chunk_count)).
+	var depth = 0
+	var po2_size = 1
+	while po2_size < chunk_count:
+		po2_size <<= 1 # Быстрое умножение на 2
+		depth += 1
+	return depth
 
 
 func create_from_sizes(base_size: int, full_size: int):
@@ -185,4 +195,3 @@ func _debug_draw_tree_recursive(ci: CanvasItem, quad: HT_QTLQuad, lod_index: int
 			chunk_indicator = 1
 		var r := Rect2(Vector2(quad.origin_x, quad.origin_y) * size, Vector2(size, size))
 		ci.draw_rect(r, Color(1.0 - lod_index * 0.2, 0.2 * checker, chunk_indicator, 1))
-
