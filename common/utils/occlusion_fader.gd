@@ -96,10 +96,32 @@ func _get_root_object(collider: Node) -> Node3D:
 	return collider as Node3D
 
 func _apply_opacity_recursive(node: Node, alpha: float):
+	# Проверяем, является ли объект визуальным (GeometryInstance3D)
 	if node is GeometryInstance3D:
-		# Используем твой шейдерный параметр dither_opacity
-		# Важно: параметр должен быть "instance uniform" в шейдере!
-		node.set_instance_shader_parameter("dither_opacity", alpha)
+		var should_apply = false
 		
+		# 1. Если это обычный Меш (MeshInstance3D)
+		if node is MeshInstance3D:
+			# У него есть эта функция, проверяем безопасно
+			if node.get_active_material(0) != null:
+				should_apply = true
+		
+		# 2. Если это CSG Стена (CSGShape3D)
+		elif node is CSGShape3D:
+			# У CSG нет get_active_material, проверяем свойства напрямую
+			if node.material_override != null or node.material != null:
+				should_apply = true
+				
+		# 3. Если это Мультимеш (Трава/Листва)
+		elif node is MultiMeshInstance3D:
+			# У мультимеша материал обычно внутри MultiMesh ресурса или в override
+			# Тут сложно проверить просто, поэтому просто разрешаем, краша не будет
+			should_apply = true
+
+		# Применяем параметр только если проверки прошли
+		if should_apply:
+			node.set_instance_shader_parameter("dither_opacity", alpha)
+		
+	# Рекурсия для детей
 	for child in node.get_children():
 		_apply_opacity_recursive(child, alpha)
