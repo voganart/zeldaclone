@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://dxcpn4ydkqwlb"]
+
+[ext_resource type="Texture2D" uid="uid://bui2qdopvbq15" path="res://assets/textures/environment/fur_01_1k/fur_01_basecolor_1k.png" id="1_1omhk"]
+[ext_resource type="Texture2D" uid="uid://b0gtkh6kg8oxq" path="res://assets/textures/environment/fur_01_1k/Packed_ORM.png" id="2_fs6no"]
+[ext_resource type="Texture2D" uid="uid://dw3llq5igr7q1" path="res://assets/textures/environment/fur_01_1k/fur_01_normal_gl_1k.png" id="3_3bv7x"]
+
+[resource]
+albedo_texture = ExtResource("1_1omhk")
+metallic = 1.0
+metallic_texture = ExtResource("2_fs6no")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_fs6no")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 2.0
+normal_texture = ExtResource("3_3bv7x")
+ao_enabled = true
+ao_light_affect = 0.5
+ao_texture = ExtResource("2_fs6no")
+uv1_scale = Vector3(0.5, 0.5, 0.5)

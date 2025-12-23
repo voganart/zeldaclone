@@ -1,11 +1,9 @@
-[gd_resource type="StandardMaterial3D" load_steps=11 format=3 uid="uid://cwpux2l2fpto6"]
+[gd_resource type="StandardMaterial3D" load_steps=9 format=3 uid="uid://cwpux2l2fpto6"]
 
 [ext_resource type="Texture2D" uid="uid://b2oxjn65h4xtr" path="res://assets/textures/environment/metal_01_1k/metal_01_color_1k.png" id="1_368t3"]
-[ext_resource type="Texture2D" uid="uid://c0rleyisy7jl7" path="res://assets/textures/environment/metal_01_1k/metal_01_ambient_occlusion_1k.png" id="2_coo4h"]
+[ext_resource type="Texture2D" uid="uid://dfk05x11w2el" path="res://assets/textures/environment/metal_01_1k/Packed_ORM.png" id="2_dl6fa"]
 [ext_resource type="Texture2D" uid="uid://bomvlyfon8tgr" path="res://assets/textures/environment/Stylized Rock2nm.png" id="2_ua6c6"]
-[ext_resource type="Texture2D" uid="uid://dv141aq3r2t3e" path="res://assets/textures/environment/metal_01_1k/metal_01_metallic_1k.png" id="4_7d7gr"]
 [ext_resource type="Texture2D" uid="uid://cmgw13qhad00q" path="res://assets/textures/environment/metal_01_1k/metal_01_normal_gl_1k.png" id="5_qq5tu"]
-[ext_resource type="Texture2D" uid="uid://bj3rv0r0ay1sm" path="res://assets/textures/environment/metal_01_1k/metal_01_roughness_1k.png" id="6_rpp2d"]
 
 [sub_resource type="Gradient" id="Gradient_01adi"]
 offsets = PackedFloat32Array(0)
@@ -27,20 +25,18 @@ albedo_color = Color(0.78594697, 0.79595083, 0.79870105, 1)
 albedo_texture = ExtResource("1_368t3")
 metallic = 1.0
 metallic_specular = 1.0
-metallic_texture = ExtResource("4_7d7gr")
-metallic_texture_channel = 4
-roughness = 0.78
-roughness_texture = ExtResource("6_rpp2d")
-roughness_texture_channel = 4
+metallic_texture = ExtResource("2_dl6fa")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_dl6fa")
+roughness_texture_channel = 1
 normal_enabled = true
 normal_texture = ExtResource("5_qq5tu")
 rim = 0.37
 rim_tint = 0.6
 rim_texture = SubResource("GradientTexture2D_qdf5j")
 ao_enabled = true
-ao_light_affect = 0.82
-ao_texture = ExtResource("2_coo4h")
-ao_texture_channel = 4
+ao_light_affect = 1.0
+ao_texture = ExtResource("2_dl6fa")
 detail_albedo = SubResource("GradientTexture1D_ua6c6")
 detail_normal = ExtResource("2_ua6c6")
 uv2_scale = Vector3(10, 10, 10)

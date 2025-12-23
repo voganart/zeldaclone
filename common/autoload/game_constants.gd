@@ -83,7 +83,7 @@ const TREE_PARAM_LOCOMOTION = "parameters/locomotion_blend/blend_position"
 
 # 4. Misc
 const TREE_PARAM_TIMESCALE = "parameters/TimeScale/scale" 
-
+const TREE_PARAM_LOCOMOTION_SPEED = "parameters/LocomotionSpeed/scale"
 # --- ПАРАМЕТРЫ ШЕЙДЕРОВ ---
 const SHADER_PARAM_PLAYER_POS = "player_position"
 const SHADER_PARAM_DISSOLVE = "dissolve_amount"

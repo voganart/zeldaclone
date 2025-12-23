@@ -29,7 +29,7 @@ func physics_update(delta: float) -> void:
 	var input_vec = player.get_movement_vector()
 	player.apply_movement_velocity(delta, input_vec, player.base_speed)
 	player.rot_char(delta)
-	
+	player.tilt_character(delta) 
 	# --- ПЕРЕХОДЫ ---
 	
 	# Приземление

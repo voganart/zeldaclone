@@ -40,6 +40,8 @@ extends CharacterBody3D
 @export var walk_run_blend_smoothing: float = 8.0
 @export var walk_run_blend_start_speed: float = 3.6
 @export var walk_run_blend_end_speed: float = 4.2
+@export var walk_calibration_speed: float = 2.5 ## Скорость, при которой анимация ХОДЬБЫ выглядит идеально (scale 1.0)
+@export var run_calibration_speed: float = 4.0  ## Скорость, при которой анимация БЕГА выглядит идеально (scale 1.0)
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
@@ -124,6 +126,7 @@ var hit_enemies_current_attack: Dictionary = {}
 
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
+var current_time_scale: float = 1.0
 
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
@@ -289,46 +292,23 @@ func rot_char(delta: float) -> void:
 		rotation.y = lerp_angle(rotation.y, target_angle, current_rot_speed * delta)
 
 func tilt_character(delta: float) -> void:
-	# 1. Если мы не двигаемся или стоим на месте - выравниваемся в 0
-	if input_handler.move_vector.length() < 0.1 or not is_running:
-		_mesh.rotation.z = lerp_angle(_mesh.rotation.z, 0.0, 10.0 * delta)
-		return
+	var target_tilt = 0.0
 
-	# 2. Получаем вектор ввода в 3D (относительно камеры, как в get_movement_vector)
-	# Нам нужно понять, жмет ли игрок "влево/вправо" относительно того, куда смотрит модель.
-	
-	# Вектор, куда смотрит модель персонажа (Z - вперед, X - право)
-	var char_basis = global_transform.basis
-	
-	# Вектор, куда хочет идти игрок (из input_handler)
-	var input_dir_2d = input_handler.move_vector
-	var input_dir_3d = Vector3(input_dir_2d.x, 0, input_dir_2d.y).normalized()
-	
-	# Если камера вращается, нужно скорректировать input_dir_3d под камеру, 
-	# но обычно move_and_slide уже учитывает это в velocity. 
-	# Давай возьмем velocity, но нормализованную (чистое направление).
-	var move_dir = velocity.normalized()
-	
-	# Переводим глобальное движение в локальное пространство персонажа
-	# local_move.x > 0 — движение вправо
-	# local_move.x < 0 — движение влево
-	var local_move = char_basis.inverse() * move_dir
-	
-	# 3. Настройка силы наклона
-	var tilt_amount = 0.0
-	
-	# Если мы бежим и есть боковая составляющая движения (поворот)
-	if abs(local_move.x) > 0.1:
-		# Угол наклона в градусах (можно вынести в export var tilt_angle = 15.0)
-		var max_tilt_deg = 15.0 
+	# Считаем наклон ТОЛЬКО если мы на земле
+	if is_on_floor():
+		# Угол наклона: 10 градусов при быстром беге, иначе 3
+		var tilt_angle = 10 if is_running and velocity.length() > base_speed + 1 else 3
 		
-		# -local_move.x: инвертируем, чтобы наклон был "внутрь" поворота (как мотоцикл)
-		# Если персонаж наклоняется не туда — убери минус перед local_move.x
-		tilt_amount = deg_to_rad(max_tilt_deg) * -sign(local_move.x)
+		var move_vec = Vector3(velocity.x, 0, velocity.z)
+		var local_move = global_transform.basis.inverse() * move_vec
+		
+		# -local_move.x для наклона внутрь поворота
+		target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)
 	
-	# 4. Применяем вращение к Visuals
-	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, tilt_amount, 10.0 * delta)
-
+	# Если мы в воздухе, target_tilt останется 0.0, и lerp плавно выровняет персонажа
+	
+	# Применяем вращение к Visuals (или _mesh)
+	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 10.0 * delta)
 # ============================================================================
 # COMBAT HELPERS
 # ============================================================================
@@ -443,28 +423,43 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	var speed_2d = Vector2(velocity.x, velocity.z).length()
 	var has_input = current_input.length_squared() > 0.01
 	
-	# !!! ИСПРАВЛЕНИЕ: !!!
+	# 1. Бленд (Ходьба/Бег)
 	if has_input:
-		# Если жмем кнопки — считаем анимацию от скорости
 		target_movement_blend = calculate_walk_run_blend(speed_2d)
 	else:
-		# Если кнопки отпустили — анимация должна стремиться к Idle (0.0), 
-		# даже если персонаж еще немного скользит по инерции.
 		target_movement_blend = 0.0
 	
-	# Плавная интерполяция
 	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
-	
-	# Если значение очень маленькое, обрубаем его в 0, чтобы не висело 0.001
-	if current_movement_blend < 0.01:
-		current_movement_blend = 0.0
-
+	if current_movement_blend < 0.01: current_movement_blend = 0.0
 	set_locomotion_blend(current_movement_blend)
 	
-	# Логика анимации остановки (Stopping)
+	# === 2. РАСЧЕТ СКОРОСТИ (СГЛАЖЕННЫЙ) ===
+	var target_time_scale = 1.0
+	
+	if speed_2d > 0.1:
+		var current_calib = 0.0
+		if speed_2d <= base_speed:
+			current_calib = walk_calibration_speed
+		else:
+			var t = clamp(inverse_lerp(base_speed, run_speed, speed_2d), 0.0, 1.0)
+			current_calib = lerp(walk_calibration_speed, run_calibration_speed, t)
+		
+		target_time_scale = speed_2d / current_calib
+		target_time_scale = clamp(target_time_scale, 0.5, 3.0)
+	else:
+		target_time_scale = 1.0
+	
+	# !!! ВОТ ЭТО ИСПРАВИТ ЗАПИНАНИЯ !!!
+	# Плавно меняем скорость воспроизведения, чтобы не было рывков таймлайна
+	current_time_scale = lerp(current_time_scale, target_time_scale, 5.0 * delta)
+	
+	anim_tree.set(GameConstants.TREE_PARAM_LOCOMOTION_SPEED, current_time_scale)
+	# ======================================
+	
+	# Stopping logic... (без изменений)
 	if has_input:
 		is_stopping = false
-	elif speed_2d > 3.0: # Если скорость все еще большая, но ввода нет — тормозим
+	elif speed_2d > 3.0:
 		if not is_stopping:
 			is_stopping = true
 			trigger_stopping()

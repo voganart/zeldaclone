@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://b2spdv1h8osk5"]
+
+[ext_resource type="Texture2D" uid="uid://bqpqv58xli0e" path="res://assets/textures/environment/stone_wall_03_1k/stone_wall_03_color_1k.png" id="1_68gqd"]
+[ext_resource type="Texture2D" uid="uid://cqxmmg7l8j10y" path="res://assets/textures/environment/stone_wall_03_1k/Packed_ORM.png" id="2_xfrqw"]
+[ext_resource type="Texture2D" uid="uid://d36xruk3omhvh" path="res://assets/textures/environment/stone_wall_03_1k/stone_wall_03_normal_gl_1k.png" id="3_xw5c8"]
+
+[resource]
+albedo_texture = ExtResource("1_68gqd")
+metallic = 1.0
+metallic_texture = ExtResource("2_xfrqw")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_xfrqw")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 2.0
+normal_texture = ExtResource("3_xw5c8")
+ao_enabled = true
+ao_light_affect = 0.5
+ao_texture = ExtResource("2_xfrqw")
+uv1_scale = Vector3(0.5, 0.5, 0.5)

@@ -1,9 +1,8 @@
-[gd_resource type="StandardMaterial3D" load_steps=7 format=3 uid="uid://b3w8xx2wj6kg3"]
+[gd_resource type="StandardMaterial3D" load_steps=6 format=3 uid="uid://b3w8xx2wj6kg3"]
 
 [ext_resource type="Texture2D" uid="uid://ca4kutbmwv478" path="res://assets/textures/environment/cliff_rocks_02_1k/cliff_rocks_02_baseColor_1k.png" id="1_4y567"]
-[ext_resource type="Texture2D" uid="uid://6cyr4d3ajp7h" path="res://assets/textures/environment/cliff_rocks_02_1k/cliff_rocks_02_ambientOcclusion_1k.png" id="2_uyari"]
+[ext_resource type="Texture2D" uid="uid://jsw476dhqmys" path="res://assets/textures/environment/cliff_rocks_02_1k/Packed_ORM.png" id="2_p6nww"]
 [ext_resource type="Texture2D" uid="uid://olf4iq4chdwx" path="res://assets/textures/environment/cliff_rocks_02_1k/cliff_rocks_02_normal_gl_1k.png" id="3_6gykr"]
-[ext_resource type="Texture2D" uid="uid://q8nyelafcmbm" path="res://assets/textures/environment/cliff_rocks_02_1k/cliff_rocks_02_roughness_1k.png" id="4_edufu"]
 
 [sub_resource type="Gradient" id="Gradient_14vba"]
 
@@ -14,9 +13,9 @@ fill_from = Vector2(1, 1)
 [resource]
 albedo_color = Color(0.87473404, 0.83124983, 0.722701, 1)
 albedo_texture = ExtResource("1_4y567")
-roughness = 0.86
-roughness_texture = ExtResource("4_edufu")
-roughness_texture_channel = 4
+roughness = 0.8
+roughness_texture = ExtResource("2_p6nww")
+roughness_texture_channel = 1
 normal_enabled = true
 normal_scale = 5.0
 normal_texture = ExtResource("3_6gykr")
@@ -25,8 +24,7 @@ rim_tint = 0.27
 rim_texture = SubResource("GradientTexture2D_qdf5j")
 ao_enabled = true
 ao_light_affect = 1.0
-ao_texture = ExtResource("2_uyari")
-ao_texture_channel = 4
+ao_texture = ExtResource("2_p6nww")
 heightmap_scale = 4.435
 detail_blend_mode = 3
 detail_uv_layer = 1

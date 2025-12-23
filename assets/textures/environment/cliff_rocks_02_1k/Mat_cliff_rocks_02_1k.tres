@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3 uid="uid://b86vwg2pvxghn"]
+
+[ext_resource type="Texture2D" uid="uid://ca4kutbmwv478" path="res://assets/textures/environment/cliff_rocks_02_1k/cliff_rocks_02_baseColor_1k.png" id="1_itl20"]
+[ext_resource type="Texture2D" uid="uid://jsw476dhqmys" path="res://assets/textures/environment/cliff_rocks_02_1k/Packed_ORM.png" id="2_x0gj4"]
+[ext_resource type="Texture2D" uid="uid://olf4iq4chdwx" path="res://assets/textures/environment/cliff_rocks_02_1k/cliff_rocks_02_normal_gl_1k.png" id="3_ed7r5"]
+
+[resource]
+albedo_texture = ExtResource("1_itl20")
+metallic = 1.0
+metallic_texture = ExtResource("2_x0gj4")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_x0gj4")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 2.0
+normal_texture = ExtResource("3_ed7r5")
+ao_enabled = true
+ao_light_affect = 0.5
+ao_texture = ExtResource("2_x0gj4")
+uv1_scale = Vector3(0.5, 0.5, 0.5)
