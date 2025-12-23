@@ -46,8 +46,8 @@ _subresources={
 },
 "Material-metal": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/_master/Master_mat_env_metal.tres",
-"use_external/path": "uid://cwpux2l2fpto6"
+"use_external/fallback_path": "res://assets/materials/Mat_metal_01_1k.tres",
+"use_external/path": "uid://b75enkxyyxb1w"
 }
 },
 "meshes": {

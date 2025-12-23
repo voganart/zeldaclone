@@ -5,13 +5,17 @@ extends EditorScenePostImport
 const SAVE_PATH = "res://entities/environment/trees_generated/"
 const COL_SUFFIX = "_col"
 const TOP_SUFFIX = "_top"
-
-# Настройки Листвы
-const LEAF_MESH_PATH = "res://assets/models/environment/LeafBasePlane.tres" # <--- ЗАМЕНИ НА СВОЙ ПУТЬ!
-const LEAF_COUNT = 1000          # Количество листьев на дереве
+const GENERATOR_SCRIPT_PATH = "res://common/utils/tree_generator.gd"
+const LEAF_MESH_PATH = "res://assets/models/environment/LeafBasePlane.tres" 
+const LEAF_COUNT = 1000          
 const LEAF_SCALE_MIN = 0.8
 const LEAF_SCALE_MAX = 1.0
-const LEAF_COLOR = Color.RED    # Цвет вершины для шейдера ветра (Красный = Ветер)
+const LEAF_COLOR = Color.RED
+
+# Коллизии
+const OCCLUSION_LAYER_NUMBER = 32
+const TREE_LAYER_NUMBER = 4
+const TREE_MASK_UP_TO_LAYER = 6 
 
 func _post_import(scene_root_node: Node) -> Object:
 	var dir = DirAccess.open("res://")
@@ -42,7 +46,6 @@ func _update_or_create_scene(trunk_source: MeshInstance3D, top_source: MeshInsta
 	var root_node: StaticBody3D
 	var packed_scene: PackedScene
 	
-	# 1. Загрузка или создание
 	if FileAccess.file_exists(file_path):
 		print("Updating tree: ", trunk_source.name)
 		packed_scene = load(file_path)
@@ -54,18 +57,24 @@ func _update_or_create_scene(trunk_source: MeshInstance3D, top_source: MeshInsta
 		root_node = StaticBody3D.new()
 		root_node.name = trunk_source.name
 	
-	# 2. Обновление Ствола
+	# КОЛЛИЗИЯ ДЕРЕВА
+	root_node.collision_layer = 1 << (TREE_LAYER_NUMBER - 1)
+	var mask_val = 0
+	for i in range(TREE_MASK_UP_TO_LAYER):
+		mask_val += 1 << i
+	root_node.collision_mask = mask_val
+	
+	# Ствол
 	var trunk_inst = root_node.get_node_or_null("Trunk")
 	if not trunk_inst:
 		trunk_inst = MeshInstance3D.new()
 		trunk_inst.name = "Trunk"
 		root_node.add_child(trunk_inst)
 		trunk_inst.owner = root_node
-	
 	trunk_inst.mesh = trunk_source.mesh.duplicate()
 	trunk_inst.transform = Transform3D.IDENTITY
 	
-	# 3. Обновление Кроны и Листьев
+	# Крона
 	if top_source:
 		var crown_inst = root_node.get_node_or_null("Crown")
 		if not crown_inst:
@@ -73,16 +82,14 @@ func _update_or_create_scene(trunk_source: MeshInstance3D, top_source: MeshInsta
 			crown_inst.name = "Crown"
 			root_node.add_child(crown_inst)
 			crown_inst.owner = root_node
-			
 		crown_inst.mesh = top_source.mesh.duplicate()
 		crown_inst.transform = Transform3D.IDENTITY
+		crown_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 		top_source.visible = false
-		
 	
-	# 4. Обновление Коллизии
+	# Коллизия Shape Ствола
 	var old_col = root_node.get_node_or_null("CollisionShape3D")
 	if old_col: old_col.free()
-	
 	var shape = null
 	if col_source:
 		for child in col_source.get_children():
@@ -96,7 +103,6 @@ func _update_or_create_scene(trunk_source: MeshInstance3D, top_source: MeshInsta
 		col_source.visible = false
 	else:
 		shape = trunk_inst.mesh.create_convex_shape()
-	
 	if shape:
 		var col_node = CollisionShape3D.new()
 		col_node.name = "CollisionShape3D"
@@ -104,12 +110,54 @@ func _update_or_create_scene(trunk_source: MeshInstance3D, top_source: MeshInsta
 		root_node.add_child(col_node)
 		col_node.owner = root_node
 
-	# 5. Сохранение
+	# --- ГЕНЕРАЦИЯ OcclusionVolume (ТЕПЕРЬ ЭТО AREA3D) ---
+	var occ_vol = root_node.get_node_or_null("OcclusionVolume")
+	if occ_vol: occ_vol.free() 
+	
+	# !!! ИЗМЕНЕНИЕ: Используем Area3D, чтобы NavMesh его игнорировал !!!
+	occ_vol = Area3D.new()
+	occ_vol.name = "OcclusionVolume"
+	
+	# Слой 32
+	occ_vol.collision_layer = 1 << (OCCLUSION_LAYER_NUMBER - 1)
+	occ_vol.collision_mask = 0 
+	
+	root_node.add_child(occ_vol)
+	occ_vol.owner = root_node
+	
+	var occ_shape = CollisionShape3D.new()
+	var sphere = SphereShape3D.new()
+	
+	if top_source:
+		var aabb = top_source.mesh.get_aabb()
+		sphere.radius = aabb.get_longest_axis_size() * 0.6
+		occ_shape.position = top_source.position + Vector3(0, aabb.get_center().y, 0)
+	else:
+		sphere.radius = 2.5
+		occ_shape.position = Vector3(0, 3.0, 0)
+		
+	occ_shape.shape = sphere
+	occ_vol.add_child(occ_shape)
+	occ_shape.owner = root_node
+	# -----------------------------------------------------------
+
+	# Скрипт
+	var gen_script = load(GENERATOR_SCRIPT_PATH)
+	if gen_script:
+		if root_node.get_script() != gen_script:
+			root_node.set_script(gen_script)
+		if "leaf_mesh" in root_node and root_node.leaf_mesh == null:
+			var leaf_mesh_res = load(LEAF_MESH_PATH)
+			if leaf_mesh_res: root_node.leaf_mesh = leaf_mesh_res
+		if "leaf_count" in root_node: root_node.leaf_count = LEAF_COUNT
+		if "leaf_color" in root_node: root_node.leaf_color = LEAF_COLOR
+		if root_node.has_method("generate_leaves"):
+			root_node.generate_leaves()
+
 	var new_packed = PackedScene.new()
 	new_packed.pack(root_node)
 	ResourceSaver.save(new_packed, file_path)
 	root_node.queue_free()
-
 
 func _get_all_children(node: Node, result: Array = []) -> Array:
 	result.push_back(node)

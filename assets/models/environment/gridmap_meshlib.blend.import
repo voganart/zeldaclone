@@ -39,15 +39,20 @@ materials/extract_format=0
 materials/extract_path=""
 _subresources={
 "materials": {
-"Material": {
+"Bark": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/_master/Master_mat_props.tres",
-"use_external/path": "uid://bhbpq6ww32ymc"
+"use_external/fallback_path": "res://assets/materials/Mat_bark_11_1k.tres",
+"use_external/path": "uid://cw11ujre0euo3"
 },
-"Material.001": {
+"Concreate": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/_master/Master_mat_meshlib_walls.tres",
-"use_external/path": "uid://duxxstyaaagod"
+"use_external/fallback_path": "res://assets/materials/Mat_concrete_wall_03_1k.tres",
+"use_external/path": "uid://b21pobpqda3oi"
+},
+"Leafes": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/materials/grass.material",
+"use_external/path": "uid://dpe8k78jbuhdk"
 }
 }
 }
