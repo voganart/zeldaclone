@@ -39,7 +39,10 @@ func generate_leaves():
 	# Сброс
 	multimesh.instance_count = 0
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_colors = true
+	
+	# !!! ИЗМЕНЕНИЕ: Отключаем цвета инстансов, чтобы работал Vertex Paint меша !!!
+	multimesh.use_colors = false 
+	
 	multimesh.mesh = leaf_mesh
 	multimesh.instance_count = leaf_count
 	
@@ -84,7 +87,9 @@ func generate_leaves():
 		t = t.scaled_local(Vector3(s, s, s))
 		
 		multimesh.set_instance_transform(i, t)
-		multimesh.set_instance_color(i, leaf_color)
+		
+		# !!! ИЗМЕНЕНИЕ: Мы отключили use_colors, поэтому эту строку убираем !!!
+		# multimesh.set_instance_color(i, leaf_color)
 	
 	multimesh_inst.multimesh = multimesh
 	print("Leaves Generated: ", leaf_count)

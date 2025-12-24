@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b0ayy72ldu21i"]
+
+[ext_resource type="Shader" uid="uid://tosxxv3lx1u5" path="res://assets/shaders/TreeWindShader.gdshader" id="1_pllpj"]
+[ext_resource type="Texture2D" uid="uid://dacg0c78dscxq" path="res://assets/textures/environment/plants/alphas_wall_folliage.png" id="2_pllpj"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_pllpj")
+shader_parameter/color_tint = Color(0.3788175, 0.48913813, 0, 1)
+shader_parameter/leaf_texture = ExtResource("2_pllpj")
+shader_parameter/leaf_shadow_color = Color(0.05, 0.1, 0.05, 1)
+shader_parameter/alpha_scissor = 0.5
+shader_parameter/normal_merge_strength = 0.8
+shader_parameter/transmission_strength = 0.5
+shader_parameter/shadow_softness = 0.5
+shader_parameter/gradient_height_min = 0.0
+shader_parameter/gradient_height_max = 1.0
+shader_parameter/wind_speed = 0.1
+shader_parameter/wind_strength = 0.22
+shader_parameter/wind_detail = 0.5
+shader_parameter/wind_direction = Vector3(1, 0, 0.5)
