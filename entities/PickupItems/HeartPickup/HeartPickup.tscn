@@ -10,6 +10,9 @@ heal_amount = 1.0
 immunity_time = 0.3
 collect_vfx_index = 3
 
+[node name="OmniLight3D" parent="." index="0"]
+light_energy = 3.0
+
 [node name="ItemsHeart" parent="Visuals" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = ExtResource("2_kex22")
