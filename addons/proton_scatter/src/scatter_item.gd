@@ -76,19 +76,40 @@ const ScatterUtil := preload('./common/scatter_util.gd')
 		lod_split_angle = val
 		ScatterUtil.request_parent_to_rebuild(self)
 
-var path: String:
-	set(val):
-		path = val
-		source_data_ready = false
-		_target_scene = load(path) if source != 0 else null
-		ScatterUtil.request_parent_to_rebuild(self)
-
+# --- ПЕРЕМЕЩЕНЫ ВВЕРХ, ЧТОБЫ БЫТЬ ВИДИМЫМИ ДЛЯ path ---
 var source_position: Vector3
 var source_rotation: Vector3
 var source_scale: Vector3
 var source_data_ready := false
 
 var _target_scene: PackedScene
+# ------------------------------------------------------
+
+var path: String:
+	set(val):
+		path = val
+		source_data_ready = false
+		
+		# ИСПРАВЛЕНИЕ: Проверка типа ресурса (Mesh или PackedScene)
+		if source != 0 and ResourceLoader.exists(path):
+			var res = load(path)
+			if res is PackedScene:
+				_target_scene = res
+			elif res is Mesh:
+				# Если это Mesh, создаем временную сцену
+				var mi = MeshInstance3D.new()
+				mi.name = path.get_file().get_basename()
+				mi.mesh = res
+				var packed = PackedScene.new()
+				if packed.pack(mi) == OK:
+					_target_scene = packed
+				mi.free()
+			else:
+				_target_scene = null
+		else:
+			_target_scene = null
+			
+		ScatterUtil.request_parent_to_rebuild(self)
 
 
 func _get_property_list() -> Array:
@@ -117,7 +138,7 @@ func get_item() -> Node3D:
 
 	if source == 0 and has_node(path):
 		node = get_node(path).duplicate() # Never expose the original node
-	elif source == 1:
+	elif source == 1 and _target_scene:
 		node = _target_scene.instantiate()
 
 	if node:

@@ -39,15 +39,20 @@ materials/extract_format=0
 materials/extract_path=""
 _subresources={
 "materials": {
-"Ground": {
+"Grass": {
 "use_external/enabled": true,
 "use_external/fallback_path": "res://assets/materials/Mat_ground_05_1k.tres",
 "use_external/path": "uid://fycdkva4263"
 },
+"Ground": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/materials/Mat_ground_02_1k.tres",
+"use_external/path": "uid://dddbinfgi0lby"
+},
 "Rocks": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/materials/Mat_cliff_rocks_02_1k.tres",
-"use_external/path": "uid://b86vwg2pvxghn"
+"use_external/fallback_path": "res://assets/materials/Mat_cliff_rocks_asset_pack_1k.tres",
+"use_external/path": "uid://byjid7dw3hx7j"
 },
 "Sand": {
 "use_external/enabled": true,

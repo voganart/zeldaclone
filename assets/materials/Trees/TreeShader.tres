@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://br1nrjywyx4pb"]
+
+[ext_resource type="Shader" uid="uid://tosxxv3lx1u5" path="res://assets/shaders/TreeWindShader.gdshader" id="1_8s377"]
+[ext_resource type="Texture2D" uid="uid://bgsr0vuv36lst" path="res://assets/textures/environment/plants/alphas_01__0004s_0008_214.png" id="2_ey8xj"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_8s377")
+shader_parameter/color_tint = Color(0.63684, 1, 0.17380488, 1)
+shader_parameter/leaf_texture = ExtResource("2_ey8xj")
+shader_parameter/leaf_shadow_color = Color(0.09314769, 0.28276283, 0, 1)
+shader_parameter/alpha_scissor = 0.5
+shader_parameter/normal_merge_strength = 1.0
+shader_parameter/transmission_strength = 5.0
+shader_parameter/shadow_softness = 0.2000000095
+shader_parameter/gradient_height_min = 0.1
+shader_parameter/gradient_height_max = 2.0
+shader_parameter/wind_speed = 0.5
+shader_parameter/wind_strength = 0.2
+shader_parameter/wind_detail = 1.0
+shader_parameter/wind_direction = Vector3(1, 0, 0.5)

@@ -1,0 +1,222 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bmtqy1vqywekf"
+path="res://.godot/imported/rocks.blend-5934fb44f3c3f881a17e5e22d067f239.scn"
+
+[deps]
+
+source_file="res://assets/models/environment/rocks.blend"
+dest_files=["res://.godot/imported/rocks.blend-5934fb44f3c3f881a17e5e22d067f239.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"materials": {
+"Rocks": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/materials/Mat_cliff_rocks_asset_pack_1k.tres",
+"use_external/path": "uid://byjid7dw3hx7j"
+}
+},
+"meshes": {
+"rocks_Cube_002": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_002.res",
+"save_to_file/path": "uid://gxav0cyjiosj"
+},
+"rocks_Cube_003": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_003.res",
+"save_to_file/path": "uid://qvybncq3n2n6"
+},
+"rocks_Cube_004": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_004.res",
+"save_to_file/path": "uid://mkp5wbhu4gen"
+},
+"rocks_Cube_005": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_005.res",
+"save_to_file/path": "uid://d1giwtu7j2imt"
+},
+"rocks_Cube_006": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_006.res",
+"save_to_file/path": "uid://ctjdkt7dwlidq"
+},
+"rocks_Cube_008": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_008.res",
+"save_to_file/path": "uid://dp1cbfgqx0tfx"
+},
+"rocks_Cube_010": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_010.res",
+"save_to_file/path": "uid://bkjavbd1blgqq"
+},
+"rocks_Cube_011": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_011.res",
+"save_to_file/path": "uid://c4qjj7cipp20p"
+},
+"rocks_Cube_013": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_013.res",
+"save_to_file/path": "uid://crua8hhvd47dq"
+},
+"rocks_Cube_014": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_014.res",
+"save_to_file/path": "uid://bargjbuy62fgh"
+},
+"rocks_Cube_015": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_015.res",
+"save_to_file/path": "uid://c4y5bnkj3ysm"
+},
+"rocks_Cube_016": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_016.res",
+"save_to_file/path": "uid://dmqhq8bgrp4pb"
+},
+"rocks_Cube_019": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_019.res",
+"save_to_file/path": "uid://qmu0lfm3flvk"
+},
+"rocks_Cube_027": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_027.res",
+"save_to_file/path": "uid://bm63cewcffe6v"
+},
+"rocks_Cube_047": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_047.res",
+"save_to_file/path": "uid://dqpqa2cxdouv5"
+},
+"rocks_Cube_081": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_081.res",
+"save_to_file/path": "uid://dxjkvxxf6cthr"
+},
+"rocks_Cube_125": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://assets/models/environment/rocks-meshes/rocks_Cube_125.res",
+"save_to_file/path": "uid://dia8ww3d401ix"
+}
+}
+}
+blender/nodes/visible=0
+blender/nodes/active_collection_only=false
+blender/nodes/punctual_lights=true
+blender/nodes/cameras=true
+blender/nodes/custom_properties=true
+blender/nodes/modifiers=1
+blender/meshes/colors=false
+blender/meshes/uvs=true
+blender/meshes/normals=true
+blender/meshes/export_geometry_nodes_instances=false
+blender/meshes/tangents=true
+blender/meshes/skins=2
+blender/meshes/export_bones_deforming_mesh_only=false
+blender/materials/unpack_enabled=true
+blender/materials/export_materials=1
+blender/animation/limit_playback=true
+blender/animation/always_sample=true
+blender/animation/group_tracks=true
+gltf/naming_version=2
