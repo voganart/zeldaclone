@@ -5,63 +5,80 @@ extends Node3D
 @export var random_rotation_y: bool = true
 @export var scale_min: float = 0.8
 @export var scale_max: float = 1.2
-@export var align_to_ground: bool = true ## Пытаться опустить на землю (RayCast)
+
+@export_category("Drop Settings")
+@export_flags_3d_physics var ground_layer: int = 1 
+@export var ray_height: float = 50.0 
+@export var ray_depth: float = 100.0
 
 @export_category("Actions")
 @export var apply_randomize: bool = false:
 	set(value):
-		if value:
-			_randomize_children()
+		if value: _randomize_children()
 		apply_randomize = false
 
 @export var drop_to_ground: bool = false:
 	set(value):
-		if value:
-			_drop_children()
+		if value: _drop_children()
 		drop_to_ground = false
 
 func _randomize_children():
-	print("Randomizing ", get_child_count(), " vegetation items...")
-	
-	for child in get_children():
+	var children = get_children()
+	if children.is_empty(): return
+
+	for child in children:
 		if not (child is Node3D): continue
 		
-		# 1. Случайный поворот по Y
 		if random_rotation_y:
 			child.rotation.y = randf() * TAU
-		
-		# 2. Случайный скейл
+			child.rotation.x = randf_range(-0.05, 0.05)
+			child.rotation.z = randf_range(-0.05, 0.05)
+			
 		var s = randf_range(scale_min, scale_max)
 		child.scale = Vector3(s, s, s)
-		
-		# 3. Небольшой наклон для живости (опционально)
-		child.rotation.x = randf_range(-0.1, 0.1)
-		child.rotation.z = randf_range(-0.1, 0.1)
+	
+	print("Randomized ", children.size(), " items.")
 
 func _drop_children():
-	print("Dropping items to ground...")
-	var space_state = get_world_3d().direct_space_state
+	var children = get_children()
+	if children.is_empty(): return
 	
-	for child in get_children():
+	var space_state = get_world_3d().direct_space_state
+	var moved_count = 0
+	
+	for child in children:
 		if not (child is Node3D): continue
 		
-		# Пускаем луч сверху вниз с позиции объекта
-		var from = child.global_position + Vector3(0, 5.0, 0)
-		var to = child.global_position + Vector3(0, -10.0, 0)
+		var from = child.global_position
+		from.y += ray_height 
+		
+		var to = from
+		to.y -= (ray_height + ray_depth)
 		
 		var query = PhysicsRayQueryParameters3D.create(from, to)
-		# Исключаем сам объект (и его детей), чтобы не попасть в свою коллизию
-		# Для этого нужно собрать RID всех коллизий ребенка, но для простоты
-		# просто выключаем маску коллизии ребенка на секунду (сложно в туле).
-		# Проще: Ищем коллизию только с World (слой 1)
-		query.collision_mask = 1 # Убедись, что земля на 1 слое
+		query.collision_mask = ground_layer
+		
+		var exclusions = []
+		_collect_collision_rids(child, exclusions)
+		query.exclude = exclusions
 		
 		var result = space_state.intersect_ray(query)
 		
 		if result:
 			child.global_position = result.position
+			moved_count += 1
+		else:
+			print("Ray missed ground for: ", child.name)
 			
-			# Ориентация по нормали (если хочешь чтобы росли перпендикулярно склону)
-			# var up = result.normal
-			# var current_fwd = -child.global_transform.basis.z
-			# child.look_at(child.global_position - result.normal, current_fwd)
+	print("Dropped ", moved_count, " items to ground.")
+
+func _collect_collision_rids(node: Node, list: Array):
+	if node is CollisionObject3D:
+		list.append(node.get_rid())
+	
+	for child in node.get_children():
+		_collect_collision_rids(child, list)
+
+func _ready():
+	if Engine.is_editor_hint():
+		set_process(false)

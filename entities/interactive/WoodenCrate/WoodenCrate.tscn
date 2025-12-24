@@ -26,6 +26,10 @@ shape = SubResource("BoxShape3D_uf1ar")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 layers = 8
+lod_bias = 0.01
+visibility_range_end = 100.0
+visibility_range_end_margin = 20.0
+visibility_range_fade_mode = 1
 mesh = ExtResource("2_l4mhh")
 
 [node name="HealthComponent" type="Node" parent="."]

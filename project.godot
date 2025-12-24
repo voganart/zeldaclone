@@ -174,6 +174,7 @@ common/physics_interpolation=true
 
 anti_aliasing/quality/msaa_3d=1
 environment/volumetric_fog/volume_size=512
+occlusion_culling/use_occlusion_culling=true
 
 [shader_globals]
 

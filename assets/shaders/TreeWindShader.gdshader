@@ -26,6 +26,14 @@ group_uniforms Color_Gradient;
 uniform float gradient_height_min : hint_range(0.0, 1.0) = 0.0;
 uniform float gradient_height_max : hint_range(0.0, 1.0) = 1.0;
 
+// --- Сферический Градиент ---
+group_uniforms Spherical_Gradient;
+uniform vec3 spherical_center_color : source_color = vec3(0.05, 0.2, 0.05); // Темный центр
+uniform vec3 spherical_outer_color : source_color = vec3(0.2, 0.8, 0.2); // Светлые края
+uniform float spherical_radius : hint_range(0.0, 20.0) = 5.0; // Радиус сферы
+uniform vec3 spherical_center_offset = vec3(0.0, 3.0, 0.0); // Смещение центра сферы (вверх по Y)
+uniform float spherical_gradient_strength : hint_range(0.0, 1.0) = 0.0; // Сила эффекта
+
 // --- Ветер ---
 group_uniforms Wind;
 uniform float wind_speed = 1.0;
@@ -34,7 +42,8 @@ uniform float wind_detail = 1.0;
 uniform vec3 wind_direction = vec3(1.0, 0.0, 0.5);
 
 varying float v_leaf_mask;
-varying float v_gradient_mix; // Итоговый коэффициент смешивания
+varying float v_gradient_mix; // Итоговый коэффициент смешивания для вертикального градиента
+varying float v_spherical_ratio; // Коэффициент для сферического градиента
 
 const float dither_matrix[16] = float[](
 	0.0625, 0.5625, 0.1875, 0.6875,
@@ -66,6 +75,10 @@ void vertex() {
 	// Если листик "глубоко" (random_depth низкий), он будет темным даже наверху.
 	v_gradient_mix = clamp(height_factor * random_depth, 0.0, 1.0);
 
+	// 5. Расчет сферического градиента (до применения ветра, чтобы градиент был стабилен)
+	float dist_to_center = distance(VERTEX, spherical_center_offset);
+	v_spherical_ratio = clamp(dist_to_center / max(spherical_radius, 0.001), 0.0, 1.0);
+
 	// Нормали
 	vec3 world_up_local = (inverse(MODEL_MATRIX) * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
 	world_up_local = normalize(world_up_local);
@@ -96,8 +109,16 @@ void fragment() {
 
 		vec3 base_color = texture(albedo_texture, UV).rgb;
 
-		// Смешиваем цвет тени и базовый цвет на основе нашего v_gradient_mix
-		vec3 final_color = mix(leaf_shadow_color, base_color, v_gradient_mix);
+		// 1. Смешиваем цвет тени и базовый цвет на основе вертикального градиента
+		vec3 vertical_grad_color = mix(leaf_shadow_color, base_color, v_gradient_mix);
+
+		// 2. Вычисляем цвет сферического градиента
+		vec3 sphere_gradient_color = mix(spherical_center_color, spherical_outer_color, v_spherical_ratio);
+		// Чтобы сферический градиент не затирал текстуру листьев полностью, умножаем его на базу
+		vec3 sphere_applied_color = sphere_gradient_color * base_color;
+
+		// 3. Итоговое смешивание двух градиентов
+		vec3 final_color = mix(vertical_grad_color, sphere_applied_color, spherical_gradient_strength);
 
 		ALBEDO = final_color * color_tint.rgb;
 		ROUGHNESS = 1.0;
@@ -113,8 +134,26 @@ void fragment() {
 }
 
 void light() {
-	float NdotL = dot(NORMAL, LIGHT);
-	float diffuse = clamp(NdotL, 0.0, 1.0);
-	float shadow = clamp(ATTENUATION, shadow_softness, 1.0);
-	DIFFUSE_LIGHT += clamp((diffuse * shadow) * LIGHT_COLOR * ALBEDO, 0.0, 1.0);
+	// 1. Диффузное освещение (Lambert)
+	// Используем max(0.0, ...), чтобы свет не уходил в минус на обратной стороне
+	float NdotL = max(0.0, dot(NORMAL, LIGHT));
+
+	// 2. Затухание и Тени
+	// ATTENUATION уже содержит информацию о том, закрыт ли пиксель тенью,
+	// и как далеко он от источника света.
+	float light_intensity = NdotL * ATTENUATION;
+
+	// 3. Стилизация теней (Shadow Softness)
+	// Если мы хотим, чтобы тени были не черными, а цветными/светлыми,
+	// нам нужно хитро смешать это. Но для точечных источников (сундук)
+	// лучше использовать честный ATTENUATION, иначе свет будет просвечивать сквозь стены.
+
+	// Если очень хочется подсветить тени (stylized look), раскомментируйте строку ниже,
+	// но это может вернуть проблему "света сквозь стены":
+	// light_intensity = mix(light_intensity, NdotL, shadow_softness * 0.5);
+
+	// 4. Итоговый цвет
+	vec3 light_contribution = light_intensity * LIGHT_COLOR * ALBEDO;
+
+	DIFFUSE_LIGHT += light_contribution;
 }
