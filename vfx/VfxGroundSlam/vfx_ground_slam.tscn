@@ -53,6 +53,30 @@ tracks/3/keys = {
 "update": 0,
 "values": [Vector3(1, 1, 1)]
 }
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Cracks:surface_material_override/0:shader_parameter/progress")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Cracks:surface_material_override/0:shader_parameter/dissolve")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
 
 [sub_resource type="Animation" id="Animation_xsjy0"]
 resource_name = "VfxGroundSlamPlay"
@@ -115,6 +139,30 @@ tracks/4/keys = {
 "update": 0,
 "values": [Vector3(0.1, 0.1, 0.1), Vector3(5, 5, 5)]
 }
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Cracks:surface_material_override/0:shader_parameter/progress")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.10000001),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Cracks:surface_material_override/0:shader_parameter/dissolve")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.4, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 0.9333334, 1.0]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_u35oc"]
 _data = {
@@ -122,7 +170,10 @@ _data = {
 &"play": SubResource("Animation_xsjy0")
 }
 
+[sub_resource type="QuadMesh" id="QuadMesh_k8bem"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_h2j1y"]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_us532")
 shader_parameter/crack_texture = ExtResource("2_xsjy0")
@@ -131,9 +182,6 @@ shader_parameter/color_outer = Color(4.203, 0.39999992, 0, 1)
 shader_parameter/progress = 0.0
 shader_parameter/dissolve = 0.0
 shader_parameter/emission_strength = 5.0
-
-[sub_resource type="QuadMesh" id="QuadMesh_k8bem"]
-material = SubResource("ShaderMaterial_h2j1y")
 
 [sub_resource type="Gradient" id="Gradient_sq17s"]
 colors = PackedColorArray(2.1519775, 1.8914768, 1.3857988, 1, 0.7769773, 0.7769773, 0.7769773, 0)
@@ -205,6 +253,7 @@ libraries = {
 [node name="Cracks" type="MeshInstance3D" parent="."]
 transform = Transform3D(3, 0, 0, 0, -1.3113416e-07, 3, 0, -3, -1.3113416e-07, 0, 0, 0)
 mesh = SubResource("QuadMesh_k8bem")
+surface_material_override/0 = SubResource("ShaderMaterial_h2j1y")
 
 [node name="DustRing" type="GPUParticles3D" parent="."]
 emitting = false
