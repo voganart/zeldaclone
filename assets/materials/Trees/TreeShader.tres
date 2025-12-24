@@ -6,13 +6,13 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_8s377")
-shader_parameter/color_tint = Color(0.3788175, 0.48913813, 0, 1)
+shader_parameter/color_tint = Color(0.5051934, 0.6194804, 0.19240834, 1)
 shader_parameter/leaf_texture = ExtResource("2_ey8xj")
-shader_parameter/leaf_shadow_color = Color(0.05, 0.1, 0.05, 1)
+shader_parameter/leaf_shadow_color = Color(0.05556689, 0.5271546, 0.44141135, 1)
 shader_parameter/alpha_scissor = 0.5
-shader_parameter/normal_merge_strength = 0.8
-shader_parameter/transmission_strength = 0.5
-shader_parameter/shadow_softness = 0.5
+shader_parameter/normal_merge_strength = 1.0
+shader_parameter/transmission_strength = 5.0
+shader_parameter/shadow_softness = 0.6870000326325
 shader_parameter/gradient_height_min = 0.0
 shader_parameter/gradient_height_max = 1.0
 shader_parameter/wind_speed = 0.5

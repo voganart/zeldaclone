@@ -15,6 +15,9 @@ const ScatterUtil := preload('./common/scatter_util.gd')
 	set(val):
 		source = val
 		property_list_changed.emit()
+		# Принудительно сбрасываем кэш при смене режима
+		_target_scene = null
+		ScatterUtil.request_parent_to_rebuild(self)
 
 @export_group("Source options", "source_")
 @export var source_scale_multiplier := 1.0:
@@ -76,39 +79,21 @@ const ScatterUtil := preload('./common/scatter_util.gd')
 		lod_split_angle = val
 		ScatterUtil.request_parent_to_rebuild(self)
 
-# --- ПЕРЕМЕЩЕНЫ ВВЕРХ, ЧТОБЫ БЫТЬ ВИДИМЫМИ ДЛЯ path ---
+# --- ПЕРЕМЕННЫЕ ---
 var source_position: Vector3
 var source_rotation: Vector3
 var source_scale: Vector3
 var source_data_ready := false
 
-var _target_scene: PackedScene
-# ------------------------------------------------------
+# Храним загруженную сцену (PackedScene)
+var _target_scene
+# ------------------
 
 var path: String:
 	set(val):
 		path = val
 		source_data_ready = false
-		
-		# ИСПРАВЛЕНИЕ: Проверка типа ресурса (Mesh или PackedScene)
-		if source != 0 and ResourceLoader.exists(path):
-			var res = load(path)
-			if res is PackedScene:
-				_target_scene = res
-			elif res is Mesh:
-				# Если это Mesh, создаем временную сцену
-				var mi = MeshInstance3D.new()
-				mi.name = path.get_file().get_basename()
-				mi.mesh = res
-				var packed = PackedScene.new()
-				if packed.pack(mi) == OK:
-					_target_scene = packed
-				mi.free()
-			else:
-				_target_scene = null
-		else:
-			_target_scene = null
-			
+		_target_scene = null # Сбрасываем кэш при смене пути
 		ScatterUtil.request_parent_to_rebuild(self)
 
 
@@ -137,15 +122,49 @@ func get_item() -> Node3D:
 	var node: Node3D
 
 	if source == 0 and has_node(path):
-		node = get_node(path).duplicate() # Never expose the original node
-	elif source == 1 and _target_scene:
-		node = _target_scene.instantiate()
+		node = get_node(path).duplicate()
+	elif source == 1:
+		# !!! ИЗМЕНЕНИЕ: Ленивая загрузка (Lazy Loading) !!!
+		# Если _target_scene пустая (сбросилась или еще не загружена), пробуем загрузить
+		if not _target_scene:
+			_force_load_from_disk()
+			
+		if _target_scene:
+			node = _target_scene.instantiate()
 
 	if node:
+		# Проверка на то, что это Node3D (Scatter не умеет работать с Node2D или Control)
+		if not (node is Node3D):
+			print_rich("[color=red]ProtonScatter Error:[/color] The scene/resource at '" + path + "' root node is not a Node3D!")
+			node.queue_free()
+			return null
+			
 		_save_source_data(node)
 		return node
 
 	return null
+
+# Вспомогательная функция для загрузки ресурсов (Мешей или Сцен)
+func _force_load_from_disk():
+	if not ResourceLoader.exists(path):
+		return
+
+	var res = load(path)
+	if res is PackedScene:
+		# Это сцена (.tscn, .glb, .gltf)
+		_target_scene = res
+	elif res is Mesh:
+		# Это меш (.obj, .tres, .res) - оборачиваем в сцену
+		var mi = MeshInstance3D.new()
+		mi.name = path.get_file().get_basename() 
+		mi.mesh = res
+		var packed = PackedScene.new()
+		if packed.pack(mi) == OK:
+			_target_scene = packed
+		mi.free()
+	else:
+		print_rich("[color=yellow]ProtonScatter Warning:[/color] Resource at '" + path + "' is not a Scene or Mesh.")
+		_target_scene = null
 
 
 # Takes a transform in input, scale it based on the local scale multiplier

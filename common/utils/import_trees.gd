@@ -6,12 +6,13 @@ const SAVE_PATH = "res://entities/environment/trees_generated/"
 const COL_SUFFIX = "_col"
 const TOP_SUFFIX = "_top"
 const GENERATOR_SCRIPT_PATH = "res://common/utils/tree_generator.gd"
+# Путь к мешу листа (для дефолтных настроек)
 const LEAF_MESH_PATH = "res://assets/models/environment/LeafBasePlane.tres" 
-const LEAF_COUNT_TREE = 1000          
-const LEAF_COUNT_BUSH = 300
-const LEAF_SCALE_MIN = 0.8
-const LEAF_SCALE_MAX = 1.0
-const LEAF_COLOR = Color.RED
+
+# Дефолтные настройки (применятся только при первом создании)
+const LEAF_COUNT_TREE = 1200          
+const LEAF_COUNT_BUSH = 400
+const LEAF_COLOR = Color(1, 1, 1, 1)
 
 # Коллизии
 const OCCLUSION_LAYER_NUMBER = 32
@@ -53,41 +54,35 @@ func _update_or_create_scene(main_source: MeshInstance3D, top_source: MeshInstan
 	var root_node: StaticBody3D
 	var packed_scene: PackedScene
 	
-	var is_new_scene = true
-	
+	# 1. Загрузка существующей сцены (чтобы сохранить настройки)
 	if FileAccess.file_exists(file_path):
 		print("Updating object: ", main_source.name)
 		packed_scene = load(file_path)
 		if packed_scene:
-			# Instantiate загружает сцену со всеми сохраненными параметрами (leaf_count и т.д.)
 			root_node = packed_scene.instantiate()
-			is_new_scene = false
 	
+	# 2. Создание новой, если не было
 	if not root_node:
 		print("Creating NEW object: ", main_source.name)
 		root_node = StaticBody3D.new()
 		root_node.name = main_source.name
 	
-	# Настройки коллизии слоя обновляем всегда (на случай если поменяли константы в скрипте)
+	# Настройки слоя обновляем всегда
 	root_node.collision_layer = 1 << (TREE_LAYER_NUMBER - 1)
 	var mask_val = 0
-	for i in range(TREE_MASK_UP_TO_LAYER):
-		mask_val += 1 << i
+	for i in range(TREE_MASK_UP_TO_LAYER): mask_val += 1 << i
 	root_node.collision_mask = mask_val
 	
-	# --- ГЕОМЕТРИЯ (MeshInstance3D) ---
-	# Меши обновляем ВСЕГДА, так как суть импорта - подтянуть новую геометрию из Blender
-	
+	# --- ОБНОВЛЕНИЕ ГЕОМЕТРИИ ---
 	if is_bush:
-		# Куст: Crown есть, Trunk нет
+		# Куст: Crown = основной меш
 		var crown_inst = _get_or_create_mesh_node(root_node, "Crown")
 		crown_inst.mesh = main_source.mesh.duplicate()
 		crown_inst.transform = Transform3D.IDENTITY
-		crown_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY 
+		# У куста включаем тени только от формы, листья добавит скрипт
+		crown_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 		
-		# Если вдруг был ствол (превратили дерево в куст), удаляем
 		if root_node.has_node("Trunk"): root_node.get_node("Trunk").free()
-		
 	else:
 		# Дерево: Trunk + Crown
 		var trunk_inst = _get_or_create_mesh_node(root_node, "Trunk")
@@ -102,23 +97,19 @@ func _update_or_create_scene(main_source: MeshInstance3D, top_source: MeshInstan
 			crown_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 			top_source.visible = false
 	
-	# --- КОЛЛИЗИЯ (Physics Shape) ---
-	# Коллизию обновляем, если геометрия поменялась. 
-	# Но для кустов удаляем.
-	
+	# --- КОЛЛИЗИЯ ---
 	var old_col = root_node.get_node_or_null("CollisionShape3D")
-	if old_col: old_col.free() # Всегда пересоздаем шейп, чтобы он соответствовал новому мешу
+	if old_col: old_col.free()
 	
 	if not is_bush:
 		var shape = null
 		if col_source:
 			for child in col_source.get_children():
-				if child is StaticBody3D:
-					for grandchild in child.get_children():
-						if grandchild is CollisionShape3D:
-							shape = grandchild.shape
-							break
-				if shape: break
+				if child is StaticBody3D or child is CollisionShape3D:
+					if child is CollisionShape3D: shape = child.shape
+					elif child.get_child_count() > 0 and child.get_child(0) is CollisionShape3D:
+						shape = child.get_child(0).shape
+					break
 			if not shape: shape = col_source.mesh.create_convex_shape()
 			col_source.visible = false
 		else:
@@ -131,15 +122,16 @@ func _update_or_create_scene(main_source: MeshInstance3D, top_source: MeshInstan
 			root_node.add_child(col_node)
 			col_node.owner = root_node
 
-	# --- OCCLUSION VOLUME (Area3D) ---
-	# !!! ВАЖНО: Проверяем наличие. Если есть - НЕ ТРОГАЕМ !!!
-	
+	# --- OCCLUSION VOLUME ---
+	# Создаем только если нет. Если есть - оставляем твои настройки.
 	if not root_node.has_node("OcclusionVolume"):
 		print("Generating DEFAULT OcclusionVolume for: ", main_source.name)
 		var occ_vol = Area3D.new()
 		occ_vol.name = "OcclusionVolume"
 		occ_vol.collision_layer = 1 << (OCCLUSION_LAYER_NUMBER - 1)
 		occ_vol.collision_mask = 0 
+		occ_vol.monitorable = true
+		occ_vol.monitoring = false
 		
 		root_node.add_child(occ_vol)
 		occ_vol.owner = root_node
@@ -149,45 +141,38 @@ func _update_or_create_scene(main_source: MeshInstance3D, top_source: MeshInstan
 		
 		if is_bush:
 			var aabb = main_source.mesh.get_aabb()
-			sphere.radius = aabb.get_longest_axis_size() * 0.5
-			occ_shape.position = Vector3(0, aabb.get_center().y, 0)
+			sphere.radius = max(aabb.get_longest_axis_size() * 0.8, 1.5)
+			occ_shape.position = Vector3(0, max(aabb.get_center().y, 1.0), 0)
 		elif top_source:
 			var aabb = top_source.mesh.get_aabb()
-			sphere.radius = aabb.get_longest_axis_size() * 0.6
-			occ_shape.position = top_source.position + Vector3(0, aabb.get_center().y, 0)
+			sphere.radius = max(aabb.get_longest_axis_size() * 0.7, 3.0)
+			var center_pos = Vector3(0, 3.5, 0)
+			if top_source.position.length() > 0.1:
+				center_pos = top_source.position + Vector3(0, aabb.get_center().y, 0)
+			occ_shape.position = center_pos
 		else:
-			sphere.radius = 2.5
-			occ_shape.position = Vector3(0, 3.0, 0)
+			sphere.radius = 3.0
+			occ_shape.position = Vector3(0, 3.5, 0)
 			
 		occ_shape.shape = sphere
 		occ_vol.add_child(occ_shape)
 		occ_shape.owner = root_node
-	else:
-		# Если OcclusionVolume уже есть, мы его не трогаем, сохраняя ваши настройки радиуса/позиции
-		pass 
-	
-	# --- СКРИПТ И ЛИСТЬЯ ---
+
+	# --- СКРИПТ ГЕНЕРАЦИИ ---
 	var gen_script = load(GENERATOR_SCRIPT_PATH)
 	if gen_script:
-		# Если скрипта нет или он другой - назначаем и ставим дефолты
 		if root_node.get_script() != gen_script:
 			root_node.set_script(gen_script)
-			
-			# Дефолтные настройки только если скрипт только что повесили
+			# Дефолты только для нового
 			if "leaf_mesh" in root_node:
 				var leaf_mesh_res = load(LEAF_MESH_PATH)
 				if leaf_mesh_res: root_node.leaf_mesh = leaf_mesh_res
-			
 			if "leaf_count" in root_node: 
 				root_node.leaf_count = LEAF_COUNT_BUSH if is_bush else LEAF_COUNT_TREE
-				
 			if "leaf_color" in root_node: root_node.leaf_color = LEAF_COLOR
 		
-		# Если скрипт УЖЕ был, значения leaf_count и прочие ОСТАЛИСЬ теми, что были в сцене.
-		# Мы их не перезаписываем.
-		
-		# Но нам ОБЯЗАТЕЛЬНО нужно вызвать генерацию, так как МЕШ кроны изменился (мы обновили его выше).
-		# Листья сгенерируются заново на новой геометрии, но используя ВАШИ сохраненные параметры (count, scale и т.д.)
+		# ПРИНУДИТЕЛЬНАЯ ПЕРЕГЕНЕРАЦИЯ
+		# Так как меш кроны (Crown) изменился, листья должны пересчитаться
 		if root_node.has_method("generate_leaves"):
 			root_node.generate_leaves()
 

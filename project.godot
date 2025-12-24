@@ -162,6 +162,7 @@ interact={
 3d_physics/layer_4="Environment"
 3d_physics/layer_5="RigidObjects"
 3d_physics/layer_6="Items"
+3d_physics/layer_7="Walls"
 3d_physics/layer_32="Occlusion"
 avoidance/layer_1="enemies"
 

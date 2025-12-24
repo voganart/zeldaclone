@@ -140,6 +140,9 @@ layers = 16
 [node name="Ground" parent="." index="20"]
 layers = 16
 
-[node name="Island" parent="." index="21"]
+[node name="Island" parent="." index="23"]
 collision_layer = 8
 collision_mask = 31
+
+[node name="CollisionShape3D" parent="Island" index="0"]
+debug_color = Color(0, 0.6, 0.69803923, 1)
