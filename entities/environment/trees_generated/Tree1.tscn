@@ -6,7 +6,7 @@
 [ext_resource type="Material" uid="uid://bhtllc307ps6e" path="res://assets/materials/bark_02.tres" id="3_twi2p"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_twi2p"]
-radius = 2.510055
+radius = 2.112322
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_twi2p"]
 resource_name = "Trees_Tree1"
@@ -65,7 +65,7 @@ collision_layer = 2147483648
 collision_mask = 0
 
 [node name="@CollisionShape3D@67494" type="CollisionShape3D" parent="OcclusionVolume"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2073078, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4905906, 0)
 shape = SubResource("SphereShape3D_twi2p")
 
 [node name="Trunk" type="MeshInstance3D" parent="."]

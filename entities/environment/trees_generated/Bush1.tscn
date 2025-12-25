@@ -5,7 +5,7 @@
 [ext_resource type="Material" uid="uid://br1nrjywyx4pb" path="res://assets/materials/Trees/TreeShader.tres" id="3_4hg3t"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_oc0to"]
-radius = 1.0542585
+radius = 0.8277542
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_0i4co"]
 resource_name = "Trees_Bush1"

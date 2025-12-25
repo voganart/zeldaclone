@@ -1,20 +1,25 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b0ayy72ldu21i"]
 
 [ext_resource type="Shader" uid="uid://tosxxv3lx1u5" path="res://assets/shaders/TreeWindShader.gdshader" id="1_pllpj"]
-[ext_resource type="Texture2D" uid="uid://dacg0c78dscxq" path="res://assets/textures/environment/plants/alphas_wall_folliage.png" id="2_pllpj"]
+[ext_resource type="Texture2D" uid="uid://bsvf3yikpn5gk" path="res://assets/textures/environment/plants/alphas_wall_foliage.png" id="2_pllpj"]
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_pllpj")
 shader_parameter/color_tint = Color(0.38229698, 0.52172375, 0.12087201, 1)
 shader_parameter/leaf_texture = ExtResource("2_pllpj")
-shader_parameter/leaf_shadow_color = Color(0, 0.40767425, 0.35607192, 1)
+shader_parameter/leaf_shadow_color = Color(0, 0.3859505, 0.33770669, 1)
 shader_parameter/alpha_scissor = 0.526000024985
 shader_parameter/normal_merge_strength = 0.622000029545
 shader_parameter/transmission_strength = 0.0
 shader_parameter/shadow_softness = 0.514000024415
 shader_parameter/gradient_height_min = 0.0
-shader_parameter/gradient_height_max = 0.400000019
+shader_parameter/gradient_height_max = 0.30000001425
+shader_parameter/spherical_center_color = Color(0, 0.30204877, 0.41853607, 1)
+shader_parameter/spherical_outer_color = Color(1, 0.95837474, 0.52630603, 1)
+shader_parameter/spherical_radius = 2.000000095
+shader_parameter/spherical_center_offset = Vector3(0, 0, 0)
+shader_parameter/spherical_gradient_strength = 0.2370000112575
 shader_parameter/wind_speed = 1.0
 shader_parameter/wind_strength = 0.05
 shader_parameter/wind_detail = 2.5

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="FoliageType" load_steps=3 format=3 uid="uid://b0an3qlap2ets"]
+
+[ext_resource type="QuadMesh" uid="uid://bm0g48uc7j6b" path="res://assets/models/environment/RootsPlane.tres" id="1_etqbu"]
+[ext_resource type="Script" uid="uid://d3lhkcffvv4ou" path="res://common/utils/FoliageType.gd" id="1_lf37k"]
+
+[resource]
+script = ExtResource("1_lf37k")
+mesh_to_spawn = ExtResource("1_etqbu")
+count_per_triangle = 10
+push_out_from_surface = 0.01
+scale_min = 2.0
+scale_max = 4.0
+gravity_tilt_min = 80.0
+gravity_tilt_max = 90.0
+random_side_tilt = 0.2
+random_spin = 0.3
+metadata/_custom_type_script = "uid://d3lhkcffvv4ou"

@@ -1,0 +1,26 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://dlnkc0cei7ou8"]
+
+[ext_resource type="Shader" uid="uid://tosxxv3lx1u5" path="res://assets/shaders/TreeWindShader.gdshader" id="1_xbdt6"]
+[ext_resource type="Texture2D" uid="uid://x8y6oruual17" path="res://assets/textures/environment/plants/roots.png" id="2_xbdt6"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_xbdt6")
+shader_parameter/color_tint = Color(0.41976216, 0.4619835, 0.12161506, 1)
+shader_parameter/leaf_texture = ExtResource("2_xbdt6")
+shader_parameter/leaf_shadow_color = Color(0.28129375, 0.017362632, 0.29905564, 1)
+shader_parameter/alpha_scissor = 0.5
+shader_parameter/normal_merge_strength = 0.0
+shader_parameter/transmission_strength = 5.0
+shader_parameter/shadow_softness = 1.0
+shader_parameter/gradient_height_min = 0.0
+shader_parameter/gradient_height_max = 0.2530000120175
+shader_parameter/spherical_center_color = Color(0.19043708, 0.00604679, 0.011348789, 1)
+shader_parameter/spherical_outer_color = Color(0.73896086, 0.5589216, 0.28783602, 1)
+shader_parameter/spherical_radius = 7.6560003636600005
+shader_parameter/spherical_center_offset = Vector3(0, 0, 0)
+shader_parameter/spherical_gradient_strength = 0.0750000035625
+shader_parameter/wind_speed = 1.0
+shader_parameter/wind_strength = 0.05
+shader_parameter/wind_detail = 2.5
+shader_parameter/wind_direction = Vector3(1, 0, 0.5)

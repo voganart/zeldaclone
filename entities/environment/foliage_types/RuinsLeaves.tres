@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="FoliageType" load_steps=3 format=3 uid="uid://dde6ipfoqfclm"]
+
+[ext_resource type="Script" uid="uid://d3lhkcffvv4ou" path="res://common/utils/FoliageType.gd" id="1_gf0gg"]
+[ext_resource type="QuadMesh" uid="uid://se11lxtm5c51" path="res://assets/models/environment/WallFoliagePlane.tres" id="1_s1dx7"]
+
+[resource]
+script = ExtResource("1_gf0gg")
+mesh_to_spawn = ExtResource("1_s1dx7")
+push_out_from_surface = 0.01
+gravity_tilt_min = 65.0
+random_side_tilt = 0.01
+random_spin = 0.01
+metadata/_custom_type_script = "uid://d3lhkcffvv4ou"
