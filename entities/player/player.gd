@@ -44,6 +44,9 @@ extends CharacterBody3D
 @export var run_calibration_speed: float = 4.0  ## Скорость, при которой анимация БЕГА выглядит идеально (scale 1.0)
 
 @export_group("Combat")
+@export var max_enemy_hits: int = 1  
+@export var max_targets_per_swing: int = 1 # <-- НОВОЕ: Лимит целей за удар
+@export var max_object_hits: int = 1 
 @export var primary_attack_speed: float = 0.8
 @export var attack_cooldown: float = 0.15
 @export var combo_window_time: float = 2.0
@@ -116,6 +119,7 @@ var roll_regen_timer: float = 0.0
 var is_roll_recharging: bool = false
 var roll_interval_timer: float = 0.0
 var is_invincible: bool = false
+
 var roll_threshold: float = 0.18
 
 var current_knockback_timer: float = 0.0
@@ -123,6 +127,8 @@ var is_knockbacked: bool = false
 var is_knockback_stun: bool = false
 var is_passing_through: bool = false
 var hit_enemies_current_attack: Dictionary = {}
+var current_swing_enemy_count: int = 0  # <-- НОВОЕ
+var current_swing_object_count: int = 0 # <-- НОВОЕ
 
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
@@ -382,6 +388,9 @@ func try_cancel_attack_for_roll(progress_ratio: float) -> bool:
 
 func start_hitbox_monitoring() -> void:
 	hit_enemies_current_attack.clear()
+	current_swing_enemy_count = 0   # <-- Сброс
+	current_swing_object_count = 0  # <-- Сброс
+	
 	# Включаем мониторинг хитбоксов принудительно
 	if punch_hand_r: punch_hand_r.monitoring = true
 	if punch_hand_l: punch_hand_l.monitoring = true
@@ -394,27 +403,71 @@ func stop_hitbox_monitoring() -> void:
 	if punch_hand_l: punch_hand_l.set_deferred("monitoring", false)
 
 ## Вызывается каждый кадр во время атаки (из стейта Attack)
+## Вызывается каждый кадр во время атаки
 func process_hitbox_check() -> void:
+	# Прерываем проверку ТОЛЬКО если оба лимита заполнены
+	if current_swing_enemy_count >= max_enemy_hits and current_swing_object_count >= max_object_hits:
+		return
+
 	var hits_occurred = false
 	if punch_hand_r: hits_occurred = _check_hand_overlap(punch_hand_r) or hits_occurred
 	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
 
 func _check_hand_overlap(hand: Area3D) -> bool:
 	var hit_something = false
+	var valid_candidates = []
+
+	# 1. Сбор кандидатов
 	for body in hand.get_overlapping_bodies():
-		# Пропускаем себя
 		if body == self: continue
-		
-		# Пропускаем тех, кого уже ударили в этом замахе
 		if hit_enemies_current_attack.has(body.get_instance_id()): continue
 		
+		# Проверяем, можем ли мы вообще ударить этот тип объекта
 		if body.has_method("take_damage") or body is RigidBody3D:
-			# Наносим урон
-			punch_collision(body, hand)
-			# Запоминаем, что этого врага ударили
-			hit_enemies_current_attack[body.get_instance_id()] = true
-			hit_something = true
-			
+			valid_candidates.append(body)
+
+	if valid_candidates.is_empty():
+		return false
+
+	# 2. СОРТИРОВКА ПРИОРИТЕТОВ
+	# Правила:
+	# А. Враги (GROUP_ENEMIES) всегда важнее ящиков.
+	# Б. Если приоритет одинаковый (два врага или два ящика) - выбираем ближнего.
+	valid_candidates.sort_custom(func(a, b):
+		var a_is_enemy = a.is_in_group(GameConstants.GROUP_ENEMIES)
+		var b_is_enemy = b.is_in_group(GameConstants.GROUP_ENEMIES)
+
+		# Если один враг, а другой нет -> Враг идет первым
+		if a_is_enemy and not b_is_enemy: return true
+		if not a_is_enemy and b_is_enemy: return false
+
+		# Иначе сортируем по дистанции
+		return global_position.distance_squared_to(a.global_position) < global_position.distance_squared_to(b.global_position)
+	)
+
+	# 3. Нанесение урона с учетом раздельных лимитов
+	for body in valid_candidates:
+		var is_enemy = body.is_in_group(GameConstants.GROUP_ENEMIES)
+		
+		if is_enemy:
+			# Логика для ВРАГОВ
+			if current_swing_enemy_count < max_enemy_hits:
+				punch_collision(body, hand)
+				hit_enemies_current_attack[body.get_instance_id()] = true
+				current_swing_enemy_count += 1
+				hit_something = true
+		else:
+			# Логика для ОБЪЕКТОВ (ящики, кусты и т.д.)
+			if current_swing_object_count < max_object_hits:
+				punch_collision(body, hand)
+				hit_enemies_current_attack[body.get_instance_id()] = true
+				current_swing_object_count += 1
+				hit_something = true
+		
+		# Если оба счетчика заполнились прямо внутри этого цикла - выходим
+		if current_swing_enemy_count >= max_enemy_hits and current_swing_object_count >= max_object_hits:
+			break
+
 	return hit_something
 # ============================================================================
 # ANIMATION LOGIC (UPDATED FOR TREE)

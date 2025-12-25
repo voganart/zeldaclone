@@ -1,4 +1,4 @@
-[gd_scene load_steps=126 format=4 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=128 format=4 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://levels/test_level/enemy_spawner.tscn" id="1_nb3sg"]
@@ -87,6 +87,15 @@
 [ext_resource type="ArrayMesh" uid="uid://ctjdkt7dwlidq" path="res://assets/models/environment/rocks-meshes/rocks_Cube_006.res" id="85_38s4e"]
 [ext_resource type="ArrayOccluder3D" uid="uid://b6fayqrf02orr" path="res://levels/test_level/level.occ" id="86_j5xtq"]
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_j5xtq"]
+frequency = 0.0017
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lwb8x"]
+noise = SubResource("FastNoiseLite_j5xtq")
+seamless = true
+seamless_blend_skirt = 0.75
+
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_oy4pa"]
 noise_type = 4
 seed = 2
@@ -98,19 +107,25 @@ fractal_weighted_strength = 0.77
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xbjnq"]
 noise = SubResource("FastNoiseLite_oy4pa")
 seamless = true
-seamless_blend_skirt = 1.0
+seamless_blend_skirt = 0.438
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xbjnq"]
 shader = ExtResource("5_oy4pa")
 shader_parameter/sky_top_color = Color(0.16731326, 0.3830293, 0.73896086, 1)
 shader_parameter/sky_horizon_color = Color(0.52104485, 0.7354609, 1, 1)
 shader_parameter/sky_bottom_color = Color(0.1539927, 0.45190766, 0.7498227, 1)
-shader_parameter/cloud_color = Color(1, 1, 1, 1)
-shader_parameter/cloud_scale = 0.198000009405
-shader_parameter/cloud_speed = 0.0010000000475
-shader_parameter/cloud_cutoff = 0.3670000174325
-shader_parameter/cloud_fuzziness = 0.1330000063175
+shader_parameter/cloud_edge_color = Color(0, 0.48513842, 1, 1)
+shader_parameter/cloud_core_color = Color(1, 0.8621591, 0.7893666, 1)
+shader_parameter/core_softness = 0.5730000272175
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_xbjnq")
+shader_parameter/cloud_scale = 0.10000000475
+shader_parameter/cloud_speed = 0.0010000000475
+shader_parameter/cloud_cutoff = 0.20400000969
+shader_parameter/cloud_fuzziness = 0.1250000059375
+shader_parameter/detail_noise_texture = SubResource("NoiseTexture2D_lwb8x")
+shader_parameter/detail_scale = 2.126000100985
+shader_parameter/detail_speed = 0.0570000027075
+shader_parameter/detail_strength = 0.654000031065
 
 [sub_resource type="Sky" id="Sky_e3h7t"]
 sky_material = SubResource("ShaderMaterial_xbjnq")
@@ -645,15 +660,8 @@ mesh = SubResource("QuadMesh_2max6")
 
 [node name="island" parent="NavigationRegion3D/Environment" instance=ExtResource("7_owp05")]
 
-[node name="Rock15_LOD0" parent="NavigationRegion3D/Environment/island" index="13"]
-layers = 1
-
 [node name="Ground" parent="NavigationRegion3D/Environment/island" index="19"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("ArrayMesh_ec6a8")
-
-[node name="Rock11_LOD0_001" parent="NavigationRegion3D/Environment/island" index="20"]
-layers = 1
 
 [node name="island2" parent="NavigationRegion3D/Environment" instance=ExtResource("7_owp05")]
 transform = Transform3D(0.2851592, 0, -0.5047124, 0, 0.8467403, 0, 0.5793414, 0, 0.24842598, 7.2547445, 7.838112, -29.176613)
@@ -771,7 +779,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1309711, 0.013222218, 2.02
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.1656365, 0.013222218, 0.7964301)
 
 [node name="WoodenCrate8" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3536325, 0.013222218, 6.0205426)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3536325, 0.22027636, 6.0205426)
 
 [node name="WoodenCrate9" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7982726, 0.013222218, -3.071014)
@@ -1100,7 +1108,7 @@ leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush4" parent="Vegetation" instance=ExtResource("17_kcl6f")]
-transform = Transform3D(1.3697433, 0.014781935, 0.5780626, 0.007373503, 1.485746, -0.05546459, -0.5782046, 0.053964652, 1.3686998, 7.0461273, 0, 6.4796157)
+transform = Transform3D(1.3697433, 0.014781935, 0.5780626, 0.007373503, 1.485746, -0.05546459, -0.5782046, 0.053964652, 1.3686998, 3.292522, 0, 5.2631116)
 
 [node name="Tree4" parent="Vegetation" instance=ExtResource("21_chnt3")]
 transform = Transform3D(0.35678965, 0.03461669, -0.9514403, -0.02416901, 1.0160575, 0.027904322, 0.951763, 0.01282486, 0.35737723, 13.36425, 0, 11.655623)
@@ -1146,7 +1154,7 @@ mesh = ExtResource("85_38s4e")
 skeleton = NodePath("../..")
 
 [node name="OccluderInstance3D" type="OccluderInstance3D" parent="."]
+visible = false
 occluder = ExtResource("86_j5xtq")
-bake_mask = 4294967293
 
 [editable path="NavigationRegion3D/Environment/island"]
