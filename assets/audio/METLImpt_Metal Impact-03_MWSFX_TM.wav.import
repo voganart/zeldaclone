@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ddvnn55g740xe"
+path="res://.godot/imported/METLImpt_Metal Impact-03_MWSFX_TM.wav-69e428b142c4f1ddbdd751f1c9263c30.sample"
+
+[deps]
+
+source_file="res://assets/audio/METLImpt_Metal Impact-03_MWSFX_TM.wav"
+dest_files=["res://.godot/imported/METLImpt_Metal Impact-03_MWSFX_TM.wav-69e428b142c4f1ddbdd751f1c9263c30.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://dx8ych5pfje11"
-path="res://.godot/imported/Toolbox - DROP.wav-86cfdabafb58cc71583e6ee8016c3f75.sample"
+path="res://.godot/imported/Toolbox - DROP.wav-966b4fdb5c296ef55356ab22461e6496.sample"
 
 [deps]
 
-source_file="res://sounds/Toolbox - DROP.wav"
-dest_files=["res://.godot/imported/Toolbox - DROP.wav-86cfdabafb58cc71583e6ee8016c3f75.sample"]
+source_file="res://assets/audio/Toolbox - DROP.wav"
+dest_files=["res://.godot/imported/Toolbox - DROP.wav-966b4fdb5c296ef55356ab22461e6496.sample"]
 
 [params]
 

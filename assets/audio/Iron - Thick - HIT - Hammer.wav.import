@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://t6x6o5w47qrb"
-path="res://.godot/imported/Iron - Thick - HIT - Hammer.wav-78e703df9c735ecd754a3c6975e4566c.sample"
+path="res://.godot/imported/Iron - Thick - HIT - Hammer.wav-e9ddf13af51deac49a0aa06e970600c0.sample"
 
 [deps]
 
-source_file="res://sounds/Iron - Thick - HIT - Hammer.wav"
-dest_files=["res://.godot/imported/Iron - Thick - HIT - Hammer.wav-78e703df9c735ecd754a3c6975e4566c.sample"]
+source_file="res://assets/audio/Iron - Thick - HIT - Hammer.wav"
+dest_files=["res://.godot/imported/Iron - Thick - HIT - Hammer.wav-e9ddf13af51deac49a0aa06e970600c0.sample"]
 
 [params]
 

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://c08kxcntjowve"
-path="res://.godot/imported/AMBForst_Spring Afternoon.wav-cf3532949b13da79b1e9fd88c2eace66.sample"
+path="res://.godot/imported/AMBForst_Spring Afternoon.wav-7eebe398079164067401b426737cac7c.sample"
 
 [deps]
 
-source_file="res://sounds/AMBForst_Spring Afternoon.wav"
-dest_files=["res://.godot/imported/AMBForst_Spring Afternoon.wav-cf3532949b13da79b1e9fd88c2eace66.sample"]
+source_file="res://assets/audio/AMBForst_Spring Afternoon.wav"
+dest_files=["res://.godot/imported/AMBForst_Spring Afternoon.wav-7eebe398079164067401b426737cac7c.sample"]
 
 [params]
 
