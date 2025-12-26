@@ -36,6 +36,7 @@ func _fade_out_and_free() -> void:
 	var materials_to_fade: Array[ShaderMaterial] = []
 	_collect_meshes(enemy, meshes_to_fade)
 	
+	# 1. Создаем дубликаты материалов для растворения
 	for mesh in meshes_to_fade:
 		var mat = mesh.get_active_material(0)
 		if mat is ShaderMaterial:
@@ -43,6 +44,7 @@ func _fade_out_and_free() -> void:
 			mesh.set_surface_override_material(0, new_mat)
 			materials_to_fade.append(new_mat)
 
+	# 2. Анимация растворения
 	if materials_to_fade.size() > 0:
 		var t: float = 0.0
 		var fade_speed: float = 0.5
@@ -51,11 +53,24 @@ func _fade_out_and_free() -> void:
 			var dt = get_process_delta_time()
 			t += dt * fade_speed
 			for mat in materials_to_fade:
-				mat.set_shader_parameter("dissolve_amount", t)
+				if is_instance_valid(mat): # Проверка валидности материала
+					mat.set_shader_parameter("dissolve_amount", t)
 			await get_tree().process_frame
 			
+	# 3. БЕЗОПАСНОЕ УДАЛЕНИЕ (FIX)
 	if is_instance_valid(enemy):
-		enemy.queue_free()
+		# Сначала отключаем меши и очищаем материалы, чтобы RenderingServer перестал их трогать
+		for mesh in meshes_to_fade:
+			if is_instance_valid(mesh):
+				mesh.visible = false # Скрываем, чтобы не рендерился
+				mesh.set_surface_override_material(0, null) # Убираем ссылку на материал
+		
+		# Ждем 1 кадр, чтобы RenderingServer обновил состояние и "забыл" про эти материалы
+		await get_tree().process_frame
+		
+		# Теперь удаляем саму ноду
+		if is_instance_valid(enemy):
+			enemy.queue_free()
 
 func _collect_meshes(node: Node, result: Array[MeshInstance3D]) -> void:
 	if node is MeshInstance3D:

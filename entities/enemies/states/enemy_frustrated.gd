@@ -16,7 +16,7 @@ func enter() -> void:
 	# 1. Переключаем состояние дерева
 	enemy.set_tree_state("angry")
 	enemy.set_move_mode("chase") 
-	enemy.set_locomotion_blend(0.0) # 0.0 в режиме chase = Combat Idle
+	enemy.set_locomotion_blend(0.0)
 	# 2. РАНДОМИЗАЦИЯ СТАРТА через TimeSeek
 	var anim_name = GameConstants.ANIM_ENEMY_ANGRY
 	if enemy.anim_player.has_animation(anim_name):
@@ -41,8 +41,9 @@ func physics_update(delta: float) -> void:
 		_give_up()
 
 func _give_up():
-	if enemy.health_component:
-		enemy.health_component.heal(enemy.health_component.max_health)
+	# !!! ИЗМЕНЕНИЕ: Убрали мгновенное лечение !!!
+	# Теперь враг просто сбрасывает агрессию, а лечиться будет в Patrol
+	
 	enemy.frustrated_cooldown = 10.0
 	MusicBrain.set_combat_state(false)
 	transitioned.emit(self, GameConstants.STATE_PATROL)

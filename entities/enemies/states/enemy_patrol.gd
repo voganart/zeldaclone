@@ -2,6 +2,7 @@ extends State
 
 @export var stuck_threshold: float = 2.0
 @export var idle_chance: float = 0.8
+@export var heal_rate: float = 1.0 ## ХП в секунду
 
 var time_stuck: float = 0.0
 var enemy: Enemy
@@ -30,8 +31,9 @@ func physics_update(delta: float) -> void:
 			transitioned.emit(self, GameConstants.STATE_CHASE)
 			return
 	
+	# !!! ИЗМЕНЕНИЕ: Лечимся медленно, используя heal_rate !!!
 	if enemy.health_component and enemy.health_component.current_health < enemy.health_component.max_health:
-		enemy.health_component.heal(10.0 * delta)
+		enemy.health_component.heal(heal_rate * delta)
 
 	if enemy.velocity.length() < 0.1:
 		time_stuck += delta
