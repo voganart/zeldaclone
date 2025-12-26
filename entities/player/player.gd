@@ -62,7 +62,7 @@ extends CharacterBody3D
 @export var punch_hand_r: Area3D
 @export var punch_hand_l: Area3D
 @onready var health_component: Node = $HealthComponent
-
+@export var attack_area: Area3D 
 # КОМПОНЕНТЫ
 @onready var state_machine: StateMachine = $StateMachine
 @onready var air_dash_ability: AirDashAbility = $AirDashAbility
@@ -377,19 +377,14 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	var max_props_per_hit = 1
 	# -------------------------
 
-	# 1. Считаем, сколько целей КАЖДОГО ТИПА мы уже ударили в этой атаке.
-	# Мы смотрим на значения в словаре ("enemy" или "prop"), а не на сами объекты.
-	# Это решает проблему с исчезающими ящиками.
+	# 1. Считаем уже ударенные цели
 	var enemies_hit_count = 0
 	var props_hit_count = 0
 	
 	for type in hit_enemies_current_attack.values():
-		if type == "enemy":
-			enemies_hit_count += 1
-		elif type == "prop":
-			props_hit_count += 1
+		if type == "enemy": enemies_hit_count += 1
+		elif type == "prop": props_hit_count += 1
 	
-	# Если лимиты исчерпаны — выходим сразу
 	if enemies_hit_count >= max_enemies_per_hit and props_hit_count >= max_props_per_hit:
 		return false
 
@@ -397,43 +392,47 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	var candidates_enemies: Array[Node3D] = []
 	var candidates_props: Array[Node3D] = []
 	
+	# Получаем список тех, кто ВООБЩЕ находится в зоне атаки перед игроком
+	# Если зона не назначена, считаем что "все валидны" (пустой массив не используем как фильтр)
+	var bodies_in_front_zone = []
+	if attack_area:
+		bodies_in_front_zone = attack_area.get_overlapping_bodies()
+	
 	for body in hand.get_overlapping_bodies():
 		if body == self: continue
-		if hit_enemies_current_attack.has(body.get_instance_id()): continue # Этот ID уже били
+		if hit_enemies_current_attack.has(body.get_instance_id()): continue
 		
-		# Сортируем по спискам
+		# !!! НОВАЯ ПРОВЕРКА !!!
+		# Если назначена FirstAttackArea, и врага в ней НЕТ — игнорируем удар.
+		# Это спасет от ударов спиной/замахом.
+		if attack_area and not body in bodies_in_front_zone:
+			continue
+		
+		# Дальше старая логика сортировки
 		if body.is_in_group(GameConstants.GROUP_ENEMIES):
 			candidates_enemies.append(body)
 		elif body is RigidBody3D or body.has_method("take_damage"):
 			candidates_props.append(body)
 	
-	# 3. Сортировка по дистанции (чтобы бить тех, кто ближе к игроку)
+	# 3. Сортировка по дистанции
 	var sort_func = func(a, b):
 		return global_position.distance_squared_to(a.global_position) < global_position.distance_squared_to(b.global_position)
 		
-	if not candidates_enemies.is_empty():
-		candidates_enemies.sort_custom(sort_func)
-	
-	if not candidates_props.is_empty():
-		candidates_props.sort_custom(sort_func)
+	if not candidates_enemies.is_empty(): candidates_enemies.sort_custom(sort_func)
+	if not candidates_props.is_empty(): candidates_props.sort_custom(sort_func)
 	
 	var hit_occurred = false
 	
-	# 4. Наносим урон
-	
-	# А) Бьем ВРАГА (если лимит позволяет)
+	# 4. Наносим урон (1 враг + 1 ящик)
 	if enemies_hit_count < max_enemies_per_hit and not candidates_enemies.is_empty():
 		var target = candidates_enemies[0]
 		punch_collision(target, hand)
-		# ЗАПИСЫВАЕМ ТИП "enemy"
 		hit_enemies_current_attack[target.get_instance_id()] = "enemy"
 		hit_occurred = true
 
-	# Б) Бьем ЯЩИК (если лимит позволяет)
 	if props_hit_count < max_props_per_hit and not candidates_props.is_empty():
 		var target = candidates_props[0]
 		punch_collision(target, hand)
-		# ЗАПИСЫВАЕМ ТИП "prop"
 		hit_enemies_current_attack[target.get_instance_id()] = "prop"
 		hit_occurred = true
 		
