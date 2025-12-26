@@ -87,19 +87,35 @@ func _setup_combo_parameters() -> void:
 	player.current_attack_knockback_enabled = true
 	
 	if player.combo_count == 0:
+		# Удар 1
 		anim_resource_name = GameConstants.ANIM_PLAYER_ATTACK_1
 		player.current_attack_damage = 1.0
 		player.has_hyper_armor = false
+		
+		# Настройки отталкивания NORMAL
+		player.current_knockback_strength = player.kb_strength_normal
+		player.current_knockback_height = player.kb_height_normal
+		
 	elif player.combo_count == 1:
+		# Удар 2
 		anim_resource_name = GameConstants.ANIM_PLAYER_ATTACK_2
 		player.current_attack_damage = 1.0
 		player.has_hyper_armor = false
+		
+		# Настройки отталкивания NORMAL
+		player.current_knockback_strength = player.kb_strength_normal
+		player.current_knockback_height = player.kb_height_normal
+		
 	else:
-		# === ФИНИШЕР ===
+		# === ФИНИШЕР (Удар 3) ===
 		anim_resource_name = GameConstants.ANIM_PLAYER_ATTACK_3
 		player.current_attack_damage = 2.0 
 		player.combo_cooldown_active = true
-		player.has_hyper_armor = true 
+		player.has_hyper_armor = true
+		
+		# Настройки отталкивания FINISHER
+		player.current_knockback_strength = player.kb_strength_finisher
+		player.current_knockback_height = player.kb_height_finisher
 
 func _advance_combo() -> void:
 	player.combo_count += 1

@@ -66,14 +66,21 @@ extends CharacterBody3D
 @export var attack_cooldown: float = 0.15
 @export var combo_window_time: float = 2.0
 @export var combo_cooldown_after_combo: float = 0.5
-@export var attack_knockback_strength: float = 5.0
-@export var attack_knockback_height: float = 2.0
-@export var knockback_duration: float = 0.2
+
+@export_subgroup("Knockback: Normal Hit (1 & 2)")
+@export var kb_strength_normal: float = 4.0 ## Сила отталкивания для первых ударов
+@export var kb_height_normal: float = 2.0   ## Высота подбрасывания для первых ударов
+
+@export_subgroup("Knockback: Finisher (3)")
+@export var kb_strength_finisher: float = 10.0 ## Сила отталкивания для финишера
+@export var kb_height_finisher: float = 6.0    ## Высота подбрасывания для финишера
+
+@export_subgroup("Misc Combat")
+@export var knockback_duration: float = 0.2 ## Внимание: Это время стана ИГРОКА при получении урона!
 @export var running_attack_impulse: float = 3.0
 @export var walking_attack_impulse: float = 1.5
 @export var attack_rotation_influence: float = 0.5
 @export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0 
-
 @export_group("Combat Assist")
 @export var soft_lock_range: float = 4.0 
 @export var soft_lock_angle: float = 90.0 
@@ -117,7 +124,9 @@ var is_attacking: bool = false
 var can_attack: bool = true
 var combo_count: int = 0
 var current_attack_damage: float = 1.0
-var current_attack_knockback_enabled: bool = false
+var current_knockback_strength: float = 0.0 
+var current_knockback_height: float = 0.0
+var current_attack_knockback_enabled: bool = true
 var combo_reset_timer: Timer
 var combo_cooldown_active: bool = false
 var combo_cooldown_timer: Timer
@@ -138,6 +147,8 @@ var is_knockback_stun: bool = false
 var is_passing_through: bool = false
 var hit_enemies_current_attack: Dictionary = {}
 var hitbox_active_timer: float = 0.0
+
+
 
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
@@ -518,17 +529,13 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
 	
 	if body.has_method("take_damage"):
-		var is_finisher = (current_attack_damage >= 2.0)
+		var is_finisher = (combo_count >= 2) # Считаем финишером 3-й удар (индекс 2)
 		var knockback_vec = Vector3.ZERO
 		
 		if current_attack_knockback_enabled:
-			knockback_vec = dir * attack_knockback_strength
-			if is_finisher:
-				knockback_vec.y = 6.0
-				knockback_vec.x *= 0.5
-				knockback_vec.z *= 0.5
-			else:
-				knockback_vec.y = attack_knockback_height
+			# Используем переменные, которые настроил player_attack.gd
+			knockback_vec = dir * current_knockback_strength
+			knockback_vec.y = current_knockback_height
 		
 		# Hit Stop logic
 		var is_enemy = body.is_in_group(GameConstants.GROUP_ENEMIES)
@@ -550,7 +557,10 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 			GameManager.hit_stop_smooth(hs_prop_time_scale, hs_prop_duration, 0.0, 0.0) 
 			GameEvents.camera_shake_requested.emit(0.1, 0.05)
 
+		# Передаем рассчитанный вектор во врага
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
+		
+		# Отдача для игрока (Recoil)
 		var recoil_force = 2.0
 		if is_finisher: recoil_force = 4.0
 		velocity -= dir * recoil_force
