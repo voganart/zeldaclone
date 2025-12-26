@@ -229,35 +229,38 @@ shader_parameter/scroll_offset = Vector2(0.1, -0.3)
 shader_parameter/scale_offset = 0.5
 shader_parameter/normal_map_scale = Vector2(0.1, 0.1)
 
-[sub_resource type="Resource" id="Resource_j5xtq"]
+[sub_resource type="Resource" id="Resource_vhl2u"]
 script = ExtResource("24_xbjnq")
-amount = 200
+amount = 300
+override_global_seed = true
+custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_lwb8x"]
+[sub_resource type="Resource" id="Resource_j5xtq"]
 script = ExtResource("25_e3h7t")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
-scale = Vector3(0.1, 0.1, 0.1)
+scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_dxok1"]
+[sub_resource type="Resource" id="Resource_lwb8x"]
 script = ExtResource("26_84ugw")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_38s4e"]
+[sub_resource type="Resource" id="Resource_dxok1"]
 script = ExtResource("27_8ftol")
 ray_length = 5.0
 ray_offset = 5.0
 align_with_collision_normal = true
 collision_mask = 8
+exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_3spol"]
+[sub_resource type="Resource" id="Resource_38s4e"]
 script = ExtResource("22_mnooe")
-stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_j5xtq"), SubResource("Resource_lwb8x"), SubResource("Resource_dxok1"), SubResource("Resource_38s4e")])
+stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_vhl2u"), SubResource("Resource_j5xtq"), SubResource("Resource_lwb8x"), SubResource("Resource_dxok1")])
 
 [sub_resource type="Resource" id="Resource_lqi4r"]
 script = ExtResource("30_mtvxm")
@@ -586,7 +589,7 @@ navigation_mesh = SubResource("NavigationMesh_u71mg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003982544, -0.013222218, 0.0002708435)
 
 [node name="Chest1" parent="NavigationRegion3D/Chests" instance=ExtResource("34_e3h7t")]
-transform = Transform3D(-0.9542301, 0.10551529, -0.27984184, 0.10841541, 0.9940925, 0.005141187, 0.2787311, -0.025433285, -0.96003234, -9.045122, -0.143018, 11.158377)
+transform = Transform3D(-0.9602378, -0.023921564, -0.278157, -0.015890986, 0.99939054, -0.031089678, 0.2787311, -0.025433287, -0.96003234, -9.045122, -0.0039824247, 11.158377)
 ability_to_unlock = "air_dash"
 
 [node name="Chest5" parent="NavigationRegion3D/Chests" instance=ExtResource("34_e3h7t")]
@@ -637,7 +640,7 @@ transform = Transform3D(0.70042783, 0, -0.016929833, 0, 0.97903067, 0, 0.0174851
 [node name="ProtonScatter" type="Node3D" parent="NavigationRegion3D/Environment"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
 script = ExtResource("21_ov4tj")
-modifier_stack = SubResource("Resource_3spol")
+modifier_stack = SubResource("Resource_38s4e")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -645,7 +648,7 @@ metadata/_custom_type_script = "uid://bn8ms3g1y108p"
 [node name="ScatterItem" type="Node3D" parent="NavigationRegion3D/Environment/ProtonScatter"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42989397, 0, -0.7570038)
 script = ExtResource("28_j2se1")
-source_scale_multiplier = 0.2
+source_scale_multiplier = 0.3
 path = "uid://gxav0cyjiosj"
 
 [node name="ScatterShape" type="Node3D" parent="NavigationRegion3D/Environment/ProtonScatter"]
