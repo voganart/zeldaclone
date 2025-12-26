@@ -131,6 +131,14 @@ normal_fade = 0.545
 distance_fade_enabled = true
 cull_mask = 16
 
+[node name="Grass" parent="." index="20"]
+layers = 17
+
+[node name="GENERATE_IslandVines" parent="." index="23"]
+visibility_range_end = 150.0
+visibility_range_end_margin = 20.0
+visibility_range_fade_mode = 1
+
 [node name="Island" parent="." index="24"]
 collision_layer = 8
 collision_mask = 31
