@@ -4,6 +4,8 @@ var enemy: Enemy
 var is_performing_attack_anim: bool = false
 var attack_timer: float = 0.0
 
+@export var hit_stagger_delay: float = 0.2 
+
 func enter() -> void:
 	enemy = entity as Enemy
 	is_performing_attack_anim = false
@@ -115,10 +117,18 @@ func _handle_retreat(delta: float) -> void:
 	if enemy.nav_agent.is_navigation_finished():
 		enemy.attack_component.tactical_retreat_pause_timer = enemy.attack_component.get_random_retreat_pause_time()
 
-func on_damage_taken() -> void:
-	if enemy.attack_component.should_tactical_retreat:
-		enemy.attack_component.clear_retreat_state()
+# СТАЛО:
+func on_damage_taken(is_heavy: bool = false) -> void:
+	if not is_performing_attack_anim: return
+
+	if is_heavy:
+		is_performing_attack_anim = false
+		AIDirector.return_attack_token(enemy)
 		transitioned.emit(self, GameConstants.STATE_CHASE)
+		print("Enemy attack INTERRUPTED by heavy hit!")
+	else:
+		attack_timer += hit_stagger_delay
+		print("Enemy attack DELAYED by light hit!")
 
 func exit() -> void:
 	is_performing_attack_anim = false

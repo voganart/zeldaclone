@@ -31,5 +31,5 @@ func update(_delta: float) -> void:
 func physics_update(_delta: float) -> void:
 	pass
 
-func on_damage_taken() -> void:
+func on_damage_taken(is_heavy: bool = false) -> void:
 	pass

@@ -325,7 +325,7 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	
 	if health_component:
 		health_component.take_damage(amount)
-	
+	state_machine.current_state.on_damage_taken( is_heavy_attack)
 	if knockback_force.length() > 0.5:
 		velocity = knockback_force
 		is_knocked_back = true
