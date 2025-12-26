@@ -6,6 +6,23 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
+@export_group("Hit Stop Settings (Juice)")
+
+@export_subgroup("Props / Objects")
+@export var hs_prop_time_scale: float = 0.1 
+@export var hs_prop_duration: float = 0.02 
+
+@export_subgroup("Enemy: Normal Hit")
+@export var hs_normal_time_scale: float = 0.1
+@export var hs_normal_duration: float = 0.04
+
+@export_subgroup("Enemy: Finisher Hit")
+@export var hs_finisher_time_scale: float = 0.1
+@export var hs_finisher_duration: float = 0.08
+
+@export_subgroup("Enemy: Lethal Hit (Kill)")
+@export var hs_lethal_time_scale: float = 0.05
+@export var hs_lethal_duration: float = 0.15
 @export_group("Jump")
 @export var jump_height: float = 1.25
 @export var jump_time_to_peak: float = 0.45
@@ -27,9 +44,6 @@ extends CharacterBody3D
 @export var rm_run_anim_speed: float = 1.3 
 
 @export_subgroup("Roll Settings")
-# ТЕПЕРЬ ЭТО МНОЖИТЕЛИ СКОРОСТИ АНИМАЦИИ!
-# 1.0 = Обычная скорость переката. 
-# 1.5 = Ускоренный перекат (дальше и быстрее).
 @export var roll_min_speed: float = 1.0 
 @export var roll_max_speed: float = 1.4
 @export var roll_control: float = 0.5 
@@ -123,14 +137,15 @@ var is_knockbacked: bool = false
 var is_knockback_stun: bool = false
 var is_passing_through: bool = false
 var hit_enemies_current_attack: Dictionary = {}
+var hitbox_active_timer: float = 0.0
 
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 var current_time_scale: float = 1.0
 
 var current_rm_velocity: Vector3 = Vector3.ZERO
+var has_hyper_armor: bool = false 
 
-# НОВАЯ ПЕРЕМЕННАЯ: Множитель скорости Root Motion (по умолчанию 1.0 - скорость анимации)
 var root_motion_speed_factor: float = 1.0
 
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
@@ -180,44 +195,35 @@ func _process(delta: float) -> void:
 		var is_locomotion = state_name == "move"
 		
 		if is_locomotion:
-			# --- ХОДЬБА (Полное управление игроком) ---
 			rot_char(delta)
-			
 			var velocity_vector = (global_transform.basis * rm_pos) / delta
 			current_rm_velocity.x = velocity_vector.x
 			current_rm_velocity.z = velocity_vector.z
-			
 		else:
-			# --- АТАКА / ПЕРЕКАТ ---
-			
-			# 1. Применяем вращение от самой анимации (база)
 			var current_transform = global_transform
 			global_transform = current_transform * Transform3D(Basis(rm_rot), Vector3.ZERO)
 			
-			# 2. ДОБАВЛЕНО: Подруливание для переката (Steering)
 			if state_name == "roll" and roll_control > 0.0:
 				var input_dir = input_handler.move_vector
 				if input_dir.length_squared() > 0.01:
 					var target_angle = atan2(input_dir.x, input_dir.y)
-					# Смешиваем текущий угол с целевым. roll_control влияет на силу доворота.
 					var steer_speed = rot_speed * roll_control
 					rotation.y = lerp_angle(rotation.y, target_angle, steer_speed * delta)
 			
-			# 3. Применяем множитель скорости (для Juice)
-			# Важно: velocity считается уже от НОВОГО поворота (с учетом подруливания)
 			var velocity_vector = (global_transform.basis * rm_pos) / delta
-			
 			current_rm_velocity.x = velocity_vector.x * root_motion_speed_factor
 			current_rm_velocity.z = velocity_vector.z * root_motion_speed_factor
 	else:
 		current_rm_velocity = Vector3.ZERO
-# ============================================================================
-# PHYSICS PROCESS
-# ============================================================================
+
 func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
 	_update_roll_timers(delta)
 	
+	if hitbox_active_timer > 0:
+		hitbox_active_timer -= delta
+		process_hitbox_check()
+		
 	if has_node("/root/SimpleGrass"):
 		var grass_manager = get_node("/root/SimpleGrass")
 		grass_manager.set_player_position(global_position)
@@ -261,9 +267,6 @@ func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: flo
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
 
-# ============================================================================
-# ANIMATION LOGIC
-# ============================================================================
 func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	var has_input = current_input.length() > 0.01
 	var target_time_scale_rm = 1.0 
@@ -301,9 +304,7 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	else:
 		is_stopping = false
 
-# ============================================================================
-# WRAPPERS
-# ============================================================================
+# --- Wrappers ---
 func set_life_state(state_name: String) -> void:
 	anim_tree.set(GameConstants.TREE_PARAM_STATE, state_name)
 
@@ -342,17 +343,13 @@ func set_slam_state(state_name: String) -> void:
 func trigger_hit() -> void:
 	anim_tree.set(GameConstants.TREE_PARAM_HIT_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
+# --- Helpers ---
 func get_movement_vector() -> Vector2:
-	if input_handler:
-		return input_handler.move_vector
+	if input_handler: return input_handler.move_vector
 	return Vector2.ZERO
 
 func apply_gravity(delta: float) -> void:
-	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming:
-		return
+	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming: return
 	var gravity = jump_gravity if velocity.y > 0.0 else fall_gravity
 	velocity.y -= gravity * delta
 
@@ -364,10 +361,8 @@ func perform_jump() -> void:
 
 func rot_char(delta: float) -> void:
 	if is_knockback_stun: return
-
 	var current_rot_speed = rot_speed
 	if is_attacking: current_rot_speed *= attack_rotation_influence
-	
 	var input_dir = input_handler.move_vector
 	if input_dir.length_squared() > 0.001:
 		var target_angle = atan2(input_dir.x, input_dir.y)
@@ -380,7 +375,6 @@ func tilt_character(delta: float) -> void:
 		var move_vec = Vector3(velocity.x, 0, velocity.z)
 		var local_move = global_transform.basis.inverse() * move_vec
 		target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)
-	
 	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 10.0 * delta)
 
 func apply_attack_impulse() -> void:
@@ -401,31 +395,29 @@ func _find_soft_lock_target() -> Node3D:
 	var best_target: Node3D = null
 	var min_dist: float = soft_lock_range
 	var search_dir = Vector3.ZERO
-	
 	if input_handler.move_vector.length() > 0.1:
 		var input_vec = input_handler.move_vector
 		search_dir = Vector3(input_vec.x, 0, input_vec.y).normalized()
 	else:
 		search_dir = global_transform.basis.z.normalized()
-
 	for enemy in enemies:
 		if not is_instance_valid(enemy): continue
 		if enemy.has_method("is_dead") and enemy.is_dead(): continue
-		
 		var dir_to_enemy = (enemy.global_position - global_position).normalized()
 		var dist = global_position.distance_to(enemy.global_position)
-		
 		if dist > soft_lock_range: continue
 		var angle_to = rad_to_deg(search_dir.angle_to(dir_to_enemy))
 		var current_fov = soft_lock_angle
 		if dist < 2.5: current_fov = 160.0
 		if angle_to > (current_fov / 2.0): continue
-		
 		if dist < min_dist:
 			min_dist = dist
 			best_target = enemy
-			
 	return best_target
+
+# ============================================================================
+# COMBAT HELPERS
+# ============================================================================
 
 func start_combo_cooldown() -> void:
 	combo_count = 0
@@ -435,7 +427,7 @@ func start_combo_cooldown() -> void:
 
 func start_attack_cooldown() -> void:
 	can_attack = false
-	attack_interval_timer.start(attack_cooldown)
+	attack_interval_timer.start(0.1) 
 
 func can_roll() -> bool:
 	if current_roll_charges <= 0: return false
@@ -464,6 +456,10 @@ func process_hitbox_check() -> void:
 	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
 
 func _check_hand_overlap(hand: Area3D) -> bool:
+	# !!! ВАЖНОЕ ИСПРАВЛЕНИЕ: ПРОВЕРКА ВКЛЮЧЕН ЛИ МОНИТОРИНГ !!!
+	if not hand.monitoring: return false
+	# --------------------------------------------------------
+
 	var max_enemies_per_hit = 1
 	var max_props_per_hit = 1
 	var enemies_hit_count = 0
@@ -520,9 +516,11 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 	if not is_attacking: return
 	if body == self: return
 	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
+	
 	if body.has_method("take_damage"):
 		var is_finisher = (current_attack_damage >= 2.0)
 		var knockback_vec = Vector3.ZERO
+		
 		if current_attack_knockback_enabled:
 			knockback_vec = dir * attack_knockback_strength
 			if is_finisher:
@@ -532,20 +530,25 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 			else:
 				knockback_vec.y = attack_knockback_height
 		
-		var enemy_hp_comp = body.get_node_or_null("HealthComponent")
-		var is_lethal = false
-		if enemy_hp_comp:
-			is_lethal = (enemy_hp_comp.current_health - current_attack_damage) <= 0
-
-		if is_lethal:
-			GameManager.hit_stop_smooth(0.1, 0.15, 0.0, 0.2) 
-			GameEvents.camera_shake_requested.emit(0.6, 0.2)
-		elif is_finisher:
-			GameManager.hit_stop_smooth(0.3, 0.1, 0.0, 0.1) 
-			GameEvents.camera_shake_requested.emit(0.4, 0.15)
+		# Hit Stop logic
+		var is_enemy = body.is_in_group(GameConstants.GROUP_ENEMIES)
+		if is_enemy:
+			var enemy_hp_comp = body.get_node_or_null("HealthComponent")
+			var is_lethal = false
+			if enemy_hp_comp:
+				is_lethal = (enemy_hp_comp.current_health - current_attack_damage) <= 0
+			if is_lethal:
+				GameManager.hit_stop_smooth(hs_lethal_time_scale, hs_lethal_duration, 0.0, 0.1) 
+				GameEvents.camera_shake_requested.emit(0.6, 0.2)
+			elif is_finisher:
+				GameManager.hit_stop_smooth(hs_finisher_time_scale, hs_finisher_duration, 0.0, 0.05) 
+				GameEvents.camera_shake_requested.emit(0.4, 0.15)
+			else:
+				GameManager.hit_stop_smooth(hs_normal_time_scale, hs_normal_duration, 0.0, 0.02) 
+				GameEvents.camera_shake_requested.emit(0.2, 0.1)
 		else:
-			GameManager.hit_stop_smooth(0.5, 0.05, 0.0, 0.05) 
-			GameEvents.camera_shake_requested.emit(0.2, 0.1)
+			GameManager.hit_stop_smooth(hs_prop_time_scale, hs_prop_duration, 0.0, 0.0) 
+			GameEvents.camera_shake_requested.emit(0.1, 0.05)
 
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
 		var recoil_force = 2.0
@@ -554,18 +557,14 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
-
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
-	
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
 	sfx_hurt.play_random()
-	
+	if has_hyper_armor: return
 	trigger_hit()
-	
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
-	
 	is_knockback_stun = true
 	is_knockbacked = true
 	current_knockback_timer = knockback_duration
@@ -593,14 +592,12 @@ func _update_roll_timers(delta: float) -> void:
 			is_roll_recharging = false
 			current_roll_charges = roll_max_charges
 			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
-			
 	elif current_roll_charges < roll_max_charges:
 		roll_regen_timer -= delta
 		if roll_regen_timer <= 0:
 			current_roll_charges += 1
 			roll_regen_timer = roll_cooldown
 			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
-			
 	if roll_interval_timer > 0:
 		roll_interval_timer -= delta
 
@@ -647,3 +644,7 @@ func get_closest_nav_point() -> Vector3:
 func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()
+
+func _check_attack_hit() -> void:
+	hitbox_active_timer = 0.1
+	process_hitbox_check()

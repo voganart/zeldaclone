@@ -6,7 +6,7 @@
 [ext_resource type="Material" uid="uid://bhtllc307ps6e" path="res://assets/materials/bark_02.tres" id="3_twi2p"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_twi2p"]
-radius = 2.112322
+radius = 2.294545
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_twi2p"]
 resource_name = "Trees_Tree1"
