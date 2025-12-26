@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ei3dhycjwff0"
-path="res://.godot/imported/floor_tiles_16_metallic_1k.png-4f0b1907659b1d50674d11e7c286c25c.ctex"
+uid="uid://bwidsnc3inugt"
+path="res://.godot/imported/stylized-wall-rock-03_ORM.png-514f46f03657485c94ff27b20be6cf71.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/environment/floor_tiles_16_1k/floor_tiles_16_metallic_1k.png"
-dest_files=["res://.godot/imported/floor_tiles_16_metallic_1k.png-4f0b1907659b1d50674d11e7c286c25c.ctex"]
+source_file="res://assets/textures/environment/stylized-wall-rock-03_ORM.png"
+dest_files=["res://.godot/imported/stylized-wall-rock-03_ORM.png-514f46f03657485c94ff27b20be6cf71.ctex"]
 
 [params]
 

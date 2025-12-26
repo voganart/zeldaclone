@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c83qkq330wyjc"
-path="res://.godot/imported/floor_tiles_16_normal_dx_1k.png-b8ccef6e0b3470df694dabc2e1039abd.ctex"
+uid="uid://btduyogeqoxl6"
+path.s3tc="res://.godot/imported/Packed_ORM.png-9f36fcd5b4c457f42508a3cb64c8c072.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/textures/environment/floor_tiles_16_1k/floor_tiles_16_normal_dx_1k.png"
-dest_files=["res://.godot/imported/floor_tiles_16_normal_dx_1k.png-b8ccef6e0b3470df694dabc2e1039abd.ctex"]
+source_file="res://assets/textures/environment/floor_tiles_16_1k/Packed_ORM.png"
+dest_files=["res://.godot/imported/Packed_ORM.png-9f36fcd5b4c457f42508a3cb64c8c072.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -23,7 +24,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -37,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

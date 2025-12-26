@@ -1,0 +1,22 @@
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://dp3vd4cr8w74q"]
+
+[ext_resource type="Texture2D" uid="uid://dhfxt44pg85cw" path="res://assets/textures/environment/floor_tiles_16_1k/floor_tiles_16_basecolor_1k.png" id="1_ghup5"]
+[ext_resource type="Texture2D" uid="uid://d3oe8jikrwftd" path="res://assets/textures/environment/floor_tiles_01_1k/Packed_ORM.png" id="2_ghup5"]
+[ext_resource type="Texture2D" uid="uid://btduyogeqoxl6" path="res://assets/textures/environment/floor_tiles_16_1k/Packed_ORM.png" id="3_odeep"]
+[ext_resource type="Texture2D" uid="uid://1j6utg3ivkys" path="res://assets/textures/environment/floor_tiles_16_1k/floor_tiles_16_normal_gl_1k.png" id="4_uqe4q"]
+
+[resource]
+albedo_texture = ExtResource("1_ghup5")
+metallic = 1.0
+metallic_texture = ExtResource("3_odeep")
+metallic_texture_channel = 2
+roughness = 0.71
+roughness_texture = ExtResource("3_odeep")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 6.62
+normal_texture = ExtResource("4_uqe4q")
+ao_enabled = true
+ao_light_affect = 0.5
+ao_texture = ExtResource("2_ghup5")
+uv1_scale = Vector3(0.5, 0.5, 0.5)

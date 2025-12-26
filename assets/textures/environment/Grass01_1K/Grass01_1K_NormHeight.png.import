@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://edj7f6edamcw"
-path="res://.godot/imported/floor_tiles_16_ambientocclusion_1k.png-5aad62dbc16b5fe07f03f643ca8e096b.ctex"
+uid="uid://btolg0p10ungw"
+path="res://.godot/imported/Grass01_1K_NormHeight.png-19c4361d470c1e6eff2e79ba97d46ee8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/environment/floor_tiles_16_1k/floor_tiles_16_ambientocclusion_1k.png"
-dest_files=["res://.godot/imported/floor_tiles_16_ambientocclusion_1k.png-5aad62dbc16b5fe07f03f643ca8e096b.ctex"]
+source_file="res://assets/textures/environment/Grass01_1K/Grass01_1K_NormHeight.png"
+dest_files=["res://.godot/imported/Grass01_1K_NormHeight.png-19c4361d470c1e6eff2e79ba97d46ee8.ctex"]
 
 [params]
 
