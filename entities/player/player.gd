@@ -18,28 +18,30 @@ extends CharacterBody3D
 @export var run_speed: float = 4.5
 @export var stop_speed: float = 8.0
 @export var acceleration: float = 0.3
-@export var rot_speed: float = 5.0
+@export var rot_speed: float = 10.0
 @export var push_force: float = 0.5
 @export var roll_push_multiplier: float = 2.5
+
+@export_group("Root Motion Tweaks")
+@export var rm_walk_anim_speed: float = 1.0 
+@export var rm_run_anim_speed: float = 1.3 
 
 @export_subgroup("Roll Settings")
 @export var roll_min_speed: float = 8.0
 @export var roll_max_speed: float = 12.0
-@export var roll_control: float = 0.5 ## Управляемость во время переката (0 - нет, 1 - полная)
-@export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 ## В какой момент переката можно прыгнуть
+@export var roll_control: float = 0.5 
+@export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 
 @export var roll_max_charges: int = 3
 @export var roll_cooldown: float = 0.5
 @export var roll_recharge_time: float = 3.0
 
 @export_group("Auto Run")
-@export var auto_run_latch_time: float = 2.0
+@export var auto_run_latch_time: float = 0.3
 
 @export_group("Animation Blending")
-@export var walk_run_blend_smoothing: float = 8.0
-@export var walk_run_blend_start_speed: float = 3.6
-@export var walk_run_blend_end_speed: float = 4.2
-@export var walk_calibration_speed: float = 2.5
-@export var run_calibration_speed: float = 4.0
+@export var walk_run_blend_smoothing: float = 5.0
+@export var blend_value_walk: float = 0.5 
+@export var blend_value_run: float = 1.0 
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
@@ -52,7 +54,7 @@ extends CharacterBody3D
 @export var running_attack_impulse: float = 3.0
 @export var walking_attack_impulse: float = 1.5
 @export var attack_rotation_influence: float = 0.5
-@export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0 ## В какой момент атаки можно прервать её перекатом
+@export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0 
 
 @export_group("Combat Assist")
 @export var soft_lock_range: float = 4.0 
@@ -63,7 +65,6 @@ extends CharacterBody3D
 @export var punch_hand_l: Area3D
 @onready var health_component: Node = $HealthComponent
 @export var attack_area: Area3D 
-# КОМПОНЕНТЫ
 @onready var state_machine: StateMachine = $StateMachine
 @onready var air_dash_ability: AirDashAbility = $AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $GroundSlamAbility
@@ -81,9 +82,6 @@ extends CharacterBody3D
 @onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
 @onready var shape_cast: ShapeCast3D = $RollSafetyCast
 
-# ============================================================================
-# RUNTIME VARIABLES
-# ============================================================================
 @onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
@@ -126,6 +124,9 @@ var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 var current_time_scale: float = 1.0
 
+# Переменная для передачи скорости из _process в _physics_process
+var current_rm_velocity: Vector3 = Vector3.ZERO
+
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
@@ -162,7 +163,44 @@ func _ready() -> void:
 	state_machine.init(self)
 
 # ============================================================================
-# PHYSICS PROCESS (CONTROLLER)
+# VISUAL PROCESS (SMOOTH ANIMATION & RM READ)
+# ============================================================================
+func _process(delta: float) -> void:
+	# Если мы в режиме Root Motion, считываем данные здесь, чтобы анимация была плавной (165 FPS)
+	if state_machine.current_state and state_machine.current_state.is_root_motion:
+		var rm_pos = anim_tree.get_root_motion_position()
+		var rm_rot = anim_tree.get_root_motion_rotation()
+		
+		var is_locomotion = state_machine.current_state.name.to_lower() == "move"
+		
+		if is_locomotion:
+			# --- ХОДЬБА (Управление игроком) ---
+			# Вращаем визуально каждый кадр
+			rot_char(delta)
+			
+			# Рассчитываем скорость: смещение / время кадра = м/с
+			# Эта скорость пойдет в физику
+			var velocity_vector = (global_transform.basis * rm_pos) / delta
+			
+			current_rm_velocity.x = velocity_vector.x
+			current_rm_velocity.z = velocity_vector.z
+			
+		else:
+			# --- АТАКА/ПЕРЕКАТ (Полный RM) ---
+			# Вращаем персонажа от анимации (плавно, каждый кадр)
+			var current_transform = global_transform
+			global_transform = current_transform * Transform3D(Basis(rm_rot), Vector3.ZERO)
+			
+			# Рассчитываем скорость относительно НОВОГО поворота
+			var velocity_vector = (global_transform.basis * rm_pos) / delta
+			current_rm_velocity.x = velocity_vector.x
+			current_rm_velocity.z = velocity_vector.z
+	else:
+		# Если RM нет, сбрасываем переменную (скорость будет считаться в физике или apply_movement)
+		current_rm_velocity = Vector3.ZERO
+
+# ============================================================================
+# PHYSICS PROCESS (COLLISIONS & GRAVITY)
 # ============================================================================
 func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
@@ -181,7 +219,18 @@ func _physics_process(delta: float) -> void:
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	move_and_slide()
+	# --- ПРИМЕНЕНИЕ СКОРОСТИ ---
+	if state_machine.current_state and state_machine.current_state.is_root_motion:
+		# Берем скорость, рассчитанную в _process
+		velocity.x = current_rm_velocity.x
+		velocity.z = current_rm_velocity.z
+		
+		# Гравитация всегда физическая
+		apply_gravity(delta)
+		move_and_slide()
+	else:
+		# Старая логика (прыжки, падение)
+		move_and_slide()
 	
 	push_obj()
 	check_jump_pass_through()
@@ -191,7 +240,11 @@ func _physics_process(delta: float) -> void:
 		current_jump_count = 0
 	was_on_floor = is_on_floor()
 
+# ... (ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ НИЖЕ) ...
 func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
+	if state_machine.current_state.is_root_motion and is_on_floor():
+		return 
+
 	var velocity_2d = Vector2(velocity.x, velocity.z)
 	
 	if input_dir != Vector2.ZERO:
@@ -202,9 +255,42 @@ func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: flo
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
 
-# ============================================================================
-# ANIMATION TREE WRAPPERS
-# ============================================================================
+func handle_move_animation(delta: float, current_input: Vector2) -> void:
+	var has_input = current_input.length() > 0.01
+	var target_time_scale_rm = 1.0 
+	
+	if has_input:
+		if is_auto_running or is_trying_to_run:
+			target_movement_blend = blend_value_run
+			target_time_scale_rm = rm_run_anim_speed 
+		else:
+			target_movement_blend = blend_value_walk
+			target_time_scale_rm = rm_walk_anim_speed 
+	else:
+		target_movement_blend = 0.0
+		target_time_scale_rm = 1.0
+	
+	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+	if current_movement_blend < 0.01: current_movement_blend = 0.0
+	
+	set_locomotion_blend(current_movement_blend)
+	
+	if state_machine.current_state.is_root_motion:
+		current_time_scale = lerp(current_time_scale, target_time_scale_rm, 5.0 * delta)
+		anim_tree.set(GameConstants.TREE_PARAM_LOCOMOTION_SPEED, current_time_scale)
+	else:
+		var speed_2d = Vector2(velocity.x, velocity.z).length()
+		var target_scale = 1.0
+		if speed_2d > 0.1:
+			target_scale = clamp(speed_2d / base_speed, 0.5, 3.0)
+		anim_tree.set(GameConstants.TREE_PARAM_LOCOMOTION_SPEED, target_scale)
+	
+	if not has_input and current_movement_blend > 0.1:
+		if not is_stopping:
+			is_stopping = true
+			trigger_stopping()
+	else:
+		is_stopping = false
 
 func set_life_state(state_name: String) -> void:
 	anim_tree.set(GameConstants.TREE_PARAM_STATE, state_name)
@@ -244,9 +330,6 @@ func set_slam_state(state_name: String) -> void:
 func trigger_hit() -> void:
 	anim_tree.set(GameConstants.TREE_PARAM_HIT_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
 func get_movement_vector() -> Vector2:
 	if input_handler:
 		return input_handler.move_vector
@@ -285,24 +368,18 @@ func tilt_character(delta: float) -> void:
 	
 	_mesh.rotation.z = lerp_angle(_mesh.rotation.z, target_tilt, 10.0 * delta)
 
-# ============================================================================
-# COMBAT HELPERS
-# ============================================================================
 func apply_attack_impulse() -> void:
-	velocity.x = 0
-	velocity.z = 0
-	
 	var target = _find_soft_lock_target()
 	if target:
 		var dir_to_enemy = (target.global_position - global_position).normalized()
 		var target_angle = atan2(dir_to_enemy.x, dir_to_enemy.z)
 		rotation.y = target_angle
 	
-	var attack_dir = global_transform.basis.z.normalized()
-	var impulse = walking_attack_impulse
-	if is_trying_to_run: impulse = running_attack_impulse
-	
-	velocity += attack_dir * impulse
+	if state_machine.current_state and not state_machine.current_state.is_root_motion:
+		var attack_dir = global_transform.basis.z.normalized()
+		var impulse = walking_attack_impulse
+		if is_trying_to_run: impulse = running_attack_impulse
+		velocity += attack_dir * impulse
 
 func _find_soft_lock_target() -> Node3D:
 	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
@@ -372,12 +449,8 @@ func process_hitbox_check() -> void:
 	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
 
 func _check_hand_overlap(hand: Area3D) -> bool:
-	# --- НАСТРОЙКИ ЛИМИТОВ ---
 	var max_enemies_per_hit = 1
 	var max_props_per_hit = 1
-	# -------------------------
-
-	# 1. Считаем уже ударенные цели
 	var enemies_hit_count = 0
 	var props_hit_count = 0
 	
@@ -388,12 +461,9 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	if enemies_hit_count >= max_enemies_per_hit and props_hit_count >= max_props_per_hit:
 		return false
 
-	# 2. Сбор кандидатов
 	var candidates_enemies: Array[Node3D] = []
 	var candidates_props: Array[Node3D] = []
 	
-	# Получаем список тех, кто ВООБЩЕ находится в зоне атаки перед игроком
-	# Если зона не назначена, считаем что "все валидны" (пустой массив не используем как фильтр)
 	var bodies_in_front_zone = []
 	if attack_area:
 		bodies_in_front_zone = attack_area.get_overlapping_bodies()
@@ -401,20 +471,14 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	for body in hand.get_overlapping_bodies():
 		if body == self: continue
 		if hit_enemies_current_attack.has(body.get_instance_id()): continue
-		
-		# !!! НОВАЯ ПРОВЕРКА !!!
-		# Если назначена FirstAttackArea, и врага в ней НЕТ — игнорируем удар.
-		# Это спасет от ударов спиной/замахом.
 		if attack_area and not body in bodies_in_front_zone:
 			continue
 		
-		# Дальше старая логика сортировки
 		if body.is_in_group(GameConstants.GROUP_ENEMIES):
 			candidates_enemies.append(body)
 		elif body is RigidBody3D or body.has_method("take_damage"):
 			candidates_props.append(body)
 	
-	# 3. Сортировка по дистанции
 	var sort_func = func(a, b):
 		return global_position.distance_squared_to(a.global_position) < global_position.distance_squared_to(b.global_position)
 		
@@ -423,7 +487,6 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	
 	var hit_occurred = false
 	
-	# 4. Наносим урон (1 враг + 1 ящик)
 	if enemies_hit_count < max_enemies_per_hit and not candidates_enemies.is_empty():
 		var target = candidates_enemies[0]
 		punch_collision(target, hand)
@@ -438,64 +501,42 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 		
 	return hit_occurred
 
-# ============================================================================
-# ANIMATION LOGIC
-# ============================================================================
-func handle_move_animation(delta: float, current_input: Vector2) -> void:
-	var speed_2d = Vector2(velocity.x, velocity.z).length()
-	var has_input = current_input.length_squared() > 0.01
-	
-	if has_input:
-		target_movement_blend = calculate_walk_run_blend(speed_2d)
-	else:
-		target_movement_blend = 0.0
-	
-	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
-	if current_movement_blend < 0.01: current_movement_blend = 0.0
-	set_locomotion_blend(current_movement_blend)
-	
-	var target_time_scale = 1.0
-	if speed_2d > 0.1:
-		var current_calib = 0.0
-		if speed_2d <= base_speed:
-			current_calib = walk_calibration_speed
-		else:
-			var t = clamp(inverse_lerp(base_speed, run_speed, speed_2d), 0.0, 1.0)
-			current_calib = lerp(walk_calibration_speed, run_calibration_speed, t)
+func punch_collision(body: Node3D, hand: Area3D) -> void:
+	if not is_attacking: return
+	if body == self: return
+	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
+	if body.has_method("take_damage"):
+		var is_finisher = (current_attack_damage >= 2.0)
+		var knockback_vec = Vector3.ZERO
+		if current_attack_knockback_enabled:
+			knockback_vec = dir * attack_knockback_strength
+			if is_finisher:
+				knockback_vec.y = 6.0
+				knockback_vec.x *= 0.5
+				knockback_vec.z *= 0.5
+			else:
+				knockback_vec.y = attack_knockback_height
 		
-		target_time_scale = speed_2d / current_calib
-		target_time_scale = clamp(target_time_scale, 0.5, 3.0)
-	else:
-		target_time_scale = 1.0
-	
-	current_time_scale = lerp(current_time_scale, target_time_scale, 5.0 * delta)
-	anim_tree.set(GameConstants.TREE_PARAM_LOCOMOTION_SPEED, current_time_scale)
-	
-	if has_input:
-		is_stopping = false
-	elif speed_2d > 3.0:
-		if not is_stopping:
-			is_stopping = true
-			trigger_stopping()
-	else:
-		is_stopping = false
+		var enemy_hp_comp = body.get_node_or_null("HealthComponent")
+		var is_lethal = false
+		if enemy_hp_comp:
+			is_lethal = (enemy_hp_comp.current_health - current_attack_damage) <= 0
 
-func calculate_walk_run_blend(speed: float) -> float:
-	if speed < 0.1: return 0.0
+		if is_lethal:
+			GameManager.hit_stop_smooth(0.1, 0.15, 0.0, 0.2) 
+			GameEvents.camera_shake_requested.emit(0.6, 0.2)
+		elif is_finisher:
+			GameManager.hit_stop_smooth(0.3, 0.1, 0.0, 0.1) 
+			GameEvents.camera_shake_requested.emit(0.4, 0.15)
+		else:
+			GameManager.hit_stop_smooth(0.5, 0.05, 0.0, 0.05) 
+			GameEvents.camera_shake_requested.emit(0.2, 0.1)
 
-	if speed <= base_speed:
-		if base_speed <= 0: return 0.0
-		return (speed / base_speed) * 0.5
-	else:
-		var speed_range = run_speed - base_speed
-		if speed_range <= 0: return 1.0
-		var excess_speed = speed - base_speed
-		var t = excess_speed / speed_range
-		return clamp(0.5 + (t * 0.5), 0.5, 1.0)
+		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
+		var recoil_force = 2.0
+		if is_finisher: recoil_force = 4.0
+		velocity -= dir * recoil_force
 
-# ============================================================================
-# HEALTH & DAMAGE
-# ============================================================================
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
 
@@ -548,36 +589,20 @@ func _update_roll_timers(delta: float) -> void:
 	if roll_interval_timer > 0:
 		roll_interval_timer -= delta
 
-# ============================================================================
-# COLLISIONS & MISC
-# ============================================================================
 func push_obj():
-	# Берем базовую силу из настроек
 	var current_push_force = push_force
 	var collision_count = get_slide_collision_count()
-	
 	for i in range(collision_count):
 		var c = get_slide_collision(i)
 		var collider = c.get_collider()
-		
-		# --- 1. ЯЩИКИ И ФИЗИКА (RigidBody3D) ---
-		# Их толкаем СИЛЬНО (используем roll_push_multiplier)
 		if collider is RigidBody3D:
 			var rigid_mult = roll_push_multiplier if is_rolling else 1.0
 			collider.apply_central_impulse(-c.get_normal() * current_push_force * rigid_mult)
-			
-		# --- 2. ВРАГИ (CharacterBody3D) ---
-		# Их толкаем СЛАБО (игнорируем roll_push_multiplier или делаем его маленьким)
 		if collider is CharacterBody3D and collider.has_method("receive_push"):
-			# Для врагов множитель всегда 1.0, даже если катимся.
-			# Если хочешь чуть сильнее, поставь 1.2, но не 2.5 как было.
 			var enemy_mult = 1.0 
-			
 			var push_dir = -c.get_normal()
 			push_dir.y = 0
 			collider.receive_push(push_dir.normalized() * current_push_force * enemy_mult)
-			
-			# Логика замедления самого игрока при ударе об врага в перекате
 			if is_rolling:
 				velocity *= 0.5
 				var current_state = state_machine.current_state
@@ -590,7 +615,6 @@ func check_jump_pass_through() -> void:
 			is_passing_through = false
 			set_collision_mask_value(3, true)
 		return
-
 	if is_on_floor():
 		for i in get_slide_collision_count():
 			var c = get_slide_collision(i)
@@ -600,27 +624,6 @@ func check_jump_pass_through() -> void:
 					set_collision_mask_value(3, false)
 					global_position.y -= 0.05
 					break
-
-func punch_collision(body: Node3D, hand: Area3D) -> void:
-	if not is_attacking: return
-	if body == self: return
-	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
-	if body.has_method("take_damage"):
-		var is_finisher = (current_attack_damage >= 2.0)
-		var knockback_vec = Vector3.ZERO
-		if current_attack_knockback_enabled:
-			knockback_vec = dir * attack_knockback_strength
-			if is_finisher:
-				knockback_vec.y = 6.0
-				knockback_vec.x *= 0.5
-				knockback_vec.z *= 0.5
-			else:
-				knockback_vec.y = attack_knockback_height
-		
-		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
-		var recoil_force = 2.0
-		if is_finisher: recoil_force = 4.0
-		velocity -= dir * recoil_force
 
 func get_closest_nav_point() -> Vector3:
 	var map = get_world_3d().navigation_map

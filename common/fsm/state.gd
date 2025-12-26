@@ -5,7 +5,7 @@ extends Node
 ## state: ссылка на вызывающее состояние (обычно self)
 ## new_state_name: имя состояния, в которое нужно перейти (в нижнем регистре)
 signal transitioned(state: State, new_state_name: String)
-
+@export var is_root_motion: bool = false
 ## Ссылка на сущность, которой управляет состояние (Игрок или Враг).
 ## Используем CharacterBody3D, так как и Player, и Enemy наследуются от него.
 var entity: CharacterBody3D
