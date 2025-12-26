@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bw0nexym6idm"
-path.bptc="res://.godot/imported/leafes.png-d492a5968a8858203eb33ebd95128c75.bptc.ctex"
+uid="uid://x8y6oruual17"
+path.s3tc="res://.godot/imported/roots.png-127a8a4826ccbefab21f2b3a79784e05.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,13 +11,13 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/environment/plants/leafes.png"
-dest_files=["res://.godot/imported/leafes.png-d492a5968a8858203eb33ebd95128c75.bptc.ctex"]
+source_file="res://assets/textures/environment/_plants/roots.png"
+dest_files=["res://.godot/imported/roots.png-127a8a4826ccbefab21f2b3a79784e05.s3tc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=true
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

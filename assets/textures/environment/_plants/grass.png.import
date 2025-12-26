@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgsr0vuv36lst"
-path.bptc="res://.godot/imported/alphas_01__0004s_0008_214.png-3e2c6540fc6d8727a070b044ff6a8df6.bptc.ctex"
+uid="uid://d0s2snmcfue6l"
+path.bptc="res://.godot/imported/grass.png-3a725f9bf17194cf6e6686f7683e435f.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/environment/plants/alphas_01__0004s_0008_214.png"
-dest_files=["res://.godot/imported/alphas_01__0004s_0008_214.png-3e2c6540fc6d8727a070b044ff6a8df6.bptc.ctex"]
+source_file="res://assets/textures/environment/_plants/grass.png"
+dest_files=["res://.godot/imported/grass.png-3a725f9bf17194cf6e6686f7683e435f.bptc.ctex"]
 
 [params]
 

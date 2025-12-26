@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cdvkr7kidb7yk"
-path.s3tc="res://.godot/imported/Groundplants0183_13_S.jpg-2b4a906622e862c32557e241a98c52a9.s3tc.ctex"
+uid="uid://bgsr0vuv36lst"
+path.bptc="res://.godot/imported/alphas_01__0004s_0008_214.png-9f6cadbb5ee6606e3221033d9fe62c4a.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,13 +11,13 @@ metadata={
 
 [deps]
 
-source_file="res://assets/textures/environment/plants/Groundplants0183_13_S.jpg"
-dest_files=["res://.godot/imported/Groundplants0183_13_S.jpg-2b4a906622e862c32557e241a98c52a9.s3tc.ctex"]
+source_file="res://assets/textures/environment/_plants/alphas_01__0004s_0008_214.png"
+dest_files=["res://.godot/imported/alphas_01__0004s_0008_214.png-9f6cadbb5ee6606e3221033d9fe62c4a.bptc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

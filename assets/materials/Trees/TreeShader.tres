@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://br1nrjywyx4pb"]
 
 [ext_resource type="Shader" uid="uid://tosxxv3lx1u5" path="res://assets/shaders/TreeWindShader.gdshader" id="1_8s377"]
-[ext_resource type="Texture2D" uid="uid://bgsr0vuv36lst" path="res://assets/textures/environment/plants/alphas_01__0004s_0008_214.png" id="2_ey8xj"]
+[ext_resource type="Texture2D" uid="uid://bgsr0vuv36lst" path="res://assets/textures/environment/_plants/alphas_01__0004s_0008_214.png" id="2_ey8xj"]
 
 [resource]
 render_priority = 0

@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://dlnkc0cei7ou8"]
 
 [ext_resource type="Shader" uid="uid://tosxxv3lx1u5" path="res://assets/shaders/TreeWindShader.gdshader" id="1_xbdt6"]
-[ext_resource type="Texture2D" uid="uid://x8y6oruual17" path="res://assets/textures/environment/plants/roots.png" id="2_xbdt6"]
+[ext_resource type="Texture2D" uid="uid://x8y6oruual17" path="res://assets/textures/environment/_plants/roots.png" id="2_xbdt6"]
 
 [resource]
 render_priority = 0
