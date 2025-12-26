@@ -1,8 +1,8 @@
 extends Node
 
 @export var player: Node3D
-@export var fade_speed: float = 5.0
-@export var fade_opacity: float = 0.5
+@export var fade_speed: float = 2.0
+@export var fade_opacity: float = 0.2
 # Выбери слой 32 в инспекторе!
 @export_flags_3d_physics var collision_mask: int = 2147483648 
 

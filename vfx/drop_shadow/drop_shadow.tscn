@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://buj16fcko6idg"]
+
+[ext_resource type="Texture2D" uid="uid://bfpnsunfysepv" path="res://assets/textures/vfx/blob_shadow.tres" id="1_hmm0y"]
+[ext_resource type="Script" uid="uid://ca45tbx54xexe" path="res://vfx/drop_shadow/drop_shadow.gd" id="1_kte3u"]
+
+[node name="DropShadow" type="RayCast3D"]
+target_position = Vector3(0, -50, 0)
+collision_mask = 88
+script = ExtResource("1_kte3u")
+max_scale = 2.0
+shadow_color = Color(0, 0, 0, 0.69803923)
+ground_cutoff = 0.5
+
+[node name="Decal" type="Decal" parent="."]
+size = Vector3(1.2, 2, 1.2)
+texture_albedo = ExtResource("1_hmm0y")
+cull_mask = 1048573
