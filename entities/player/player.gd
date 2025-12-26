@@ -27,8 +27,11 @@ extends CharacterBody3D
 @export var rm_run_anim_speed: float = 1.3 
 
 @export_subgroup("Roll Settings")
-@export var roll_min_speed: float = 8.0
-@export var roll_max_speed: float = 12.0
+# ТЕПЕРЬ ЭТО МНОЖИТЕЛИ СКОРОСТИ АНИМАЦИИ!
+# 1.0 = Обычная скорость переката. 
+# 1.5 = Ускоренный перекат (дальше и быстрее).
+@export var roll_min_speed: float = 1.0 
+@export var roll_max_speed: float = 1.4
 @export var roll_control: float = 0.5 
 @export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 
 @export var roll_max_charges: int = 3
@@ -41,7 +44,8 @@ extends CharacterBody3D
 @export_group("Animation Blending")
 @export var walk_run_blend_smoothing: float = 5.0
 @export var blend_value_walk: float = 0.5 
-@export var blend_value_run: float = 1.0 
+@export var blend_value_run: float = 1.0
+@export var stopping_threshold: float = 0.6 
 
 @export_group("Combat")
 @export var primary_attack_speed: float = 0.8
@@ -124,8 +128,10 @@ var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 var current_time_scale: float = 1.0
 
-# Переменная для передачи скорости из _process в _physics_process
 var current_rm_velocity: Vector3 = Vector3.ZERO
+
+# НОВАЯ ПЕРЕМЕННАЯ: Множитель скорости Root Motion (по умолчанию 1.0 - скорость анимации)
+var root_motion_speed_factor: float = 1.0
 
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
@@ -163,44 +169,50 @@ func _ready() -> void:
 	state_machine.init(self)
 
 # ============================================================================
-# VISUAL PROCESS (SMOOTH ANIMATION & RM READ)
+# VISUAL PROCESS
 # ============================================================================
 func _process(delta: float) -> void:
-	# Если мы в режиме Root Motion, считываем данные здесь, чтобы анимация была плавной (165 FPS)
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
 		var rm_pos = anim_tree.get_root_motion_position()
 		var rm_rot = anim_tree.get_root_motion_rotation()
 		
-		var is_locomotion = state_machine.current_state.name.to_lower() == "move"
+		var state_name = state_machine.current_state.name.to_lower()
+		var is_locomotion = state_name == "move"
 		
 		if is_locomotion:
-			# --- ХОДЬБА (Управление игроком) ---
-			# Вращаем визуально каждый кадр
+			# --- ХОДЬБА (Полное управление игроком) ---
 			rot_char(delta)
 			
-			# Рассчитываем скорость: смещение / время кадра = м/с
-			# Эта скорость пойдет в физику
 			var velocity_vector = (global_transform.basis * rm_pos) / delta
-			
 			current_rm_velocity.x = velocity_vector.x
 			current_rm_velocity.z = velocity_vector.z
 			
 		else:
-			# --- АТАКА/ПЕРЕКАТ (Полный RM) ---
-			# Вращаем персонажа от анимации (плавно, каждый кадр)
+			# --- АТАКА / ПЕРЕКАТ ---
+			
+			# 1. Применяем вращение от самой анимации (база)
 			var current_transform = global_transform
 			global_transform = current_transform * Transform3D(Basis(rm_rot), Vector3.ZERO)
 			
-			# Рассчитываем скорость относительно НОВОГО поворота
+			# 2. ДОБАВЛЕНО: Подруливание для переката (Steering)
+			if state_name == "roll" and roll_control > 0.0:
+				var input_dir = input_handler.move_vector
+				if input_dir.length_squared() > 0.01:
+					var target_angle = atan2(input_dir.x, input_dir.y)
+					# Смешиваем текущий угол с целевым. roll_control влияет на силу доворота.
+					var steer_speed = rot_speed * roll_control
+					rotation.y = lerp_angle(rotation.y, target_angle, steer_speed * delta)
+			
+			# 3. Применяем множитель скорости (для Juice)
+			# Важно: velocity считается уже от НОВОГО поворота (с учетом подруливания)
 			var velocity_vector = (global_transform.basis * rm_pos) / delta
-			current_rm_velocity.x = velocity_vector.x
-			current_rm_velocity.z = velocity_vector.z
+			
+			current_rm_velocity.x = velocity_vector.x * root_motion_speed_factor
+			current_rm_velocity.z = velocity_vector.z * root_motion_speed_factor
 	else:
-		# Если RM нет, сбрасываем переменную (скорость будет считаться в физике или apply_movement)
 		current_rm_velocity = Vector3.ZERO
-
 # ============================================================================
-# PHYSICS PROCESS (COLLISIONS & GRAVITY)
+# PHYSICS PROCESS
 # ============================================================================
 func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
@@ -219,17 +231,12 @@ func _physics_process(delta: float) -> void:
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	# --- ПРИМЕНЕНИЕ СКОРОСТИ ---
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
-		# Берем скорость, рассчитанную в _process
 		velocity.x = current_rm_velocity.x
 		velocity.z = current_rm_velocity.z
-		
-		# Гравитация всегда физическая
 		apply_gravity(delta)
 		move_and_slide()
 	else:
-		# Старая логика (прыжки, падение)
 		move_and_slide()
 	
 	push_obj()
@@ -240,7 +247,6 @@ func _physics_process(delta: float) -> void:
 		current_jump_count = 0
 	was_on_floor = is_on_floor()
 
-# ... (ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ НИЖЕ) ...
 func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
 	if state_machine.current_state.is_root_motion and is_on_floor():
 		return 
@@ -255,6 +261,9 @@ func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: flo
 	velocity.x = velocity_2d.x
 	velocity.z = velocity_2d.y
 
+# ============================================================================
+# ANIMATION LOGIC
+# ============================================================================
 func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	var has_input = current_input.length() > 0.01
 	var target_time_scale_rm = 1.0 
@@ -285,13 +294,16 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 			target_scale = clamp(speed_2d / base_speed, 0.5, 3.0)
 		anim_tree.set(GameConstants.TREE_PARAM_LOCOMOTION_SPEED, target_scale)
 	
-	if not has_input and current_movement_blend > 0.1:
+	if not has_input and current_movement_blend > stopping_threshold:
 		if not is_stopping:
 			is_stopping = true
 			trigger_stopping()
 	else:
 		is_stopping = false
 
+# ============================================================================
+# WRAPPERS
+# ============================================================================
 func set_life_state(state_name: String) -> void:
 	anim_tree.set(GameConstants.TREE_PARAM_STATE, state_name)
 
@@ -330,6 +342,9 @@ func set_slam_state(state_name: String) -> void:
 func trigger_hit() -> void:
 	anim_tree.set(GameConstants.TREE_PARAM_HIT_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
 func get_movement_vector() -> Vector2:
 	if input_handler:
 		return input_handler.move_vector

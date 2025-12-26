@@ -4,7 +4,6 @@ var player: Player
 var roll_duration: float = 0.0
 var elapsed_time: float = 0.0
 var ghost_layers: Array[int] = [3, 5]
-var current_roll_speed: float = 0.0
 
 func enter() -> void:
 	player = entity as Player
@@ -30,7 +29,7 @@ func enter() -> void:
 	if player.shape_cast:
 		player.shape_cast.enabled = true
 
-	# Запуск анимации через дерево
+	# Запуск анимации
 	player.trigger_roll()
 	
 	if player.anim_player.has_animation(GameConstants.ANIM_PLAYER_ROLL):
@@ -38,19 +37,21 @@ func enter() -> void:
 	else:
 		roll_duration = 0.6
 	
-	# Расчет скорости
+	# === УПРАВЛЕНИЕ СКОРОСТЬЮ ROOT MOTION ===
+	# Определяем, бежали мы или стояли
 	var current_speed_2d = Vector2(player.velocity.x, player.velocity.z).length()
+	# Фактор от 0.0 (стояли) до 1.0 (макс бег)
 	var speed_factor = clamp(current_speed_2d / player.run_speed, 0.0, 1.0)
-	current_roll_speed = lerp(player.roll_min_speed, player.roll_max_speed, speed_factor)
 	
-	var forward = player.global_transform.basis.z.normalized()
-	player.velocity.x = forward.x * current_roll_speed
-	player.velocity.z = forward.z * current_roll_speed
+	# Вычисляем множитель скорости
+	# player.roll_min_speed должен быть около 1.0 (нормальная скорость анимации)
+	# player.roll_max_speed около 1.5 (ускоренный перекат)
+	player.root_motion_speed_factor = lerp(player.roll_min_speed, player.roll_max_speed, speed_factor)
 	
 	player.sfx_roll.play_random()
 
 func physics_update(delta: float) -> void:
-	player.apply_gravity(delta)
+	# Гравитация и прочее обрабатывается в player.gd (если включен RM)
 	elapsed_time += delta
 	var progress = elapsed_time / roll_duration
 
@@ -69,23 +70,7 @@ func physics_update(delta: float) -> void:
 			transitioned.emit(self, GameConstants.STATE_ATTACK)
 			return
 
-	# --- УПРАВЛЕНИЕ ---
-	var input_dir = player.input_handler.move_vector
-	if input_dir != Vector2.ZERO:
-		var input_vec3 = Vector3(input_dir.x, 0, input_dir.y)
-		var local_input = player.global_transform.basis.inverse() * input_vec3
-		var steer_amount = local_input.x
-		if abs(steer_amount) > 0.1:
-			var rotation_strength = player.rot_speed * player.roll_control * delta
-			player.rotate_y(steer_amount * rotation_strength)
-	
-	var forward = player.global_transform.basis.z.normalized()
-	player.velocity.x = forward.x * current_roll_speed
-	player.velocity.z = forward.z * current_roll_speed
-	
-	player.move_and_slide()
-
-	# Проверка застревания в конце
+	# Проверка застревания
 	if progress >= 0.9:
 		if player.shape_cast and player.shape_cast.is_colliding():
 			var nav_point = player.get_closest_nav_point()
@@ -99,7 +84,19 @@ func physics_update(delta: float) -> void:
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false
+	# Сбрасываем множитель скорости обратно в 1.0
+	player.root_motion_speed_factor = 1.0
+	
 	for layer in ghost_layers:
 		player.set_collision_mask_value(layer, true)
 	if player.shape_cast:
 		player.shape_cast.enabled = false
+		
+	var input_vec = player.input_handler.move_vector
+	if input_vec.length() > 0.01:
+		if player.is_trying_to_run:
+			player.current_movement_blend = player.blend_value_run
+		else:
+			player.current_movement_blend = player.blend_value_walk
+		
+		player.set_locomotion_blend(player.current_movement_blend)
