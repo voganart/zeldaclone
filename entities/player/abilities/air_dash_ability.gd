@@ -15,7 +15,17 @@ var _start_position: Vector3 = Vector3.ZERO
 var _dash_direction: Vector3 = Vector3.ZERO
 var is_unlocked: bool = false
 
-@onready var actor: CharacterBody3D = get_parent()
+var actor: CharacterBody3D
+
+func _ready() -> void:
+	# Ищем CharacterBody3D вверх по иерархии (Player -> Abilities -> ThisNode)
+	var parent = get_parent()
+	if parent is CharacterBody3D:
+		actor = parent
+	elif parent.get_parent() is CharacterBody3D:
+		actor = parent.get_parent()
+	else:
+		push_error("AirDashAbility: Could not find CharacterBody3D parent!")
 
 func _process(delta: float) -> void:
 	if cooldown_timer > 0:
@@ -58,7 +68,6 @@ func perform_dash() -> void:
 	var forward = actor.global_transform.basis.z.normalized()
 	_dash_direction = Vector3(forward.x, 0, forward.z).normalized()
 	
-	# Используем метод API игрока для запуска анимации
 	if actor.has_method("trigger_air_dash"):
 		actor.trigger_air_dash()
 	

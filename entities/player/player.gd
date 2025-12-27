@@ -14,14 +14,7 @@ extends CharacterBody3D
 @export var rm_walk_anim_speed: float = 1.0 
 @export var rm_run_anim_speed: float = 1.3 
 
-@export_subgroup("Roll Settings")
-@export var roll_min_speed: float = 1.0 
-@export var roll_max_speed: float = 1.4
-@export var roll_control: float = 0.5 
-@export_range(0.0, 1.0) var roll_jump_cancel_threshold: float = 0.75 
-@export var roll_max_charges: int = 3
-@export var roll_cooldown: float = 0.5
-@export var roll_recharge_time: float = 3.0
+# [REMOVED] Roll Settings -> RollAbility
 
 @export_group("Auto Run")
 @export var auto_run_latch_time: float = 0.3
@@ -32,32 +25,25 @@ extends CharacterBody3D
 @export var blend_value_run: float = 1.0
 @export var stopping_threshold: float = 0.6 
 
-# [REMOVED] Combat Group -> CombatComponent
-# [REMOVED] Knockback Group -> CombatComponent
-# [REMOVED] Misc Combat -> Partially CombatComponent
-
-@export_subgroup("Misc Combat")
-@export var knockback_duration: float = 0.2 
-@export var running_attack_impulse: float = 3.0
-@export var walking_attack_impulse: float = 1.5
-@export var attack_rotation_influence: float = 0.5
-@export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0 
+# [REMOVED] Combat Settings -> CombatComponent
+# [REMOVED] Knockback Settings -> CombatComponent
 
 @export_group("Combat Assist")
 @export var soft_lock_range: float = 4.0 
 @export var soft_lock_angle: float = 90.0 
  
-# [REMOVED] Punch Hand exports -> CombatComponent
-
 # --- COMPONENTS ---
 @onready var anim_controller: AnimationController = $Components/AnimationController 
 @onready var movement_component: MovementComponent = $Components/MovementComponent
-@onready var combat_component: CombatComponent = $Components/CombatComponent # <-- НОВЫЙ КОМПОНЕНТ
+@onready var combat_component: CombatComponent = $Components/CombatComponent 
 @onready var health_component: Node = $HealthComponent
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var state_machine: StateMachine = $StateMachine
-@onready var air_dash_ability: AirDashAbility = $AirDashAbility
-@onready var ground_slam_ability: GroundSlamAbility = $GroundSlamAbility
+
+# Abilities
+@onready var air_dash_ability: AirDashAbility = $Abilities/AirDashAbility
+@onready var ground_slam_ability: GroundSlamAbility = $Abilities/GroundSlamAbility
+@onready var roll_ability: RollAbility = $Abilities/RollAbility # <-- НОВАЯ СПОСОБНОСТЬ
 # ------------------
 
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
@@ -79,16 +65,9 @@ var is_auto_running: bool = false
 var is_stopping: bool = false
 var shift_pressed_time: float = 0.0
 
-# [REMOVED] Combat variables (is_attacking, can_attack, combo_count etc.) -> CombatComponent
-
-var is_rolling: bool = false
-var current_roll_charges: int = 3
-var roll_penalty_timer: float = 0.0
-var roll_regen_timer: float = 0.0
-var is_roll_recharging: bool = false
-var roll_interval_timer: float = 0.0
+var is_rolling: bool = false # Оставляем как флаг состояния (активен ли сейчас ролл), но логику зарядов убрали
 var is_invincible: bool = false
-var roll_threshold: float = 0.18
+var roll_threshold: float = 0.18 # Порог нажатия shift для ролла
 
 var current_knockback_timer: float = 0.0
 var is_knockbacked: bool = false
@@ -102,7 +81,7 @@ var current_rm_velocity: Vector3 = Vector3.ZERO
 
 var root_motion_speed_factor: float = 1.0
 
-# Геттеры свойств компонента для совместимости
+# Геттеры свойств компонента Movement
 var base_speed: float:
 	get: return movement_component.base_speed
 var run_speed: float:
@@ -111,7 +90,7 @@ var current_jump_count: int:
 	get: return movement_component.current_jump_count
 	set(val): movement_component.current_jump_count = val
 
-# Геттеры для CombatComponent (чтобы не ломать States)
+# Геттеры для CombatComponent
 var is_attacking: bool:
 	get: return combat_component.is_attacking
 	set(val): combat_component.is_attacking = val
@@ -156,14 +135,52 @@ var combo_reset_timer: Timer:
 	get: return combat_component.combo_reset_timer
 var combo_cooldown_active: bool:
 	get: return not combat_component.combo_cooldown_timer.is_stopped()
-	set(val): pass # Read-only логика в компоненте, либо добавить метод
+	set(val): pass
 var hitbox_active_timer: float:
 	get: return combat_component.hitbox_active_timer
 	set(val): combat_component.hitbox_active_timer = val
 var hit_enemies_current_attack: Dictionary:
 	get: return combat_component.hit_enemies_current_attack
 	set(val): combat_component.hit_enemies_current_attack = val
-	
+var knockback_duration: float:
+	get: return combat_component.knockback_duration
+var running_attack_impulse: float:
+	get: return combat_component.running_attack_impulse
+var walking_attack_impulse: float:
+	get: return combat_component.walking_attack_impulse
+var attack_rotation_influence: float:
+	get: return combat_component.attack_rotation_influence
+var attack_roll_cancel_threshold: float:
+	get: return combat_component.attack_roll_cancel_threshold
+# Геттеры для RollAbility (чтобы не ломать PlayerHUD и State)
+var current_roll_charges: int:
+	get: return roll_ability.current_roll_charges
+	set(val): roll_ability.current_roll_charges = val
+var roll_max_charges: int:
+	get: return roll_ability.roll_max_charges
+var is_roll_recharging: bool:
+	get: return roll_ability.is_roll_recharging
+var roll_recharge_time: float:
+	get: return roll_ability.roll_recharge_time
+var roll_penalty_timer: float:
+	get: return roll_ability.roll_penalty_timer
+var roll_regen_timer: float:
+	get: return roll_ability.roll_regen_timer
+var roll_cooldown: float:
+	get: return roll_ability.roll_cooldown
+# Эти параметры используются в State roll
+var roll_min_speed: float:
+	get: return roll_ability.roll_min_speed
+var roll_max_speed: float:
+	get: return roll_ability.roll_max_speed
+var roll_control: float:
+	get: return roll_ability.roll_control
+var roll_jump_cancel_threshold: float:
+	get: return roll_ability.roll_jump_cancel_threshold
+var roll_interval_timer: float:
+	get: return roll_ability.roll_interval_timer
+	set(val): roll_ability.roll_interval_timer = val
+
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
@@ -171,14 +188,15 @@ func _ready() -> void:
 	movement_component.init(self)
 	combat_component.init(self)
 	
-	# [REMOVED] Timer creation -> Moved to CombatComponent
+	# Проксируем сигнал от RollAbility
+	if roll_ability:
+		roll_ability.roll_charges_changed.connect(func(c, m, p): roll_charges_changed.emit(c, m, p))
 
 	if health_component:
 		health_component.health_changed.connect(_on_health_changed)
 		health_component.died.connect(_on_died)
 		_on_health_changed(health_component.get_health(), health_component.get_max_health())
 
-	current_roll_charges = roll_max_charges
 	state_machine.init(self)
 
 # ============================================================================
@@ -216,10 +234,8 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
-	_update_roll_timers(delta)
+	# [REMOVED] _update_roll_timers removed, handled by RollAbility
 	
-	# [REMOVED] hitbox_active_timer logic -> CombatComponent handles it internally
-		
 	if has_node("/root/SimpleGrass"):
 		var grass_manager = get_node("/root/SimpleGrass")
 		grass_manager.set_player_position(global_position)
@@ -389,7 +405,6 @@ func _find_soft_lock_target() -> Node3D:
 # ============================================================================
 
 func start_combo_cooldown() -> void:
-	# Так как компонент сам управляет таймером, нам нужно только сбросить счетчик
 	combat_component.combo_count = 0
 	combat_component.can_attack = false
 	combat_component.combo_cooldown_timer.start(combat_component.combo_cooldown_after_combo)
@@ -399,10 +414,7 @@ func start_attack_cooldown() -> void:
 	combat_component.attack_interval_timer.start(combat_component.attack_cooldown)
 
 func can_roll() -> bool:
-	if current_roll_charges <= 0: return false
-	if roll_interval_timer > 0: return false
-	if is_roll_recharging: return false
-	return true
+	return roll_ability.can_roll()
 
 func try_cancel_attack_for_roll(progress_ratio: float) -> bool:
 	if attack_roll_cancel_threshold >= 1.0: return true
@@ -449,20 +461,7 @@ func _update_stun_timer(delta: float) -> void:
 			is_knockbacked = false
 
 func _update_roll_timers(delta: float) -> void:
-	if is_roll_recharging:
-		roll_penalty_timer -= delta
-		if roll_penalty_timer <= 0:
-			is_roll_recharging = false
-			current_roll_charges = roll_max_charges
-			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
-	elif current_roll_charges < roll_max_charges:
-		roll_regen_timer -= delta
-		if roll_regen_timer <= 0:
-			current_roll_charges += 1
-			roll_regen_timer = roll_cooldown
-			roll_charges_changed.emit(current_roll_charges, roll_max_charges, false)
-	if roll_interval_timer > 0:
-		roll_interval_timer -= delta
+	pass # Делегировано RollAbility
 
 func push_obj():
 	pass

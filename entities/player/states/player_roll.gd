@@ -3,7 +3,6 @@ extends State
 var player: Player
 var roll_duration: float = 0.0
 var elapsed_time: float = 0.0
-# Убрали переменную ghost_layers
 
 func enter() -> void:
 	player = entity as Player
@@ -11,19 +10,11 @@ func enter() -> void:
 	player.is_invincible = true
 	elapsed_time = 0.0
 	
-	# --- ТРАТА ЗАРЯДОВ ---
-	player.current_roll_charges -= 1
-	if player.current_roll_charges <= 0:
-		player.is_roll_recharging = true
-		player.roll_penalty_timer = player.roll_recharge_time
-	else:
-		if player.roll_regen_timer <= 0:
-			player.roll_regen_timer = player.roll_cooldown
-	
-	player.roll_charges_changed.emit(player.current_roll_charges, player.roll_max_charges, player.is_roll_recharging)
+	# --- ИЗМЕНЕНИЕ: ТРАТА ЗАРЯДОВ ЧЕРЕЗ КОМПОНЕНТ ---
+	player.roll_ability.consume_charge()
+	# -----------------------------------------------
 	
 	# --- ФИЗИКА ---
-	# УБРАЛИ ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ. Теперь мы толкаем объекты собой.
 	if player.shape_cast:
 		player.shape_cast.enabled = true
 
@@ -78,7 +69,6 @@ func exit() -> void:
 	player.is_invincible = false
 	player.root_motion_speed_factor = 1.0
 	
-	# Убрали восстановление масок, так как мы их не меняли
 	if player.shape_cast:
 		player.shape_cast.enabled = false
 		

@@ -24,11 +24,25 @@ var _impact_processed: bool = false
 var _playing_end_anim: bool = false
 var is_unlocked: bool = false
 
-@onready var actor: CharacterBody3D = get_parent()
-# Анимационный плеер нужен только для получения длительности анимаций
-@onready var anim_player: AnimationPlayer = actor.get_node("character/AnimationPlayer")
+var actor: CharacterBody3D
+var anim_player: AnimationPlayer
 
 signal cooldown_updated(time_left: float, max_time: float)
+
+func _ready() -> void:
+	# Ищем CharacterBody3D вверх по иерархии
+	var parent = get_parent()
+	if parent is CharacterBody3D:
+		actor = parent
+	elif parent.get_parent() is CharacterBody3D:
+		actor = parent.get_parent()
+	
+	if actor:
+		# Ищем AnimationPlayer внутри игрока (путь может отличаться, если структура изменилась)
+		anim_player = actor.get_node_or_null("character/AnimationPlayer")
+		if not anim_player:
+			# Запасной вариант поиска
+			anim_player = actor.find_child("AnimationPlayer", true, false)
 
 func _process(delta: float) -> void:
 	if cooldown_timer > 0:
@@ -69,7 +83,6 @@ func start_slam() -> void:
 	actor.set_collision_mask_value(3, false)
 	actor.velocity = Vector3.ZERO
 	
-	# Устанавливаем Transition в start
 	if actor.has_method("set_slam_state"):
 		actor.set_slam_state("start")
 
@@ -92,7 +105,6 @@ func update_physics(delta: float) -> bool:
 		actor.velocity = Vector3.ZERO
 		if _windup_timer <= 0:
 			_animation_phase = "mid"
-			# Переход в mid
 			if actor.has_method("set_slam_state"):
 				actor.set_slam_state("mid")
 		return true
@@ -144,7 +156,6 @@ func _check_ground_proximity() -> void:
 	if result:
 		_animation_phase = "end"
 		_playing_end_anim = true
-		# Переход в end (приземление)
 		if actor.has_method("set_slam_state"):
 			actor.set_slam_state("end")
 
@@ -158,13 +169,14 @@ func _perform_impact() -> void:
 	if actor.get("sfx_slam_impact"):
 		actor.sfx_slam_impact.play_random()
 	
-	# Если мы еще не включили end (ударились об пол раньше луча)
 	if not _playing_end_anim:
 		if actor.has_method("set_slam_state"):
 			actor.set_slam_state("end")
 	
-	# Ждем окончания анимации
-	var anim_len = anim_player.get_animation(GameConstants.ANIM_PLAYER_SLAM_END).length
+	var anim_len = 1.0
+	if anim_player and anim_player.has_animation(GameConstants.ANIM_PLAYER_SLAM_END):
+		anim_len = anim_player.get_animation(GameConstants.ANIM_PLAYER_SLAM_END).length
+	
 	var wait_time = anim_len / slam_end_anim_speed
 	
 	_deal_damage()
@@ -174,7 +186,6 @@ func _perform_impact() -> void:
 	await get_tree().create_timer(wait_time).timeout
 	if not is_instance_valid(actor): return
 	
-	# Здесь мы не выключаем стейт в "off", это делает State (player_slam.gd) при выходе
 	is_recovering = false
 	_playing_end_anim = false
 	

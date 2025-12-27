@@ -8,6 +8,12 @@ extends Node
 @export var combo_window_time: float = 2.0
 @export var combo_cooldown_after_combo: float = 0.5
 
+@export_subgroup("Misc Combat Params")
+@export var knockback_duration: float = 0.2 
+@export var running_attack_impulse: float = 3.0
+@export var walking_attack_impulse: float = 1.5
+@export var attack_rotation_influence: float = 0.5
+@export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0 
 # --- НАСТРОЙКИ ОТТАЛКИВАНИЯ (KNOCKBACK) ---
 @export_group("Knockback Settings")
 @export_subgroup("Normal Hit (1 & 2)")
