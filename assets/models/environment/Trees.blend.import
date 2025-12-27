@@ -46,8 +46,8 @@ _subresources={
 },
 "Trunk": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/materials/bark_02.tres",
-"use_external/path": "uid://bhtllc307ps6e"
+"use_external/fallback_path": "res://assets/materials/Mat_bark_02_1k.tres",
+"use_external/path": "uid://co0dfpo0lv30i"
 },
 "Trunk.001": {
 "use_external/enabled": true,

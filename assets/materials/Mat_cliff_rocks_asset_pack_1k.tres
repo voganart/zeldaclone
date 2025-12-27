@@ -1,7 +1,6 @@
-[gd_resource type="StandardMaterial3D" load_steps=6 format=3 uid="uid://byjid7dw3hx7j"]
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://byjid7dw3hx7j"]
 
 [ext_resource type="Texture2D" uid="uid://cfdhtky7yphb2" path="res://assets/textures/environment/cliff_rocks_asset_pack_1k/AP2_Rocks_BaseColor(Alpha-Smoothness).png" id="1_5y44n"]
-[ext_resource type="Texture2D" uid="uid://cq5ff8oaol02j" path="res://assets/textures/environment/cliff_rocks_asset_pack_1k/AP2_Rocks_Roughness.png" id="2_g363s"]
 [ext_resource type="Texture2D" uid="uid://wlawnxslh8jh" path="res://assets/textures/environment/cliff_rocks_asset_pack_1k/AP2_Rocks_GradientColorMask.png" id="3_kyr11"]
 [ext_resource type="Texture2D" uid="uid://dk2av1q2bjigo" path="res://assets/textures/environment/cliff_rocks_asset_pack_1k/AP2_Rocks_DirtColorMask.png" id="4_k8nyt"]
 [ext_resource type="Texture2D" uid="uid://1l8gbfa61fi3" path="res://assets/textures/environment/cliff_rocks_asset_pack_1k/AP2_Rocks_Normal_GL.png" id="5_qqmnk"]
@@ -9,13 +8,13 @@
 [resource]
 albedo_texture = ExtResource("1_5y44n")
 metallic_texture_channel = 2
-roughness_texture = ExtResource("2_g363s")
+roughness_texture = ExtResource("1_5y44n")
 normal_enabled = true
-normal_scale = 3.24
+normal_scale = 2.41
 normal_texture = ExtResource("5_qqmnk")
 ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("2_g363s")
+ao_texture = ExtResource("1_5y44n")
+ao_texture_channel = 4
 detail_enabled = true
 detail_mask = ExtResource("4_k8nyt")
 detail_blend_mode = 3
