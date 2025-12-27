@@ -62,8 +62,7 @@ const ANIM_ENEMY_KNOCKDOWN = "Monstr_knockdown"
 const ANIM_ENEMY_HIT = "Monstr_hit"
 const ANIM_ENEMY_STRAFE_L = "Monstr_walk_strafe_l"
 const ANIM_ENEMY_STRAFE_R = "Monstr_walk_strafe_r"
-
-# --- PARAMETERS ANIMATION TREE (Обновлено под скриншот) ---
+	
 # 1. Root State
 const TREE_PARAM_STATE = "parameters/state/transition_request" # "alive", "dead"
 
@@ -81,6 +80,10 @@ const TREE_PARAM_JUMP_STATE = "parameters/jump_state/transition_request" # "Star
 const TREE_PARAM_STOPPING_SHOT = "parameters/stopping_oneshot/request"
 const TREE_PARAM_LOCOMOTION = "parameters/locomotion_blend/blend_position"
 
+const TREE_ONE_SHOT_KNOCKDOWN = "parameters/knockdown_oneshot/request"
+const TREE_ANGRY_SEEK = "parameters/TimeSeek/seek_request"
+const TREE_PARAM_STRAFE_BLEND = "parameters/strafe_blend/blend_position"
+const TREE_PARAM_CHASE_BLEND = "parameters/chase_blend/blend_position"
 # 4. Misc
 const TREE_PARAM_TIMESCALE = "parameters/TimeScale/scale" 
 const TREE_PARAM_LOCOMOTION_SPEED = "parameters/LocomotionSpeed/scale"

@@ -36,7 +36,7 @@ extends CharacterBody3D
 @onready var anim_controller: AnimationController = $Components/AnimationController 
 @onready var movement_component: MovementComponent = $Components/MovementComponent
 @onready var combat_component: CombatComponent = $Components/CombatComponent 
-@onready var health_component: Node = $HealthComponent
+@onready var health_component: Node = $Components/HealthComponent
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var state_machine: StateMachine = $StateMachine
 
