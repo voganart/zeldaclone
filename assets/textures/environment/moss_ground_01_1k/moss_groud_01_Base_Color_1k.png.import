@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btolg0p10ungw"
-path="res://.godot/imported/Grass01_1K_NormHeight.png-19c4361d470c1e6eff2e79ba97d46ee8.ctex"
+uid="uid://ck06f7k34pubf"
+path="res://.godot/imported/moss_groud_01_Base_Color_1k.png-ba1bfb309f61d4fb9f2963a6ad41bd09.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/environment/Grass01_1K/Grass01_1K_NormHeight.png"
-dest_files=["res://.godot/imported/Grass01_1K_NormHeight.png-19c4361d470c1e6eff2e79ba97d46ee8.ctex"]
+source_file="res://assets/textures/environment/moss_ground_01_1k/moss_groud_01_Base_Color_1k.png"
+dest_files=["res://.godot/imported/moss_groud_01_Base_Color_1k.png-ba1bfb309f61d4fb9f2963a6ad41bd09.ctex"]
 
 [params]
 

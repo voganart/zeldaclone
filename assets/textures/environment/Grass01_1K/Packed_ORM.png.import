@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cq5ff8oaol02j"
-path.s3tc="res://.godot/imported/AP2_Rocks_Roughness.png-11391fee959e13d3654eda3073ae2652.s3tc.ctex"
+uid="uid://5i8mtdrgkoji"
+path="res://.godot/imported/Packed_ORM.png-75700c53a23c8f67f4bcbd7c4ae78536.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/environment/cliff_rocks_asset_pack_1k/AP2_Rocks_Roughness.png"
-dest_files=["res://.godot/imported/AP2_Rocks_Roughness.png-11391fee959e13d3654eda3073ae2652.s3tc.ctex"]
+source_file="res://assets/textures/environment/Grass01_1K/Packed_ORM.png"
+dest_files=["res://.godot/imported/Packed_ORM.png-75700c53a23c8f67f4bcbd7c4ae78536.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -24,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -38,4 +37,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
