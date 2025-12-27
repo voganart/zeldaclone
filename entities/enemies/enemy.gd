@@ -19,6 +19,11 @@ extends CharacterBody3D
 @export_range(0.0, 1.0) var flee_health_threshold: float = 0.25
 @export_range(0.0, 1.0) var flee_chance: float = 0.3
 
+# --- НОВОЕ: Радиус призыва помощи ---
+@export_group("AI Behaviors")
+@export var help_radius: float = 15.0 ## Радиус, в котором союзники услышат бой
+# ------------------------------------
+
 @export_group("Hit Stop Settings")
 @export var hit_stop_lethal_time_scale: float = 0.5
 @export var hit_stop_lethal_duration: float = 0.2
@@ -105,6 +110,10 @@ func _ready() -> void:
 	nav_agent.avoidance_enabled = true
 	nav_agent.velocity_computed.connect(_on_velocity_computed)
 	
+	# Убедимся, что враг в группе, чтобы его могли найти другие
+	if not is_in_group(GameConstants.GROUP_ENEMIES):
+		add_to_group(GameConstants.GROUP_ENEMIES)
+	
 	await get_tree().process_frame
 	nav_agent.set_navigation_map(get_world_3d().navigation_map)
 	GameEvents.player_died.connect(_on_player_died)
@@ -128,38 +137,30 @@ func _physics_process(delta: float) -> void:
 	elif debug_label:
 		debug_label.visible = false
 		
-	# Гравитация применяется всегда, если не на полу
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	# === ЛОГИКА НОКБЭКА И СМЕРТИ ===
+	# Обработка нокбэка
 	if is_knocked_back:
-		# Уменьшаем таймер "минимального полета"
 		if knockback_timer > 0:
 			knockback_timer -= delta
 		
-		# Торможение по горизонтали (воздухе или на земле)
 		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
 		
 		move_and_slide()
 		
-		# ПРОВЕРКА: Если минимальное время вышло И мы коснулись земли
 		if knockback_timer <= 0 and is_on_floor():
 			is_knocked_back = false
 			velocity = Vector3.ZERO
 			
-			# Если удар был смертельным, то теперь, после приземления, умираем
 			if pending_death:
 				_finalize_death()
-		
-		return # Прерываем остальную логику движения
-	# ===============================
+		return
 
 	if frustrated_cooldown > 0:
 		frustrated_cooldown -= delta
 
-	# Управление движением через машину состояний
 	var state_name = state_machine.current_state.name.to_lower()
 	if state_name != "chase" and state_name != "patrol":
 		move_and_slide()
@@ -181,7 +182,6 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	if is_knocked_back: return
 	var target_vel = safe_velocity
 	target_vel.y = velocity.y
-	# Используем move_toward для плавного набора скорости и трения
 	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
 	move_and_slide()
 
@@ -238,9 +238,7 @@ func update_movement_animation(delta: float) -> void:
 	var current_state_name = state_machine.current_state.name.to_lower()
 	var speed_length = velocity.length()
 
-	# Блокировка ног (Idle) при ударах
 	var should_force_idle = is_knocked_back or current_state_name == "hit"
-	
 	if current_state_name == "attack" and speed_length < 0.5:
 		should_force_idle = true
 
@@ -249,11 +247,9 @@ func update_movement_animation(delta: float) -> void:
 		set_locomotion_blend(current_movement_blend)
 		return
 
-	# --- ЛОГИКА ДВИЖЕНИЯ ---
 	var local_velocity = global_transform.basis.inverse() * velocity
 	
 	if current_state_name == "combatstance":
-		# Стрейфы
 		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
 		set_strafe_blend(-strafe_val) 
 	else:
@@ -282,10 +278,13 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	if is_dead(): return
 	frustrated_cooldown = 0.0
 	
+	# --- НОВОЕ: Зовем на помощь при получении урона ---
+	_cry_for_help()
+	# --------------------------------------------------
+	
 	var is_lethal = (health_component.current_health - amount) <= 0
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
 
-	# 1. Применяем Hit Stop (замедление времени)
 	if is_lethal:
 		if hit_stop_lethal_time_scale < 1.0:
 			GameManager.hit_stop_smooth(hit_stop_lethal_time_scale, hit_stop_lethal_duration)
@@ -293,12 +292,9 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 		if is_attacking:
 			GameManager.hit_stop_local([anim_player], 0.15)
 	
-	# 2. Анимация
-	# ЕСЛИ СМЕРТЬ: Всегда играем Knockdown (полет)
 	if is_lethal:
 		trigger_knockdown_oneshot()
 		hurt_lock_timer = 0.5
-	# Если не смерть, логика обычного хита
 	elif not is_lethal:
 		if is_heavy_attack:
 			if is_attacking:
@@ -311,32 +307,23 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 				trigger_hit_oneshot()
 				hurt_lock_timer = 0.2
 
-	# 3. Эффекты
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()
 	if sfx_hurt_voice: sfx_hurt_voice.play_random()
 	if sfx_flesh_hit: sfx_flesh_hit.play_random()
 	
-	# 4. Урон
 	if health_component:
 		health_component.take_damage(amount)
 		
 	state_machine.current_state.on_damage_taken(is_heavy_attack)
 	
-	# 5. ФИЗИКА ОТБРАСЫВАНИЯ
-	# Даже если knockback_force маленький, при смерти даем пинок вверх и назад
 	var final_force = knockback_force
 	
 	if is_lethal:
-		# Гарантируем подбрасывание вверх для красивой смерти
 		if final_force.length() < 1.0:
-			# Если вектора нет, толкаем просто назад от игрока (примерно)
 			final_force = -global_transform.basis.z * 5.0
-			
-		# Добавляем вертикальный импульс
 		final_force.y = max(final_force.y, 6.0) 
 		
-		# Если сила по горизонтали слишком слабая, усиливаем
 		var horiz = Vector2(final_force.x, final_force.z)
 		if horiz.length() < 3.0:
 			horiz = horiz.normalized() * 5.0
@@ -346,15 +333,42 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	if final_force.length() > 0.5:
 		velocity = final_force
 		is_knocked_back = true
-		# Минимальное время в воздухе, чтобы не сработало "приземление" сразу же
 		knockback_timer = 0.2 
 
+# --- НОВАЯ СИСТЕМА: КРИК О ПОМОЩИ ---
+func _cry_for_help() -> void:
+	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)
+	for enemy in enemies:
+		# Пропускаем себя, мертвых или удаленных
+		if enemy == self or not is_instance_valid(enemy) or enemy.is_dead():
+			continue
+			
+		var dist = global_position.distance_to(enemy.global_position)
+		if dist <= help_radius:
+			# Если враг в радиусе — он слышит бой
+			enemy.hear_alert(player)
+
+## Эта функция вызывается извне (другим врагом)
+func hear_alert(target: Node3D) -> void:
+	# Если мы уже мертвы или уже в бою — игнорируем
+	if is_dead(): return
+	var current_state = state_machine.current_state.name.to_lower()
+	
+	# Если уже атакуем или преследуем — ничего не меняем, мы уже заняты
+	if current_state in ["attack", "chase", "combatstance", "hit", "dead"]:
+		return
+		
+	# Иначе (Idle/Patrol) — агримся!
+	# Можно добавить задержку реакции или анимацию удивления,
+	# но для динамики сразу переключаем в Chase.
+	print(name, " heard call for help!")
+	state_machine.change_state(GameConstants.STATE_CHASE)
+# ------------------------------------
+
 func _on_died() -> void:
-	# Если мы в полете (knockback), откладываем смерть до приземления
 	if is_knocked_back:
 		pending_death = true
 		return
-	
 	_finalize_death()
 
 func _finalize_death() -> void:
