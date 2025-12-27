@@ -6,23 +6,9 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
-@export_group("Hit Stop Settings (Juice)")
-
-@export_subgroup("Props / Objects")
-@export var hs_prop_time_scale: float = 0.1 
-@export var hs_prop_duration: float = 0.02 
-
-@export_subgroup("Enemy: Normal Hit")
-@export var hs_normal_time_scale: float = 0.1
-@export var hs_normal_duration: float = 0.04
-
-@export_subgroup("Enemy: Finisher Hit")
-@export var hs_finisher_time_scale: float = 0.1
-@export var hs_finisher_duration: float = 0.08
-
-@export_subgroup("Enemy: Lethal Hit (Kill)")
-@export var hs_lethal_time_scale: float = 0.05
-@export var hs_lethal_duration: float = 0.15
+# [REMOVED] Hit Stop Settings -> CombatComponent
+# [REMOVED] Jump settings -> MovementComponent
+# [REMOVED] Movement settings -> MovementComponent
 
 @export_group("Root Motion Tweaks")
 @export var rm_walk_anim_speed: float = 1.0 
@@ -46,19 +32,9 @@ extends CharacterBody3D
 @export var blend_value_run: float = 1.0
 @export var stopping_threshold: float = 0.6 
 
-@export_group("Combat")
-@export var primary_attack_speed: float = 0.8
-@export var attack_cooldown: float = 0.15
-@export var combo_window_time: float = 2.0
-@export var combo_cooldown_after_combo: float = 0.5
-
-@export_subgroup("Knockback: Normal Hit (1 & 2)")
-@export var kb_strength_normal: float = 4.0 
-@export var kb_height_normal: float = 2.0   
-
-@export_subgroup("Knockback: Finisher (3)")
-@export var kb_strength_finisher: float = 10.0 
-@export var kb_height_finisher: float = 6.0    
+# [REMOVED] Combat Group -> CombatComponent
+# [REMOVED] Knockback Group -> CombatComponent
+# [REMOVED] Misc Combat -> Partially CombatComponent
 
 @export_subgroup("Misc Combat")
 @export var knockback_duration: float = 0.2 
@@ -71,13 +47,12 @@ extends CharacterBody3D
 @export var soft_lock_range: float = 4.0 
 @export var soft_lock_angle: float = 90.0 
  
-@export_group("Components")
-@export var punch_hand_r: Area3D
-@export var punch_hand_l: Area3D
+# [REMOVED] Punch Hand exports -> CombatComponent
 
 # --- COMPONENTS ---
 @onready var anim_controller: AnimationController = $Components/AnimationController 
 @onready var movement_component: MovementComponent = $Components/MovementComponent
+@onready var combat_component: CombatComponent = $Components/CombatComponent # <-- НОВЫЙ КОМПОНЕНТ
 @onready var health_component: Node = $HealthComponent
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var state_machine: StateMachine = $StateMachine
@@ -85,7 +60,6 @@ extends CharacterBody3D
 @onready var ground_slam_ability: GroundSlamAbility = $GroundSlamAbility
 # ------------------
 
-@export var attack_area: Area3D 
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
 @onready var attack_timer: Timer = $FirstAttackTimer
 
@@ -105,17 +79,7 @@ var is_auto_running: bool = false
 var is_stopping: bool = false
 var shift_pressed_time: float = 0.0
 
-var is_attacking: bool = false
-var can_attack: bool = true
-var combo_count: int = 0
-var current_attack_damage: float = 1.0
-var current_knockback_strength: float = 0.0 
-var current_knockback_height: float = 0.0
-var current_attack_knockback_enabled: bool = true
-var combo_reset_timer: Timer
-var combo_cooldown_active: bool = false
-var combo_cooldown_timer: Timer
-var attack_interval_timer: Timer
+# [REMOVED] Combat variables (is_attacking, can_attack, combo_count etc.) -> CombatComponent
 
 var is_rolling: bool = false
 var current_roll_charges: int = 3
@@ -130,19 +94,15 @@ var current_knockback_timer: float = 0.0
 var is_knockbacked: bool = false
 var is_knockback_stun: bool = false
 
-var hit_enemies_current_attack: Dictionary = {}
-var hitbox_active_timer: float = 0.0
-
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
 var current_time_scale: float = 1.0
 
 var current_rm_velocity: Vector3 = Vector3.ZERO
-var has_hyper_armor: bool = false 
 
 var root_motion_speed_factor: float = 1.0
 
-# Геттеры свойств компонента для совместимости (если нужно обращаться извне)
+# Геттеры свойств компонента для совместимости
 var base_speed: float:
 	get: return movement_component.base_speed
 var run_speed: float:
@@ -151,34 +111,67 @@ var current_jump_count: int:
 	get: return movement_component.current_jump_count
 	set(val): movement_component.current_jump_count = val
 
-
+# Геттеры для CombatComponent (чтобы не ломать States)
+var is_attacking: bool:
+	get: return combat_component.is_attacking
+	set(val): combat_component.is_attacking = val
+var can_attack: bool:
+	get: return combat_component.can_attack
+	set(val): combat_component.can_attack = val
+var combo_count: int:
+	get: return combat_component.combo_count
+	set(val): combat_component.combo_count = val
+var primary_attack_speed: float:
+	get: return combat_component.primary_attack_speed
+var attack_cooldown: float:
+	get: return combat_component.attack_cooldown
+var kb_strength_normal: float:
+	get: return combat_component.kb_strength_normal
+var kb_height_normal: float:
+	get: return combat_component.kb_height_normal
+var kb_strength_finisher: float:
+	get: return combat_component.kb_strength_finisher
+var kb_height_finisher: float:
+	get: return combat_component.kb_height_finisher
+var combo_window_time: float:
+	get: return combat_component.combo_window_time
+var combo_cooldown_after_combo: float:
+	get: return combat_component.combo_cooldown_after_combo
+var has_hyper_armor: bool:
+	get: return combat_component.has_hyper_armor
+	set(val): combat_component.has_hyper_armor = val
+var current_attack_damage: float:
+	get: return combat_component.current_attack_damage
+	set(val): combat_component.current_attack_damage = val
+var current_knockback_strength: float:
+	get: return combat_component.current_knockback_strength
+	set(val): combat_component.current_knockback_strength = val
+var current_knockback_height: float:
+	get: return combat_component.current_knockback_height
+	set(val): combat_component.current_knockback_height = val
+var current_attack_knockback_enabled: bool:
+	get: return combat_component.current_attack_knockback_enabled
+	set(val): combat_component.current_attack_knockback_enabled = val
+var combo_reset_timer: Timer:
+	get: return combat_component.combo_reset_timer
+var combo_cooldown_active: bool:
+	get: return not combat_component.combo_cooldown_timer.is_stopped()
+	set(val): pass # Read-only логика в компоненте, либо добавить метод
+var hitbox_active_timer: float:
+	get: return combat_component.hitbox_active_timer
+	set(val): combat_component.hitbox_active_timer = val
+var hit_enemies_current_attack: Dictionary:
+	get: return combat_component.hit_enemies_current_attack
+	set(val): combat_component.hit_enemies_current_attack = val
+	
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
-	# ИНИЦИАЛИЗАЦИЯ КОМПОНЕНТА ДВИЖЕНИЯ В ПЕРВУЮ ОЧЕРЕДЬ
+	# ИНИЦИАЛИЗАЦИЯ КОМПОНЕНТОВ
 	movement_component.init(self)
+	combat_component.init(self)
 	
-	combo_reset_timer = Timer.new()
-	combo_reset_timer.one_shot = true
-	combo_reset_timer.wait_time = combo_window_time
-	combo_reset_timer.timeout.connect(func(): combo_count = 0)
-	add_child(combo_reset_timer)
-	
-	combo_cooldown_timer = Timer.new()
-	combo_cooldown_timer.one_shot = true
-	combo_cooldown_timer.wait_time = combo_cooldown_after_combo
-	combo_cooldown_timer.timeout.connect(func():
-		combo_cooldown_active = false
-		can_attack = true
-		print("Combo cooldown ended"))
-	add_child(combo_cooldown_timer)
-	
-	attack_interval_timer = Timer.new()
-	attack_interval_timer.one_shot = true
-	attack_interval_timer.timeout.connect(func():
-		if not combo_cooldown_active:
-			can_attack = true)
-	add_child(attack_interval_timer)
+	# [REMOVED] Timer creation -> Moved to CombatComponent
 
 	if health_component:
 		health_component.health_changed.connect(_on_health_changed)
@@ -225,9 +218,7 @@ func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
 	_update_roll_timers(delta)
 	
-	if hitbox_active_timer > 0:
-		hitbox_active_timer -= delta
-		process_hitbox_check()
+	# [REMOVED] hitbox_active_timer logic -> CombatComponent handles it internally
 		
 	if has_node("/root/SimpleGrass"):
 		var grass_manager = get_node("/root/SimpleGrass")
@@ -394,18 +385,18 @@ func _find_soft_lock_target() -> Node3D:
 	return best_target
 
 # ============================================================================
-# COMBAT HELPERS
+# COMBAT WRAPPERS
 # ============================================================================
 
 func start_combo_cooldown() -> void:
-	combo_count = 0
-	combo_cooldown_active = true
-	can_attack = false
-	combo_cooldown_timer.start(combo_cooldown_after_combo)
+	# Так как компонент сам управляет таймером, нам нужно только сбросить счетчик
+	combat_component.combo_count = 0
+	combat_component.can_attack = false
+	combat_component.combo_cooldown_timer.start(combat_component.combo_cooldown_after_combo)
 
 func start_attack_cooldown() -> void:
-	can_attack = false
-	attack_interval_timer.start(0.1) 
+	combat_component.can_attack = false
+	combat_component.attack_interval_timer.start(combat_component.attack_cooldown)
 
 func can_roll() -> bool:
 	if current_roll_charges <= 0: return false
@@ -419,139 +410,13 @@ func try_cancel_attack_for_roll(progress_ratio: float) -> bool:
 	return progress_ratio >= (1.0 - attack_roll_cancel_threshold)
 
 func start_hitbox_monitoring() -> void:
-	hit_enemies_current_attack.clear()
-	if punch_hand_r: punch_hand_r.monitoring = true
-	if punch_hand_l: punch_hand_l.monitoring = true
+	combat_component.start_hitbox_monitoring()
 
 func stop_hitbox_monitoring() -> void:
-	hit_enemies_current_attack.clear()
-	if punch_hand_r: punch_hand_r.set_deferred("monitoring", false)
-	if punch_hand_l: punch_hand_l.set_deferred("monitoring", false)
+	combat_component._stop_hitbox_monitoring()
 
-func process_hitbox_check() -> void:
-	var hits_occurred = false
-	if punch_hand_r: hits_occurred = _check_hand_overlap(punch_hand_r) or hits_occurred
-	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
-
-func _check_hand_overlap(hand: Area3D) -> bool:
-	if not hand.monitoring: return false
-
-	var max_enemies_per_hit = 1
-	var max_props_per_hit = 1
-	var enemies_hit_count = 0
-	var props_hit_count = 0
-	
-	for type in hit_enemies_current_attack.values():
-		if type == "enemy": enemies_hit_count += 1
-		elif type == "prop": props_hit_count += 1
-	
-	if enemies_hit_count >= max_enemies_per_hit and props_hit_count >= max_props_per_hit:
-		return false
-
-	var candidates_enemies: Array[Node3D] = []
-	var candidates_props: Array[Node3D] = []
-	
-	var bodies_in_front_zone = []
-	if attack_area:
-		bodies_in_front_zone = attack_area.get_overlapping_bodies()
-	
-	for body in hand.get_overlapping_bodies():
-		if body == self: continue
-		if hit_enemies_current_attack.has(body.get_instance_id()): continue
-		if attack_area and not body in bodies_in_front_zone:
-			continue
-		
-		# Линия видимости
-		if not _has_line_of_sight(body):
-			continue
-		
-		if body.is_in_group(GameConstants.GROUP_ENEMIES):
-			candidates_enemies.append(body)
-		elif body is RigidBody3D or body.has_method("take_damage"):
-			candidates_props.append(body)
-	
-	var sort_func = func(a, b):
-		return global_position.distance_squared_to(a.global_position) < global_position.distance_squared_to(b.global_position)
-		
-	if not candidates_enemies.is_empty(): candidates_enemies.sort_custom(sort_func)
-	if not candidates_props.is_empty(): candidates_props.sort_custom(sort_func)
-	
-	var hit_occurred = false
-	
-	if enemies_hit_count < max_enemies_per_hit and not candidates_enemies.is_empty():
-		var target = candidates_enemies[0]
-		punch_collision(target, hand)
-		hit_enemies_current_attack[target.get_instance_id()] = "enemy"
-		hit_occurred = true
-
-	if props_hit_count < max_props_per_hit and not candidates_props.is_empty():
-		var target = candidates_props[0]
-		punch_collision(target, hand)
-		hit_enemies_current_attack[target.get_instance_id()] = "prop"
-		hit_occurred = true
-		
-	return hit_occurred
-
-func _has_line_of_sight(target: Node3D) -> bool:
-	var space_state = get_world_3d().direct_space_state
-	
-	# Пускаем луч от груди игрока к центру врага (чуть выше ног)
-	var origin = global_position + Vector3(0, 1.0, 0)
-	var dest = target.global_position + Vector3(0, 0.5, 0) 
-	
-	var query = PhysicsRayQueryParameters3D.create(origin, dest)
-	query.exclude = [self]
-	
-	var result = space_state.intersect_ray(query)
-	
-	if result:
-		if result.collider == target:
-			return true
-		return false
-	return false
-
-func punch_collision(body: Node3D, hand: Area3D) -> void:
-	if not is_attacking: return
-	if body == self: return
-	
-	var dir = (body.global_position - global_position)
-	dir.y = 0
-	dir = dir.normalized()
-	
-	if body.has_method("take_damage"):
-		var is_finisher = (combo_count >= 2) 
-		var knockback_vec = Vector3.ZERO
-		
-		if current_attack_knockback_enabled:
-			knockback_vec = dir * current_knockback_strength
-			knockback_vec.y = current_knockback_height
-		
-		# Hit Stop logic
-		var is_enemy = body.is_in_group(GameConstants.GROUP_ENEMIES)
-		if is_enemy:
-			var enemy_hp_comp = body.get_node_or_null("HealthComponent")
-			var is_lethal = false
-			if enemy_hp_comp:
-				is_lethal = (enemy_hp_comp.current_health - current_attack_damage) <= 0
-			if is_lethal:
-				GameManager.hit_stop_smooth(hs_lethal_time_scale, hs_lethal_duration, 0.0, 0.1) 
-				GameEvents.camera_shake_requested.emit(0.6, 0.2)
-			elif is_finisher:
-				GameManager.hit_stop_smooth(hs_finisher_time_scale, hs_finisher_duration, 0.0, 0.05) 
-				GameEvents.camera_shake_requested.emit(0.4, 0.15)
-			else:
-				GameManager.hit_stop_smooth(hs_normal_time_scale, hs_normal_duration, 0.0, 0.02) 
-				GameEvents.camera_shake_requested.emit(0.2, 0.1)
-		else:
-			GameManager.hit_stop_smooth(hs_prop_time_scale, hs_prop_duration, 0.0, 0.0) 
-			GameEvents.camera_shake_requested.emit(0.1, 0.05)
-
-		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
-		
-		var recoil_force = 15.0 
-		if is_finisher: recoil_force = 25.0 
-		
-		velocity -= dir * recoil_force
+func _check_attack_hit() -> void:
+	combat_component.activate_hitbox_check(0.1)
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
@@ -609,7 +474,3 @@ func get_closest_nav_point() -> Vector3:
 func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()
-
-func _check_attack_hit() -> void:
-	hitbox_active_timer = 0.1
-	process_hitbox_check()
