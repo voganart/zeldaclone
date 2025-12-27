@@ -11,13 +11,13 @@ radius = 0.8
 [node name="HitboxesContainer" type="Node3D" parent="." index="0"]
 
 [node name="punch_hand_r" type="Area3D" parent="HitboxesContainer" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5846616, 0.52681744, -0.015321244)
+transform = Transform3D(-0.1572888, -0.07266781, -0.9848755, -0.2248956, -0.9684487, 0.1073723, -0.961604, 0.23838311, 0.13598341, -0.5846616, 0.52681744, -0.015321244)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxesContainer/punch_hand_r" index="0"]
 shape = SubResource("SphereShape3D_a184d")
 
 [node name="punch_hand_l" type="Area3D" parent="HitboxesContainer" index="1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5829645, 0.524442, -0.0130754635)
+transform = Transform3D(-0.15659972, 0.06965396, 0.98520255, 0.22539818, -0.96866584, 0.10431499, 0.9615988, 0.23840052, 0.13599402, 0.5829645, 0.524442, -0.0130754635)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxesContainer/punch_hand_l" index="0"]
 transform = Transform3D(1, 7.947286e-08, -2.9802326e-08, -7.947286e-08, 1, 2.4835268e-08, 2.980233e-08, -2.4835266e-08, 1, 0, 0, 0)
@@ -64,10 +64,12 @@ bones/26/rotation = Quaternion(0.32276228, -0.630698, 0.32291308, 0.6275124)
 bones/27/rotation = Quaternion(4.3082656e-07, 0.91525143, 0.40288314, 2.0303418e-07)
 bones/28/rotation = Quaternion(1.4531615e-10, 1.1596324e-05, 2.3524446e-07, 1)
 
-[node name="Monstr" parent="root/Skeleton3D" index="0"]
+[node name="PhysicalBoneSimulator3D" type="PhysicalBoneSimulator3D" parent="root/Skeleton3D" index="0"]
+
+[node name="Monstr" parent="root/Skeleton3D" index="1"]
 surface_material_override/0 = ExtResource("2_a184d")
 
-[node name="hand_r" type="BoneAttachment3D" parent="root/Skeleton3D" index="1"]
+[node name="hand_r" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
 transform = Transform3D(-0.15728858, -0.07266773, -0.9848746, -0.22489527, -0.96844774, 0.1073722, -0.9616026, 0.23838288, 0.13598329, -0.5846616, 0.52681744, -0.015321244)
 bone_name = "hand.r"
 bone_idx = 10
@@ -76,7 +78,7 @@ bone_idx = 10
 remote_path = NodePath("../../../../HitboxesContainer/punch_hand_r")
 update_scale = false
 
-[node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
+[node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="3"]
 transform = Transform3D(-0.15659992, 0.06965366, 0.985203, 0.22539848, -0.9686617, 0.10431504, 0.96160007, 0.2383995, 0.13599408, 0.5829645, 0.524442, -0.0130754635)
 bone_name = "hand.l"
 bone_idx = 16

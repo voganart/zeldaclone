@@ -16,7 +16,8 @@ func _ready() -> void:
 func take_damage(amount: float, knockback_force: Vector3, _is_heavy: bool = false) -> void:
 	# Будим ящик при ударе
 	sleeping = false 
-	
+	var random_torque = Vector3(randf(), randf(), randf()) * 10.0
+	apply_torque_impulse(random_torque)
 	# Ограничиваем полет вверх
 	var dampened_force = knockback_force 
 	if dampened_force.y > 5.0: dampened_force.y = 5.0

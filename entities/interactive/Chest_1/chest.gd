@@ -48,28 +48,33 @@ func spawn_loot():
 	if loot_indices.is_empty(): return
 	
 	for index in loot_indices:
-		if not is_instance_valid(spawn_point): return
-		
-		# 1. Спавним
 		var item = ItemPool.spawn_item(index, spawn_point.global_position)
 		if not item: continue
 		
-		# (Тут твой код скейла/твина, если он есть)
+		# === КИНЕМАТОГРАФИЧНЫЙ ВЫЛЕТ ===
 		
-		# 2. Считаем математику
-		var angle = randf() * TAU 
-		var horizontal_dir = Vector3(cos(angle), 0, sin(angle))
+		# 1. Рандомный вектор вылета (Конус вверх)
+		var angle = randf() * TAU
+		var spread_rad = randf_range(0.2, 1.0)
+		var dir = Vector3(cos(angle) * spread_rad, 1.0, sin(angle) * spread_rad).normalized()
 		
-		var up_speed = randf_range(up_velocity_min, up_velocity_max)
-		var side_speed = randf_range(spread_velocity * 0.5, spread_velocity)
+		# 2. Сила с вариацией
+		var force = randf_range(launch_force_min, launch_force_max)
 		
-		# 3. ПРИМЕНЯЕМ СИЛУ СРАЗУ ЖЕ
-		item.linear_velocity = Vector3.ZERO
-		item.angular_velocity = Vector3.ZERO
+		# 3. Вращение (Обязательно для "веса")
+		var torque = Vector3(
+			randf_range(-1, 1),
+			randf_range(-1, 1),
+			randf_range(-1, 1)
+		) * 10.0 # Сила вращения
 		
-		item.linear_velocity = Vector3(0, up_speed, 0) + (horizontal_dir * side_speed)
+		item.apply_impulse(dir * force)
+		item.apply_torque_impulse(torque)
 		
-		# 4. И ТОЛЬКО ТЕПЕРЬ ЖДЕМ перед следующим предметом
+		# Настройка физики самого предмета (если это RigidBody)
+		if item.gravity_scale < 2.0:
+			item.gravity_scale = 2.5 # Тяжелое падение
+			
 		await get_tree().create_timer(spawn_interval).timeout
 
 func _unlock_ability_logic():

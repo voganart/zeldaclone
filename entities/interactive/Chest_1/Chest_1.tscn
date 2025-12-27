@@ -97,11 +97,15 @@ size = Vector3(1.7822266, 0.6758385, 1.0549316)
 
 [node name="Chest" type="Node3D"]
 script = ExtResource("1_2d6lx")
+is_opened = null
+ability_to_unlock = null
+loot_indices = null
 up_velocity_min = 2.0
 up_velocity_max = 4.0
 spread_velocity = 2.0
 launch_force_min = 2.0
 launch_force_max = 4.0
+spawn_interval = null
 
 [node name="Base" type="AnimatableBody3D" parent="."]
 transform = Transform3D(0.9999921, 5.8912113e-20, 1.1102229e-16, -1.8626302e-09, 0.9999964, 0, 0, -6.9388683e-18, 1, 0, 0, 0)

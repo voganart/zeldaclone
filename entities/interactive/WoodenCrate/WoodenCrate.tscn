@@ -20,6 +20,8 @@ continuous_cd = true
 angular_damp = 2.0
 script = ExtResource("1_uf1ar")
 health_component = NodePath("HealthComponent")
+debris_vfx_index = null
+vfx_offset = null
 break_sound = ExtResource("2_420b2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
