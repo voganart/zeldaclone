@@ -5,6 +5,9 @@ extends Node
 @export var attack_range: float = 2.0
 @export var attack_cooldown: float = 1.5
 @export var attack_speed: float = 1.0
+
+# ВЕРНУЛИ ОДНУ ПЕРЕМЕННУЮ
+# Теперь это просто сила рывка для любой атаки.
 @export var attack_impulse: float = 2.0
 
 @export_group("Tactical Retreat")
@@ -14,8 +17,7 @@ extends Node
 @export var tactical_retreat_pause_min: float = 0.5
 @export var tactical_retreat_pause_max: float = 1.5
 
-# Данные об атаках (имена должны совпадать с именами анимаций в AnimationPlayer)
-# Логика в enemy_attack.gd будет парсить эти имена для выбора ветки в AnimationTree (Attack1/Attack2)
+# Данные об атаках (для визуального разнообразия анимаций)
 var monster_attacks = [GameConstants.ANIM_ENEMY_ATTACK_1, GameConstants.ANIM_ENEMY_ATTACK_2]
 var last_attack_index = -1
 var last_attack_time: float = -999.0
@@ -32,12 +34,15 @@ func is_attack_ready() -> bool:
 	return (time_now - last_attack_time) >= attack_cooldown
 
 func get_next_attack_animation() -> String:
+	# Просто чередуем анимации (левой/правой), но физика будет одинаковой
 	last_attack_index = (last_attack_index + 1) % monster_attacks.size()
 	return monster_attacks[last_attack_index]
 
 func register_attack() -> float:
 	last_attack_time = Time.get_ticks_msec() / 1000.0
 	_check_for_tactical_retreat()
+	
+	# Возвращаем единый настроенный импульс
 	return attack_impulse
 
 func _check_for_tactical_retreat() -> void:

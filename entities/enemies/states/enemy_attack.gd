@@ -14,23 +14,21 @@ func enter() -> void:
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
 	enemy.attack_component.clear_retreat_state()
 	
-	# --- ИСПРАВЛЕНИЕ ---
-	# Раньше тут было "normal", из-за чего враг "расслаблялся" перед ударом.
-	# Ставим "chase", чтобы использовалась ветка анимаций с боевой стойкой (Combat Idle).
+	# Включаем стойку
 	enemy.set_move_mode("chase")
-	
-	# Сбрасываем скорость анимации в 0 (это будет Combat Idle внутри BlendSpace Chase)
 	enemy.current_movement_blend = 0.0 
 	enemy.set_locomotion_blend(0.0)
 
 func physics_update(delta: float) -> void:
-	# Принудительно обновляем анимацию
-	# (в enemy.gd логика увидит state "attack" и будет держать blend около 0, 
-	# но теперь в режиме "chase")
 	enemy.update_movement_animation(delta) 
 	
 	if is_performing_attack_anim:
 		attack_timer -= delta
+		
+		# Доводка поворота во время атаки
+		if is_instance_valid(enemy.player):
+			enemy.handle_rotation(delta, enemy.player.global_position, enemy.attack_rotation_speed)
+
 		if attack_timer <= 0:
 			_finish_attack()
 		return
@@ -50,10 +48,16 @@ func _perform_attack() -> void:
 		tree_attack_idx = "Attack2"
 	
 	var impulse = enemy.attack_component.register_attack()
-	var forward = -enemy.global_transform.basis.z.normalized()
+	
+	# ИСПРАВЛЕНИЕ НАПРАВЛЕНИЯ
+	# Так как ваши персонажи смотрят в +Z, вектор "вперед" — это basis.z
+	# (В стандартном Godot это -basis.z)
+	var forward = enemy.global_transform.basis.z.normalized()
+	
+	# Применяем рывок вперед
 	enemy.receive_push(forward * impulse)
 	
-	# Запускаем OneShot анимацию атаки поверх Combat Idle
+	# Запускаем анимацию
 	enemy.trigger_attack_oneshot(tree_attack_idx)
 	
 	var anim_length = 1.0
@@ -85,17 +89,12 @@ func _handle_retreat(delta: float) -> void:
 		transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 
-	# --- Фаза 1: Пауза (Стоим и смотрим) ---
 	if enemy.attack_component.tactical_retreat_pause_timer > 0:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
-		
-		# Убеждаемся, что мы в боевой стойке
 		enemy.set_move_mode("chase") 
-		
 		enemy.current_movement_blend = move_toward(enemy.current_movement_blend, 0.0, delta * 5.0)
 		enemy.set_locomotion_blend(enemy.current_movement_blend)
-		
 		enemy.handle_rotation(delta, enemy.player.global_position)
 		
 		if enemy.attack_component.tactical_retreat_pause_timer <= 0:
@@ -103,21 +102,16 @@ func _handle_retreat(delta: float) -> void:
 			transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 
-	# --- Фаза 2: Движение (Отход) ---
 	enemy.nav_agent.target_position = enemy.attack_component.tactical_retreat_target
 	enemy.nav_agent.max_speed = enemy.retreat_speed 
 	enemy.move_toward_path()
 	enemy.handle_rotation(delta, enemy.player.global_position)
-	
-	# Боевой режим движения
 	enemy.set_move_mode("chase")
-	
 	enemy.update_movement_animation(delta) 
 	
 	if enemy.nav_agent.is_navigation_finished():
 		enemy.attack_component.tactical_retreat_pause_timer = enemy.attack_component.get_random_retreat_pause_time()
 
-# СТАЛО:
 func on_damage_taken(is_heavy: bool = false) -> void:
 	if not is_performing_attack_anim: return
 

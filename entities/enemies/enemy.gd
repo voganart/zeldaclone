@@ -30,6 +30,7 @@ extends CharacterBody3D
 @export var retreat_speed: float = 2.5
 @export var rotation_speed: float = 6.0
 @export var combat_rotation_speed: float = 30.0
+@export var attack_rotation_speed: float = 2.0 
 @export_range(0, 180) var strafe_view_angle: float = 45.0
 @export var gravity: float = 30.0
 @export var knockback_strength: float = 2.0
@@ -83,7 +84,6 @@ const TREE_BLEND_CHASE = "parameters/chase_blend/blend_position"
 # SHARED DATA
 # ============================================================================
 var vertical_velocity: float = 0.0
-var external_push: Vector3 = Vector3.ZERO
 var last_known_player_pos: Vector3 = Vector3.ZERO
 var frustrated_cooldown: float = 0.0
 var hurt_lock_timer: float = 0.0
@@ -175,14 +175,13 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	if is_knocked_back: return
 	var target_vel = safe_velocity
 	target_vel.y = velocity.y
+	# Используем move_toward для плавного набора скорости и трения
 	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
 	move_and_slide()
 
 func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, speed_override: float = -1.0) -> void:
-	if target_override != Vector3.ZERO:
-		if global_position.distance_squared_to(target_override) < 0.01: return
-	
 	var look_dir: Vector3
+	
 	if target_override != Vector3.ZERO:
 		look_dir = (target_override - global_position).normalized()
 	elif velocity.length_squared() > 0.1:
@@ -191,16 +190,14 @@ func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, spee
 		return
 
 	look_dir.y = 0
-	if look_dir.is_normalized():
-		var current_forward = - global_transform.basis.z.normalized()
-		var angle_to_target = current_forward.signed_angle_to(look_dir, Vector3.UP)
-		var current_rotation_speed = speed_override if speed_override > 0 else rotation_speed
-		var max_rotation_angle = current_rotation_speed * delta
-		var rotation_angle = clamp(angle_to_target, -max_rotation_angle, max_rotation_angle)
-		rotate_y(rotation_angle)
+	
+	if look_dir.is_normalized() and look_dir.length_squared() > 0.001:
+		var target_angle = atan2(look_dir.x, look_dir.z)
+		var current_speed = speed_override if speed_override > 0 else rotation_speed
+		rotation.y = lerp_angle(rotation.y, target_angle, current_speed * delta)
 
 func receive_push(push: Vector3) -> void:
-	external_push += push
+	velocity += push
 
 # ============================================================================
 # ANIMATION TREE WRAPPERS
@@ -209,7 +206,6 @@ func set_tree_state(state_name: String):
 	anim_tree.set(TREE_STATE, state_name)
 
 func set_move_mode(mode_name: String):
-	# "normal" или "strafe"
 	anim_tree.set(TREE_MOVE_MODE, mode_name)
 
 func set_locomotion_blend(value: float):
@@ -220,7 +216,6 @@ func set_strafe_blend(value: float):
 	anim_tree.set(TREE_BLEND_STRAFE, value)
 
 func trigger_attack_oneshot(attack_name: String):
-	# attack_name должен быть "Attack1" или "Attack2" согласно Transition в дереве
 	anim_tree.set(TREE_ATTACK_IDX, attack_name)
 	anim_tree.set(TREE_ONE_SHOT_ATTACK, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
@@ -237,56 +232,55 @@ func update_movement_animation(delta: float) -> void:
 	var current_state_name = state_machine.current_state.name.to_lower()
 	var speed_length = velocity.length()
 
-	# --- ЛОГИКА БЛОКИРОВКИ НОГ ---
-	# 1. Если нас ударили (Hit) или откинули (Knockback) -> всегда Idle.
-	# 2. Если мы в Attack, но стоим на месте (наносим удар) -> тоже Idle.
-	#    (Порог 0.5 позволяет игнорировать микро-сдвиги, но пропускает бегство со скоростью 2.5)
+	# Блокировка ног (Idle) при ударах
 	var should_force_idle = is_knocked_back or current_state_name == "hit"
 	
 	if current_state_name == "attack" and speed_length < 0.5:
 		should_force_idle = true
 
 	if should_force_idle:
-		# Плавный сброс в 0 (Idle)
 		current_movement_blend = move_toward(current_movement_blend, 0.0, delta * 5.0)
 		set_locomotion_blend(current_movement_blend)
 		return
-	# -----------------------------
 
 	# --- ЛОГИКА ДВИЖЕНИЯ ---
 	var local_velocity = global_transform.basis.inverse() * velocity
 	
-	# Combat Stance (Стрейфы)
 	if current_state_name == "combatstance":
+		# Стрейфы
 		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
 		set_strafe_blend(-strafe_val) 
-		
-	# Locomotion (Idle / Walk / Run / Backward)
 	else:
 		var target_val = 0.0
 		
-		# Проверка движения назад (Local Z > 0.1)
-		var is_moving_backwards = local_velocity.z > 0.1
+		# --- ИСПРАВЛЕНИЕ НАПРАВЛЕНИЯ ДЛЯ МОДЕЛЕЙ +Z ---
+		# Т.к. модель смотрит в +Z, то:
+		# local_velocity.z > 0 -> Движение ВПЕРЕД
+		# local_velocity.z < 0 -> Движение НАЗАД
+		
+		# Если скорость Z сильно отрицательная (< -0.1), значит мы пятимся назад
+		var is_moving_backwards = local_velocity.z < -0.1
 		
 		if speed_length < 0.1:
 			target_val = 0.0
 		else:
 			if is_moving_backwards:
-				# Движение НАЗАД
-				# Если у вас BlendSpace настроен от -1 до 1, где -1 (или -0.5) это ход назад:
+				# Движение НАЗАД (Blend < 0)
 				var back_intensity = clamp(speed_length / walk_speed, 0.0, 1.0)
-				# Умножаем на -1, чтобы уйти в левую часть графика BlendSpace
 				target_val = -back_intensity 
 			else:
-				# Движение ВПЕРЕД
+				# Движение ВПЕРЕД (Blend > 0)
 				if speed_length <= walk_speed * 1.2:
+					# Ходьба (0.0 - 1.0)
 					target_val = clamp(speed_length / walk_speed, 0.0, 1.0)
 				else:
+					# Бег (1.0 +)
 					target_val = 1.0 + clamp((speed_length - walk_speed) / (run_speed - walk_speed), 0.0, 1.0)
 
-		# Применяем
+		# Применяем блендинг
 		current_movement_blend = lerp(current_movement_blend, target_val, walk_run_blend_smoothing * delta)
 		set_locomotion_blend(current_movement_blend)
+
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================
@@ -301,18 +295,13 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 			GameManager.hit_stop_smooth(hit_stop_lethal_time_scale, hit_stop_lethal_duration)
 	elif not is_lethal:
 		if is_heavy_attack:
-			# KNOCKDOWN
 			if is_attacking:
 				AIDirector.return_attack_token(self)
 				state_machine.change_state(GameConstants.STATE_CHASE)
-			
 			trigger_knockdown_oneshot()
 			hurt_lock_timer = 0.5
 		else:
-			# HIT (STUTTER)
 			if is_attacking:
-				# Для AnimationTree HitStop реализуем через паузу анимации или TimeScale
-				# GameManager делает hit_stop_local на AnimationPlayer, это должно работать и с деревом
 				GameManager.hit_stop_local([anim_player], 0.15)
 			else:
 				trigger_hit_oneshot()
@@ -340,7 +329,6 @@ func _on_died() -> void:
 	if health_bar: health_bar.visible = false
 	state_machine.change_state(GameConstants.STATE_DEAD)
 
-# Animation Event Call
 func _check_attack_hit() -> void:
 	var hits_found = false
 	if punch_hand_r and _check_single_hand_hit(punch_hand_r): hits_found = true
@@ -367,7 +355,6 @@ func _check_single_hand_hit(hand_area: Area3D) -> bool:
 # UI & MISC
 # ============================================================================
 func _on_health_changed(new_health: float, _max_hp: float) -> void:
-	# Мы просто добавили _max_hp в аргументы, чтобы соответствовать сигналу
 	if health_bar and health_component:
 		health_bar.update_health(new_health, health_component.get_max_health())
 	
@@ -393,45 +380,30 @@ func is_dead() -> bool:
 		return state_machine.current_state.name.to_lower() == GameConstants.STATE_DEAD
 	return false
 
-
 func _update_debug_info() -> void:
 	var state_name = "None"
 	if state_machine.current_state:
 		state_name = state_machine.current_state.name
 	
-	# Получаем параметры из дерева
-	# Приводим к int, чтобы избежать ошибки типов
 	var raw_move_mode = anim_tree.get(TREE_MOVE_MODE)
 	var move_mode_idx = 0
-	
-	# Безопасная проверка типа
 	if typeof(raw_move_mode) == TYPE_INT:
 		move_mode_idx = raw_move_mode
 	
-	var move_mode_str = "Normal" # index 0
-	if move_mode_idx == 1: 
-		move_mode_str = "Strafe"
-	elif move_mode_idx == 2: 
-		move_mode_str = "Chase"
+	var move_mode_str = "Normal"
+	if move_mode_idx == 1: move_mode_str = "Strafe"
+	elif move_mode_idx == 2: move_mode_str = "Chase"
 	
-	# Получаем текущий бленд
 	var blend_val = current_movement_blend
-	
-	# Если режим Strafe (индекс 1), читаем другой параметр
 	if move_mode_idx == 1:
 		blend_val = anim_tree.get(TREE_BLEND_STRAFE)
 
 	var hp = 0
-	if health_component: 
-		hp = ceil(health_component.current_health)
+	if health_component: hp = ceil(health_component.current_health)
 	
 	debug_label.text = "State: %s\nMode: %s (%d)\nBlend: %.2f\nHP: %d" % [state_name, move_mode_str, move_mode_idx, blend_val, hp]
 	
-	if state_name.to_lower() == "attack":
-		debug_label.modulate = Color.RED
-	elif state_name.to_lower() == "chase":
-		debug_label.modulate = Color.ORANGE
-	elif state_name.to_lower() == "patrol":
-		debug_label.modulate = Color.GREEN
-	else:
-		debug_label.modulate = Color.WHITE
+	if state_name.to_lower() == "attack": debug_label.modulate = Color.RED
+	elif state_name.to_lower() == "chase": debug_label.modulate = Color.ORANGE
+	elif state_name.to_lower() == "patrol": debug_label.modulate = Color.GREEN
+	else: debug_label.modulate = Color.WHITE
