@@ -4154,7 +4154,7 @@ _subresources={
 },
 "materials": {
 "Material": {
-"use_external/enabled": true,
+"use_external/enabled": false,
 "use_external/fallback_path": "res://assets/_master/MasterPalette.tres",
 "use_external/path": "uid://c3gmswlr7otco"
 }

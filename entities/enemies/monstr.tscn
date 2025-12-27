@@ -4,8 +4,24 @@
 [ext_resource type="Material" uid="uid://c3gmswlr7otco" path="res://assets/_master/MasterPalette.tres" id="2_a184d"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_a184d"]
+radius = 0.8
 
 [node name="Monstr" instance=ExtResource("1_io610")]
+
+[node name="HitboxesContainer" type="Node3D" parent="." index="0"]
+
+[node name="punch_hand_r" type="Area3D" parent="HitboxesContainer" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5846616, 0.52681744, -0.015321244)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxesContainer/punch_hand_r" index="0"]
+shape = SubResource("SphereShape3D_a184d")
+
+[node name="punch_hand_l" type="Area3D" parent="HitboxesContainer" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5829645, 0.524442, -0.0130754635)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxesContainer/punch_hand_l" index="0"]
+transform = Transform3D(1, 7.947286e-08, -2.9802326e-08, -7.947286e-08, 1, 2.4835268e-08, 2.980233e-08, -2.4835266e-08, 1, 0, 0, 0)
+shape = SubResource("SphereShape3D_a184d")
 
 [node name="Skeleton3D" parent="root" index="0"]
 bones/1/position = Vector3(-1.6116648e-10, 0.4740881, 0.00042610895)
@@ -56,19 +72,15 @@ transform = Transform3D(-0.15728858, -0.07266773, -0.9848746, -0.22489527, -0.96
 bone_name = "hand.r"
 bone_idx = 10
 
-[node name="punch_hand_r" type="Area3D" parent="root/Skeleton3D/hand_r" index="0"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_r/punch_hand_r" index="0"]
-transform = Transform3D(1.5, 1.1920929e-07, -4.470349e-08, -1.1920929e-07, 1.5, 3.7252903e-08, 4.4703494e-08, -3.72529e-08, 1.5, -0.009334392, 0.1862461, -0.012251139)
-shape = SubResource("SphereShape3D_a184d")
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="root/Skeleton3D/hand_r" index="0"]
+remote_path = NodePath("../../../../HitboxesContainer/punch_hand_r")
+update_scale = false
 
 [node name="hand_l" type="BoneAttachment3D" parent="root/Skeleton3D" index="2"]
 transform = Transform3D(-0.15659992, 0.06965366, 0.985203, 0.22539848, -0.9686617, 0.10431504, 0.96160007, 0.2383995, 0.13599408, 0.5829645, 0.524442, -0.0130754635)
 bone_name = "hand.l"
 bone_idx = 16
 
-[node name="punch_hand_l" type="Area3D" parent="root/Skeleton3D/hand_l" index="0"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="root/Skeleton3D/hand_l/punch_hand_l" index="0"]
-transform = Transform3D(1.5, 1.1920929e-07, -4.470349e-08, -1.1920929e-07, 1.5, 3.7252903e-08, 4.4703494e-08, -3.72529e-08, 1.5, -0.009334392, 0.1862461, -0.012251139)
-shape = SubResource("SphereShape3D_a184d")
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="root/Skeleton3D/hand_l" index="0"]
+remote_path = NodePath("../../../../HitboxesContainer/punch_hand_l")
+update_scale = false
