@@ -2,7 +2,7 @@ class_name Enemy
 extends CharacterBody3D
 
 ## ============================================================================
-## ENEMY CONTROLLER (AnimationTree Refactor)
+## ENEMY CONTROLLER
 ## ============================================================================
 
 # ============================================================================
@@ -128,27 +128,33 @@ func _physics_process(delta: float) -> void:
 	elif debug_label:
 		debug_label.visible = false
 		
+	# Гравитация применяется всегда, если не на полу
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	# Обработка нокбэка
+	# === ЛОГИКА НОКБЭКА И СМЕРТИ ===
 	if is_knocked_back:
-		knockback_timer -= delta
-		if knockback_timer <= 0:
-			is_knocked_back = false
-			velocity.x = 0
-			velocity.z = 0
-			
-			if pending_death:
-				pending_death = false
-				state_machine.change_state(GameConstants.STATE_DEAD)
-				if health_bar: health_bar.visible = false
-				emit_signal("died")
+		# Уменьшаем таймер "минимального полета"
+		if knockback_timer > 0:
+			knockback_timer -= delta
 		
+		# Торможение по горизонтали (воздухе или на земле)
 		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
+		
 		move_and_slide()
-		return
+		
+		# ПРОВЕРКА: Если минимальное время вышло И мы коснулись земли
+		if knockback_timer <= 0 and is_on_floor():
+			is_knocked_back = false
+			velocity = Vector3.ZERO
+			
+			# Если удар был смертельным, то теперь, после приземления, умираем
+			if pending_death:
+				_finalize_death()
+		
+		return # Прерываем остальную логику движения
+	# ===============================
 
 	if frustrated_cooldown > 0:
 		frustrated_cooldown -= delta
@@ -252,32 +258,20 @@ func update_movement_animation(delta: float) -> void:
 		set_strafe_blend(-strafe_val) 
 	else:
 		var target_val = 0.0
-		
-		# --- ИСПРАВЛЕНИЕ НАПРАВЛЕНИЯ ДЛЯ МОДЕЛЕЙ +Z ---
-		# Т.к. модель смотрит в +Z, то:
-		# local_velocity.z > 0 -> Движение ВПЕРЕД
-		# local_velocity.z < 0 -> Движение НАЗАД
-		
-		# Если скорость Z сильно отрицательная (< -0.1), значит мы пятимся назад
 		var is_moving_backwards = local_velocity.z < -0.1
 		
 		if speed_length < 0.1:
 			target_val = 0.0
 		else:
 			if is_moving_backwards:
-				# Движение НАЗАД (Blend < 0)
 				var back_intensity = clamp(speed_length / walk_speed, 0.0, 1.0)
 				target_val = -back_intensity 
 			else:
-				# Движение ВПЕРЕД (Blend > 0)
 				if speed_length <= walk_speed * 1.2:
-					# Ходьба (0.0 - 1.0)
 					target_val = clamp(speed_length / walk_speed, 0.0, 1.0)
 				else:
-					# Бег (1.0 +)
 					target_val = 1.0 + clamp((speed_length - walk_speed) / (run_speed - walk_speed), 0.0, 1.0)
 
-		# Применяем блендинг
 		current_movement_blend = lerp(current_movement_blend, target_val, walk_run_blend_smoothing * delta)
 		set_locomotion_blend(current_movement_blend)
 
@@ -287,12 +281,24 @@ func update_movement_animation(delta: float) -> void:
 func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
 	if is_dead(): return
 	frustrated_cooldown = 0.0
+	
 	var is_lethal = (health_component.current_health - amount) <= 0
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
 
+	# 1. Применяем Hit Stop (замедление времени)
 	if is_lethal:
 		if hit_stop_lethal_time_scale < 1.0:
 			GameManager.hit_stop_smooth(hit_stop_lethal_time_scale, hit_stop_lethal_duration)
+	else:
+		if is_attacking:
+			GameManager.hit_stop_local([anim_player], 0.15)
+	
+	# 2. Анимация
+	# ЕСЛИ СМЕРТЬ: Всегда играем Knockdown (полет)
+	if is_lethal:
+		trigger_knockdown_oneshot()
+		hurt_lock_timer = 0.5
+	# Если не смерть, логика обычного хита
 	elif not is_lethal:
 		if is_heavy_attack:
 			if is_attacking:
@@ -301,29 +307,58 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 			trigger_knockdown_oneshot()
 			hurt_lock_timer = 0.5
 		else:
-			if is_attacking:
-				GameManager.hit_stop_local([anim_player], 0.15)
-			else:
+			if not is_attacking:
 				trigger_hit_oneshot()
 				hurt_lock_timer = 0.2
 
+	# 3. Эффекты
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()
 	if sfx_hurt_voice: sfx_hurt_voice.play_random()
 	if sfx_flesh_hit: sfx_flesh_hit.play_random()
 	
+	# 4. Урон
 	if health_component:
 		health_component.take_damage(amount)
-	state_machine.current_state.on_damage_taken( is_heavy_attack)
-	if knockback_force.length() > 0.5:
-		velocity = knockback_force
+		
+	state_machine.current_state.on_damage_taken(is_heavy_attack)
+	
+	# 5. ФИЗИКА ОТБРАСЫВАНИЯ
+	# Даже если knockback_force маленький, при смерти даем пинок вверх и назад
+	var final_force = knockback_force
+	
+	if is_lethal:
+		# Гарантируем подбрасывание вверх для красивой смерти
+		if final_force.length() < 1.0:
+			# Если вектора нет, толкаем просто назад от игрока (примерно)
+			final_force = -global_transform.basis.z * 5.0
+			
+		# Добавляем вертикальный импульс
+		final_force.y = max(final_force.y, 6.0) 
+		
+		# Если сила по горизонтали слишком слабая, усиливаем
+		var horiz = Vector2(final_force.x, final_force.z)
+		if horiz.length() < 3.0:
+			horiz = horiz.normalized() * 5.0
+			final_force.x = horiz.x
+			final_force.z = horiz.y
+
+	if final_force.length() > 0.5:
+		velocity = final_force
 		is_knocked_back = true
-		knockback_timer = 0.2
+		# Минимальное время в воздухе, чтобы не сработало "приземление" сразу же
+		knockback_timer = 0.2 
 
 func _on_died() -> void:
+	# Если мы в полете (knockback), откладываем смерть до приземления
 	if is_knocked_back:
 		pending_death = true
 		return
+	
+	_finalize_death()
+
+func _finalize_death() -> void:
+	pending_death = false
 	AIDirector.return_attack_token(self)
 	emit_signal("died")
 	if health_bar: health_bar.visible = false

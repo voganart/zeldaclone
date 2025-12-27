@@ -496,6 +496,11 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 		if attack_area and not body in bodies_in_front_zone:
 			continue
 		
+		# --- НОВАЯ ПРОВЕРКА: Линия видимости (СКВОЗЬ СТЕНЫ БИТЬ НЕЛЬЗЯ) ---
+		if not _has_line_of_sight(body):
+			continue
+		# ------------------------------------------------------------------
+		
 		if body.is_in_group(GameConstants.GROUP_ENEMIES):
 			candidates_enemies.append(body)
 		elif body is RigidBody3D or body.has_method("take_damage"):
@@ -523,22 +528,45 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 		
 	return hit_occurred
 
+# --- НОВАЯ ФУНКЦИЯ: Проверка препятствий ---
+func _has_line_of_sight(target: Node3D) -> bool:
+	var space_state = get_world_3d().direct_space_state
+	
+	# Пускаем луч от груди игрока к центру врага (чуть выше ног)
+	var origin = global_position + Vector3(0, 1.0, 0)
+	var dest = target.global_position + Vector3(0, 0.5, 0) 
+	
+	var query = PhysicsRayQueryParameters3D.create(origin, dest)
+	# Игнорируем только самого игрока. 
+	# Луч должен удариться либо во врага, либо в стену.
+	query.exclude = [self]
+	
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		# Если луч попал во врага или в объект, который является врагом
+		if result.collider == target:
+			return true
+		# Если попали во что-то другое (стену) раньше врага
+		return false
+	
+	# Если луч вообще ни во что не попал (редко, но бывает если враг без коллизии)
+	return false
+# -------------------------------------------
+
 func punch_collision(body: Node3D, hand: Area3D) -> void:
 	if not is_attacking: return
 	if body == self: return
 	
-	# === ИЗМЕНЕНИЕ: Вектор от центра игрока к центру врага (стабильнее) ===
 	var dir = (body.global_position - global_position)
 	dir.y = 0
 	dir = dir.normalized()
-	# ======================================================================
 	
 	if body.has_method("take_damage"):
-		var is_finisher = (combo_count >= 2) # Считаем финишером 3-й удар (индекс 2)
+		var is_finisher = (combo_count >= 2) 
 		var knockback_vec = Vector3.ZERO
 		
 		if current_attack_knockback_enabled:
-			# Используем переменные, которые настроил player_attack.gd
 			knockback_vec = dir * current_knockback_strength
 			knockback_vec.y = current_knockback_height
 		
@@ -565,13 +593,12 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 		# Передаем рассчитанный вектор во врага
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
 		
-		# === ИЗМЕНЕНИЕ: Усиленная отдача (Recoil) ===
-		var recoil_force = 4.0 # Было 2.0
-		if is_finisher: recoil_force = 8.0 # Было 4.0
+		# === ОТДАЧА (RECOIL) ===
+		var recoil_force = 15.0  # Усиленная отдача
+		if is_finisher: recoil_force = 25.0 
 		
-		# Отнимаем вектор от скорости для эффекта отскока
 		velocity -= dir * recoil_force
-		# ============================================
+		# =======================
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
@@ -626,7 +653,6 @@ func push_obj():
 	for i in range(collision_count):
 		var c = get_slide_collision(i)
 		
-		# --- ИГНОРИРУЕМ ПОЛ ---
 		if c.get_normal().y > 0.7:
 			continue
 		
@@ -639,13 +665,11 @@ func push_obj():
 			
 		push_dir = push_dir.normalized()
 		
-		# ЯЩИКИ
 		if collider is RigidBody3D:
 			var current_force = push_force
 			if is_rolling: current_force *= roll_push_multiplier
 			collider.apply_central_impulse(push_dir * current_force * dt)
 			
-		# ВРАГИ
 		elif collider is CharacterBody3D and collider.has_method("receive_push"):
 			var nudge_strength = 10.0 * dt
 			if is_rolling: 
