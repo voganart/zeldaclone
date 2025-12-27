@@ -568,7 +568,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6821437, -3.8146973e-06, -
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12831068, 2.3841858e-06, -5.099948)
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["nav_region"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.003982544, 0.013222218, -0.0002708435)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0606575, -0.26426268, 0.19495583)
 navigation_mesh = SubResource("NavigationMesh_u71mg")
 
 [node name="Chests" type="Node3D" parent="NavigationRegion3D"]

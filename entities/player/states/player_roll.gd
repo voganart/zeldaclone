@@ -3,7 +3,7 @@ extends State
 var player: Player
 var roll_duration: float = 0.0
 var elapsed_time: float = 0.0
-var ghost_layers: Array[int] = [3, 5]
+# Убрали переменную ghost_layers
 
 func enter() -> void:
 	player = entity as Player
@@ -23,9 +23,7 @@ func enter() -> void:
 	player.roll_charges_changed.emit(player.current_roll_charges, player.roll_max_charges, player.is_roll_recharging)
 	
 	# --- ФИЗИКА ---
-	for layer in ghost_layers:
-		player.set_collision_mask_value(layer, false)
-	
+	# УБРАЛИ ОТКЛЮЧЕНИЕ КОЛЛИЗИЙ. Теперь мы толкаем объекты собой.
 	if player.shape_cast:
 		player.shape_cast.enabled = true
 
@@ -38,20 +36,14 @@ func enter() -> void:
 		roll_duration = 0.6
 	
 	# === УПРАВЛЕНИЕ СКОРОСТЬЮ ROOT MOTION ===
-	# Определяем, бежали мы или стояли
 	var current_speed_2d = Vector2(player.velocity.x, player.velocity.z).length()
-	# Фактор от 0.0 (стояли) до 1.0 (макс бег)
 	var speed_factor = clamp(current_speed_2d / player.run_speed, 0.0, 1.0)
 	
-	# Вычисляем множитель скорости
-	# player.roll_min_speed должен быть около 1.0 (нормальная скорость анимации)
-	# player.roll_max_speed около 1.5 (ускоренный перекат)
 	player.root_motion_speed_factor = lerp(player.roll_min_speed, player.roll_max_speed, speed_factor)
 	
 	player.sfx_roll.play_random()
 
 func physics_update(delta: float) -> void:
-	# Гравитация и прочее обрабатывается в player.gd (если включен RM)
 	elapsed_time += delta
 	var progress = elapsed_time / roll_duration
 
@@ -70,7 +62,7 @@ func physics_update(delta: float) -> void:
 			transitioned.emit(self, GameConstants.STATE_ATTACK)
 			return
 
-	# Проверка застревания
+	# Проверка застревания (если уперлись в стену)
 	if progress >= 0.9:
 		if player.shape_cast and player.shape_cast.is_colliding():
 			var nav_point = player.get_closest_nav_point()
@@ -84,11 +76,9 @@ func physics_update(delta: float) -> void:
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false
-	# Сбрасываем множитель скорости обратно в 1.0
 	player.root_motion_speed_factor = 1.0
 	
-	for layer in ghost_layers:
-		player.set_collision_mask_value(layer, true)
+	# Убрали восстановление масок, так как мы их не меняли
 	if player.shape_cast:
 		player.shape_cast.enabled = false
 		

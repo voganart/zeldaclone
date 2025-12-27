@@ -36,8 +36,8 @@ extends CharacterBody3D
 @export var stop_speed: float = 8.0
 @export var acceleration: float = 0.3
 @export var rot_speed: float = 10.0
-@export var push_force: float = 0.5
-@export var roll_push_multiplier: float = 2.5
+@export var push_force: float = 120.0 
+@export var roll_push_multiplier: float = 3.0 
 
 @export_group("Root Motion Tweaks")
 @export var rm_walk_anim_speed: float = 1.0 
@@ -68,15 +68,15 @@ extends CharacterBody3D
 @export var combo_cooldown_after_combo: float = 0.5
 
 @export_subgroup("Knockback: Normal Hit (1 & 2)")
-@export var kb_strength_normal: float = 4.0 ## Сила отталкивания для первых ударов
-@export var kb_height_normal: float = 2.0   ## Высота подбрасывания для первых ударов
+@export var kb_strength_normal: float = 4.0 
+@export var kb_height_normal: float = 2.0   
 
 @export_subgroup("Knockback: Finisher (3)")
-@export var kb_strength_finisher: float = 10.0 ## Сила отталкивания для финишера
-@export var kb_height_finisher: float = 6.0    ## Высота подбрасывания для финишера
+@export var kb_strength_finisher: float = 10.0 
+@export var kb_height_finisher: float = 6.0    
 
 @export_subgroup("Misc Combat")
-@export var knockback_duration: float = 0.2 ## Внимание: Это время стана ИГРОКА при получении урона!
+@export var knockback_duration: float = 0.2 
 @export var running_attack_impulse: float = 3.0
 @export var walking_attack_impulse: float = 1.5
 @export var attack_rotation_influence: float = 0.5
@@ -526,7 +526,12 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 func punch_collision(body: Node3D, hand: Area3D) -> void:
 	if not is_attacking: return
 	if body == self: return
-	var dir = (body.global_transform.origin - hand.global_transform.origin).normalized()
+	
+	# === ИЗМЕНЕНИЕ: Вектор от центра игрока к центру врага (стабильнее) ===
+	var dir = (body.global_position - global_position)
+	dir.y = 0
+	dir = dir.normalized()
+	# ======================================================================
 	
 	if body.has_method("take_damage"):
 		var is_finisher = (combo_count >= 2) # Считаем финишером 3-й удар (индекс 2)
@@ -560,10 +565,13 @@ func punch_collision(body: Node3D, hand: Area3D) -> void:
 		# Передаем рассчитанный вектор во врага
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
 		
-		# Отдача для игрока (Recoil)
-		var recoil_force = 2.0
-		if is_finisher: recoil_force = 4.0
+		# === ИЗМЕНЕНИЕ: Усиленная отдача (Recoil) ===
+		var recoil_force = 4.0 # Было 2.0
+		if is_finisher: recoil_force = 8.0 # Было 4.0
+		
+		# Отнимаем вектор от скорости для эффекта отскока
 		velocity -= dir * recoil_force
+		# ============================================
 
 func take_damage(amount: float, knockback_force: Vector3) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
@@ -612,24 +620,38 @@ func _update_roll_timers(delta: float) -> void:
 		roll_interval_timer -= delta
 
 func push_obj():
-	var current_push_force = push_force
+	var dt = get_physics_process_delta_time()
 	var collision_count = get_slide_collision_count()
+	
 	for i in range(collision_count):
 		var c = get_slide_collision(i)
+		
+		# --- ИГНОРИРУЕМ ПОЛ ---
+		if c.get_normal().y > 0.7:
+			continue
+		
 		var collider = c.get_collider()
+		var push_dir = -c.get_normal()
+		push_dir.y = 0 
+		
+		if push_dir.length_squared() < 0.001:
+			continue
+			
+		push_dir = push_dir.normalized()
+		
+		# ЯЩИКИ
 		if collider is RigidBody3D:
-			var rigid_mult = roll_push_multiplier if is_rolling else 1.0
-			collider.apply_central_impulse(-c.get_normal() * current_push_force * rigid_mult)
-		if collider is CharacterBody3D and collider.has_method("receive_push"):
-			var enemy_mult = 1.0 
-			var push_dir = -c.get_normal()
-			push_dir.y = 0
-			collider.receive_push(push_dir.normalized() * current_push_force * enemy_mult)
-			if is_rolling:
-				velocity *= 0.5
-				var current_state = state_machine.current_state
-				if "current_roll_speed" in current_state:
-					current_state.current_roll_speed *= 0.5
+			var current_force = push_force
+			if is_rolling: current_force *= roll_push_multiplier
+			collider.apply_central_impulse(push_dir * current_force * dt)
+			
+		# ВРАГИ
+		elif collider is CharacterBody3D and collider.has_method("receive_push"):
+			var nudge_strength = 10.0 * dt
+			if is_rolling: 
+				nudge_strength *= 3.0 
+				velocity *= 0.95
+			collider.receive_push(push_dir * nudge_strength)
 
 func check_jump_pass_through() -> void:
 	if is_passing_through:

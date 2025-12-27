@@ -6,7 +6,7 @@
 [ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
-friction = 0.8
+friction = 0.5
 rough = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uf1ar"]
@@ -20,8 +20,6 @@ continuous_cd = true
 angular_damp = 2.0
 script = ExtResource("1_uf1ar")
 health_component = NodePath("HealthComponent")
-debris_vfx_index = null
-vfx_offset = null
 break_sound = ExtResource("2_420b2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
