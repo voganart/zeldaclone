@@ -49,7 +49,6 @@ func _post_import(scene_root_node: Node) -> Object:
 func _create_and_save_scene(main_source: MeshInstance3D, top_source: MeshInstance3D, col_source: MeshInstance3D, is_bush: bool):
 	var file_path = SAVE_PATH + main_source.name + ".tscn"
 	
-	# Создаем всегда новый StaticBody, чтобы собрать его с нуля чисто
 	var root_node = StaticBody3D.new()
 	root_node.name = main_source.name
 	
@@ -76,7 +75,6 @@ func _create_and_save_scene(main_source: MeshInstance3D, top_source: MeshInstanc
 	# --- КОЛЛИЗИЯ ---
 	var shape = null
 	if not is_bush and col_source:
-		# Пытаемся найти шейп в суффиксе _col
 		for child in col_source.get_children():
 			if child is CollisionShape3D: shape = child.shape; break
 			if child.get_child_count() > 0 and child.get_child(0) is CollisionShape3D:
@@ -110,8 +108,7 @@ func _create_and_save_scene(main_source: MeshInstance3D, top_source: MeshInstanc
 	elif top_source:
 		var aabb = top_source.mesh.get_aabb()
 		sphere.radius = max(aabb.get_longest_axis_size() * 0.7, 3.0)
-		# Центрируем по кроне
-		occ_shape.position = Vector3(0, 3.5, 0) # Дефолт
+		occ_shape.position = Vector3(0, 3.5, 0)
 	else:
 		sphere.radius = 3.0
 		occ_shape.position = Vector3(0, 3.5, 0)
@@ -120,19 +117,19 @@ func _create_and_save_scene(main_source: MeshInstance3D, top_source: MeshInstanc
 	occ_vol.add_child(occ_shape)
 	occ_shape.owner = root_node
 
-	# --- СКРИПТ И ГЕНЕРАЦИЯ ---
+	# --- ГЕНЕРАЦИЯ ЛИСТЬЕВ И СКРИПТ ---
 	var gen_script = load(GENERATOR_SCRIPT_PATH)
 	if gen_script:
+		# Прикрепляем скрипт (и НЕ удаляем его)
 		root_node.set_script(gen_script)
 		
-		# Задаем параметры
+		# Дефолтные настройки
 		var leaf_mesh_res = load(LEAF_MESH_PATH)
 		if leaf_mesh_res: root_node.leaf_mesh = leaf_mesh_res
 		root_node.leaf_count = LEAF_COUNT_BUSH if is_bush else LEAF_COUNT_TREE
 		root_node.leaf_color = LEAF_COLOR
 		
-		# !!! ГЛАВНОЕ: Генерируем листья ПРЯМО СЕЙЧАС !!!
-		# Это создаст MultiMeshInstance3D и наполнит его данными
+		# Генерируем листья, чтобы они были сразу
 		if root_node.has_method("generate_leaves"):
 			root_node.generate_leaves()
 
@@ -141,7 +138,7 @@ func _create_and_save_scene(main_source: MeshInstance3D, top_source: MeshInstanc
 	var err = new_packed.pack(root_node)
 	if err == OK:
 		ResourceSaver.save(new_packed, file_path)
-		print("Saved generated tree: ", file_path)
+		print("Saved generated tree (Editable): ", file_path)
 	else:
 		printerr("Failed to pack scene: ", main_source.name)
 		

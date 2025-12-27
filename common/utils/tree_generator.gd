@@ -16,9 +16,10 @@ extends Node3D
 			generate_leaves()
 		regenerate = false
 
-# _ready() убираем полностью! 
-# Скрипт не должен ничего делать при загрузке сцены, 
-# он должен просто показывать то, что сохранено в .tscn
+# _ready пустой! Никакой авто-генерации при загрузке сцены.
+# Это уберет ошибки при старте проекта.
+func _ready():
+	pass
 
 func generate_leaves():
 	var crown = get_node_or_null("Crown")
@@ -28,17 +29,19 @@ func generate_leaves():
 		
 	var multimesh_inst = crown.get_node_or_null("LeavesMultiMesh")
 	
-	# Если ноды нет - создаем
+	# Если инстанса нет - создаем
 	if not multimesh_inst:
 		multimesh_inst = MultiMeshInstance3D.new()
 		multimesh_inst.name = "LeavesMultiMesh"
 		crown.add_child(multimesh_inst)
-		# ВАЖНО: Ставим owner, чтобы узел сохранился в .tscn файл
-		var scene_root = get_tree().edited_scene_root
-		if scene_root:
-			multimesh_inst.owner = scene_root
-		elif self.owner:
-			multimesh_inst.owner = self.owner
+		# ВАЖНО: Ставим owner, чтобы узел сохранился в сцену и был виден в дереве
+		if crown.owner:
+			multimesh_inst.owner = crown.owner
+		elif Engine.is_editor_hint():
+			# Пытаемся найти корень редактируемой сцены
+			var tree = get_tree()
+			if tree and tree.edited_scene_root:
+				multimesh_inst.owner = tree.edited_scene_root
 			
 		multimesh_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
@@ -46,23 +49,23 @@ func generate_leaves():
 		print("TreeGenerator: Assign a Leaf Mesh!")
 		return
 
-	# --- ДЕТЕРМИНИЗМ (Чтобы у всех были одинаковые деревья) ---
-	# Используем уникальное имя или позицию для создания сида
+	# Детерминизм (чтобы при нажатии regenerate без смены параметров вид не менялся хаотично)
 	seed(self.name.hash() + int(global_position.x) + int(global_position.z))
-	# ---------------------------------------------------------
 
-	# Создаем абсолютно новый ресурс, чтобы избежать ошибок "Instance count must be 0"
-	var multimesh = MultiMesh.new()
+	# === ГЛАВНЫЙ ФИКС ОШИБОК ===
+	# Мы создаем абсолютно НОВЫЙ ресурс MultiMesh.
+	# Мы не трогаем старый, который может быть заблокирован движком.
+	var new_multimesh = MultiMesh.new()
 	
-	# 1. Сначала настраиваем флаги (пока instance_count == 0)
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_colors = true 
-	multimesh.mesh = leaf_mesh
+	# 1. Настраиваем флаги на пустом меше (ошибок не будет)
+	new_multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	new_multimesh.use_colors = true 
+	new_multimesh.mesh = leaf_mesh
 	
-	# 2. Потом выделяем память
-	multimesh.instance_count = leaf_count
+	# 2. Выделяем память
+	new_multimesh.instance_count = leaf_count
 	
-	# Подготовка данных меша
+	# 3. Заполняем данными
 	var mdt = MeshDataTool.new()
 	mdt.create_from_surface(crown.mesh, 0)
 	
@@ -93,20 +96,18 @@ func generate_leaves():
 		
 		var t = Transform3D()
 		t.origin = pos
-		
 		if abs(normal.y) < 0.99: t = t.looking_at(pos + normal, Vector3.UP)
 		else: t = t.looking_at(pos + normal, Vector3.RIGHT)
-		
 		t = t.rotated_local(Vector3(1, 0, 0), -PI * 0.5)
 		t = t.rotated_local(Vector3(1, 0, 0), randf_range(-random_tilt, random_tilt))
 		t = t.rotated_local(Vector3(0, 0, 1), randf_range(-random_tilt, random_tilt))
 		t = t.rotated_local(Vector3(0, 1, 0), randf() * TAU)
-		
 		var s = randf_range(leaf_scale_min, leaf_scale_max)
 		t = t.scaled_local(Vector3(s, s, s))
 		
-		multimesh.set_instance_transform(i, t)
-		multimesh.set_instance_color(i, data_color)
+		new_multimesh.set_instance_transform(i, t)
+		new_multimesh.set_instance_color(i, data_color)
 	
-	multimesh_inst.multimesh = multimesh
-	print("TreeGenerator: Generated ", leaf_count, " leaves for ", name)
+	# 4. Подменяем старый ресурс новым
+	multimesh_inst.multimesh = new_multimesh
+	print("TreeGenerator: Regenerated ", leaf_count, " leaves for ", name)
