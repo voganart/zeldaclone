@@ -88,7 +88,7 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_2d6lx")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2d6lx"]
-size = Vector3(1.2480469, 0.7342529, 1)
+size = Vector3(1.0898438, 0.7202835, 0.7515259)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_w6sjs"]
 size = Vector3(1.7822266, 0.6758385, 1.0549316)
@@ -130,7 +130,7 @@ distance_fade_enabled = true
 omni_range = 0.782
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Base"]
-transform = Transform3D(0.9999965, -3.3527407e-08, -3.9967783e-15, 3.3527538e-08, 0.9999965, -2.4286033e-17, -7.395571e-32, 1.2836954e-16, 1, 3.6720849e-10, 0.3703947, 1.9796219e-17)
+transform = Transform3D(1, -3.3527407e-08, -3.9967783e-15, 3.3527506e-08, 0.9999965, -2.4286033e-17, -1.4791142e-31, 1.2836954e-16, 1, 6.0138816e-10, 0.36341003, -0.0055236816)
 shape = SubResource("BoxShape3D_2d6lx")
 
 [node name="Lid" type="AnimatableBody3D" parent="."]

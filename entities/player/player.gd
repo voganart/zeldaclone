@@ -262,6 +262,18 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 		target_movement_blend = 0.0
 		target_time_scale_rm = 1.0
 	
+	# --- НОВАЯ ЛОГИКА: СТОЛКНОВЕНИЕ СО СТЕНОЙ ---
+	# Если мы жмем кнопки, но уперлись в стену (is_on_wall)
+	# И реальная скорость очень мала, значит мы застряли.
+	if has_input and is_on_wall():
+		# Считаем горизонтальную скорость
+		var real_horizontal_speed = Vector2(velocity.x, velocity.z).length()
+		
+		# Если скорость меньше 0.5 (персонаж почти стоит), переходим в Idle
+		if real_horizontal_speed < 0.5:
+			target_movement_blend = 0.0
+	# ----------------------------------------------
+	
 	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
 	if current_movement_blend < 0.01: current_movement_blend = 0.0
 	
