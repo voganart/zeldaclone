@@ -13,8 +13,12 @@ func enter() -> void:
 	enemy.set_physics_process(false)
 	enemy.collision_layer = 0
 	
-	if enemy.punch_hand_r: enemy.punch_hand_r.set_deferred("monitoring", false)
-	if enemy.punch_hand_l: enemy.punch_hand_l.set_deferred("monitoring", false)
+	# --- ИСПРАВЛЕНИЕ: Используем CombatComponent вместо удаленных переменных ---
+	# Раньше: if enemy.punch_hand_r: enemy.punch_hand_r.set_deferred("monitoring", false)
+	# Теперь:
+	if enemy.combat_component:
+		enemy.combat_component._stop_hitbox_monitoring()
+	# --------------------------------------------------------------------------
 	
 	# СБРОС TimeScale (Фикс HitStop)
 	enemy.anim_player.speed_scale = 1.0

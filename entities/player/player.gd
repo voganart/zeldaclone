@@ -6,15 +6,9 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
-# [REMOVED] Hit Stop Settings -> CombatComponent
-# [REMOVED] Jump settings -> MovementComponent
-# [REMOVED] Movement settings -> MovementComponent
-
 @export_group("Root Motion Tweaks")
 @export var rm_walk_anim_speed: float = 1.0 
 @export var rm_run_anim_speed: float = 1.3 
-
-# [REMOVED] Roll Settings -> RollAbility
 
 @export_group("Auto Run")
 @export var auto_run_latch_time: float = 0.3
@@ -24,9 +18,6 @@ extends CharacterBody3D
 @export var blend_value_walk: float = 0.5 
 @export var blend_value_run: float = 1.0
 @export var stopping_threshold: float = 0.6 
-
-# [REMOVED] Combat Settings -> CombatComponent
-# [REMOVED] Knockback Settings -> CombatComponent
 
 @export_group("Combat Assist")
 @export var soft_lock_range: float = 4.0 
@@ -43,7 +34,7 @@ extends CharacterBody3D
 # Abilities
 @onready var air_dash_ability: AirDashAbility = $Abilities/AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $Abilities/GroundSlamAbility
-@onready var roll_ability: RollAbility = $Abilities/RollAbility # <-- НОВАЯ СПОСОБНОСТЬ
+@onready var roll_ability: RollAbility = $Abilities/RollAbility
 # ------------------
 
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
@@ -65,9 +56,9 @@ var is_auto_running: bool = false
 var is_stopping: bool = false
 var shift_pressed_time: float = 0.0
 
-var is_rolling: bool = false # Оставляем как флаг состояния (активен ли сейчас ролл), но логику зарядов убрали
+var is_rolling: bool = false 
 var is_invincible: bool = false
-var roll_threshold: float = 0.18 # Порог нажатия shift для ролла
+var roll_threshold: float = 0.18 
 
 var current_knockback_timer: float = 0.0
 var is_knockbacked: bool = false
@@ -152,7 +143,8 @@ var attack_rotation_influence: float:
 	get: return combat_component.attack_rotation_influence
 var attack_roll_cancel_threshold: float:
 	get: return combat_component.attack_roll_cancel_threshold
-# Геттеры для RollAbility (чтобы не ломать PlayerHUD и State)
+
+# Геттеры для RollAbility
 var current_roll_charges: int:
 	get: return roll_ability.current_roll_charges
 	set(val): roll_ability.current_roll_charges = val
@@ -168,7 +160,6 @@ var roll_regen_timer: float:
 	get: return roll_ability.roll_regen_timer
 var roll_cooldown: float:
 	get: return roll_ability.roll_cooldown
-# Эти параметры используются в State roll
 var roll_min_speed: float:
 	get: return roll_ability.roll_min_speed
 var roll_max_speed: float:
@@ -184,11 +175,9 @@ var roll_interval_timer: float:
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
-	# ИНИЦИАЛИЗАЦИЯ КОМПОНЕНТОВ
 	movement_component.init(self)
 	combat_component.init(self)
 	
-	# Проксируем сигнал от RollAbility
 	if roll_ability:
 		roll_ability.roll_charges_changed.connect(func(c, m, p): roll_charges_changed.emit(c, m, p))
 
@@ -199,9 +188,6 @@ func _ready() -> void:
 
 	state_machine.init(self)
 
-# ============================================================================
-# VISUAL PROCESS
-# ============================================================================
 func _process(delta: float) -> void:
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
 		var rm_pos = anim_controller.get_root_motion_position()
@@ -234,7 +220,6 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_stun_timer(delta)
-	# [REMOVED] _update_roll_timers removed, handled by RollAbility
 	
 	if has_node("/root/SimpleGrass"):
 		var grass_manager = get_node("/root/SimpleGrass")
@@ -430,14 +415,19 @@ func stop_hitbox_monitoring() -> void:
 func _check_attack_hit() -> void:
 	combat_component.activate_hitbox_check(0.1)
 
-func take_damage(amount: float, knockback_force: Vector3) -> void:
+# === ИСПРАВЛЕНИЕ ЗДЕСЬ: Добавлен 3-й аргумент is_heavy_attack = false ===
+func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
+	
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
 	sfx_hurt.play_random()
+	
 	if has_hyper_armor: return
+	
 	trigger_hit()
+	
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 	is_knockback_stun = true
@@ -461,7 +451,7 @@ func _update_stun_timer(delta: float) -> void:
 			is_knockbacked = false
 
 func _update_roll_timers(delta: float) -> void:
-	pass # Делегировано RollAbility
+	pass
 
 func push_obj():
 	pass

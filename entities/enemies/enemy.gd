@@ -2,7 +2,7 @@ class_name Enemy
 extends CharacterBody3D
 
 ## ============================================================================
-## ENEMY CONTROLLER (REFACTORED)
+## ENEMY CONTROLLER (FIXED PATHS)
 ## ============================================================================
 
 # ============================================================================
@@ -10,11 +10,6 @@ extends CharacterBody3D
 # ============================================================================
 @export_group("Debug")
 @export var show_debug_label: bool = true
-
-@export_group("Components")
-@export var punch_hand_r: Area3D
-@export var punch_hand_l: Area3D
-@export var punch_area: Area3D # Конус атаки (опционально)
 
 @export_group("AI Settings")
 @export var can_flee: bool = true
@@ -27,14 +22,10 @@ extends CharacterBody3D
 @export var hit_stop_lethal_duration: float = 0.2
 @export var hit_stop_local_duration: float = 0.08
 
-# Настройки движения теперь проксируются или используются компонентом, 
-# но для удобства настройки в инспекторе врага оставляем их здесь, 
-# а в _ready передадим их компоненту или будем использовать напрямую.
 @export_group("Movement Stats")
 @export var walk_speed: float = 1.5
 @export var run_speed: float = 3.5
 @export var retreat_speed: float = 2.5
-# rotation_speed берется из MovementComponent, но можно переопределить
 @export var combat_rotation_speed: float = 20.0
 @export var attack_rotation_speed: float = 2.0 
 @export_range(0, 180) var strafe_view_angle: float = 45.0
@@ -48,21 +39,21 @@ extends CharacterBody3D
 # ============================================================================
 # NODE REFERENCES
 # ============================================================================
-# --- НОВЫЕ КОМПОНЕНТЫ ---
+# --- КОМПОНЕНТЫ ---
 @onready var movement_component: MovementComponent = $Components/MovementComponent
 @onready var anim_controller: AnimationController = $Components/AnimationController
+@onready var combat_component: CombatComponent = $Components/CombatComponent 
+# !!! ИСПРАВЛЕНИЕ: Обновлен путь к компоненту атаки !!!
+@onready var attack_component: EnemyAttackComponent = $Components/EnemyAttackComponent
 # ------------------------
 
 @onready var debug_label: Label3D = $DebugLabel
 @onready var state_machine: StateMachine = $StateMachine
-@onready var vision_component: VisionComponent = $VisionComponent
-@onready var attack_component: EnemyAttackComponent = $EnemyAttackComponent
+@onready var vision_component: VisionComponent = $Components/VisionComponent
 @onready var health_component: Node = $Components/HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
-# AnimationTree теперь управляется через anim_controller, прямая ссылка не нужна, 
-# но оставим для старых проверок если они есть (лучше удалить позже)
 @onready var anim_tree: AnimationTree = $Monstr/AnimationTree 
 
 var vfx_pull: Node3D
@@ -85,19 +76,19 @@ var is_knocked_back: bool = false
 var pending_death: bool = false
 var knockback_timer: float = 0.0
 
-# Используется для навигации
-var _desired_velocity: Vector3 = Vector3.ZERO
-
 signal died
 
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
-	# Инициализация компонента движения
-	movement_component.init(self)
-	# Настраиваем базовую скорость вращения из компонента
-	movement_component.rotation_speed = 6.0 
+	# Инициализация компонентов
+	if movement_component:
+		movement_component.init(self)
+		movement_component.rotation_speed = 6.0 
+	
+	if combat_component:
+		combat_component.init(self)
 	
 	nav_agent.max_speed = walk_speed
 	nav_agent.avoidance_enabled = true
@@ -119,8 +110,7 @@ func _ready() -> void:
 	if can_flee:
 		can_flee = (randf() <= flee_chance)
 
-	# Инициализация анимации через контроллер
-	if anim_tree: anim_tree.active = true # На всякий случай
+	if anim_tree: anim_tree.active = true 
 	set_tree_state("alive")
 	set_move_mode("normal")
 
@@ -132,14 +122,14 @@ func _physics_process(delta: float) -> void:
 		debug_label.visible = false
 		
 	# Гравитация через компонент
-	movement_component.apply_gravity(delta)
+	if movement_component:
+		movement_component.apply_gravity(delta)
 
 	# Обработка нокбэка
 	if is_knocked_back:
 		if knockback_timer > 0:
 			knockback_timer -= delta
 		
-		# Затухание инерции
 		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
 		
@@ -155,14 +145,12 @@ func _physics_process(delta: float) -> void:
 	if frustrated_cooldown > 0:
 		frustrated_cooldown -= delta
 
-	# Движение управляется стейтами через NavigationAgent
-	# NavigationAgent вызывает _on_velocity_computed, где мы применяем скорость
 	var state_name = state_machine.current_state.name.to_lower()
 	if state_name != "dead":
 		move_and_slide()
 		
-	# Толкание других объектов (если нужно)
-	movement_component.handle_pushing(false)
+	if movement_component:
+		movement_component.handle_pushing(false)
 
 # ============================================================================
 # MOVEMENT HELPERS
@@ -176,18 +164,13 @@ func move_toward_path() -> void:
 	var direction = (next_pos - global_position).normalized()
 	direction.y = 0
 	
-	# Мы просто устанавливаем желаемую скорость для агента навигации.
-	# Реальное движение произойдет в callback _on_velocity_computed
 	nav_agent.set_velocity(direction * nav_agent.max_speed)
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	if is_knocked_back: return
 	
-	# Сохраняем вертикальную скорость (гравитацию)
 	var target_vel = safe_velocity
 	target_vel.y = velocity.y
-	
-	# Плавное движение
 	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
 
 func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, speed_override: float = -1.0) -> void:
@@ -201,9 +184,7 @@ func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, spee
 	else:
 		return
 
-	var current_speed = speed_override if speed_override > 0 else movement_component.rotation_speed
-	
-	# Используем компонент для поворота
+	var current_speed = speed_override if speed_override > 0 else (movement_component.rotation_speed if movement_component else 6.0)
 	if look_dir.length_squared() > 0.001:
 		var target_angle = atan2(look_dir.x, look_dir.y)
 		rotation.y = lerp_angle(rotation.y, target_angle, current_speed * delta)
@@ -222,20 +203,12 @@ func set_move_mode(mode_name: String):
 
 func set_locomotion_blend(value: float):
 	anim_controller.set_locomotion_blend(value)
-	# Враг использует один параметр для blend_position и в Locomotion, и в Chase
-	# AnimationController имеет метод set_locomotion_blend который ставит "parameters/locomotion_blend/blend_position"
-	# Если у тебя в дереве есть "parameters/chase_blend/blend_position", нужно добавить это в контроллер или оставить ручной set здесь
-	# Пока оставим как было, через anim_tree, если параметр нестандартный, 
-	# ИЛИ лучше добавить метод в AnimationController.
-	# Для совместимости используем anim_tree напрямую для нестандартных параметров:
 	anim_tree.set("parameters/chase_blend/blend_position", value)
 
 func set_strafe_blend(value: float):
-	# То же самое, если strafe_blend нет в контроллере
 	anim_tree.set("parameters/strafe_blend/blend_position", value)
 
 func trigger_attack_oneshot(attack_name: String):
-	# Преобразуем имя анимации в индекс (Attack1, Attack2)
 	var idx = 0
 	if "2" in attack_name: idx = 1
 	if "3" in attack_name: idx = 2
@@ -245,10 +218,7 @@ func trigger_hit_oneshot():
 	anim_controller.trigger_hit()
 
 func trigger_knockdown_oneshot():
-	# Этого метода нет в AnimationController, добавим вызов напрямую или расширим контроллер.
-	# Для скорости используем прямой вызов:
 	anim_tree.set(GameConstants.TREE_ONE_SHOT_KNOCKDOWN, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	# Но лучше потом добавить func trigger_knockdown() в AnimationController
 
 func trigger_angry_seek(time: float):
 	anim_tree.set(GameConstants.TREE_ANGRY_SEEK, time)
@@ -293,6 +263,12 @@ func update_movement_animation(delta: float) -> void:
 # ============================================================================
 # COMBAT & DAMAGE
 # ============================================================================
+
+# !!! COMPATIBILITY WRAPPER !!!
+func _check_attack_hit() -> void:
+	if combat_component:
+		combat_component.activate_hitbox_check(0.1)
+
 func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
 	if is_dead(): return
 	frustrated_cooldown = 0.0
@@ -310,15 +286,14 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 			GameManager.hit_stop_local([anim_player], 0.15)
 	
 	if is_lethal:
-		# Прямой доступ к параметру дерева для нокдауна, так как в контроллере его пока нет
-		anim_tree.set("parameters/knockdown_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		trigger_knockdown_oneshot()
 		hurt_lock_timer = 0.5
 	elif not is_lethal:
 		if is_heavy_attack:
 			if is_attacking:
 				AIDirector.return_attack_token(self)
 				state_machine.change_state(GameConstants.STATE_CHASE)
-			anim_tree.set("parameters/knockdown_oneshot/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+			trigger_knockdown_oneshot()
 			hurt_lock_timer = 0.5
 		else:
 			if not is_attacking:
@@ -381,35 +356,8 @@ func _finalize_death() -> void:
 	AIDirector.return_attack_token(self)
 	emit_signal("died")
 	if health_bar: health_bar.visible = false
+	if combat_component: combat_component._stop_hitbox_monitoring()
 	state_machine.change_state(GameConstants.STATE_DEAD)
-
-# --- ПРОВЕРКА АТАКИ ---
-# Враг использует старую систему Area3D для атаки (punch_hand_r),
-# пока не перешли на CombatComponent полностью.
-func _check_attack_hit() -> void:
-	var hits_found = false
-	if punch_hand_r and _check_single_hand_hit(punch_hand_r): hits_found = true
-	if not hits_found and punch_hand_l: _check_single_hand_hit(punch_hand_l)
-
-func _check_single_hand_hit(hand_area: Area3D) -> bool:
-	if not hand_area.monitoring: return false
-	
-	# Проверка конуса атаки
-	if punch_area:
-		var valid_targets = punch_area.get_overlapping_bodies()
-		if not valid_targets.has(player): return false
-
-	var bodies = hand_area.get_overlapping_bodies()
-	for body in bodies:
-		if body == player:
-			var knockback_dir = (player.global_position - global_position).normalized()
-			knockback_dir.y = 0.5
-			knockback_dir = knockback_dir.normalized() * knockback_strength
-			
-			if player.has_method("take_damage"):
-				player.take_damage(1.0, knockback_dir)
-				return true
-	return false
 
 # ============================================================================
 # UI & MISC
@@ -445,7 +393,6 @@ func _update_debug_info() -> void:
 	if state_machine.current_state:
 		state_name = state_machine.current_state.name
 	
-	# Получаем напрямую из дерева, так как контроллер не хранит состояние
 	var raw_move_mode = anim_tree.get("parameters/move_mode/transition_request")
 	var move_mode_idx = 0
 	if typeof(raw_move_mode) == TYPE_INT:

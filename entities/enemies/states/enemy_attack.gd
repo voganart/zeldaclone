@@ -18,6 +18,13 @@ func enter() -> void:
 	enemy.set_move_mode("chase")
 	enemy.current_movement_blend = 0.0 
 	enemy.set_locomotion_blend(0.0)
+	
+	# === ВАЖНО: ВКЛЮЧАЕМ МОНИТОРИНГ ХИТБОКСОВ ===
+	# Это не наносит урон, а просто "включает радар" Area3D.
+	# Сам урон нанесется, когда анимация вызовет _check_attack_hit.
+	if enemy.combat_component:
+		enemy.combat_component.start_hitbox_monitoring()
+	# ============================================
 
 func physics_update(delta: float) -> void:
 	enemy.update_movement_animation(delta) 
@@ -50,8 +57,6 @@ func _perform_attack() -> void:
 	var impulse = enemy.attack_component.register_attack()
 	
 	# ИСПРАВЛЕНИЕ НАПРАВЛЕНИЯ
-	# Так как ваши персонажи смотрят в +Z, вектор "вперед" — это basis.z
-	# (В стандартном Godot это -basis.z)
 	var forward = enemy.global_transform.basis.z.normalized()
 	
 	# Применяем рывок вперед
@@ -127,3 +132,7 @@ func on_damage_taken(is_heavy: bool = false) -> void:
 func exit() -> void:
 	is_performing_attack_anim = false
 	AIDirector.return_attack_token(enemy)
+	
+	# === ВЫКЛЮЧАЕМ МОНИТОРИНГ ===
+	if enemy.combat_component:
+		enemy.combat_component._stop_hitbox_monitoring()

@@ -1,6 +1,16 @@
 class_name CombatComponent
 extends Node
 
+enum Faction { PLAYER, ENEMY }
+
+# --- НАСТРОЙКИ ФРАКЦИИ ---
+@export_group("Faction Settings")
+@export var faction: Faction = Faction.PLAYER
+
+# --- НАСТРОЙКИ ОТДАЧИ (RECOIL) ---
+@export_group("Recoil Settings")
+@export var self_recoil_strength: float = 0.0 ## Сила отлета ВЛАДЕЛЬЦА назад при ударе (для Игрока ставь ~15, для Врага 0).
+
 # --- НАСТРОЙКИ КОМБО И ТАЙМИНГОВ ---
 @export_group("Combat Timing")
 @export var primary_attack_speed: float = 0.8
@@ -14,7 +24,8 @@ extends Node
 @export var walking_attack_impulse: float = 1.5
 @export var attack_rotation_influence: float = 0.5
 @export_range(0.0, 1.0) var attack_roll_cancel_threshold: float = 1.0 
-# --- НАСТРОЙКИ ОТТАЛКИВАНИЯ (KNOCKBACK) ---
+
+# --- НАСТРОЙКИ ОТТАЛКИВАНИЯ (KNOCKBACK - ЖЕРТВЫ) ---
 @export_group("Knockback Settings")
 @export_subgroup("Normal Hit (1 & 2)")
 @export var kb_strength_normal: float = 4.0 
@@ -30,19 +41,19 @@ extends Node
 @export var hs_prop_time_scale: float = 0.1 
 @export var hs_prop_duration: float = 0.02 
 
-@export_subgroup("Enemy: Normal")
+@export_subgroup("Target: Normal")
 @export var hs_normal_time_scale: float = 0.1
 @export var hs_normal_duration: float = 0.04
 
-@export_subgroup("Enemy: Finisher")
+@export_subgroup("Target: Finisher")
 @export var hs_finisher_time_scale: float = 0.1
 @export var hs_finisher_duration: float = 0.08
 
-@export_subgroup("Enemy: Kill")
+@export_subgroup("Target: Kill")
 @export var hs_lethal_time_scale: float = 0.05
 @export var hs_lethal_duration: float = 0.15
 
-# --- ССЫЛКИ НА ХИТБОКСЫ (Назначь в инспекторе!) ---
+# --- ССЫЛКИ НА ХИТБОКСЫ ---
 @export_group("Hitboxes")
 @export var punch_hand_r: Area3D
 @export var punch_hand_l: Area3D
@@ -70,8 +81,14 @@ var attack_interval_timer: Timer
 var hit_enemies_current_attack: Dictionary = {}
 var hitbox_active_timer: float = 0.0
 
+var target_group_name: String = ""
+
 func _ready() -> void:
-	# Создаем таймеры программно
+	if faction == Faction.PLAYER:
+		target_group_name = GameConstants.GROUP_ENEMIES
+	else:
+		target_group_name = GameConstants.GROUP_PLAYER
+
 	combo_reset_timer = Timer.new()
 	combo_reset_timer.one_shot = true
 	combo_reset_timer.wait_time = combo_window_time
@@ -81,16 +98,12 @@ func _ready() -> void:
 	combo_cooldown_timer = Timer.new()
 	combo_cooldown_timer.one_shot = true
 	combo_cooldown_timer.wait_time = combo_cooldown_after_combo
-	combo_cooldown_timer.timeout.connect(func():
-		print("Combo cooldown ended")
-		can_attack = true
-	)
+	combo_cooldown_timer.timeout.connect(func(): can_attack = true)
 	add_child(combo_cooldown_timer)
 	
 	attack_interval_timer = Timer.new()
 	attack_interval_timer.one_shot = true
 	attack_interval_timer.timeout.connect(func():
-		# Если не в глобальном кулдауне после комбо, разрешаем атаку
 		if combo_cooldown_timer.is_stopped():
 			can_attack = true
 	)
@@ -104,14 +117,10 @@ func _physics_process(delta: float) -> void:
 		hitbox_active_timer -= delta
 		_process_hitbox_check()
 
-# --- УПРАВЛЕНИЕ АТАКОЙ ---
-
 func start_attack_sequence() -> void:
 	is_attacking = true
 	can_attack = false
 	combo_reset_timer.stop()
-	
-	# Сброс списков попаданий
 	hitbox_active_timer = 0.0
 	hit_enemies_current_attack.clear()
 
@@ -120,17 +129,14 @@ func end_attack_sequence() -> void:
 	is_attacking = false
 	combo_count += 1
 	
-	# Логика завершения серии
 	if combo_count >= 3:
-		# Финишер был нанесен
 		can_attack = false
 		combo_cooldown_timer.start(combo_cooldown_after_combo)
-		combo_count = 0 # Сброс сразу или после таймера? Обычно сразу.
+		combo_count = 0 
 	else:
-		# Обычный удар
 		can_attack = false
 		attack_interval_timer.start(attack_cooldown)
-		combo_reset_timer.start() # Если игрок не ударит снова, комбо сбросится
+		combo_reset_timer.start() 
 
 func configure_attack_parameters(damage: float, is_finisher: bool, hyper_armor: bool) -> void:
 	current_attack_damage = damage
@@ -143,8 +149,6 @@ func configure_attack_parameters(damage: float, is_finisher: bool, hyper_armor: 
 		current_knockback_strength = kb_strength_normal
 		current_knockback_height = kb_height_normal
 
-# --- ХИТБОКСЫ И УРОН ---
-
 func start_hitbox_monitoring() -> void:
 	hit_enemies_current_attack.clear()
 	if punch_hand_r: punch_hand_r.monitoring = true
@@ -155,7 +159,6 @@ func _stop_hitbox_monitoring() -> void:
 	if punch_hand_r: punch_hand_r.set_deferred("monitoring", false)
 	if punch_hand_l: punch_hand_l.set_deferred("monitoring", false)
 
-## Вызывается из AnimationPlayer или Player.gd, чтобы "включить" проверку на N секунд
 func activate_hitbox_check(duration: float = 0.1) -> void:
 	hitbox_active_timer = duration
 	_process_hitbox_check()
@@ -168,21 +171,19 @@ func _process_hitbox_check() -> void:
 func _check_hand_overlap(hand: Area3D) -> bool:
 	if not hand.monitoring: return false
 
-	# Лимиты целей за один кадр/удар
-	var max_enemies = 1
+	var max_targets = 1
 	var max_props = 1
-	var enemies_hit = 0
-	var props_hit = 0
+	var targets_hit_count = 0
+	var props_hit_count = 0
 	
-	# Считаем уже ударенных
 	for type in hit_enemies_current_attack.values():
-		if type == "enemy": enemies_hit += 1
-		elif type == "prop": props_hit += 1
+		if type == "target": targets_hit_count += 1
+		elif type == "prop": props_hit_count += 1
 	
-	if enemies_hit >= max_enemies and props_hit >= max_props:
+	if targets_hit_count >= max_targets and props_hit_count >= max_props:
 		return false
 
-	var candidates_enemies: Array[Node3D] = []
+	var candidates_targets: Array[Node3D] = []
 	var candidates_props: Array[Node3D] = []
 	
 	var bodies_in_front = []
@@ -193,45 +194,41 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 		if body == actor: continue
 		if hit_enemies_current_attack.has(body.get_instance_id()): continue
 		
-		# Если есть AttackArea (конус перед игроком), проверяем, что враг в нём
-		# (чтобы не бить врагов строго за спиной при анимации замаха)
-		if attack_area and not body in bodies_in_front:
+		if faction == Faction.PLAYER and attack_area and not body in bodies_in_front:
 			continue
 		
-		# Проверка стен
 		if not _has_line_of_sight(body):
 			continue
 		
-		if body.is_in_group("enemies"): # Hardcoded string replaced logic
-			candidates_enemies.append(body)
+		if body.is_in_group(target_group_name): 
+			candidates_targets.append(body)
 		elif body is RigidBody3D or body.has_method("take_damage"):
-			candidates_props.append(body)
+			if faction == Faction.PLAYER: 
+				candidates_props.append(body)
 	
-	# Сортировка по дистанции (бьем ближайшего)
 	var sort_func = func(a, b):
 		return actor.global_position.distance_squared_to(a.global_position) < actor.global_position.distance_squared_to(b.global_position)
 		
-	if not candidates_enemies.is_empty(): candidates_enemies.sort_custom(sort_func)
+	if not candidates_targets.is_empty(): candidates_targets.sort_custom(sort_func)
 	if not candidates_props.is_empty(): candidates_props.sort_custom(sort_func)
 	
 	var hit_occurred = false
 	
-	if enemies_hit < max_enemies and not candidates_enemies.is_empty():
-		var target = candidates_enemies[0]
-		_apply_hit(target)
-		hit_enemies_current_attack[target.get_instance_id()] = "enemy"
+	if targets_hit_count < max_targets and not candidates_targets.is_empty():
+		var target = candidates_targets[0]
+		_apply_hit(target, false)
+		hit_enemies_current_attack[target.get_instance_id()] = "target"
 		hit_occurred = true
 
-	if props_hit < max_props and not candidates_props.is_empty():
+	if props_hit_count < max_props and not candidates_props.is_empty():
 		var target = candidates_props[0]
-		_apply_hit(target)
+		_apply_hit(target, true)
 		hit_enemies_current_attack[target.get_instance_id()] = "prop"
 		hit_occurred = true
 		
 	return hit_occurred
 
-func _apply_hit(body: Node3D) -> void:
-	if not is_attacking: return
+func _apply_hit(body: Node3D, is_prop: bool) -> void:
 	if not actor: return
 
 	var dir = (body.global_position - actor.global_position)
@@ -239,45 +236,44 @@ func _apply_hit(body: Node3D) -> void:
 	dir = dir.normalized()
 	
 	if body.has_method("take_damage"):
-		# Определяем финишер по урону или флагу (здесь упрощенно по урону > 1, но лучше передавать флаг)
-		# В данном случае damage передается извне.
-		var is_finisher = (current_attack_damage > 1.5) # Условность, можно улучшить
+		var is_finisher = (current_attack_damage > 1.5) 
 		
 		var knockback_vec = Vector3.ZERO
 		if current_attack_knockback_enabled:
 			knockback_vec = dir * current_knockback_strength
 			knockback_vec.y = current_knockback_height
 		
-		# --- Hit Stop & Juice ---
-		var is_enemy = body.is_in_group("enemies")
-		if is_enemy:
-			var enemy_hp_comp = body.get_node_or_null("HealthComponent")
+		if not is_prop:
+			var target_hp_comp = body.get_node_or_null("Components/HealthComponent")
+			if not target_hp_comp:
+				target_hp_comp = body.get_node_or_null("HealthComponent")
+
 			var is_lethal = false
-			if enemy_hp_comp:
-				is_lethal = (enemy_hp_comp.current_health - current_attack_damage) <= 0
+			if target_hp_comp:
+				is_lethal = (target_hp_comp.current_health - current_attack_damage) <= 0
 			
-			if is_lethal:
-				GameManager.hit_stop_smooth(hs_lethal_time_scale, hs_lethal_duration, 0.0, 0.1) 
-				GameEvents.camera_shake_requested.emit(0.6, 0.2)
-			elif is_finisher:
-				GameManager.hit_stop_smooth(hs_finisher_time_scale, hs_finisher_duration, 0.0, 0.05) 
-				GameEvents.camera_shake_requested.emit(0.4, 0.15)
+			if faction == Faction.PLAYER:
+				if is_lethal:
+					GameManager.hit_stop_smooth(hs_lethal_time_scale, hs_lethal_duration, 0.0, 0.1) 
+					GameEvents.camera_shake_requested.emit(0.6, 0.2)
+				elif is_finisher:
+					GameManager.hit_stop_smooth(hs_finisher_time_scale, hs_finisher_duration, 0.0, 0.05) 
+					GameEvents.camera_shake_requested.emit(0.4, 0.15)
+				else:
+					GameManager.hit_stop_smooth(hs_normal_time_scale, hs_normal_duration, 0.0, 0.02) 
+					GameEvents.camera_shake_requested.emit(0.2, 0.1)
 			else:
-				GameManager.hit_stop_smooth(hs_normal_time_scale, hs_normal_duration, 0.0, 0.02) 
-				GameEvents.camera_shake_requested.emit(0.2, 0.1)
+				GameEvents.camera_shake_requested.emit(0.3, 0.2)
 		else:
-			# Props
 			GameManager.hit_stop_smooth(hs_prop_time_scale, hs_prop_duration, 0.0, 0.0) 
 			GameEvents.camera_shake_requested.emit(0.1, 0.05)
 		
 		# Нанесение урона
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
 		
-		# Отдача (Recoil)
-		var recoil_force = 15.0 
-		if is_finisher: recoil_force = 25.0 
-		
-		actor.velocity -= dir * recoil_force
+		# --- ПРИМЕНЕНИЕ ОТДАЧИ (УПРОЩЕНО) ---
+		if self_recoil_strength > 0:
+			actor.velocity -= dir * self_recoil_strength
 
 func _has_line_of_sight(target: Node3D) -> bool:
 	if not actor: return false

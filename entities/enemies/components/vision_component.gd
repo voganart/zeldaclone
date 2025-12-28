@@ -20,8 +20,16 @@ var _can_see_player: bool = false
 var _scan_timer: Timer
 var player_target: Node3D 
 
-@onready var actor: Node3D = get_parent()
+@onready var actor: Node3D = _find_actor()
 
+func _find_actor() -> Node3D:
+	var p = get_parent()
+	# Если компонент лежит прямо в Enemy
+	if p is CharacterBody3D: return p
+	# Если компонент лежит в Enemy/Components
+	if p and p.get_parent() is CharacterBody3D: return p.get_parent()
+	return null
+	
 func _ready() -> void:
 	_scan_timer = Timer.new()
 	_scan_timer.wait_time = scan_interval + randf_range(-0.05, 0.05)
