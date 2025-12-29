@@ -18,7 +18,6 @@ func enter() -> void:
 	# Полная остановка и подготовка
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
 	enemy.set_move_mode("chase")
-	enemy.set_locomotion_blend(0.0)
 	
 	# Включаем "радар" хитбоксов (урон нанесется только при вызове из анимации)
 	if enemy.combat_component:
@@ -148,7 +147,6 @@ func _handle_retreat(delta: float) -> void:
 		enemy.attack_component.tactical_retreat_pause_timer -= delta
 		enemy.nav_agent.set_velocity(Vector3.ZERO)
 		enemy.set_move_mode("chase") 
-		enemy.set_locomotion_blend(0.0)
 		enemy.handle_rotation(delta, enemy.player.global_position)
 		
 		if enemy.attack_component.tactical_retreat_pause_timer <= 0:
