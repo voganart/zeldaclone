@@ -251,7 +251,7 @@ libraries = {
 }
 
 [node name="Cracks" type="MeshInstance3D" parent="."]
-transform = Transform3D(3, 0, 0, 0, -1.3113416e-07, 3, 0, -3, -1.3113416e-07, 0, 0, 0)
+transform = Transform3D(3, 0, 0, 0, -1.3113416e-07, 3, 0, -3, -1.3113416e-07, 0, 0.036811493, 0)
 mesh = SubResource("QuadMesh_k8bem")
 surface_material_override/0 = SubResource("ShaderMaterial_h2j1y")
 

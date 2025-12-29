@@ -6,6 +6,10 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
+@export_group("Idle Animations")
+@export var enable_idle_dance: bool = true ## Включить анимацию танца при бездействии?
+@export var idle_dance_time: float = 10.0 ## Время простоя (сек) до начала танца
+
 @export_group("Root Motion Tweaks")
 @export var rm_walk_anim_speed: float = 1.0 
 @export var rm_run_anim_speed: float = 1.3 

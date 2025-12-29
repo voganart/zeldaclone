@@ -8,10 +8,10 @@ extends RigidBody3D
 
 func _ready() -> void:
 	# Настройка физики:
-	mass = 10.0
+	mass = 5.0
 	# Снизили damping (было 5.0), чтобы ящик легче сдвигался
-	linear_damp = 1.0 
-	angular_damp = 1.0
+	linear_damp = 2.0 
+	angular_damp = 2.0
 	
 	if health_component:
 		health_component.died.connect(_on_broken)

@@ -6,7 +6,7 @@
 [ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
-friction = 0.5
+friction = 0.3
 rough = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uf1ar"]
@@ -15,7 +15,6 @@ rough = true
 collision_layer = 16
 collision_mask = 127
 collision_priority = 0.5
-mass = 0.5
 physics_material_override = SubResource("PhysicsMaterial_uf1ar")
 continuous_cd = true
 angular_damp = 2.0

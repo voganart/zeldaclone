@@ -107,9 +107,15 @@ func _check_vision_logic(target: Node3D) -> bool:
 # --- ДЕБАГ ВИЗУАЛИЗАЦИЯ ---
 
 func _setup_debug_meshes() -> void:
+	# Если контейнер уже есть, не создаем новый
+	if _debug_container: return
+
 	_debug_container = Node3D.new()
 	_debug_container.name = "VisionDebugVisuals"
 	add_child(_debug_container)
+	
+	# !!! ФИКС: Делаем контейнер независимым от вращения и скейла врага
+	_debug_container.top_level = true 
 
 	# Сфера основного зрения (Красная - дальний радиус)
 	_debug_sight_mesh = MeshInstance3D.new()
@@ -142,10 +148,24 @@ func _setup_debug_meshes() -> void:
 func _update_debug_meshes() -> void:
 	if not _debug_container: return
 	
+	# !!! ФИКС: Ручная синхронизация позиции с актером
+	if is_instance_valid(actor):
+		_debug_container.global_position = actor.global_position
+	else:
+		_debug_container.visible = false
+		return
+	
 	_debug_container.visible = true
 	var offset = Vector3(0, eye_height_offset, 0)
+	
+	# Позиция сфер локально внутри контейнера (с учетом высоты глаз)
 	_debug_sight_mesh.position = offset
 	_debug_proximity_mesh.position = offset
 	
+	# Масштабируем сферы под радиусы
 	_debug_sight_mesh.scale = Vector3.ONE * sight_range
 	_debug_proximity_mesh.scale = Vector3.ONE * proximity_detection_range
+	
+func _exit_tree() -> void:
+	if _debug_container:
+		_debug_container.queue_free()

@@ -87,6 +87,7 @@ const TREE_PARAM_CHASE_BLEND = "parameters/chase_blend/blend_position"
 # 4. Misc
 const TREE_PARAM_TIMESCALE = "parameters/TimeScale/scale" 
 const TREE_PARAM_LOCOMOTION_SPEED = "parameters/LocomotionSpeed/scale"
+const TREE_PARAM_DANCE_SHOT = "parameters/dance_oneshot/request"
 # --- ПАРАМЕТРЫ ШЕЙДЕРОВ ---
 const SHADER_PARAM_PLAYER_POS = "player_position"
 const SHADER_PARAM_DISSOLVE = "dissolve_amount"

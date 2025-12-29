@@ -22,6 +22,7 @@ const P_STOPPING_SHOT = "parameters/stopping_oneshot/request"
 const P_LOCOMOTION = "parameters/locomotion_blend/blend_position"
 const P_LOCOMOTION_SPEED = "parameters/LocomotionSpeed/scale"
 
+const PARAM_DANCE = "parameters/dance_oneshot/request"
 func _ready():
 	if anim_tree:
 		anim_tree.active = true
@@ -78,6 +79,18 @@ func trigger_roll() -> void:
 func trigger_stopping() -> void:
 	anim_tree.set(P_STOPPING_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
+func trigger_dance() -> void:
+	# Проверка на всякий случай
+	if anim_tree:
+		# ONE_SHOT_REQUEST_FIRE запускает анимацию
+		anim_tree.set(PARAM_DANCE, AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		print("AnimationController: Dance Triggered!") # Дебаг принт
+
+func stop_dance() -> void:
+	if anim_tree:
+		# FADE_OUT плавно выключает
+		anim_tree.set(PARAM_DANCE, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
+	
 # Получение данных Root Motion (для Player.gd)
 func get_root_motion_position() -> Vector3:
 	return anim_tree.get_root_motion_position()

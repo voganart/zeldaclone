@@ -138,6 +138,9 @@ func handle_pushing(is_rolling: bool) -> void:
 		if collider is RigidBody3D:
 			var current_force = push_force
 			if is_rolling: current_force *= roll_push_multiplier
+			var push_vector = push_dir
+			push_vector.y = 0.1 # Небольшой компонент вверх, чтобы "разгрузить" трение
+			push_vector = push_vector.normalized()
 			collider.apply_central_impulse(push_dir * current_force * dt)
 			
 		elif collider is CharacterBody3D and collider.has_method("receive_push"):
