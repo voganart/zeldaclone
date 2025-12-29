@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkh8rsc2pvxl0"]
+
+[ext_resource type="Script" uid="uid://brpm6dv43sv6m" path="res://entities/enemies/components/AlertIndicator/alert_indicator.gd" id="1_hb5e3"]
+[ext_resource type="Texture2D" uid="uid://dias7xbaoargj" path="res://entities/enemies/components/AlertIndicator/AlertSprite.png" id="1_ltkcm"]
+
+[node name="AlertIndicator" type="Node3D"]
+script = ExtResource("1_hb5e3")
+icon_scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="AlertSprite" type="Sprite3D" parent="."]
+billboard = 1
+texture = ExtResource("1_ltkcm")

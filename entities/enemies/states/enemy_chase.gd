@@ -8,10 +8,21 @@ func enter() -> void:
 	enemy.nav_agent.max_speed = enemy.run_speed
 	unreachable_timer = 0.0
 	MusicBrain.set_combat_state(true)
-	
-	# !!! ИЗМЕНЕНИЕ: Включаем боевой режим бега (Combat Idle -> Run) !!!
 	enemy.set_move_mode("chase")
 
+	# --- ЛОГИКА ИНДИКАТОРА АГРО ---
+	var prev_name = ""
+	# Проверяем, существует ли прошлое состояние (его может не быть при старте игры)
+	if state_machine.previous_state:
+		prev_name = state_machine.previous_state.name.to_lower()
+	
+	# Показываем "!" только если мы пришли из спокойных состояний
+	# Если мы пришли из "attack" или "hit", значит мы уже в бою, и "!" показывать не надо
+	if prev_name in ["patrol", "idle", "frustrated", "flee"]:
+		if enemy.has_node("AlertIndicator"):
+			enemy.alert_indicator.play_aggro()
+	# ------------------------------
+			
 func physics_update(delta: float) -> void:
 	# ... (весь код physics_update остается как в предыдущем ответе с "умным поворотом") ...
 	# Копируйте логику из предыдущего моего ответа про "обход препятствий"

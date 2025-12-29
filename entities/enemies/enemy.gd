@@ -52,6 +52,7 @@ extends CharacterBody3D
 @onready var vision_component: VisionComponent = $Components/VisionComponent
 @onready var health_component: Node = $Components/HealthComponent
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
+@onready var alert_indicator = $AlertIndicator
 
 @onready var anim_player: AnimationPlayer = $Monstr/AnimationPlayer
 @onready var anim_tree: AnimationTree = $Monstr/AnimationTree 
