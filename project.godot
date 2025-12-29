@@ -55,6 +55,7 @@ MusicBrain="*res://common/autoload/music_brain.gd"
 InteractionManager="*res://common/interaction/interaction_manager.gd"
 ItemPool="*res://common/autoload/ItemPool.tscn"
 VfxPool="*res://common/autoload/VfxPool.tscn"
+GraphicsManager="*res://common/autoload/graphics_manager.gd"
 
 [display]
 
@@ -78,6 +79,8 @@ enemies=""
 fade_objects=""
 vfx_pool=""
 nav_region=""
+world_env=""
+level_detail_objects=""
 
 [gui]
 

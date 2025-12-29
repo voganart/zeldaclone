@@ -157,6 +157,10 @@ func _init():
 
 
 func _ready():
+	GraphicsManager.quality_changed.connect(_on_quality_changed)
+	
+	# Применяем текущие настройки сразу при старте (чтобы трава знала текущий пресет)
+	_on_quality_changed(GraphicsManager.presets[GraphicsManager.current_quality])
 	if Engine.is_editor_hint():
 		set_process(true)
 	else:
@@ -198,7 +202,20 @@ func _ready():
 	if disable_node_rotation:
 		set_notify_transform(true)
 	update_all_material()
-
+	
+func _on_quality_changed(settings: Dictionary) -> void:
+	var dist = settings["grass_distance"]
+	var level = settings.get("grass_level", 7.0) # Берем из настроек или дефолт 7.0
+	
+	# 1. Включаем оптимизацию
+	self.optimization_by_distance = true
+	
+	# 2. Настраиваем дистанции
+	self.optimization_dist_max = dist
+	self.optimization_dist_min = dist * 0.7 # Чуть увеличим разброс (30% фейда)
+	
+	# 3. Настраиваем уровень детализации
+	self.optimization_level = level
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED:

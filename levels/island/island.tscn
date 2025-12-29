@@ -134,7 +134,7 @@ cull_mask = 16
 [node name="Grass" parent="." index="20"]
 layers = 17
 
-[node name="GENERATE_IslandVines" parent="." index="23"]
+[node name="GENERATE_IslandVines" parent="." index="23" groups=["level_detail_objects"]]
 visibility_range_end = 150.0
 visibility_range_end_margin = 20.0
 visibility_range_fade_mode = 1

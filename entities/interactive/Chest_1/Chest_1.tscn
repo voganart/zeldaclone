@@ -95,7 +95,7 @@ size = Vector3(1.7822266, 0.6758385, 1.0549316)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_m4fme"]
 
-[node name="Chest" type="Node3D"]
+[node name="Chest" type="Node3D" groups=["level_detail_objects"]]
 script = ExtResource("1_2d6lx")
 is_opened = null
 ability_to_unlock = null
