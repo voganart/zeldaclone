@@ -4,6 +4,8 @@ var enemy: Enemy
 
 func enter() -> void:
 	enemy = entity as Enemy
+	if enemy.has_node("AlertIndicator"):
+		enemy.get_node("AlertIndicator").queue_free()
 	AIDirector.release_slot(enemy)
 	AIDirector.return_attack_token(enemy)
 	

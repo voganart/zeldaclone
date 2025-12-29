@@ -5,7 +5,7 @@
 
 [node name="AlertIndicator" type="Node3D"]
 script = ExtResource("1_hb5e3")
-icon_scale = Vector3(0.6, 0.6, 0.6)
+icon_scale = Vector3(0.5, 0.5, 0.5)
 
 [node name="AlertSprite" type="Sprite3D" parent="."]
 billboard = 1
