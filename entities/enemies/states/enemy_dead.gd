@@ -7,34 +7,31 @@ func enter() -> void:
 	AIDirector.release_slot(enemy)
 	AIDirector.return_attack_token(enemy)
 	
-	enemy.nav_agent.set_velocity(Vector3.ZERO)
-	enemy.nav_agent.avoidance_enabled = false
-	enemy.velocity = Vector3.ZERO
+	# Полная остановка логики
 	enemy.set_physics_process(false)
-	enemy.collision_layer = 0
 	
-	# --- ИСПРАВЛЕНИЕ: Используем CombatComponent вместо удаленных переменных ---
-	# Раньше: if enemy.punch_hand_r: enemy.punch_hand_r.set_deferred("monitoring", false)
-	# Теперь:
+	# Выключаем хитбоксы атаки
 	if enemy.combat_component:
 		enemy.combat_component._stop_hitbox_monitoring()
-	# --------------------------------------------------------------------------
 	
-	# СБРОС TimeScale (Фикс HitStop)
-	enemy.anim_player.speed_scale = 1.0
+	# --- RAGDOLL START ---
 	
-	# ПЕРЕКЛЮЧАЕМ ДЕРЕВО В DEAD
-	enemy.set_tree_state("dead")
+	# Рассчитываем направление удара
+	var knockback_force = enemy.velocity # Враг уже летит от удара (take_damage задает velocity)
 	
-	# Получаем длину анимации смерти
-	var anim_len = 2.0
-	if enemy.anim_player.has_animation(GameConstants.ANIM_ENEMY_DEATH):
-		anim_len = enemy.anim_player.get_animation(GameConstants.ANIM_ENEMY_DEATH).length
+	# Если скорость маленькая, добавим дефолтный пинок назад
+	if knockback_force.length() < 1.0:
+		knockback_force = -enemy.global_transform.basis.z * 5.0
 	
-	await get_tree().create_timer(anim_len + 2.0).timeout
+	# Запускаем физику
+	enemy.activate_ragdoll(knockback_force)
+	
+	# ---------------------
+	
+	# Ждем, пока тушка наваляется (например, 4 секунды)
+	await get_tree().create_timer(4.0).timeout
 	
 	_fade_out_and_free()
-
 func _fade_out_and_free() -> void:
 	var meshes_to_fade: Array[MeshInstance3D] = []
 	var materials_to_fade: Array[ShaderMaterial] = []

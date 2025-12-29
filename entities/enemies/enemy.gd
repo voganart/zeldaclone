@@ -43,8 +43,10 @@ extends CharacterBody3D
 @onready var movement_component: MovementComponent = $Components/MovementComponent
 @onready var anim_controller: AnimationController = $Components/AnimationController
 @onready var combat_component: CombatComponent = $Components/CombatComponent 
-# !!! ИСПРАВЛЕНИЕ: Обновлен путь к компоненту атаки !!!
 @onready var attack_component: EnemyAttackComponent = $Components/EnemyAttackComponent
+@onready var skeleton: Skeleton3D = $Monstr/root/Skeleton3D
+@onready var bone_simulator: PhysicalBoneSimulator3D = $Monstr/root/Skeleton3D/PhysicalBoneSimulator3D 
+
 # ------------------------
 
 @onready var debug_label: Label3D = $DebugLabel
@@ -412,3 +414,37 @@ func _update_debug_info() -> void:
 	elif state_name.to_lower() == "chase": debug_label.modulate = Color.ORANGE
 	elif state_name.to_lower() == "patrol": debug_label.modulate = Color.GREEN
 	else: debug_label.modulate = Color.WHITE
+	
+func activate_ragdoll(force_vector: Vector3) -> void:
+	print("--- RAGDOLL ACTIVATION (SIMULATOR MODE) ---")
+	
+	$CollisionShape3D.set_deferred("disabled", true)
+	nav_agent.velocity = Vector3.ZERO
+	
+	if anim_tree:
+		anim_tree.active = false
+	if anim_player:
+		anim_player.stop()
+	
+	# Проверяем, нашли ли мы симулятор
+	if bone_simulator:
+		# Включаем симуляцию через этот узел
+		bone_simulator.physical_bones_start_simulation()
+		print("Ragdoll: Simulator started!")
+		
+		# Теперь ищем кости ВНУТРИ СИМУЛЯТОРА, а не скелета
+		var pushed = false
+		for child in bone_simulator.get_children():
+			if child is PhysicalBone3D:
+				if "Hips" in child.name or "Spine" in child.name or "Pelvis" in child.name:
+					child.apply_central_impulse(force_vector * 30.0)
+					print("Ragdoll: Pushed bone -> ", child.name)
+					pushed = true
+					break
+		
+		if not pushed and bone_simulator.get_child_count() > 0:
+			var first_bone = bone_simulator.get_child(0) as PhysicalBone3D
+			if first_bone:
+				first_bone.apply_central_impulse(force_vector * 30.0)
+	else:
+		printerr("ERROR: PhysicalBoneSimulator3D не найден! Проверь путь в скрипте!")
