@@ -25,7 +25,7 @@ particle_flag_rotate_y = true
 emission_shape_offset = Vector3(0, 0.5, 0)
 emission_shape_scale = Vector3(0.5, 1, 0.5)
 emission_shape = 3
-emission_box_extents = Vector3(0.5, 0.5, 0.5)
+emission_box_extents = Vector3(1, 1, 1)
 angle_min = -4.9999895
 angle_max = 5.000011
 angle_curve = SubResource("CurveTexture_xnfmx")
@@ -43,6 +43,7 @@ tangential_accel_max = -2.2351742e-06
 damping_min = 1.0
 damping_max = 3.0000002
 scale_min = 0.5
+scale_max = 1.5
 scale_curve = SubResource("CurveTexture_1f0tf")
 
 [node name="CrateExplosion" type="Node3D"]
@@ -50,7 +51,7 @@ scale_curve = SubResource("CurveTexture_1f0tf")
 [node name="GPUParticles3D" type="GPUParticles3D" parent="."]
 cast_shadow = 0
 emitting = false
-amount = 15
+amount = 20
 lifetime = 1.5
 one_shot = true
 speed_scale = 2.0
@@ -62,7 +63,7 @@ draw_pass_1 = ExtResource("1_f14cs")
 [node name="GPUParticles3D2" type="GPUParticles3D" parent="."]
 cast_shadow = 0
 emitting = false
-amount = 15
+amount = 20
 lifetime = 1.5
 one_shot = true
 speed_scale = 2.0

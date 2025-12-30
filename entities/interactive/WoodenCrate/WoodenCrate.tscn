@@ -6,7 +6,7 @@
 [ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
-friction = 0.3
+friction = 0.5
 rough = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uf1ar"]

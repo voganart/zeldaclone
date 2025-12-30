@@ -547,7 +547,7 @@ debug_color = Color(1, 0, 0, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.90906, 3.8146973e-06, -3.7101824)
 
 [node name="Enemy42" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6358066, -3.8146973e-06, 1.6507359)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0519896, -2.861023e-06, -7.768874)
 
 [node name="Enemy40" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.93013, 0, -5.067836)
@@ -559,7 +559,7 @@ transform = Transform3D(-0.9901805, 0, 0.13979536, 0, 1, 0, -0.13979536, 0, -0.9
 transform = Transform3D(-0.86140764, 0, -0.5079142, 0, 1, 0, 0.5079142, 0, -0.86140764, 2.6842825, 0, -5.4282207)
 
 [node name="Enemy48" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
-transform = Transform3D(-0.86140764, 0, -0.5079142, 0, 1, 0, 0.5079142, 0, -0.86140764, 6.2915473, 0, -1.1736125)
+transform = Transform3D(-0.86140764, 0, -0.5079142, 0, 1, 0, 0.5079142, 0, -0.86140764, 2.052271, 0, -0.22532022)
 
 [node name="Enemy46" parent="Entities/PatrolZone" instance=ExtResource("5_u71mg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6821437, -3.8146973e-06, -3.6403599)
@@ -719,25 +719,25 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.447992, 0.013222218, -4.76
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.294936, 0.013222218, 0.29564476)
 
 [node name="WoodenCrate5" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6983998, 0.013222218, -1.121387)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6983998, 0.09748101, -1.121387)
 
 [node name="WoodenCrate6" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1309711, 0.013222218, 2.0288472)
 
 [node name="WoodenCrate7" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.1656365, 0.013222218, 0.12875342)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.1656365, 0.21470356, 0.12875342)
 
 [node name="WoodenCrate8" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3536325, 0.22027636, 6.0205426)
 
 [node name="WoodenCrate9" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7982726, 0.013222218, -3.071014)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7982726, 0.081714034, -3.071014)
 
 [node name="WoodenCrate10" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2373023, 0.013222218, -8.760046)
 
 [node name="WoodenCrate11" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.320205, 1.0132227, 0.6579275)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.320205, 1.4817284, 0.6579275)
 
 [node name="WoodenCrate4" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.638402, 0.013222218, -5.648444)
@@ -761,16 +761,25 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.9753027, 0.013222218, -6.8
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5244323, 0.013222218, 8.285053)
 
 [node name="WoodenCrate12" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9002743, 0.013221264, 0.6637497)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9002743, 0.481727, 0.6637497)
+
+[node name="WoodenCrate28" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0609577, 1.073273, 13.249036)
+
+[node name="WoodenCrate30" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2173922, 2.073273, 13.249036)
+
+[node name="WoodenCrate29" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.191042, 0.03819102, 13.254858)
 
 [node name="WoodenCrate13" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.479264, 1.0132241, -1.2694652)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.479264, 1.0846097, -1.2694652)
 
 [node name="WoodenCrate14" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.336041, 2.0132222, -1.3153305)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.336041, 2.1808753, -1.3153305)
 
 [node name="WoodenCrate15" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.237982, 0.013222218, -1.4142241)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.237982, 0.114873886, -1.4142241)
 
 [node name="WoodenCrate16" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.630039, 0.013222218, -7.8788743)
@@ -779,7 +788,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.630039, 0.013222218, -7.87
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.207314, 0.013222218, -10.030909)
 
 [node name="WoodenCrate18" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.840342, 0.013222218, 0.26430798)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.840342, 0.09015679, 0.26430798)
 
 [node name="WoodenCrate19" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9445457, 0.013222218, -8.38571)
@@ -788,10 +797,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9445457, 0.013222218, -8.38
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.076292, 0.013222218, -7.591587)
 
 [node name="WoodenCrate21" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.983927, 1.0132222, 0.18788362)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.983927, 1.1432434, 0.18788362)
 
 [node name="WoodenCrate22" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.040492, 0.013222218, 2.2492132)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.040492, 0.07967067, 2.2492132)
 
 [node name="Vegetation" type="Node3D" parent="NavigationRegion3D" groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003982544, -0.013222218, 0.0002708435)
