@@ -79,7 +79,7 @@ var is_knocked_back: bool = false
 var pending_death: bool = false
 var knockback_timer: float = 0.0
 
-# --- ИЗМЕНЕНИЕ: Заменяем const на var для AI LOD ---
+# --- ОПТИМИЗАЦИЯ: Переменные для AI LOD ---
 var physics_update_counter: int = 0
 var physics_lod_distance_sq: float = 30.0 * 30.0 # Дистанция для LOD (в квадрате)
 var physics_lod_skip_frames: int = 10 # Пропускать N-1 кадров
@@ -132,7 +132,7 @@ func _ready() -> void:
 	# --- НОВОЕ: Регистрация в AIDirector для Animation LOD ---
 	AIDirector.register_enemy(self)
 
-# --- НОВОЕ: Обработчик сигнала качества ---
+# --- НОВАЯ ФУНКЦИЯ: Обработчик сигнала качества ---
 func _on_quality_changed(settings: Dictionary):
 	if settings.has("ai_phys_lod_dist_sq"):
 		physics_lod_distance_sq = settings["ai_phys_lod_dist_sq"]
@@ -346,12 +346,10 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	var is_lethal = (health_component.current_health - amount) <= 0
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
 
-	if is_lethal:
-		if hit_stop_lethal_time_scale < 1.0:
-			GameManager.hit_stop_smooth(hit_stop_lethal_time_scale, hit_stop_lethal_duration)
-	else:
-		if is_attacking:
-			GameManager.hit_stop_local([anim_player], 0.15)
+	# --- ИЗМЕНЕНИЕ: Удаляем вызов hit_stop_local ---
+	# if is_attacking:
+	# 	GameManager.hit_stop_local([anim_player], 0.15)
+	# -----------------------------------------------
 	
 	if is_lethal:
 		trigger_knockdown_oneshot()

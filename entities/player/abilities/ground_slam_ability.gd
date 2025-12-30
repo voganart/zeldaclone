@@ -3,7 +3,7 @@ extends Node
 
 @export_group("Ground Slam")
 @export var slam_damage: float = 1.0
-@export var slam_radius: float = 2.0
+@export var slam_radius: float = 3.0
 @export var slam_descent_speed: float = 20.0
 @export var slam_knockback: float = 0.3
 @export var slam_cooldown: float = 2.0
@@ -12,6 +12,14 @@ extends Node
 @export var slam_min_height: float = 2.5
 @export var slam_end_anim_speed: float = 1.5
 @export var slam_vfx_index: int = 2
+
+# --- НОВЫЕ НАСТРОЙКИ "СОЧНОСТИ" ---
+@export_group("Juice & Feedback")
+@export var hs_time_scale: float = 0.05
+@export var hs_duration: float = 0.15
+@export var camera_shake_strength: float = 0.8
+@export var camera_shake_duration: float = 0.25
+# ------------------------------------
 
 var is_slamming: bool = false
 var is_recovering: bool = false
@@ -27,6 +35,10 @@ var is_unlocked: bool = false
 var actor: CharacterBody3D
 var anim_player: AnimationPlayer
 
+# --- НОВОЕ: Area3D для детекции ---
+var slam_area: Area3D
+var slam_shape: CollisionShape3D
+
 signal cooldown_updated(time_left: float, max_time: float)
 
 func _ready() -> void:
@@ -38,11 +50,40 @@ func _ready() -> void:
 		actor = parent.get_parent()
 	
 	if actor:
-		# Ищем AnimationPlayer внутри игрока (путь может отличаться, если структура изменилась)
+		# Ищем AnimationPlayer внутри игрока
 		anim_player = actor.get_node_or_null("character/AnimationPlayer")
 		if not anim_player:
-			# Запасной вариант поиска
 			anim_player = actor.find_child("AnimationPlayer", true, false)
+			
+		# ИСПРАВЛЕНИЕ: Используем call_deferred, чтобы избежать ошибки "Parent node is busy"
+		# Это отложит создание Area3D до момента, когда дерево узлов будет готово
+		call_deferred("_setup_slam_area")
+
+func _setup_slam_area() -> void:
+	if not is_instance_valid(actor): return
+
+	# Создаем Area3D программно
+	slam_area = Area3D.new()
+	slam_area.name = "SlamDetectionArea"
+	actor.add_child(slam_area)
+	
+	# Поднимаем зону поражения на 1 метр вверх от ног, 
+	# чтобы не цеплять пол и лучше попадать по врагам
+	slam_area.position = Vector3(0, 1.0, 0)
+	
+	# Настраиваем коллизии
+	slam_area.collision_layer = 0 # Сама зона не является препятствием
+	# Сканируем всё (позже отфильтруем в коде)
+	slam_area.collision_mask = 0xFFFFFFFF 
+	slam_area.monitorable = false # Игрок не должен "видеться" этой зоной как препятствие для других
+	slam_area.monitoring = false # Выключено по умолчанию для экономии ресурсов
+	
+	# Создаем шейп
+	slam_shape = CollisionShape3D.new()
+	var sphere = SphereShape3D.new()
+	sphere.radius = slam_radius
+	slam_shape.shape = sphere
+	slam_area.add_child(slam_shape)
 
 func _process(delta: float) -> void:
 	if cooldown_timer > 0:
@@ -61,6 +102,7 @@ func can_slam() -> bool:
 	if "current_jump_count" in actor and actor.current_jump_count < 2:
 		return false
 	
+	# Проверка высоты (Raycast вниз)
 	var space_state = actor.get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(actor.global_position, actor.global_position + Vector3(0, -slam_min_height, 0))
 	query.exclude = [actor]
@@ -79,6 +121,14 @@ func start_slam() -> void:
 	_animation_phase = "start"
 	_impact_processed = false
 	_playing_end_anim = false
+	
+	# Обновляем радиус, если он менялся в инспекторе (с проверкой на существование)
+	if slam_shape and slam_shape.shape is SphereShape3D:
+		slam_shape.shape.radius = slam_radius
+	
+	# Включаем мониторинг в начале слэма (с проверкой на существование)
+	if slam_area:
+		slam_area.monitoring = true
 	
 	actor.set_collision_mask_value(3, false)
 	actor.velocity = Vector3.ZERO
@@ -165,7 +215,7 @@ func _perform_impact() -> void:
 	
 	is_slamming = false
 	is_recovering = true
-	get_tree().call_group("camera_shaker", "add_trauma", 5.8)
+	
 	if actor.get("sfx_slam_impact"):
 		actor.sfx_slam_impact.play_random()
 	
@@ -179,7 +229,12 @@ func _perform_impact() -> void:
 	
 	var wait_time = anim_len / slam_end_anim_speed
 	
-	_deal_damage()
+	_deal_damage() # Наносим урон
+	
+	# Выключаем Area3D после удара
+	if slam_area:
+		slam_area.monitoring = false
+	
 	actor.set_collision_mask_value(3, true)
 	print("Slam Impact!")
 	
@@ -195,25 +250,33 @@ func _perform_impact() -> void:
 		vfx.get_node("AnimationPlayer").seek(0, true)
 
 func _deal_damage() -> void:
-	var space_state = actor.get_world_3d().direct_space_state
-	var shape = SphereShape3D.new()
-	shape.radius = slam_radius
-	var params = PhysicsShapeQueryParameters3D.new()
-	params.shape = shape
-	params.transform = Transform3D(Basis(), actor.global_position)
-	params.collision_mask = 0xFFFFFFFF 
-	params.exclude = [actor]
-	var results = space_state.intersect_shape(params)
+	if not slam_area: return
 	
-	for result in results:
-		var body = result.collider
+	# --- ИСПОЛЬЗУЕМ AREA3D ВМЕСТО INTERSECT_SHAPE ---
+	var bodies = slam_area.get_overlapping_bodies()
+	# ------------------------------------------------
+	
+	var targets_hit = 0
+	
+	for body in bodies:
 		if not is_instance_valid(body): continue
+		if body == actor: continue
+		
+		# Проверка: есть ли у объекта метод получения урона
 		if body.has_method("take_damage"):
+			targets_hit += 1 
+			
 			var push_dir = (body.global_position - actor.global_position).normalized()
 			var knockback_vec = push_dir * 8.0 
 			knockback_vec.y = 3.0
+			
 			if body.has_method("receive_push"):
 				body.receive_push(push_dir * 3.0)
 			elif body is RigidBody3D:
 				body.apply_central_impulse(push_dir * 10.0) 
+			
 			body.take_damage(slam_damage, knockback_vec, true)
+	
+	if targets_hit > 0:
+		GameEvents.camera_shake_requested.emit(camera_shake_strength, camera_shake_duration)
+		GameManager.hit_stop_smooth(hs_time_scale, hs_duration, 0.0, 0.1)

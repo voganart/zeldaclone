@@ -168,18 +168,22 @@ func _process_hitbox_check() -> void:
 	if punch_hand_r: hits_occurred = _check_hand_overlap(punch_hand_r) or hits_occurred
 	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
 
+# --- ИЗМЕНЕНИЕ: Возвращаем логику с лимитом на 1 врага + 1 объект ---
 func _check_hand_overlap(hand: Area3D) -> bool:
 	if not hand.monitoring: return false
 
+	# Лимиты: не более 1 врага и 1 объекта за удар
 	var max_targets = 1
 	var max_props = 1
 	var targets_hit_count = 0
 	var props_hit_count = 0
 	
+	# Считаем, сколько и чего мы уже ударили в этой атаке
 	for type in hit_enemies_current_attack.values():
 		if type == "target": targets_hit_count += 1
 		elif type == "prop": props_hit_count += 1
 	
+	# Если лимиты исчерпаны, выходим
 	if targets_hit_count >= max_targets and props_hit_count >= max_props:
 		return false
 
@@ -214,12 +218,14 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	
 	var hit_occurred = false
 	
+	# Применяем удар к ближайшему врагу, если лимит не исчерпан
 	if targets_hit_count < max_targets and not candidates_targets.is_empty():
 		var target = candidates_targets[0]
 		_apply_hit(target, false)
 		hit_enemies_current_attack[target.get_instance_id()] = "target"
 		hit_occurred = true
 
+	# Применяем удар к ближайшему объекту, если лимит не исчерпан
 	if props_hit_count < max_props and not candidates_props.is_empty():
 		var target = candidates_props[0]
 		_apply_hit(target, true)
