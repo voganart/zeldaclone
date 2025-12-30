@@ -1,16 +1,22 @@
 class_name MovementComponent
 extends Node
 
-# --- ЕДИНЫЕ НАСТРОЙКИ ДВИЖЕНИЯ ДЛЯ ВСЕХ ---
-@export_group("Base Movement Stats")
-@export var base_speed: float = 3.0 ## Базовая скорость (ходьба)
-@export var run_speed: float = 4.5  ## Скорость бега / погони
-@export var rotation_speed: float = 10.0 ## Скорость поворота (Lerp weight)
-@export var acceleration: float = 0.3
-@export var stop_speed: float = 8.0
+# --- ГЛАВНЫЕ НАСТРОЙКИ ДВИЖЕНИЯ (SHARED) ---
+@export_group("Speed Stats")
+@export var walk_speed: float = 3.0   ## Обычная скорость
+@export var run_speed: float = 4.5    ## Скорость бега / погони
+@export var rotation_speed: float = 10.0 ## Базовая скорость поворота (Lerp weight)
+
+@export_group("Ground Physics")
+@export var acceleration: float = 8.0  ## Разгон на земле (Snappiness)
+@export var friction: float = 10.0     ## Торможение на земле
+
+@export_group("Air Physics")
+@export var air_acceleration: float = 4.0 ## Управляемость в воздухе. Поставь 10-20 для резкого контроля.
+@export var air_friction: float = 1.0     ## Сопротивление воздуха.
 
 @export_group("Physics Interaction")
-@export var push_force: float = 200.0 ## Сила толкания физических объектов
+@export var push_force: float = 200.0 ## Сила толкания ящиков
 @export var roll_push_multiplier: float = 3.0 
 
 @export_group("Jump Settings")
@@ -20,12 +26,14 @@ extends Node
 @export var max_jump_count: int = 2
 @export var second_jump_multiplier: float = 1.2
 
+# Внутренние переменные
 var actor: CharacterBody3D
 var current_jump_count: int = 0
 var was_on_floor: bool = true
 var is_passing_through: bool = false 
+var stop_speed: float = 8.0 # Вспомогательная для полной остановки при малых скоростях
 
-# Расчет гравитации (кэшируем при старте)
+# Кэшированная гравитация
 @onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
@@ -54,17 +62,34 @@ func apply_gravity(delta: float) -> void:
 	var gravity = jump_gravity if actor.velocity.y > 0.0 else fall_gravity
 	actor.velocity.y -= gravity * delta
 
+# Универсальная функция движения
 func move(delta: float, input_dir: Vector2, target_speed: float, is_root_motion: bool = false) -> void:
 	if not actor: return
 	if is_root_motion and actor.is_on_floor():
 		return 
 
+	# --- АВТОМАТИЧЕСКОЕ ПЕРЕКЛЮЧЕНИЕ ФИЗИКИ ---
+	var current_accel = acceleration
+	var current_friction = friction
+	
+	if not actor.is_on_floor():
+		current_accel = air_acceleration
+		current_friction = air_friction
+	# -------------------------------------------
+
 	var velocity_2d = Vector2(actor.velocity.x, actor.velocity.z)
 	
 	if input_dir != Vector2.ZERO:
-		velocity_2d = velocity_2d.lerp(input_dir * target_speed, acceleration)
+		# Разгоняемся / Меняем направление
+		velocity_2d = velocity_2d.move_toward(input_dir * target_speed, current_accel * delta)
 	else:
-		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, stop_speed * delta)
+		# Тормозим
+		# Используем stop_speed для более резкой доводки в ноль при остановке на земле
+		var fric = current_friction
+		if actor.is_on_floor():
+			fric = max(fric, stop_speed) 
+			
+		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, fric * delta)
 		
 	actor.velocity.x = velocity_2d.x
 	actor.velocity.z = velocity_2d.y
@@ -85,13 +110,14 @@ func rotate_towards(delta: float, direction: Vector2, speed_modifier: float = 1.
 	if not actor: return
 	if direction.length_squared() > 0.001:
 		var target_angle = atan2(direction.x, direction.y)
+		# Теперь rotation_speed объявлен и ошибки не будет
 		actor.rotation.y = lerp_angle(actor.rotation.y, target_angle, rotation_speed * speed_modifier * delta)
 
 func tilt_character(delta: float, mesh_node: Node3D, is_running: bool) -> void:
 	if not actor or not mesh_node: return
 	var target_tilt = 0.0
 	if actor.is_on_floor():
-		var tilt_angle = 10 if is_running and actor.velocity.length() > base_speed + 1 else 3
+		var tilt_angle = 10 if is_running and actor.velocity.length() > walk_speed + 1 else 3
 		var move_vec = Vector3(actor.velocity.x, 0, actor.velocity.z)
 		var local_move = actor.global_transform.basis.inverse() * move_vec
 		target_tilt = clamp(-local_move.x, -1, 1) * deg_to_rad(tilt_angle)
@@ -105,8 +131,6 @@ func handle_pushing(is_rolling: bool) -> void:
 	
 	for i in range(collision_count):
 		var c = actor.get_slide_collision(i)
-		
-		# Игнорируем пол
 		if c.get_normal().y > 0.7: continue
 		
 		var collider = c.get_collider()
@@ -120,7 +144,6 @@ func handle_pushing(is_rolling: bool) -> void:
 			collider.sleeping = false
 			var current_force = push_force
 			if is_rolling: current_force *= roll_push_multiplier
-			
 			collider.apply_central_impulse(push_dir * current_force * dt)
 			
 		elif collider is CharacterBody3D and collider.has_method("receive_push"):

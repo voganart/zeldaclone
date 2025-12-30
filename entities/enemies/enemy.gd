@@ -26,11 +26,11 @@ extends CharacterBody3D
 @export var hit_stop_lethal_duration: float = 0.2
 @export var hit_stop_local_duration: float = 0.08
 
-@export_group("Movement Stats")
-# Базовые скорости (walk/run/rotation) теперь настраиваются в MovementComponent!
-@export var retreat_speed: float = 2.5 ## Скорость тактического отступления (специфично для AI)
-@export var combat_rotation_speed: float = 20.0 ## Скорость поворота в бою (быстрее обычной)
-@export var attack_rotation_speed: float = 2.0 ## Скорость поворота во время удара (медленно)
+@export_group("AI Specific Movement")
+# Базовые Walk/Run/Accel/Rotation теперь в MovementComponent!
+@export var retreat_speed: float = 2.5 ## Скорость отступления (AI)
+@export var combat_rotation_speed: float = 20.0 ## Быстрый поворот в бою
+@export var attack_rotation_speed: float = 2.0 ## Медленный поворот при ударе
 @export_range(0, 180) var strafe_view_angle: float = 45.0
 
 @export var knockback_strength: float = 2.0
@@ -42,14 +42,17 @@ extends CharacterBody3D
 # ============================================================================
 # COMPONENT PROXIES (GETTERS)
 # ============================================================================
-# Эти геттеры обеспечивают совместимость со скриптами Состояний (States),
-# но берут данные из единого MovementComponent.
+# Это связывает скрипты состояний (States) с данными компонента
 var walk_speed: float:
-	get: return movement_component.base_speed
+	get: return movement_component.walk_speed
 var run_speed: float:
 	get: return movement_component.run_speed
 var rotation_speed: float:
 	get: return movement_component.rotation_speed
+var acceleration: float:
+	get: return movement_component.acceleration
+var friction: float:
+	get: return movement_component.friction
 
 # ============================================================================
 # NODE REFERENCES
@@ -103,13 +106,12 @@ signal died
 func _ready() -> void:
 	if movement_component:
 		movement_component.init(self)
-		# ВАЖНО: Убедись, что в сцене Enemy в MovementComponent выставлено:
-		# Base Speed = 1.5, Run Speed = 3.5, Push Force = 15.0
+		# Значения по умолчанию для врага (можно менять в Инспекторе сцены Enemy)
+		# movement_component.push_force = 15.0 # (Лучше настроить в сцене)
 	
 	if combat_component:
 		combat_component.init(self)
 	
-	# Используем геттер (читаем из компонента)
 	nav_agent.max_speed = walk_speed
 	nav_agent.avoidance_enabled = enable_avoidance
 	nav_agent.radius = agent_radius
@@ -181,8 +183,12 @@ func _physics_process(delta: float) -> void:
 	if is_knocked_back:
 		if knockback_timer > 0:
 			knockback_timer -= delta
-		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
-		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
+		
+		# Торможение при откидывании (используем friction из компонента)
+		var friction_val = friction if movement_component else 2.0
+		velocity.x = move_toward(velocity.x, 0, friction_val * delta)
+		velocity.z = move_toward(velocity.z, 0, friction_val * delta)
+		
 		move_and_slide()
 		if knockback_timer <= 0 and is_on_floor():
 			is_knocked_back = false
@@ -199,7 +205,6 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		
 	if movement_component:
-		# Используем логику компонента для толкания объектов (RigidBody)
 		movement_component.handle_pushing(false)
 
 func set_animation_process_mode(is_manual: bool):
@@ -242,18 +247,21 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	var target_vel = safe_velocity
 	target_vel.y = velocity.y
 	
-	# --- АГРЕССИВНОЕ ПРЕСЛЕДОВАНИЕ ---
 	var current_state = state_machine.current_state.name.to_lower()
 	
+	# Агрессивное преследование сквозь препятствия
 	if current_state == "chase":
 		if safe_velocity.length() < 0.5:
 			var next_pos = nav_agent.get_next_path_position()
 			var raw_dir = (next_pos - global_position).normalized()
 			raw_dir.y = 0
-			target_vel = raw_dir * (walk_speed * 0.8) # Используем геттер
+			target_vel = raw_dir * (walk_speed * 0.8)
 			target_vel.y = velocity.y
-
-	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
+	
+	# ИСПОЛЬЗУЕМ ACCELERATION ИЗ КОМПОНЕНТА!
+	# Это обеспечивает плавный разгон и остановку согласно настройкам.
+	var accel = acceleration if movement_component else 20.0
+	velocity = velocity.move_toward(target_vel, accel * get_physics_process_delta_time())
 
 func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, speed_override: float = -1.0) -> void:
 	var look_dir: Vector2 = Vector2.ZERO
@@ -266,8 +274,11 @@ func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, spee
 	else:
 		return
 
-	# Если override не задан, используем стандартную скорость из компонента
-	var current_speed = speed_override if speed_override > 0 else rotation_speed
+	# Если speed_override не задан, используем базовый rotation_speed из компонента
+	var current_speed = speed_override
+	if current_speed <= 0:
+		current_speed = rotation_speed # Геттер берет из компонента
+		
 	if look_dir.length_squared() > 0.001:
 		var target_angle = atan2(look_dir.x, look_dir.y)
 		rotation.y = lerp_angle(rotation.y, target_angle, current_speed * delta)
@@ -322,7 +333,6 @@ func update_movement_animation(delta: float) -> void:
 	var local_velocity = global_transform.basis.inverse() * velocity
 	
 	if current_state_name == "combatstance":
-		# Используем геттер walk_speed
 		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
 		set_strafe_blend(-strafe_val) 
 	else:

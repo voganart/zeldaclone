@@ -7,8 +7,8 @@ extends CharacterBody3D
 # EXPORTS & CONFIG
 # ============================================================================
 @export_group("Idle Animations")
-@export var enable_idle_dance: bool = true ## Включить анимацию танца при бездействии?
-@export var idle_dance_time: float = 10.0 ## Время простоя (сек) до начала танца
+@export var enable_idle_dance: bool = true 
+@export var idle_dance_time: float = 10.0 
 
 @export_group("Root Motion Tweaks")
 @export var rm_walk_anim_speed: float = 1.0 
@@ -18,7 +18,7 @@ extends CharacterBody3D
 @export var auto_run_latch_time: float = 0.3
 
 @export_group("Animation Blending")
-@export var walk_run_blend_smoothing: float = 5.0
+# walk_run_blend_smoothing удален, так как теперь мы берем Acceleration/Friction из компонента
 @export var blend_value_walk: float = 0.5 
 @export var blend_value_run: float = 1.0
 @export var stopping_threshold: float = 0.6 
@@ -77,9 +77,8 @@ var current_rm_velocity: Vector3 = Vector3.ZERO
 var root_motion_speed_factor: float = 1.0
 
 # Геттеры свойств компонента Movement
-# Player уже использует правильный подход, просто убеждаемся в именовании.
 var base_speed: float:
-	get: return movement_component.base_speed
+	get: return movement_component.walk_speed 
 var run_speed: float:
 	get: return movement_component.run_speed
 var current_jump_count: int:
@@ -272,7 +271,25 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 		if real_horizontal_speed < 0.5:
 			target_movement_blend = 0.0
 	
-	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
+	# === ИСПРАВЛЕНИЕ: ПРИВЯЗКА ФИЗИКИ К ROOT MOTION ===
+	# Теперь переменные Acceleration и Friction из MovementComponent реально влияют на инерцию.
+	
+	var change_rate = 0.0
+	
+	# Если мы разгоняемся (текущий бленд меньше цели)
+	if target_movement_blend > current_movement_blend:
+		# Нормализуем ускорение относительно максимальной скорости бега
+		# Пример: Accel 8.0 / RunSpeed 4.5 = ~1.7 единиц бленда в секунду
+		change_rate = movement_component.acceleration / max(movement_component.run_speed, 0.1)
+	else:
+		# Если тормозим
+		# Пример: Friction 10.0 / RunSpeed 4.5 = ~2.2 единиц бленда в секунду
+		change_rate = movement_component.friction / max(movement_component.run_speed, 0.1)
+	
+	# Применяем calculated rate
+	current_movement_blend = move_toward(current_movement_blend, target_movement_blend, change_rate * delta)
+	# =================================================
+	
 	if current_movement_blend < 0.01: current_movement_blend = 0.0
 	
 	set_locomotion_blend(current_movement_blend)
@@ -284,7 +301,7 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 		var speed_2d = Vector2(velocity.x, velocity.z).length()
 		var target_scale = 1.0
 		if speed_2d > 0.1:
-			target_scale = clamp(speed_2d / movement_component.base_speed, 0.5, 3.0)
+			target_scale = clamp(speed_2d / movement_component.walk_speed, 0.5, 3.0)
 		anim_controller.set_locomotion_speed_scale(target_scale) 
 	
 	if not has_input and current_movement_blend > stopping_threshold:
