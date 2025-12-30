@@ -2,7 +2,7 @@ class_name Enemy
 extends CharacterBody3D
 
 ## ============================================================================
-## ENEMY CONTROLLER (FIXED PATHS)
+## ENEMY CONTROLLER (WITH PUSHING LOGIC)
 ## ============================================================================
 
 # ============================================================================
@@ -15,7 +15,14 @@ extends CharacterBody3D
 @export var can_flee: bool = true
 @export_range(0.0, 1.0) var flee_health_threshold: float = 0.25
 @export_range(0.0, 1.0) var flee_chance: float = 0.3
-@export var help_radius: float = 15.0 ## Радиус призыва помощи
+@export var help_radius: float = 15.0 
+
+@export_group("Navigation Avoidance")
+@export var enable_avoidance: bool = true 
+@export var agent_radius: float = 0.6 
+
+@export_group("Physics Interaction")
+@export var enemy_push_force: float = 15.0 ## Сила, с которой враг толкает ящики (меньше, чем у игрока)
 
 @export_group("Hit Stop Settings")
 @export var hit_stop_lethal_time_scale: float = 0.5
@@ -39,15 +46,12 @@ extends CharacterBody3D
 # ============================================================================
 # NODE REFERENCES
 # ============================================================================
-# --- КОМПОНЕНТЫ ---
 @onready var movement_component: MovementComponent = $Components/MovementComponent
 @onready var anim_controller: AnimationController = $Components/AnimationController
 @onready var combat_component: CombatComponent = $Components/CombatComponent 
 @onready var attack_component: EnemyAttackComponent = $Components/EnemyAttackComponent
 @onready var skeleton: Skeleton3D = $Monstr/root/Skeleton3D
 @onready var bone_simulator: PhysicalBoneSimulator3D = $Monstr/root/Skeleton3D/PhysicalBoneSimulator3D 
-
-# ------------------------
 
 @onready var debug_label: Label3D = $DebugLabel
 @onready var state_machine: StateMachine = $StateMachine
@@ -79,11 +83,9 @@ var is_knocked_back: bool = false
 var pending_death: bool = false
 var knockback_timer: float = 0.0
 
-# --- ОПТИМИЗАЦИЯ: Переменные для AI LOD ---
 var physics_update_counter: int = 0
-var physics_lod_distance_sq: float = 30.0 * 30.0 # Дистанция для LOD (в квадрате)
-var physics_lod_skip_frames: int = 10 # Пропускать N-1 кадров
-# --------------------------------------------------
+var physics_lod_distance_sq: float = 30.0 * 30.0 
+var physics_lod_skip_frames: int = 10 
 
 signal died
 
@@ -91,7 +93,6 @@ signal died
 # INITIALIZATION
 # ============================================================================
 func _ready() -> void:
-	# Инициализация компонентов
 	if movement_component:
 		movement_component.init(self)
 		movement_component.rotation_speed = 6.0 
@@ -100,15 +101,20 @@ func _ready() -> void:
 		combat_component.init(self)
 	
 	nav_agent.max_speed = walk_speed
-	nav_agent.avoidance_enabled = true
-	nav_agent.velocity_computed.connect(_on_velocity_computed)
+	nav_agent.avoidance_enabled = enable_avoidance
+	nav_agent.radius = agent_radius
+	nav_agent.neighbor_distance = 10.0 
+	nav_agent.time_horizon_obstacles = 1.0 
+	nav_agent.time_horizon_agents = 1.0    
+	
+	if not nav_agent.velocity_computed.is_connected(_on_velocity_computed):
+		nav_agent.velocity_computed.connect(_on_velocity_computed)
 	
 	if not is_in_group(GameConstants.GROUP_ENEMIES):
 		add_to_group(GameConstants.GROUP_ENEMIES)
 	
 	state_machine.init(self)
 	
-	# --- НОВОЕ: Подписка на сигнал графики ---
 	GraphicsManager.quality_changed.connect(_on_quality_changed)
 	
 	await get_tree().process_frame
@@ -126,13 +132,10 @@ func _ready() -> void:
 	set_tree_state("alive")
 	set_move_mode("normal")
 	
-	# --- ОПТИМИЗАЦИЯ: Десинхронизация счетчика кадров ---
 	physics_update_counter = randi() % physics_lod_skip_frames
 	
-	# --- НОВОЕ: Регистрация в AIDirector для Animation LOD ---
 	AIDirector.register_enemy(self)
 
-# --- НОВАЯ ФУНКЦИЯ: Обработчик сигнала качества ---
 func _on_quality_changed(settings: Dictionary):
 	if settings.has("ai_phys_lod_dist_sq"):
 		physics_lod_distance_sq = settings["ai_phys_lod_dist_sq"]
@@ -144,19 +147,17 @@ func _exit_tree() -> void:
 	AIDirector.unregister_enemy(self)
 
 func _physics_process(delta: float) -> void:
-	# --- ИЗМЕНЕНИЕ: Используем переменные вместо констант ---
 	if is_instance_valid(player):
 		var dist_sq = global_position.distance_squared_to(player.global_position)
-		if dist_sq > physics_lod_distance_sq: # <-- Используем переменную
+		if dist_sq > physics_lod_distance_sq: 
 			physics_update_counter += 1
-			if physics_update_counter < physics_lod_skip_frames: # <-- Используем переменную
+			if physics_update_counter < physics_lod_skip_frames:
 				if not is_on_floor():
 					movement_component.apply_gravity(delta)
 					move_and_slide()
 				return 
 			else:
 				physics_update_counter = 0 
-	# -----------------------------------------------
 
 	if show_debug_label and debug_label:
 		debug_label.visible = true
@@ -164,20 +165,15 @@ func _physics_process(delta: float) -> void:
 	elif debug_label:
 		debug_label.visible = false
 		
-	# Гравитация через компонент
 	if movement_component:
 		movement_component.apply_gravity(delta)
 
-	# Обработка нокбэка
 	if is_knocked_back:
 		if knockback_timer > 0:
 			knockback_timer -= delta
-		
 		velocity.x = move_toward(velocity.x, 0, 2.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 2.0 * delta)
-		
 		move_and_slide()
-		
 		if knockback_timer <= 0 and is_on_floor():
 			is_knocked_back = false
 			velocity = Vector3.ZERO
@@ -191,26 +187,46 @@ func _physics_process(delta: float) -> void:
 	var state_name = state_machine.current_state.name.to_lower()
 	if state_name != "dead":
 		move_and_slide()
+		# !!! НОВОЕ: Враги теперь умеют толкать ящики !!!
+		_handle_enemy_pushing() 
 		
 	if movement_component:
+		# Вызов компонента оставляем для других целей, но толкание RigidBody делаем сами ниже
 		movement_component.handle_pushing(false)
 
-# --- НОВЫЕ ФУНКЦИИ ДЛЯ ANIMATION LOD ---
+# --- НОВАЯ ФУНКЦИЯ: Толкание ящиков врагами ---
+func _handle_enemy_pushing() -> void:
+	# Проверяем все коллизии после move_and_slide
+	for i in get_slide_collision_count():
+		var c = get_slide_collision(i)
+		var collider = c.get_collider()
+		
+		# Если уперлись в RigidBody (Ящик)
+		if collider is RigidBody3D:
+			# Направление толчка - от нормали столкновения
+			var push_dir = -c.get_normal()
+			push_dir.y = 0 # Не толкаем вниз/вверх
+			
+			# Будим объект
+			collider.sleeping = false
+			
+			# Применяем импульс. 
+			# Сила меньше чем у игрока (enemy_push_force ~ 10-20), 
+			# чтобы враги медленно сдвигали завалы, а не разбрасывали их.
+			collider.apply_central_impulse(push_dir * enemy_push_force * get_physics_process_delta_time())
+# -----------------------------------------------
+
 func set_animation_process_mode(is_manual: bool):
-	# !!! ИСПРАВЛЕНИЕ: Управляем AnimationTree, а не AnimationPlayer !!!
 	if anim_tree:
 		if is_manual:
 			anim_tree.process_callback = AnimationPlayer.ANIMATION_PROCESS_MANUAL
 		else:
-			# Возвращаем стандартный режим обновления по физике
 			anim_tree.process_callback = AnimationPlayer.ANIMATION_PROCESS_PHYSICS
 
 func manual_animation_advance(delta: float):
-	# !!! ИСПРАВЛЕНИЕ: Проверяем и вызываем advance у AnimationTree !!!
 	if anim_tree and anim_tree.process_callback == AnimationPlayer.ANIMATION_PROCESS_MANUAL:
 		anim_tree.advance(delta)
 
-# --- НОВОЕ: Функции для VisibleOnScreenNotifier3D ---
 func _on_visible_on_screen_notifier_3d_screen_entered():
 	if anim_tree:
 		anim_tree.active = true
@@ -218,7 +234,6 @@ func _on_visible_on_screen_notifier_3d_screen_entered():
 func _on_visible_on_screen_notifier_3d_screen_exited():
 	if anim_tree:
 		anim_tree.active = false
-# ----------------------------------------------------
 
 # ============================================================================
 # MOVEMENT HELPERS
@@ -232,13 +247,33 @@ func move_toward_path() -> void:
 	var direction = (next_pos - global_position).normalized()
 	direction.y = 0
 	
-	nav_agent.set_velocity(direction * nav_agent.max_speed)
+	var desired_velocity = direction * nav_agent.max_speed
+	nav_agent.set_velocity(desired_velocity)
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	if is_knocked_back: return
 	
 	var target_vel = safe_velocity
 	target_vel.y = velocity.y
+	
+	# --- АГРЕССИВНОЕ ПРЕСЛЕДОВАНИЕ ---
+	# Если мы в режиме погони (Chase), но навигация говорит "Стой" (safe_velocity ~ 0),
+	# скорее всего нас блокирует ящик или другой враг.
+	# Мы должны игнорировать "безопасность" и давить вперед.
+	var current_state = state_machine.current_state.name.to_lower()
+	
+	if current_state == "chase":
+		# Если безопасная скорость слишком мала, а мы хотим двигаться
+		if safe_velocity.length() < 0.5:
+			# Берем направление прямо на следующую точку пути (сквозь препятствие)
+			var next_pos = nav_agent.get_next_path_position()
+			var raw_dir = (next_pos - global_position).normalized()
+			raw_dir.y = 0
+			
+			# Применяем силу движения (немного меньше максимальной, чтобы была "вязкость" толкания)
+			target_vel = raw_dir * (walk_speed * 0.8)
+			target_vel.y = velocity.y
+
 	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
 
 func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, speed_override: float = -1.0) -> void:
@@ -261,7 +296,7 @@ func receive_push(push: Vector3) -> void:
 	velocity += push
 
 # ============================================================================
-# ANIMATION CONTROLLER WRAPPERS
+# ANIMATION & STATE WRAPPERS
 # ============================================================================
 func set_tree_state(state_name: String):
 	anim_controller.set_state(state_name)
@@ -332,7 +367,6 @@ func update_movement_animation(delta: float) -> void:
 # COMBAT & DAMAGE
 # ============================================================================
 
-# !!! COMPATIBILITY WRAPPER !!!
 func _check_attack_hit() -> void:
 	if combat_component:
 		combat_component.activate_hitbox_check(0.1)
@@ -346,11 +380,6 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 	var is_lethal = (health_component.current_health - amount) <= 0
 	var is_attacking = state_machine.current_state.name.to_lower() == "attack"
 
-	# --- ИЗМЕНЕНИЕ: Удаляем вызов hit_stop_local ---
-	# if is_attacking:
-	# 	GameManager.hit_stop_local([anim_player], 0.15)
-	# -----------------------------------------------
-	
 	if is_lethal:
 		trigger_knockdown_oneshot()
 		hurt_lock_timer = 0.5
@@ -489,19 +518,14 @@ func activate_ragdoll(force_vector: Vector3) -> void:
 	if anim_player:
 		anim_player.stop()
 	
-	# Проверяем, нашли ли мы симулятор
 	if bone_simulator:
-		# Включаем симуляцию через этот узел
 		bone_simulator.physical_bones_start_simulation()
-		print("Ragdoll: Simulator started!")
 		
-		# Теперь ищем кости ВНУТРИ СИМУЛЯТОРА, а не скелета
 		var pushed = false
 		for child in bone_simulator.get_children():
 			if child is PhysicalBone3D:
 				if "Hips" in child.name or "Spine" in child.name or "Pelvis" in child.name:
 					child.apply_central_impulse(force_vector * 30.0)
-					print("Ragdoll: Pushed bone -> ", child.name)
 					pushed = true
 					break
 		
