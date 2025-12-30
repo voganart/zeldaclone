@@ -193,6 +193,16 @@ func _ready() -> void:
 	state_machine.init(self)
 
 func _process(delta: float) -> void:
+	# _process больше не управляет Root Motion.
+	# Здесь остаются только вещи, не связанные с физикой, например, таймеры.
+	_update_stun_timer(delta)
+	
+	if has_node("/root/SimpleGrass"):
+		var grass_manager = get_node("/root/SimpleGrass")
+		grass_manager.set_player_position(global_position)
+
+func _physics_process(delta: float) -> void:
+	# === ГЛАВНОЕ ИЗМЕНЕНИЕ: ЛОГИКА ROOT MOTION ПЕРЕНЕСЕНА СЮДА ===
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
 		var rm_pos = anim_controller.get_root_motion_position()
 		var rm_rot = anim_controller.get_root_motion_rotation()
@@ -221,13 +231,7 @@ func _process(delta: float) -> void:
 			current_rm_velocity.z = velocity_vector.z * root_motion_speed_factor
 	else:
 		current_rm_velocity = Vector3.ZERO
-
-func _physics_process(delta: float) -> void:
-	_update_stun_timer(delta)
-	
-	if has_node("/root/SimpleGrass"):
-		var grass_manager = get_node("/root/SimpleGrass")
-		grass_manager.set_player_position(global_position)
+	# ================================================================
 
 	if is_knockback_stun:
 		apply_gravity(delta)

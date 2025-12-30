@@ -172,11 +172,14 @@ avoidance/layer_1="enemies"
 
 [physics]
 
-3d/solver/solver_iterations=50
+common/physics_jitter_fix=1.0
+3d/sleep_threshold_linear=0.2
+3d/solver/contact_recycle_radius=1.0
 common/physics_interpolation=true
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=2
 anti_aliasing/quality/msaa_3d=1
 environment/volumetric_fog/volume_size=512
 occlusion_culling/use_occlusion_culling=true
