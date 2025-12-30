@@ -2,7 +2,7 @@ class_name Enemy
 extends CharacterBody3D
 
 ## ============================================================================
-## ENEMY CONTROLLER (WITH PUSHING LOGIC)
+## ENEMY CONTROLLER
 ## ============================================================================
 
 # ============================================================================
@@ -21,20 +21,16 @@ extends CharacterBody3D
 @export var enable_avoidance: bool = true 
 @export var agent_radius: float = 0.6 
 
-@export_group("Physics Interaction")
-@export var enemy_push_force: float = 15.0 ## Сила, с которой враг толкает ящики (меньше, чем у игрока)
-
 @export_group("Hit Stop Settings")
 @export var hit_stop_lethal_time_scale: float = 0.5
 @export var hit_stop_lethal_duration: float = 0.2
 @export var hit_stop_local_duration: float = 0.08
 
 @export_group("Movement Stats")
-@export var walk_speed: float = 1.5
-@export var run_speed: float = 3.5
-@export var retreat_speed: float = 2.5
-@export var combat_rotation_speed: float = 20.0
-@export var attack_rotation_speed: float = 2.0 
+# Базовые скорости (walk/run/rotation) теперь настраиваются в MovementComponent!
+@export var retreat_speed: float = 2.5 ## Скорость тактического отступления (специфично для AI)
+@export var combat_rotation_speed: float = 20.0 ## Скорость поворота в бою (быстрее обычной)
+@export var attack_rotation_speed: float = 2.0 ## Скорость поворота во время удара (медленно)
 @export_range(0, 180) var strafe_view_angle: float = 45.0
 
 @export var knockback_strength: float = 2.0
@@ -42,6 +38,18 @@ extends CharacterBody3D
 
 @export_group("Animation Blending")
 @export var walk_run_blend_smoothing: float = 8.0
+
+# ============================================================================
+# COMPONENT PROXIES (GETTERS)
+# ============================================================================
+# Эти геттеры обеспечивают совместимость со скриптами Состояний (States),
+# но берут данные из единого MovementComponent.
+var walk_speed: float:
+	get: return movement_component.base_speed
+var run_speed: float:
+	get: return movement_component.run_speed
+var rotation_speed: float:
+	get: return movement_component.rotation_speed
 
 # ============================================================================
 # NODE REFERENCES
@@ -95,11 +103,13 @@ signal died
 func _ready() -> void:
 	if movement_component:
 		movement_component.init(self)
-		movement_component.rotation_speed = 6.0 
+		# ВАЖНО: Убедись, что в сцене Enemy в MovementComponent выставлено:
+		# Base Speed = 1.5, Run Speed = 3.5, Push Force = 15.0
 	
 	if combat_component:
 		combat_component.init(self)
 	
+	# Используем геттер (читаем из компонента)
 	nav_agent.max_speed = walk_speed
 	nav_agent.avoidance_enabled = enable_avoidance
 	nav_agent.radius = agent_radius
@@ -187,34 +197,10 @@ func _physics_process(delta: float) -> void:
 	var state_name = state_machine.current_state.name.to_lower()
 	if state_name != "dead":
 		move_and_slide()
-		# !!! НОВОЕ: Враги теперь умеют толкать ящики !!!
-		_handle_enemy_pushing() 
 		
 	if movement_component:
-		# Вызов компонента оставляем для других целей, но толкание RigidBody делаем сами ниже
+		# Используем логику компонента для толкания объектов (RigidBody)
 		movement_component.handle_pushing(false)
-
-# --- НОВАЯ ФУНКЦИЯ: Толкание ящиков врагами ---
-func _handle_enemy_pushing() -> void:
-	# Проверяем все коллизии после move_and_slide
-	for i in get_slide_collision_count():
-		var c = get_slide_collision(i)
-		var collider = c.get_collider()
-		
-		# Если уперлись в RigidBody (Ящик)
-		if collider is RigidBody3D:
-			# Направление толчка - от нормали столкновения
-			var push_dir = -c.get_normal()
-			push_dir.y = 0 # Не толкаем вниз/вверх
-			
-			# Будим объект
-			collider.sleeping = false
-			
-			# Применяем импульс. 
-			# Сила меньше чем у игрока (enemy_push_force ~ 10-20), 
-			# чтобы враги медленно сдвигали завалы, а не разбрасывали их.
-			collider.apply_central_impulse(push_dir * enemy_push_force * get_physics_process_delta_time())
-# -----------------------------------------------
 
 func set_animation_process_mode(is_manual: bool):
 	if anim_tree:
@@ -257,21 +243,14 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	target_vel.y = velocity.y
 	
 	# --- АГРЕССИВНОЕ ПРЕСЛЕДОВАНИЕ ---
-	# Если мы в режиме погони (Chase), но навигация говорит "Стой" (safe_velocity ~ 0),
-	# скорее всего нас блокирует ящик или другой враг.
-	# Мы должны игнорировать "безопасность" и давить вперед.
 	var current_state = state_machine.current_state.name.to_lower()
 	
 	if current_state == "chase":
-		# Если безопасная скорость слишком мала, а мы хотим двигаться
 		if safe_velocity.length() < 0.5:
-			# Берем направление прямо на следующую точку пути (сквозь препятствие)
 			var next_pos = nav_agent.get_next_path_position()
 			var raw_dir = (next_pos - global_position).normalized()
 			raw_dir.y = 0
-			
-			# Применяем силу движения (немного меньше максимальной, чтобы была "вязкость" толкания)
-			target_vel = raw_dir * (walk_speed * 0.8)
+			target_vel = raw_dir * (walk_speed * 0.8) # Используем геттер
 			target_vel.y = velocity.y
 
 	velocity = velocity.move_toward(target_vel, 20.0 * get_physics_process_delta_time())
@@ -287,7 +266,8 @@ func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, spee
 	else:
 		return
 
-	var current_speed = speed_override if speed_override > 0 else (movement_component.rotation_speed if movement_component else 6.0)
+	# Если override не задан, используем стандартную скорость из компонента
+	var current_speed = speed_override if speed_override > 0 else rotation_speed
 	if look_dir.length_squared() > 0.001:
 		var target_angle = atan2(look_dir.x, look_dir.y)
 		rotation.y = lerp_angle(rotation.y, target_angle, current_speed * delta)
@@ -342,6 +322,7 @@ func update_movement_animation(delta: float) -> void:
 	var local_velocity = global_transform.basis.inverse() * velocity
 	
 	if current_state_name == "combatstance":
+		# Используем геттер walk_speed
 		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
 		set_strafe_blend(-strafe_val) 
 	else:

@@ -1,7 +1,7 @@
 extends Node
 
-const MAX_ATTACKERS = 1
-const SLOT_COUNT = 8
+const MAX_ATTACKERS = 2
+const SLOT_COUNT = 6
 const SLOT_DISTANCE = 2.5
 
 var current_attackers: Array[Enemy] = []

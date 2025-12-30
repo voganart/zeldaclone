@@ -1,21 +1,18 @@
 class_name MovementComponent
 extends Node
 
-# --- НАСТРОЙКИ ДВИЖЕНИЯ ---
-@export_group("Movement Settings")
-@export var base_speed: float = 3.0
-@export var run_speed: float = 4.5
-@export var stop_speed: float = 8.0
+# --- ЕДИНЫЕ НАСТРОЙКИ ДВИЖЕНИЯ ДЛЯ ВСЕХ ---
+@export_group("Base Movement Stats")
+@export var base_speed: float = 3.0 ## Базовая скорость (ходьба)
+@export var run_speed: float = 4.5  ## Скорость бега / погони
+@export var rotation_speed: float = 10.0 ## Скорость поворота (Lerp weight)
 @export var acceleration: float = 0.3
-@export var rotation_speed: float = 10.0
+@export var stop_speed: float = 8.0
 
-# --- СИЛА ТОЛКАНИЯ ---
-# Увеличиваем силу. Для массы 20кг сила 120.0 может быть маловата, если высокое трение.
-# Попробуем поднять, чтобы ощущался вес, но движение шло.
-@export var push_force: float = 200.0  
+@export_group("Physics Interaction")
+@export var push_force: float = 200.0 ## Сила толкания физических объектов
 @export var roll_push_multiplier: float = 3.0 
 
-# ... (Остальные переменные оставляем без изменений) ...
 @export_group("Jump Settings")
 @export var jump_height: float = 1.25
 @export var jump_time_to_peak: float = 0.45
@@ -28,6 +25,7 @@ var current_jump_count: int = 0
 var was_on_floor: bool = true
 var is_passing_through: bool = false 
 
+# Расчет гравитации (кэшируем при старте)
 @onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
@@ -100,7 +98,6 @@ func tilt_character(delta: float, mesh_node: Node3D, is_running: bool) -> void:
 	
 	mesh_node.rotation.z = lerp_angle(mesh_node.rotation.z, target_tilt, 10.0 * delta)
 
-# --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ТОЛКАНИЯ ---
 func handle_pushing(is_rolling: bool) -> void:
 	if not actor: return
 	var dt = get_physics_process_delta_time()
@@ -109,31 +106,21 @@ func handle_pushing(is_rolling: bool) -> void:
 	for i in range(collision_count):
 		var c = actor.get_slide_collision(i)
 		
-		# Игнорируем пол (удар снизу не считается толканием)
-		if c.get_normal().y > 0.7:
-			continue
+		# Игнорируем пол
+		if c.get_normal().y > 0.7: continue
 		
 		var collider = c.get_collider()
-		
-		# Вычисляем направление толчка от центра игрока к точке удара
-		# Это стабильнее, чем брать нормаль коллизии
 		var push_dir = -c.get_normal()
-		push_dir.y = 0 # Толкаем только горизонтально!
+		push_dir.y = 0 
 		
-		if push_dir.length_squared() < 0.001:
-			continue
-			
+		if push_dir.length_squared() < 0.001: continue
 		push_dir = push_dir.normalized()
 		
 		if collider is RigidBody3D:
-			# !!! ВАЖНО: Будим объект, иначе он будет стоять как стена !!!
 			collider.sleeping = false
-			
 			var current_force = push_force
 			if is_rolling: current_force *= roll_push_multiplier
 			
-			# Прикладываем силу в центр масс объекта
-			# dt (delta time) нужен, чтобы сила не зависела от FPS
 			collider.apply_central_impulse(push_dir * current_force * dt)
 			
 		elif collider is CharacterBody3D and collider.has_method("receive_push"):

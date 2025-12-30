@@ -77,6 +77,7 @@ var current_rm_velocity: Vector3 = Vector3.ZERO
 var root_motion_speed_factor: float = 1.0
 
 # Геттеры свойств компонента Movement
+# Player уже использует правильный подход, просто убеждаемся в именовании.
 var base_speed: float:
 	get: return movement_component.base_speed
 var run_speed: float:
@@ -193,8 +194,6 @@ func _ready() -> void:
 	state_machine.init(self)
 
 func _process(delta: float) -> void:
-	# _process больше не управляет Root Motion.
-	# Здесь остаются только вещи, не связанные с физикой, например, таймеры.
 	_update_stun_timer(delta)
 	
 	if has_node("/root/SimpleGrass"):
@@ -202,7 +201,6 @@ func _process(delta: float) -> void:
 		grass_manager.set_player_position(global_position)
 
 func _physics_process(delta: float) -> void:
-	# === ГЛАВНОЕ ИЗМЕНЕНИЕ: ЛОГИКА ROOT MOTION ПЕРЕНЕСЕНА СЮДА ===
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
 		var rm_pos = anim_controller.get_root_motion_position()
 		var rm_rot = anim_controller.get_root_motion_rotation()
@@ -231,7 +229,6 @@ func _physics_process(delta: float) -> void:
 			current_rm_velocity.z = velocity_vector.z * root_motion_speed_factor
 	else:
 		current_rm_velocity = Vector3.ZERO
-	# ================================================================
 
 	if is_knockback_stun:
 		apply_gravity(delta)
@@ -270,17 +267,10 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 		target_movement_blend = 0.0
 		target_time_scale_rm = 1.0
 	
-	# --- НОВАЯ ЛОГИКА: СТОЛКНОВЕНИЕ СО СТЕНОЙ ---
-	# Если мы жмем кнопки, но уперлись в стену (is_on_wall)
-	# И реальная скорость очень мала, значит мы застряли.
 	if has_input and is_on_wall():
-		# Считаем горизонтальную скорость
 		var real_horizontal_speed = Vector2(velocity.x, velocity.z).length()
-		
-		# Если скорость меньше 0.5 (персонаж почти стоит), переходим в Idle
 		if real_horizontal_speed < 0.5:
 			target_movement_blend = 0.0
-	# ----------------------------------------------
 	
 	current_movement_blend = lerp(current_movement_blend, target_movement_blend, walk_run_blend_smoothing * delta)
 	if current_movement_blend < 0.01: current_movement_blend = 0.0
@@ -435,7 +425,6 @@ func stop_hitbox_monitoring() -> void:
 func _check_attack_hit() -> void:
 	combat_component.activate_hitbox_check(0.1)
 
-# === ИСПРАВЛЕНИЕ ЗДЕСЬ: Добавлен 3-й аргумент is_heavy_attack = false ===
 func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
 	
