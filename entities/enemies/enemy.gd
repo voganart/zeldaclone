@@ -79,6 +79,12 @@ var is_knocked_back: bool = false
 var pending_death: bool = false
 var knockback_timer: float = 0.0
 
+# --- ИЗМЕНЕНИЕ: Заменяем const на var для AI LOD ---
+var physics_update_counter: int = 0
+var physics_lod_distance_sq: float = 30.0 * 30.0 # Дистанция для LOD (в квадрате)
+var physics_lod_skip_frames: int = 10 # Пропускать N-1 кадров
+# --------------------------------------------------
+
 signal died
 
 # ============================================================================
@@ -102,6 +108,9 @@ func _ready() -> void:
 	
 	state_machine.init(self)
 	
+	# --- НОВОЕ: Подписка на сигнал графики ---
+	GraphicsManager.quality_changed.connect(_on_quality_changed)
+	
 	await get_tree().process_frame
 	nav_agent.set_navigation_map(get_world_3d().navigation_map)
 	GameEvents.player_died.connect(_on_player_died)
@@ -116,8 +125,39 @@ func _ready() -> void:
 	if anim_tree: anim_tree.active = true 
 	set_tree_state("alive")
 	set_move_mode("normal")
+	
+	# --- ОПТИМИЗАЦИЯ: Десинхронизация счетчика кадров ---
+	physics_update_counter = randi() % physics_lod_skip_frames
+	
+	# --- НОВОЕ: Регистрация в AIDirector для Animation LOD ---
+	AIDirector.register_enemy(self)
+
+# --- НОВОЕ: Обработчик сигнала качества ---
+func _on_quality_changed(settings: Dictionary):
+	if settings.has("ai_phys_lod_dist_sq"):
+		physics_lod_distance_sq = settings["ai_phys_lod_dist_sq"]
+	if settings.has("ai_phys_lod_skip"):
+		physics_lod_skip_frames = settings["ai_phys_lod_skip"]
+	print("Enemy %s: Physics LODs updated." % name)
+
+func _exit_tree() -> void:
+	AIDirector.unregister_enemy(self)
 
 func _physics_process(delta: float) -> void:
+	# --- ИЗМЕНЕНИЕ: Используем переменные вместо констант ---
+	if is_instance_valid(player):
+		var dist_sq = global_position.distance_squared_to(player.global_position)
+		if dist_sq > physics_lod_distance_sq: # <-- Используем переменную
+			physics_update_counter += 1
+			if physics_update_counter < physics_lod_skip_frames: # <-- Используем переменную
+				if not is_on_floor():
+					movement_component.apply_gravity(delta)
+					move_and_slide()
+				return 
+			else:
+				physics_update_counter = 0 
+	# -----------------------------------------------
+
 	if show_debug_label and debug_label:
 		debug_label.visible = true
 		_update_debug_info()
@@ -154,6 +194,31 @@ func _physics_process(delta: float) -> void:
 		
 	if movement_component:
 		movement_component.handle_pushing(false)
+
+# --- НОВЫЕ ФУНКЦИИ ДЛЯ ANIMATION LOD ---
+func set_animation_process_mode(is_manual: bool):
+	# !!! ИСПРАВЛЕНИЕ: Управляем AnimationTree, а не AnimationPlayer !!!
+	if anim_tree:
+		if is_manual:
+			anim_tree.process_callback = AnimationPlayer.ANIMATION_PROCESS_MANUAL
+		else:
+			# Возвращаем стандартный режим обновления по физике
+			anim_tree.process_callback = AnimationPlayer.ANIMATION_PROCESS_PHYSICS
+
+func manual_animation_advance(delta: float):
+	# !!! ИСПРАВЛЕНИЕ: Проверяем и вызываем advance у AnimationTree !!!
+	if anim_tree and anim_tree.process_callback == AnimationPlayer.ANIMATION_PROCESS_MANUAL:
+		anim_tree.advance(delta)
+
+# --- НОВОЕ: Функции для VisibleOnScreenNotifier3D ---
+func _on_visible_on_screen_notifier_3d_screen_entered():
+	if anim_tree:
+		anim_tree.active = true
+
+func _on_visible_on_screen_notifier_3d_screen_exited():
+	if anim_tree:
+		anim_tree.active = false
+# ----------------------------------------------------
 
 # ============================================================================
 # MOVEMENT HELPERS

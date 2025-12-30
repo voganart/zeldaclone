@@ -11,74 +11,61 @@ const GROUP_DETAIL_OBJECTS = "level_detail_objects"
 
 var presets = {
 	Quality.LOW: {
+		# --- ГРАФИКА (GPU) ---
 		"scale_3d": 0.75,
 		"msaa": Viewport.MSAA_DISABLED,
 		"fxaa": false,
 		"shadow_size": 1024,
 		"shadow_filter": RenderingServer.SHADOW_QUALITY_HARD,
 		"vsync": DisplayServer.VSYNC_DISABLED,
-		# --- ENVIRONMENT ---
-		"ssao": false,
-		"ssil": false,
-		"sdfgi": false,
-		"ssr": false,
-		"glow": false,
-		"volumetric_fog": false,
-		
-		# --- LOD & CULLING ---
+		"ssao": false, "ssil": false, "sdfgi": false, "ssr": false, "glow": false, "volumetric_fog": false,
 		"lod_threshold": 5.0,
-		"grass_distance": 20.0,
-		"grass_level": 2.0,
-		# Исчезновение объектов
-		"vis_range": 30.0,        # Исчезают очень близко
-		"vis_margin": 5.0         # Короткий фейд
+		"grass_distance": 20.0, "grass_level": 2.0,
+		"vis_range": 30.0, "vis_margin": 5.0,
+		
+		# --- ИСПРАВЛЕНИЕ: Добавляем явное приведение типов к массивам ---
+		"ai_anim_lod_dists_sq": [5.0*5.0, 10.0*10.0, 15.0*15.0] as Array[float],
+		"ai_anim_lod_skips": [3, 8, 20] as Array[int],
+		"ai_phys_lod_dist_sq": 15.0 * 15.0,
+		"ai_phys_lod_skip": 25,
 	},
 	Quality.MEDIUM: {
+		# --- ГРАФИКА (GPU) ---
 		"scale_3d": 1.0,
 		"msaa": Viewport.MSAA_2X,
 		"fxaa": true,
 		"shadow_size": 2048,
 		"shadow_filter": RenderingServer.SHADOW_QUALITY_SOFT_LOW,
 		"vsync": DisplayServer.VSYNC_DISABLED,
-		# --- ENVIRONMENT ---
-		"ssao": true,
-		"ssil": false,
-		"sdfgi": false,
-		"ssr": false,
-		"glow": true,
-		"volumetric_fog": false,
-		
-		# --- LOD & CULLING ---
+		"ssao": true, "ssil": false, "sdfgi": false, "ssr": false, "glow": true, "volumetric_fog": false,
 		"lod_threshold": 1.0,
-		"grass_distance": 60.0,
-		"grass_level": 10.0,
-		# Исчезновение объектов (Твой запрос)
-		"vis_range": 80.0,
-		"vis_margin": 20.0
+		"grass_distance": 60.0, "grass_level": 10.0,
+		"vis_range": 80.0, "vis_margin": 20.0,
+
+		# --- ИСПРАВЛЕНИЕ: Добавляем явное приведение типов к массивам ---
+		"ai_anim_lod_dists_sq": [7.0*7.0, 12.0*12.0, 18.0*18.0] as Array[float],
+		"ai_anim_lod_skips": [2, 6, 18] as Array[int],
+		"ai_phys_lod_dist_sq": 22.0 * 22.0,
+		"ai_phys_lod_skip": 15,
 	},
 	Quality.HIGH: {
+		# --- ГРАФИКА (GPU) ---
 		"scale_3d": 1.0,
 		"msaa": Viewport.MSAA_4X,
 		"fxaa": true,
 		"shadow_size": 4096,
 		"shadow_filter": RenderingServer.SHADOW_QUALITY_SOFT_HIGH,
 		"vsync": DisplayServer.VSYNC_DISABLED,
-		
-		# --- ENVIRONMENT ---
-		"ssao": true,
-		"ssil": true,
-		"sdfgi": true,
-		"ssr": true,
-		"glow": true,
-		"volumetric_fog": true,
-		
-		# --- LOD & CULLING ---
+		"ssao": true, "ssil": true, "sdfgi": true, "ssr": true, "glow": true, "volumetric_fog": true,
 		"lod_threshold": 0.1,
-		"grass_distance": 120.0,
-		"grass_level": 20.0,
-		# Исчезновение объектов (Почти не исчезают)
-		"vis_range": 500.0,
-		"vis_margin": 50.0
+		"grass_distance": 120.0, "grass_level": 20.0,
+		"vis_range": 500.0, "vis_margin": 50.0,
+
+		# --- ИСПРАВЛЕНИЕ: Добавляем явное приведение типов к массивам ---
+		"ai_anim_lod_dists_sq": [8.0*8.0, 15.0*15.0, 20.0*20.0] as Array[float],
+		"ai_anim_lod_skips": [2, 5, 15] as Array[int],
+		"ai_phys_lod_dist_sq": 30.0 * 30.0,
+		"ai_phys_lod_skip": 10,
 	}
 }
 
@@ -121,7 +108,7 @@ func apply_preset(quality: Quality) -> void:
 	# 4. Обновление объектов (Culling)
 	_update_detail_objects(p)
 	
-	# 5. Сигнал (трава и т.д.)
+	# 5. Сигнал (трава, AI и т.д.)
 	quality_changed.emit(p)
 
 func _apply_environment_settings(p: Dictionary) -> void:

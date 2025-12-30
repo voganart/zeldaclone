@@ -3,12 +3,25 @@ extends State
 var enemy: Enemy
 var unreachable_timer: float = 0.0
 
+# --- ОПТИМИЗАЦИЯ: Таймер для обновления пути ---
+# Как часто враг будет пересчитывать путь до игрока (в секундах)
+@export var path_update_interval: float = 0.15 
+var update_path_timer: float = 0.0
+# -----------------------------------------------
+
 func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.max_speed = enemy.run_speed
 	unreachable_timer = 0.0
 	MusicBrain.set_combat_state(true)
 	enemy.set_move_mode("chase")
+
+	# --- ОПТИМИЗАЦИЯ: Немедленное обновление пути при входе в состояние ---
+	# И ставим таймер на случайное значение, чтобы враги не обновляли путь одновременно
+	if is_instance_valid(enemy.player):
+		enemy.nav_agent.target_position = enemy.player.global_position
+	update_path_timer = randf() * path_update_interval # Десинхронизация
+	# --------------------------------------------------------------------
 
 	# --- ЛОГИКА ИНДИКАТОРА АГРО ---
 	var prev_name = ""
@@ -24,14 +37,17 @@ func enter() -> void:
 	# ------------------------------
 			
 func physics_update(delta: float) -> void:
-	# ... (весь код physics_update остается как в предыдущем ответе с "умным поворотом") ...
-	# Копируйте логику из предыдущего моего ответа про "обход препятствий"
 	if not is_instance_valid(enemy.player):
 		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 
-	enemy.nav_agent.target_position = enemy.player.global_position
-	
+	# --- ОПТИМИЗАЦИЯ: Обновление пути по таймеру ---
+	update_path_timer -= delta
+	if update_path_timer <= 0.0:
+		update_path_timer = path_update_interval + randf_range(-0.05, 0.05) # Добавляем "дрожание"
+		enemy.nav_agent.target_position = enemy.player.global_position
+	# -----------------------------------------------
+
 	if not enemy.nav_agent.is_target_reachable():
 		unreachable_timer += delta
 		if unreachable_timer > 1.5:
