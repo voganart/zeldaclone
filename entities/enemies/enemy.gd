@@ -376,15 +376,25 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 		hurt_lock_timer = 0.5
 	elif not is_lethal:
 		if is_heavy_attack:
+			# Тяжелая атака всегда сбивает врага с ног и прерывает атаку
 			if is_attacking:
 				AIDirector.return_attack_token(self)
 				state_machine.change_state(GameConstants.STATE_CHASE)
 			trigger_knockdown_oneshot()
 			hurt_lock_timer = 0.5
 		else:
-			if not is_attacking:
+			# --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+			# Hyper Armor: Если враг атакует, обычный удар НЕ вызывает анимацию боли (Hit),
+			# и, следовательно, НЕ прерывает его атаку.
+			if is_attacking:
+				# Урон проходит, вспышка есть, но анимация продолжается.
+				# Это позволит врагу завершить удар и нанести урон игроку (Trade).
+				pass
+			else:
+				# Если враг просто стоит/бежит, он вздрагивает.
 				trigger_hit_oneshot()
 				hurt_lock_timer = 0.2
+			# -------------------------
 
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()

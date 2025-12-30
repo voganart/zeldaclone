@@ -492,7 +492,7 @@ environment = SubResource("Environment_k5f4k")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 physics_interpolation_mode = 1
-transform = Transform3D(1, 0, 0, 0, 0.7071067, 0.7071068, 0, -0.7071068, 0.7071067, -5.218, 8, 19.480999)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.70710677, 0, -0.7071068, 0.70710677, -5.218, 8, 19.480999)
 cull_mask = 983039
 current = true
 fov = 50.0
@@ -599,13 +599,13 @@ transform = Transform3D(0.734133, 0, 0.6790058, 0, 1, 0, -0.6790058, 0, 0.734133
 [node name="Environment" type="Node3D" parent="NavigationRegion3D"]
 
 [node name="WaterPlane" type="MeshInstance3D" parent="NavigationRegion3D/Environment"]
-transform = Transform3D(500, 0, 0, 0, 0.358, 0, 0, 0, 500, -11.226218, -1.1124976, 9.440019)
+transform = Transform3D(500, 0, 0, 0, 0.358, 0, 0, 0, 500, -11.226218, -5.632872, 9.440019)
 visible = false
 mesh = SubResource("QuadMesh_2max6")
 surface_material_override/0 = SubResource("ShaderMaterial_xfgcj")
 
 [node name="WaterPlane2" type="MeshInstance3D" parent="NavigationRegion3D/Environment"]
-transform = Transform3D(500, 0, 0, 0, 0.358, 0, 0, 0, 500, -11.226218, -12.704716, 9.440019)
+transform = Transform3D(500, 0, 0, 0, 0.358, 0, 0, 0, 500, -11.226218, -17.22509, 9.440019)
 visible = false
 mesh = SubResource("QuadMesh_2max6")
 

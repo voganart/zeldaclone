@@ -165,10 +165,14 @@ func _handle_retreat(delta: float) -> void:
 	if enemy.nav_agent.is_navigation_finished():
 		enemy.attack_component.tactical_retreat_pause_timer = enemy.attack_component.get_random_retreat_pause_time()
 
+# --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
 func on_damage_taken(is_heavy: bool = false) -> void:
-	is_performing_attack_anim = false
-	AIDirector.return_attack_token(enemy)
-	transitioned.emit(self, GameConstants.STATE_CHASE)
+	# Прерываем атаку ТОЛЬКО если удар был тяжелым
+	if is_heavy:
+		is_performing_attack_anim = false
+		AIDirector.return_attack_token(enemy)
+		transitioned.emit(self, GameConstants.STATE_CHASE)
+	# В противном случае ничего не делаем, враг продолжает атаку (Hyper Armor)
 
 func exit() -> void:
 	is_performing_attack_anim = false
