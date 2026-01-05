@@ -520,6 +520,8 @@ spring_length = 10.0
 noise = SubResource("Resource_dev6b")
 _preview_noise = false
 noise_emitter_layer = 32
+align_transform_with_view = Callable()
+align_position_with_view = Callable()
 metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
 [node name="CameraShaker" type="Node" parent="PhantomCamera3D"]
