@@ -35,7 +35,7 @@ Shortcuts/density_decrement=Object(Shortcut,"resource_local_to_scene":false,"res
 [application]
 
 config/name="ZeldaClone"
-run/main_scene="uid://dj30vac7b3xou"
+run/main_scene="uid://3um71gotlboh"
 config/features=PackedStringArray("4.5", "Mobile")
 config/icon="res://icon.svg"
 
@@ -56,6 +56,7 @@ InteractionManager="*res://common/interaction/interaction_manager.gd"
 ItemPool="*res://common/autoload/ItemPool.tscn"
 VfxPool="*res://common/autoload/VfxPool.tscn"
 GraphicsManager="*res://common/autoload/graphics_manager.gd"
+SceneManager="*res://common/autoload/scene_manager.gd"
 
 [display]
 
@@ -151,6 +152,10 @@ interact={
 , Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":3,"pressure":0.0,"pressed":true,"script":null)
 ]
 }
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://assets/translations/texts.en.translation", "res://assets/translations/texts.ru.translation")
 
 [layer_names]
 

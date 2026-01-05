@@ -468,7 +468,9 @@ func _on_died() -> void:
 	if is_in_group(GameConstants.GROUP_PLAYER):
 		remove_from_group(GameConstants.GROUP_PLAYER)
 	state_machine.change_state(GameConstants.STATE_DEAD)
-
+	
+	await get_tree().create_timer(2.0).timeout
+	SceneManager.open_game_over()
 func _update_stun_timer(delta: float) -> void:
 	if current_knockback_timer > 0:
 		current_knockback_timer -= delta

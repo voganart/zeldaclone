@@ -1,0 +1,9 @@
+keys,ru,en
+ui_new_game,"Новая игра","New Game"
+ui_settings,"Настройки","Settings"
+ui_exit,"Выход","Exit"
+ui_loading,"Загрузка","Loading"
+ui_game_over,"Потрачено...","Wasted..."
+ui_retry,"Попробовать снова","Try Again"
+ui_menu,"В меню","Main Menu"
+game_title,"Квантубикея: Эхо Пустоты","Kvantubikeya: Echoes of the Void"

@@ -1,0 +1,81 @@
+[gd_scene load_steps=3 format=3 uid="uid://3um71gotlboh"]
+
+[ext_resource type="Texture2D" uid="uid://cf6db6qu2b31q" path="res://assets/ui/menu_bg.jpg" id="1_5oih7"]
+[ext_resource type="Script" uid="uid://dvpvc1soitbva" path="res://ui/menus/main_menu.gd" id="1_qc8qn"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qc8qn")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_5oih7")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="UI_Layer" type="CanvasLayer" parent="."]
+
+[node name="Margin" type="MarginContainer" parent="UI_Layer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 400
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBox" type="VBoxContainer" parent="UI_Layer/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="UI_Layer/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "game_title"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="ButtonsVBox" type="VBoxContainer" parent="UI_Layer/Margin/VBox"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 5
+
+[node name="BtnNewGame" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "ui_new_game"
+
+[node name="BtnSettings" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "ui_settings"
+
+[node name="BtnExit" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "ui_exit"
+
+[node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Version" type="Label" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "ver 0.1 demo"
