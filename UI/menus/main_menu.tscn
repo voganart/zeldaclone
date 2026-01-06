@@ -31,22 +31,33 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
 theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 400
+theme_override_constants/margin_top = 50
 theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 50
 
 [node name="VBox" type="VBoxContainer" parent="UI_Layer/Margin"]
+custom_minimum_size = Vector2(1200, 600)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Spacer2" type="Control" parent="UI_Layer/Margin/VBox"]
+custom_minimum_size = Vector2(100, 300)
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI_Layer/Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 64
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.4862745)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 84
 text = "game_title"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox"]
-custom_minimum_size = Vector2(100, 100)
+custom_minimum_size = Vector2(100, 300)
 layout_mode = 2
 
 [node name="ButtonsVBox" type="VBoxContainer" parent="UI_Layer/Margin/VBox"]
@@ -72,10 +83,12 @@ theme_override_font_sizes/font_size = 26
 text = "ui_exit"
 
 [node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
-[node name="Version" type="Label" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+[node name="Version" type="Label" parent="UI_Layer/Margin/VBox"]
 layout_mode = 2
 size_flags_horizontal = 4
+size_flags_vertical = 10
+theme_override_constants/outline_size = 1
 text = "ver 0.1 demo"

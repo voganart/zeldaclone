@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://djfbluhws0fbk"]
+
+[ext_resource type="PackedScene" uid="uid://cnq1ulipv30y2" path="res://entities/PickupItems/BasePickup.tscn" id="1_331c8"]
+[ext_resource type="Script" uid="uid://on4f4ixyxx7m" path="res://entities/PickupItems/VaboPickup/vabo.gd" id="2_p7dtb"]
+[ext_resource type="ArrayMesh" uid="uid://ciuh21du8vlgm" path="res://assets/models/interactive/items_Vabo.res" id="3_p7dtb"]
+
+[node name="VaboPickup" instance=ExtResource("1_331c8")]
+collision_mask = 88
+script = ExtResource("2_p7dtb")
+amount = 1
+pool_index = 1
+attraction_speed = 12.0
+attraction_radius = 4.0
+
+[node name="OmniLight3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.79609615, 0)
+light_color = Color(0.33164126, 0.8789321, 1, 1)
+light_energy = 3.0
+omni_range = 0.7423955
+
+[node name="Items" parent="Visuals" index="0"]
+mesh = ExtResource("3_p7dtb")

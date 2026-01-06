@@ -57,6 +57,7 @@ ItemPool="*res://common/autoload/ItemPool.tscn"
 VfxPool="*res://common/autoload/VfxPool.tscn"
 GraphicsManager="*res://common/autoload/graphics_manager.gd"
 SceneManager="*res://common/autoload/scene_manager.gd"
+PlayerData="*res://common/autoload/player_data.gd"
 
 [display]
 
@@ -156,6 +157,7 @@ interact={
 [internationalization]
 
 locale/translations=PackedStringArray("res://assets/translations/texts.en.translation", "res://assets/translations/texts.ru.translation")
+locale/test="en"
 
 [layer_names]
 

@@ -453,6 +453,19 @@ func _finalize_death() -> void:
 	emit_signal("died")
 	if health_bar: health_bar.visible = false
 	if combat_component: combat_component._stop_hitbox_monitoring()
+	
+	# --- НОВОЕ: СПАВН ЛУТА ---
+	# Спавним Вабо (индекс 1)
+	# Шанс дропа 100% для теста, потом можно сделать рандом
+	if ItemPool.has_method("spawn_item"):
+		var pickup = ItemPool.spawn_item(1, global_position + Vector3(0, 0.5, 0))
+		
+		# Делаем красивый вылет (если предмет заспавнился)
+		if pickup:
+			var rng_dir = Vector3(randf_range(-1, 1), 5.0, randf_range(-1, 1)).normalized()
+			pickup.apply_impulse(rng_dir * 5.0)
+	# -------------------------
+	
 	state_machine.change_state(GameConstants.STATE_DEAD)
 
 # ============================================================================

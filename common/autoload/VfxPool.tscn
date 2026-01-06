@@ -9,4 +9,3 @@
 [node name="VfxPooll" type="Node" groups=["vfx_pool"]]
 script = ExtResource("1_8cm2a")
 effect_scenes = Array[PackedScene]([ExtResource("2_mpjbu"), ExtResource("3_ooko2"), ExtResource("4_17fw4"), ExtResource("5_mpjbu")])
-auto_expand = true
