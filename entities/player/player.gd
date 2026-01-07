@@ -6,6 +6,10 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
+@export_group("Respawn Settings")
+@export var fall_limit_y: float = -20.0 ## Высота, при которой считается, что игрок упал
+@export var fall_damage: float = 1.0 ## Урон за падение
+
 @export_group("Idle Animations")
 @export var enable_idle_dance: bool = true 
 @export var idle_dance_time: float = 10.0 
@@ -52,6 +56,9 @@ extends CharacterBody3D
 @onready var sfx_dash: RandomAudioPlayer3D = $SoundBank/SfxDash
 @onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
 @onready var shape_cast: ShapeCast3D = $RollSafetyCast
+
+var last_safe_position: Vector3 = Vector3.ZERO
+var safe_pos_timer: float = 0.0 # Таймер, чтобы не сохранять позицию каждую милисекунду
 
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
@@ -179,6 +186,7 @@ var roll_interval_timer: float:
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
+	last_safe_position = global_position # Стартовая точка безопасна
 	movement_component.init(self)
 	combat_component.init(self)
 	
@@ -248,6 +256,39 @@ func _physics_process(delta: float) -> void:
 	
 	movement_component.handle_pushing(is_rolling)
 
+	# 1. Обновляем безопасную позицию
+	if is_on_floor():
+		safe_pos_timer += delta
+		# Сохраняем позицию, только если мы стоим на земле больше 0.5 сек (чтобы не сохранить точку на краю обрыва)
+		if safe_pos_timer > 0.5:
+			last_safe_position = global_position
+			safe_pos_timer = 0.0 # Сброс, чтобы не обновлять слишком часто, но можно и оставить накапливаться
+	else:
+		safe_pos_timer = 0.0
+
+	# 2. Проверка падения
+	if global_position.y < fall_limit_y:
+		_handle_fall_respawn()
+
+func _handle_fall_respawn() -> void:
+	# Наносим урон (без отталкивания)
+	take_damage(fall_damage, Vector3.ZERO)
+	
+	# Если умер от урона - ничего не делаем, сработает _on_died
+	if health_component.current_health <= 0:
+		return
+
+	# Телепортируем обратно
+	global_position = last_safe_position
+	velocity = Vector3.ZERO # Сбрасываем скорость падения
+	
+	# Визуал: можно добавить затемнение экрана на долю секунды
+	# Для этого нужен доступ к HUD или SceneManager
+	# Пока просто мигнем
+	is_invincible = true
+	await get_tree().create_timer(1.0).timeout
+	is_invincible = false
+	
 func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
 	movement_component.move(delta, input_dir, target_speed, state_machine.current_state.is_root_motion)
 
