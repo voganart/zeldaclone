@@ -94,14 +94,20 @@ func end_battle():
 func _set_barriers_collision(enabled: bool):
 	if not barriers: return
 	
-	for child in barriers.get_children():
-		# 1. Вариант для CSG (твои текущие стены)
-		if child is CSGShape3D:
-			child.use_collision = enabled
-			
-		# 2. Вариант для StaticBody3D (если будешь использовать меши)
-		elif child is CollisionObject3D: # StaticBody3D наследуется от CollisionObject3D
-			# Самый надежный способ - отключить все шейпы внутри
-			for sub_child in child.get_children():
-				if sub_child is CollisionShape3D or sub_child is CollisionPolygon3D:
-					sub_child.set_deferred("disabled", not enabled)
+	# Запускаем рекурсивный поиск по всему дереву узлов внутри Barriers
+	_apply_collision_recursive(barriers, enabled)
+
+func _apply_collision_recursive(node: Node, enabled: bool):
+	# 1. Если это CSG (включая CSGPolygon3D)
+	if node is CSGShape3D:
+		node.use_collision = enabled
+	
+	# 2. Если это StaticBody3D (обычные меши)
+	elif node is CollisionObject3D:
+		for sub_child in node.get_children():
+			if sub_child is CollisionShape3D or sub_child is CollisionPolygon3D:
+				sub_child.set_deferred("disabled", not enabled)
+	
+	# Рекурсия: заходим во всех детей текущего узла
+	for child in node.get_children():
+		_apply_collision_recursive(child, enabled)
