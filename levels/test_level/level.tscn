@@ -96,7 +96,7 @@
 frequency = 0.0017
 fractal_type = 2
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lwb8x"]
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_eonaa"]
 noise = SubResource("FastNoiseLite_j5xtq")
 seamless = true
 seamless_blend_skirt = 0.75
@@ -109,7 +109,7 @@ fractal_octaves = 6
 fractal_gain = 0.865
 fractal_weighted_strength = 0.77
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xbjnq"]
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_hw3sy"]
 noise = SubResource("FastNoiseLite_oy4pa")
 seamless = true
 seamless_blend_skirt = 0.438
@@ -122,22 +122,22 @@ shader_parameter/sky_bottom_color = Color(0.1539927, 0.45190766, 0.7498227, 1)
 shader_parameter/cloud_edge_color = Color(0, 0.48513842, 1, 1)
 shader_parameter/cloud_core_color = Color(1, 0.8621591, 0.7893666, 1)
 shader_parameter/core_softness = 0.5730000272175
-shader_parameter/noise_texture = SubResource("NoiseTexture2D_xbjnq")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_hw3sy")
 shader_parameter/cloud_scale = 0.10000000475
 shader_parameter/cloud_speed = 0.0010000000475
 shader_parameter/cloud_cutoff = 0.20400000969
 shader_parameter/cloud_fuzziness = 0.1250000059375
-shader_parameter/detail_noise_texture = SubResource("NoiseTexture2D_lwb8x")
+shader_parameter/detail_noise_texture = SubResource("NoiseTexture2D_eonaa")
 shader_parameter/detail_scale = 2.126000100985
 shader_parameter/detail_speed = 0.0570000027075
 shader_parameter/detail_strength = 0.654000031065
 
-[sub_resource type="Sky" id="Sky_e3h7t"]
+[sub_resource type="Sky" id="Sky_eidw4"]
 sky_material = SubResource("ShaderMaterial_xbjnq")
 
 [sub_resource type="Environment" id="Environment_k5f4k"]
 background_mode = 2
-sky = SubResource("Sky_e3h7t")
+sky = SubResource("Sky_eidw4")
 ambient_light_source = 3
 ambient_light_color = Color(0, 0.77411205, 1.102, 1)
 tonemap_mode = 2
@@ -235,7 +235,7 @@ shader_parameter/scroll_offset = Vector2(0.1, -0.3)
 shader_parameter/scale_offset = 0.5
 shader_parameter/normal_map_scale = Vector2(0.1, 0.1)
 
-[sub_resource type="Resource" id="Resource_eonaa"]
+[sub_resource type="Resource" id="Resource_64ve8"]
 script = ExtResource("24_xbjnq")
 amount = 300
 override_global_seed = true
@@ -243,20 +243,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_hw3sy"]
+[sub_resource type="Resource" id="Resource_v186a"]
 script = ExtResource("25_e3h7t")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_eidw4"]
+[sub_resource type="Resource" id="Resource_1svdv"]
 script = ExtResource("26_84ugw")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_64ve8"]
+[sub_resource type="Resource" id="Resource_7lijs"]
 script = ExtResource("27_8ftol")
 ray_length = 5.0
 ray_offset = 5.0
@@ -264,9 +264,9 @@ align_with_collision_normal = true
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_v186a"]
+[sub_resource type="Resource" id="Resource_xp5hi"]
 script = ExtResource("22_mnooe")
-stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_eonaa"), SubResource("Resource_hw3sy"), SubResource("Resource_eidw4"), SubResource("Resource_64ve8")])
+stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_64ve8"), SubResource("Resource_v186a"), SubResource("Resource_1svdv"), SubResource("Resource_7lijs")])
 
 [sub_resource type="Resource" id="Resource_lqi4r"]
 script = ExtResource("30_mtvxm")
@@ -652,7 +652,7 @@ max_active_enemies = 3
 [node name="ProtonScatter" type="Node3D" parent="NavigationRegion3D/Environment"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
 script = ExtResource("21_ov4tj")
-modifier_stack = SubResource("Resource_v186a")
+modifier_stack = SubResource("Resource_xp5hi")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"

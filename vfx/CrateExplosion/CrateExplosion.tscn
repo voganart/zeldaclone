@@ -1,0 +1,127 @@
+[gd_scene load_steps=10 format=3 uid="uid://bk0jojvlhos42"]
+
+[ext_resource type="Script" uid="uid://j74dvftt5vu1" path="res://vfx/CrateExplosion/crate_explosion.gd" id="1_pkdg3"]
+[ext_resource type="ArrayMesh" uid="uid://b58pn5dx7ndbi" path="res://assets/models/interactive/crate_particle_1.res" id="2_2utvy"]
+[ext_resource type="ArrayMesh" uid="uid://cfstu8y7gng8i" path="res://assets/models/interactive/crate_particle_2.res" id="3_lv3br"]
+[ext_resource type="PackedScene" uid="uid://bi1sb07r8d1p0" path="res://vfx/CrateExplosion/crate_fractured.tscn" id="4_pkdg3"]
+
+[sub_resource type="Curve" id="Curve_f14cs"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, -25.373657), 0.0, 0.0, 0, 0, Vector2(1, 30.142334), 62.516087, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_xnfmx"]
+curve = SubResource("Curve_f14cs")
+
+[sub_resource type="Curve" id="Curve_x55x4"]
+_data = [Vector2(0, 0.2899862), 0.0, 2.7540827, 0, 0, Vector2(1, 0), -3.527071, 0.0, 0, 0]
+point_count = 2
+metadata/_snap_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_1f0tf"]
+curve = SubResource("Curve_x55x4")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_m86cl"]
+lifetime_randomness = 0.53
+particle_flag_rotate_y = true
+emission_shape_offset = Vector3(0, 0.5, 0)
+emission_shape_scale = Vector3(0.5, 1, 0.5)
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+angle_min = -4.9999895
+angle_max = 5.000011
+angle_curve = SubResource("CurveTexture_xnfmx")
+direction = Vector3(0, 5, 0)
+initial_velocity_min = 1.0
+initial_velocity_max = 5.0
+angular_velocity_min = -277.18002
+angular_velocity_max = 260.28998
+orbit_velocity_min = 9.49949e-08
+orbit_velocity_max = 9.49949e-08
+radial_accel_min = -5.000002
+radial_accel_max = 4.9999976
+tangential_accel_min = -2.2351742e-06
+tangential_accel_max = -2.2351742e-06
+damping_min = 1.0
+damping_max = 3.0000002
+scale_min = 0.5
+scale_curve = SubResource("CurveTexture_1f0tf")
+
+[node name="CrateExplosion" type="Node3D"]
+script = ExtResource("1_pkdg3")
+lifetime = 3.0
+debris_layer = 32
+debris_mask = 106
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+cast_shadow = 0
+emitting = false
+amount = 20
+lifetime = 1.5
+one_shot = true
+speed_scale = 2.0
+explosiveness = 0.9
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_m86cl")
+draw_pass_1 = ExtResource("2_2utvy")
+
+[node name="GPUParticles3D2" type="GPUParticles3D" parent="."]
+cast_shadow = 0
+emitting = false
+amount = 20
+lifetime = 1.5
+one_shot = true
+speed_scale = 2.0
+explosiveness = 0.9
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_m86cl")
+draw_pass_1 = ExtResource("3_lv3br")
+
+[node name="Crate_fractured" parent="." instance=ExtResource("4_pkdg3")]
+
+[node name="Crate_fractured_cell" parent="Crate_fractured" index="0"]
+layers = 8
+
+[node name="Crate_fractured_cell_001" parent="Crate_fractured" index="1"]
+layers = 8
+
+[node name="Crate_fractured_cell_002" parent="Crate_fractured" index="2"]
+layers = 8
+
+[node name="Crate_fractured_cell_003" parent="Crate_fractured" index="3"]
+layers = 8
+
+[node name="Crate_fractured_cell_004" parent="Crate_fractured" index="4"]
+layers = 8
+
+[node name="Crate_fractured_cell_005" parent="Crate_fractured" index="5"]
+layers = 8
+
+[node name="Crate_fractured_cell_006" parent="Crate_fractured" index="6"]
+layers = 8
+
+[node name="Crate_fractured_cell_007" parent="Crate_fractured" index="7"]
+layers = 8
+
+[node name="Crate_fractured_cell_008" parent="Crate_fractured" index="8"]
+layers = 8
+
+[node name="Crate_fractured_cell_009" parent="Crate_fractured" index="9"]
+layers = 8
+
+[node name="Crate_fractured_cell_010" parent="Crate_fractured" index="10"]
+layers = 8
+
+[node name="Crate_fractured_cell_011" parent="Crate_fractured" index="11"]
+layers = 8
+
+[node name="Crate_fractured_cell_012" parent="Crate_fractured" index="12"]
+layers = 8
+
+[node name="Crate_fractured_cell_013" parent="Crate_fractured" index="13"]
+layers = 8
+
+[node name="Crate_fractured_cell_014" parent="Crate_fractured" index="14"]
+layers = 8
+
+[editable path="Crate_fractured"]

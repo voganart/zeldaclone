@@ -1,0 +1,99 @@
+[gd_scene load_steps=10 format=3 uid="uid://e1q2o5wpoj38"]
+
+[ext_resource type="PackedScene" uid="uid://3qeblptfymiv" path="res://levels/island/island.tscn" id="1_uw0fs"]
+[ext_resource type="Shader" uid="uid://dmd7y6fsoqikt" path="res://assets/shaders/clouds.gdshader" id="1_xr3ws"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_g1svp"]
+frequency = 0.0017
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lwb8x"]
+noise = SubResource("FastNoiseLite_g1svp")
+seamless = true
+seamless_blend_skirt = 0.75
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_aut2e"]
+noise_type = 4
+seed = 2
+frequency = 0.0472
+fractal_octaves = 6
+fractal_gain = 0.865
+fractal_weighted_strength = 0.77
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xbjnq"]
+noise = SubResource("FastNoiseLite_aut2e")
+seamless = true
+seamless_blend_skirt = 0.438
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mimob"]
+shader = ExtResource("1_xr3ws")
+shader_parameter/sky_top_color = Color(0.16731326, 0.3830293, 0.73896086, 1)
+shader_parameter/sky_horizon_color = Color(0.52104485, 0.7354609, 1, 1)
+shader_parameter/sky_bottom_color = Color(0.1539927, 0.45190766, 0.7498227, 1)
+shader_parameter/cloud_edge_color = Color(0, 0.48513842, 1, 1)
+shader_parameter/cloud_core_color = Color(1, 0.8621591, 0.7893666, 1)
+shader_parameter/core_softness = 0.5730000272175
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_xbjnq")
+shader_parameter/cloud_scale = 0.10000000475
+shader_parameter/cloud_speed = 0.0010000000475
+shader_parameter/cloud_cutoff = 0.20400000969
+shader_parameter/cloud_fuzziness = 0.1250000059375
+shader_parameter/detail_noise_texture = SubResource("NoiseTexture2D_lwb8x")
+shader_parameter/detail_scale = 2.126000100985
+shader_parameter/detail_speed = 0.0570000027075
+shader_parameter/detail_strength = 0.654000031065
+
+[sub_resource type="Sky" id="Sky_e3h7t"]
+sky_material = SubResource("ShaderMaterial_mimob")
+
+[sub_resource type="Environment" id="Environment_vhhjt"]
+background_mode = 2
+sky = SubResource("Sky_e3h7t")
+ambient_light_source = 3
+ambient_light_color = Color(0, 0.77411205, 1.102, 1)
+tonemap_mode = 2
+ssr_enabled = true
+ssao_enabled = true
+ssao_radius = 0.5
+ssao_intensity = 3.0
+ssao_power = 3.2153225
+ssil_enabled = true
+ssil_intensity = 2.0
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+glow_enabled = true
+glow_normalized = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_albedo = Color(0.4509804, 0.72156864, 1, 1)
+volumetric_fog_sky_affect = 0.5
+adjustment_enabled = true
+adjustment_contrast = 1.2
+
+[node name="Level01" type="Node3D"]
+
+[node name="Lights" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -98)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lights"]
+transform = Transform3D(0.8059284, 0.35710707, -0.47218016, 0, 0.7975839, 0.60320795, 0.59201324, -0.48614237, 0.6427954, 13, 6, 0)
+light_color = Color(1, 0.7488306, 0.49473882, 1)
+light_indirect_energy = 3.0
+light_angular_distance = 0.3
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_blur = 5.0
+directional_shadow_mode = 0
+directional_shadow_split_1 = 0.5
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 244.5
+directional_shadow_pancake_size = 10.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Lights" groups=["world_env"]]
+environment = SubResource("Environment_vhhjt")
+
+[node name="Geometry" type="Node3D" parent="."]
+
+[node name="zone1" type="Node3D" parent="."]
+
+[node name="island" parent="zone1" instance=ExtResource("1_uw0fs")]

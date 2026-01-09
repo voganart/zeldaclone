@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://csvu7l0q7xvit"]
+[gd_scene load_steps=8 format=3 uid="uid://csvu7l0q7xvit"]
 
 [ext_resource type="Script" uid="uid://tb6xtkrjbiys" path="res://ui/health_component/health_component.gd" id="1_njo25"]
 [ext_resource type="Script" uid="uid://ddapxe0483vqb" path="res://entities/interactive/WoodenCrate/breakable_object.gd" id="1_uf1ar"]
 [ext_resource type="AudioStream" uid="uid://b1kl4cjk8vu1u" path="res://assets/audio/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.mp3" id="2_420b2"]
+[ext_resource type="PackedScene" uid="uid://bk0jojvlhos42" path="res://vfx/CrateExplosion/CrateExplosion.tscn" id="2_hxdnf"]
 [ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
@@ -21,6 +22,7 @@ continuous_cd = true
 angular_damp = 2.0
 script = ExtResource("1_uf1ar")
 health_component = NodePath("HealthComponent")
+debris_scene = ExtResource("2_hxdnf")
 break_sound = ExtResource("2_420b2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
