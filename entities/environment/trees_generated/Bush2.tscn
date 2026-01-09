@@ -33,7 +33,7 @@ buffer = PackedFloat32Array(-0.6215265, 0.62813526, 0.85250795, 0.43875813, 1.04
 radius = 1.9808306
 
 [node name="Bush2" type="StaticBody3D" groups=["level_detail_objects"]]
-collision_layer = 8
+collision_layer = 128
 collision_mask = 63
 script = ExtResource("1_mgwxe")
 leaf_mesh = ExtResource("2_ml6bh")

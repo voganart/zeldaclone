@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cnq1ulipv30y2" path="res://entities/PickupItems/BasePickup.tscn" id="1_331c8"]
 [ext_resource type="Script" uid="uid://on4f4ixyxx7m" path="res://entities/PickupItems/VaboPickup/vabo.gd" id="2_p7dtb"]
-[ext_resource type="ArrayMesh" uid="uid://ciuh21du8vlgm" path="res://assets/models/interactive/items_Vabo.res" id="3_p7dtb"]
+[ext_resource type="ArrayMesh" uid="uid://yc6m1p18btn2" path="res://assets/models/interactive/items_Vabo.res" id="3_p7dtb"]
 
 [node name="VaboPickup" instance=ExtResource("1_331c8")]
 collision_mask = 88

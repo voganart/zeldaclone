@@ -9,7 +9,7 @@ enum Faction { PLAYER, ENEMY }
 
 # --- НАСТРОЙКИ ОТДАЧИ (RECOIL) ---
 @export_group("Recoil Settings")
-@export var self_recoil_strength: float = 0.0 ## Сила отлета ВЛАДЕЛЬЦА назад при ударе (для Игрока ставь ~15, для Врага 0).
+@export var self_recoil_strength: float = 0.0 
 
 # --- НАСТРОЙКИ КОМБО И ТАЙМИНГОВ ---
 @export_group("Combat Timing")
@@ -168,22 +168,18 @@ func _process_hitbox_check() -> void:
 	if punch_hand_r: hits_occurred = _check_hand_overlap(punch_hand_r) or hits_occurred
 	if punch_hand_l: hits_occurred = _check_hand_overlap(punch_hand_l) or hits_occurred
 
-# --- ИЗМЕНЕНИЕ: Возвращаем логику с лимитом на 1 врага + 1 объект ---
 func _check_hand_overlap(hand: Area3D) -> bool:
 	if not hand.monitoring: return false
 
-	# Лимиты: не более 1 врага и 1 объекта за удар
 	var max_targets = 1
 	var max_props = 1
 	var targets_hit_count = 0
 	var props_hit_count = 0
 	
-	# Считаем, сколько и чего мы уже ударили в этой атаке
 	for type in hit_enemies_current_attack.values():
 		if type == "target": targets_hit_count += 1
 		elif type == "prop": props_hit_count += 1
 	
-	# Если лимиты исчерпаны, выходим
 	if targets_hit_count >= max_targets and props_hit_count >= max_props:
 		return false
 
@@ -201,6 +197,7 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 		if faction == Faction.PLAYER and attack_area and not body in bodies_in_front:
 			continue
 		
+		# Проверяем видимость (Raycast)
 		if not _has_line_of_sight(body):
 			continue
 		
@@ -218,14 +215,12 @@ func _check_hand_overlap(hand: Area3D) -> bool:
 	
 	var hit_occurred = false
 	
-	# Применяем удар к ближайшему врагу, если лимит не исчерпан
 	if targets_hit_count < max_targets and not candidates_targets.is_empty():
 		var target = candidates_targets[0]
 		_apply_hit(target, false)
 		hit_enemies_current_attack[target.get_instance_id()] = "target"
 		hit_occurred = true
 
-	# Применяем удар к ближайшему объекту, если лимит не исчерпан
 	if props_hit_count < max_props and not candidates_props.is_empty():
 		var target = candidates_props[0]
 		_apply_hit(target, true)
@@ -274,19 +269,28 @@ func _apply_hit(body: Node3D, is_prop: bool) -> void:
 			GameManager.hit_stop_smooth(hs_prop_time_scale, hs_prop_duration, 0.0, 0.0) 
 			GameEvents.camera_shake_requested.emit(0.1, 0.05)
 		
-		# Нанесение урона
 		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
 		
-		# --- ПРИМЕНЕНИЕ ОТДАЧИ (УПРОЩЕНО) ---
 		if self_recoil_strength > 0:
 			actor.velocity -= dir * self_recoil_strength
 
+# --- ФИКС ЛОГИКИ ЛУЧА ДЛЯ ПЕРЕВЕРНУТЫХ ОБЪЕКТОВ ---
 func _has_line_of_sight(target: Node3D) -> bool:
 	if not actor: return false
 	var space_state = actor.get_world_3d().direct_space_state
 	
 	var origin = actor.global_position + Vector3(0, 1.0, 0)
-	var dest = target.global_position + Vector3(0, 0.5, 0) 
+	
+	# ИЗМЕНЕНИЕ: Используем to_global, чтобы учитывать поворот объекта (для ящиков)
+	# Для RigidBody (ящик 1м высотой, origin внизу) центр находится в локальных (0, 0.5, 0).
+	# Функция to_global переведет это в правильную мировую точку, даже если ящик перевернут.
+	var dest = Vector3.ZERO
+	
+	if target is RigidBody3D:
+		dest = target.to_global(Vector3(0, 0.5, 0))
+	else:
+		# Для врагов (CharacterBody) Origin обычно в ногах, центр груди ~1.0
+		dest = target.global_position + Vector3(0, 1.0, 0)
 	
 	var query = PhysicsRayQueryParameters3D.create(origin, dest)
 	query.exclude = [actor]
