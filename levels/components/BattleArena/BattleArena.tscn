@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://vklbwyebk8e6"]
 
-[ext_resource type="Script" uid="uid://dk12hsfbh7e6y" path="res://levels/components/battle_arena.gd" id="1_umlgf"]
-[ext_resource type="Shader" uid="uid://km73ncd4kuqo" path="res://levels/components/battle_arena_wall.gdshader" id="2_umlgf"]
+[ext_resource type="Script" uid="uid://dk12hsfbh7e6y" path="res://levels/components/BattleArena/battle_arena.gd" id="1_umlgf"]
+[ext_resource type="Shader" uid="uid://km73ncd4kuqo" path="res://levels/components/BattleArena/battle_arena_wall.gdshader" id="2_umlgf"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_umlgf"]
 radius = 10.561544
@@ -28,14 +28,14 @@ seamless_blend_skirt = 0.55
 render_priority = 0
 shader = ExtResource("2_umlgf")
 shader_parameter/barrier_color = Color(1, 0.3019608, 0.101960786, 0.78431374)
-shader_parameter/emission_strength = 2.0
+shader_parameter/emission_strength = 10.0
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_s3t56")
 shader_parameter/noise_scale = 0.2
 shader_parameter/speed = 0.50000002375
 shader_parameter/flip_vertical = true
-shader_parameter/gradient_power = 1.98600009107512
-shader_parameter/top_cutoff = 0.0
-shader_parameter/base_solidity = 1.0
+shader_parameter/gradient_power = 2.00000009174012
+shader_parameter/top_softness = 1.0
+shader_parameter/base_solidity = 0.5
 
 [node name="BattleArena" type="Node3D"]
 script = ExtResource("1_umlgf")
