@@ -1,4 +1,4 @@
-[gd_scene load_steps=131 format=4 uid="uid://dj30vac7b3xou"]
+[gd_scene load_steps=130 format=4 uid="uid://dj30vac7b3xou"]
 
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_cosw0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://levels/test_level/enemy_spawner.tscn" id="1_nb3sg"]
@@ -39,7 +39,6 @@
 [ext_resource type="Script" uid="uid://c2siviktuy2o2" path="res://addons/proton_scatter/src/shapes/box_shape.gd" id="30_mtvxm"]
 [ext_resource type="Script" uid="uid://2juaclm8gc1n" path="res://addons/simplegrasstextured/grass.gd" id="34_8ftol"]
 [ext_resource type="PackedScene" uid="uid://tvcq0ve33rtx" path="res://entities/interactive/Chest_1/Chest_1.tscn" id="34_e3h7t"]
-[ext_resource type="PackedScene" uid="uid://bk0jojvlhos42" path="res://vfx/CrateExplosion/CrateExplosion.tscn" id="34_hw3sy"]
 [ext_resource type="Material" uid="uid://b54eg1q5wuq6v" path="res://assets/materials/Mat_wood_planks_07.tres" id="37_j2se1"]
 [ext_resource type="Material" uid="uid://3fxugdm5ywki" path="res://assets/materials/Mat_wood_planks_05.tres" id="38_dsao6"]
 [ext_resource type="Material" uid="uid://diik0gbing35k" path="res://assets/materials/Mat_wood_planks_04.tres" id="39_lqi4r"]
@@ -236,7 +235,7 @@ shader_parameter/scroll_offset = Vector2(0.1, -0.3)
 shader_parameter/scale_offset = 0.5
 shader_parameter/normal_map_scale = Vector2(0.1, 0.1)
 
-[sub_resource type="Resource" id="Resource_hw3sy"]
+[sub_resource type="Resource" id="Resource_eonaa"]
 script = ExtResource("24_xbjnq")
 amount = 300
 override_global_seed = true
@@ -244,20 +243,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_eidw4"]
+[sub_resource type="Resource" id="Resource_hw3sy"]
 script = ExtResource("25_e3h7t")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_64ve8"]
+[sub_resource type="Resource" id="Resource_eidw4"]
 script = ExtResource("26_84ugw")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_v186a"]
+[sub_resource type="Resource" id="Resource_64ve8"]
 script = ExtResource("27_8ftol")
 ray_length = 5.0
 ray_offset = 5.0
@@ -265,9 +264,9 @@ align_with_collision_normal = true
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_1svdv"]
+[sub_resource type="Resource" id="Resource_v186a"]
 script = ExtResource("22_mnooe")
-stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_hw3sy"), SubResource("Resource_eidw4"), SubResource("Resource_64ve8"), SubResource("Resource_v186a")])
+stack = Array[ExtResource("23_oy4pa")]([SubResource("Resource_eonaa"), SubResource("Resource_hw3sy"), SubResource("Resource_eidw4"), SubResource("Resource_64ve8")])
 
 [sub_resource type="Resource" id="Resource_lqi4r"]
 script = ExtResource("30_mtvxm")
@@ -653,7 +652,7 @@ max_active_enemies = 3
 [node name="ProtonScatter" type="Node3D" parent="NavigationRegion3D/Environment"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
 script = ExtResource("21_ov4tj")
-modifier_stack = SubResource("Resource_1svdv")
+modifier_stack = SubResource("Resource_v186a")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -786,17 +785,6 @@ transform = Transform3D(1, 0, 0, 0, -1, 8.742278e-08, 0, -8.742278e-08, -1, 0.24
 
 [node name="WoodenCrate25" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(-0.08969389, 0, -0.99596936, -0.07380983, 0.99725026, 0.00664708, 0.99323064, 0.07410854, -0.089447245, -9.731079, 0.13185519, -3.937797)
-
-[node name="CrateExplosion" parent="NavigationRegion3D/breakable_object" instance=ExtResource("34_hw3sy")]
-transform = Transform3D(-1, 8.742278e-08, 0, -8.742278e-08, -1, 0, 0, 0, 1, 0, 1.1789966, 20.053877)
-
-[node name="GPUParticles3D" parent="NavigationRegion3D/breakable_object/CrateExplosion" index="0"]
-emitting = true
-one_shot = false
-
-[node name="GPUParticles3D2" parent="NavigationRegion3D/breakable_object/CrateExplosion" index="1"]
-emitting = true
-one_shot = false
 
 [node name="WoodenCrate26" parent="NavigationRegion3D/breakable_object" instance=ExtResource("19_qd4pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.139043, 0.013222218, -8.154355)
@@ -1186,6 +1174,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5336034, -0.40915453, 18.7
 
 [editable path="NavigationRegion3D/MovingPlatformRoot2"]
 [editable path="NavigationRegion3D/Environment/island"]
-[editable path="NavigationRegion3D/breakable_object/CrateExplosion"]
-[editable path="NavigationRegion3D/breakable_object/CrateExplosion/Crate_fractured"]
 [editable path="NavigationRegion3D/Vegetation/Tree2"]

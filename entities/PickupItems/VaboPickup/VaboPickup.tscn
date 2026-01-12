@@ -5,12 +5,12 @@
 [ext_resource type="ArrayMesh" uid="uid://yc6m1p18btn2" path="res://assets/models/interactive/items_Vabo.res" id="3_p7dtb"]
 
 [node name="VaboPickup" instance=ExtResource("1_331c8")]
-collision_mask = 88
 script = ExtResource("2_p7dtb")
 amount = 1
 pool_index = 1
-attraction_speed = 12.0
-attraction_radius = 4.0
+attraction_start_speed = 2.0
+attraction_acceleration = 10.0
+attraction_radius = 3.0
 
 [node name="OmniLight3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.79609615, 0)

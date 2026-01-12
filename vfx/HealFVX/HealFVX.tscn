@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dhw5djf47hw8l"]
 
-[ext_resource type="Material" uid="uid://b76idu5166tte" path="res://vfx/PickupItem/HealFVX.tres" id="1_ho4l8"]
+[ext_resource type="Material" uid="uid://b76idu5166tte" path="res://vfx/HealFVX/HealFVX.tres" id="1_ho4l8"]
 [ext_resource type="ArrayMesh" uid="uid://pm4x0psax0iy" path="res://assets/models/interactive/environment_props_Plus.res" id="2_ho4l8"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b3r45"]
@@ -15,7 +15,6 @@ emission_energy_multiplier = 0.94
 material_override = SubResource("StandardMaterial3D_b3r45")
 cast_shadow = 0
 emitting = false
-amount = 20
 interp_to_end = 0.03
 one_shot = true
 explosiveness = 0.5
