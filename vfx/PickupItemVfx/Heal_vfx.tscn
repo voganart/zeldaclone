@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dhw5djf47hw8l"]
 
-[ext_resource type="Material" uid="uid://b76idu5166tte" path="res://vfx/HealFVX/HealFVX.tres" id="1_ho4l8"]
-[ext_resource type="ArrayMesh" uid="uid://pm4x0psax0iy" path="res://assets/models/interactive/environment_props_Plus.res" id="2_ho4l8"]
+[ext_resource type="Material" uid="uid://b76idu5166tte" path="res://vfx/PickupItemVfx/Heal_vfx.tres" id="1_8sda6"]
+[ext_resource type="ArrayMesh" uid="uid://pm4x0psax0iy" path="res://assets/models/interactive/environment_props_Plus.res" id="2_iilkx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b3r45"]
 transparency = 1
@@ -19,5 +19,5 @@ interp_to_end = 0.03
 one_shot = true
 explosiveness = 0.5
 randomness = 0.63
-process_material = ExtResource("1_ho4l8")
-draw_pass_1 = ExtResource("2_ho4l8")
+process_material = ExtResource("1_8sda6")
+draw_pass_1 = ExtResource("2_iilkx")

@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://ck8or4s38s7a3"]
+
+[ext_resource type="PackedScene" uid="uid://dhw5djf47hw8l" path="res://vfx/PickupItemVfx/Heal_vfx.tscn" id="1_vh2l8"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_swdhd"]
+transparency = 1
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.07998133, 1, 0, 1)
+emission_enabled = true
+emission = Color(0, 6.215854, 8.639841, 1)
+emission_energy_multiplier = 0.94
+
+[sub_resource type="SphereMesh" id="SphereMesh_vh2l8"]
+
+[node name="VaboVfx" instance=ExtResource("1_vh2l8")]
+material_override = SubResource("StandardMaterial3D_swdhd")
+draw_pass_1 = SubResource("SphereMesh_vh2l8")

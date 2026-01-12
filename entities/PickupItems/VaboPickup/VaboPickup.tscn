@@ -8,6 +8,7 @@
 script = ExtResource("2_p7dtb")
 amount = 1
 pool_index = 1
+collect_vfx_index = 4
 attraction_start_speed = 2.0
 attraction_acceleration = 10.0
 attraction_radius = 3.0
