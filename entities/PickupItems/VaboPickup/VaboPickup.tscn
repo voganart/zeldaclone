@@ -9,9 +9,9 @@ script = ExtResource("2_p7dtb")
 amount = 1
 pool_index = 1
 collect_vfx_index = 4
-attraction_start_speed = 2.0
+attraction_start_speed = 1.0
 attraction_acceleration = 10.0
-attraction_radius = 3.0
+attraction_radius = 2.0
 
 [node name="OmniLight3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.79609615, 0)
@@ -19,5 +19,11 @@ light_color = Color(0.33164126, 0.8789321, 1, 1)
 light_energy = 3.0
 omni_range = 0.7423955
 
+[node name="CollisionShape3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32094628, 0)
+
 [node name="Items" parent="Visuals" index="0"]
 mesh = ExtResource("3_p7dtb")
+
+[node name="CollisionShape3D" parent="InteractionArea" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.39646122, 0)

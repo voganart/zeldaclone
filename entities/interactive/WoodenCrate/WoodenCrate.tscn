@@ -24,6 +24,10 @@ script = ExtResource("1_uf1ar")
 health_component = NodePath("HealthComponent")
 debris_scene = ExtResource("2_hxdnf")
 break_sound = ExtResource("2_420b2")
+drop_chance = 0.3
+heart_drop_rate = 0.1
+item_index_vabo = 1
+item_index_heart = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
