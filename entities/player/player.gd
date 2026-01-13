@@ -228,12 +228,14 @@ func _physics_process(delta: float) -> void:
 			global_transform = current_transform * Transform3D(Basis(rm_rot), Vector3.ZERO)
 			
 			if state_name == "roll" and roll_control > 0.0:
-				var input_dir = input_handler.move_vector
+				# БЫЛО: var input_dir = input_handler.move_vector
+				# СТАЛО: Используем вектор с учетом камеры
+				var input_dir = get_movement_vector() 
+				
 				if input_dir.length_squared() > 0.01:
 					var target_angle = atan2(input_dir.x, input_dir.y)
 					var steer_speed = movement_component.rotation_speed * roll_control
 					rotation.y = lerp_angle(rotation.y, target_angle, steer_speed * delta)
-			
 			var velocity_vector = (global_transform.basis * rm_pos) / delta
 			current_rm_velocity.x = velocity_vector.x * root_motion_speed_factor
 			current_rm_velocity.z = velocity_vector.z * root_motion_speed_factor

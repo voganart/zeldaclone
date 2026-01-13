@@ -933,12 +933,16 @@ func _ready():
 					# Waits for the SpringArm3D to be ready and then apply rotation
 					# Resolves an issue most prominent in Godot 4.4
 					await _follow_spring_arm.ready
-					reparent.call_deferred(_follow_spring_arm)
-					_camera_target = _follow_spring_arm
-					_follow_spring_arm.global_position = _get_target_position_offset() if is_instance_valid(follow_target) else global_position
-					_follow_spring_arm.global_rotation = initial_rotation
-					_has_follow_spring_arm = true
-					top_level = false
+					
+					# --- ФИКС ОШИБКИ: Проверяем, что мы все еще в дереве после await ---
+					if is_inside_tree() and _follow_spring_arm.is_inside_tree():
+						reparent.call_deferred(_follow_spring_arm)
+						_camera_target = _follow_spring_arm
+						_follow_spring_arm.global_position = _get_target_position_offset() if is_instance_valid(follow_target) else global_position
+						_follow_spring_arm.global_rotation = initial_rotation
+						_has_follow_spring_arm = true
+						top_level = false
+					# -------------------------------------------------------------------
 		_:
 			_transform_output.origin = global_position
 
@@ -950,8 +954,6 @@ func _ready():
 	_transform_output = global_transform
 
 	_phantom_camera_manager.noise_3d_emitted.connect(_noise_emitted)
-
-
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() and _draw_gizmo:
 		update_gizmos()

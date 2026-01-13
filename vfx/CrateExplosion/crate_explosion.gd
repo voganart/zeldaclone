@@ -30,12 +30,21 @@ func _play_all_particles(node: Node) -> void:
 		_play_all_particles(child)
 
 func _convert_to_physics() -> void:
+	# 1. Если сам эффект уже удален (например, при смене сцены), выходим
+	if not is_inside_tree(): return 
+	
 	var meshes = _get_all_meshes(self)
 	if meshes.is_empty(): return
 	
 	var active_shards: Array[RigidBody3D] = []
 
 	for mesh_node in meshes:
+		if not is_instance_valid(mesh_node): continue
+		
+		# 2. Проверяем родителя перед добавлением нового узла
+		var parent_node = mesh_node.get_parent()
+		if not parent_node or not parent_node.is_inside_tree(): continue
+
 		var original_transform = mesh_node.transform
 		var original_scale = original_transform.basis.get_scale()
 		
@@ -47,9 +56,8 @@ func _convert_to_physics() -> void:
 
 		var rb = RigidBody3D.new()
 		rb.name = mesh_node.name + "_RB"
-		mesh_node.get_parent().add_child(rb)
+		parent_node.add_child(rb) # Добавляем к родителю меша
 		
-		# Отвязываем физику от родителя (чтобы гравитация и верх работали правильно)
 		rb.top_level = true 
 
 		var clean_basis = Basis() 
@@ -70,43 +78,43 @@ func _convert_to_physics() -> void:
 		var col = CollisionShape3D.new()
 		if mesh_node.mesh:
 			var aabb = mesh_node.mesh.get_aabb()
-			if aabb.size.length_squared() < 0.0001:
+			if aabb.size.length_squared() > 0.0001:
+				var box_shape = BoxShape3D.new()
+				box_shape.size = aabb.size * safe_scale
+				col.shape = box_shape
+				col.position = aabb.get_center() * safe_scale
+			else:
+				# Если меш пустой/битый, удаляем RB и пропускаем
 				rb.queue_free()
 				continue
-				
-			var box_shape = BoxShape3D.new()
-			box_shape.size = aabb.size * safe_scale
-			col.shape = box_shape
-			col.position = aabb.get_center() * safe_scale
 			
 		rb.add_child(col)
 		
-		mesh_node.reparent(rb)
-		mesh_node.transform = Transform3D.IDENTITY 
-		mesh_node.scale = safe_scale 
+		# 3. КРИТИЧЕСКАЯ ПРОВЕРКА перед reparent()
+		if mesh_node.is_inside_tree() and rb.is_inside_tree():
+			mesh_node.reparent(rb)
+			mesh_node.transform = Transform3D.IDENTITY 
+			mesh_node.scale = safe_scale 
+			active_shards.append(rb)
+		else:
+			rb.queue_free()
+			continue
 		
-		active_shards.append(rb)
-		
-		# --- 5. ПРИМЕНЕНИЕ СИЛ (РАЗДЕЛЕНО) ---
-		
-		# А. Линейный импульс (Разлет)
+		# Применение сил (как и было)
 		var world_up_impulse = Vector3(
-			randf_range(-0.8, 0.8), # В стороны
-			randf_range(1.0, 3.0),  # Вверх
+			randf_range(-0.8, 0.8),
+			randf_range(1.0, 3.0),
 			randf_range(-0.8, 0.8)
 		).normalized()
 		
-		# Применяем силу к центру масс (без вращения)
 		rb.apply_central_impulse(world_up_impulse * explosion_impulse)
 		
-		# Б. Угловой импульс (Вращение)
 		var random_torque_axis = Vector3(
 			randf_range(-1.0, 1.0),
 			randf_range(-1.0, 1.0),
 			randf_range(-1.0, 1.0)
 		).normalized()
 		
-		# Применяем только вращение
 		rb.apply_torque_impulse(random_torque_axis * explosion_spin)
 
 	await get_tree().create_timer(lifetime).timeout
