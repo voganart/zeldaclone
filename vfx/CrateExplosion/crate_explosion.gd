@@ -30,7 +30,6 @@ func _play_all_particles(node: Node) -> void:
 		_play_all_particles(child)
 
 func _convert_to_physics() -> void:
-	# 1. Если сам эффект уже удален (например, при смене сцены), выходим
 	if not is_inside_tree(): return 
 	
 	var meshes = _get_all_meshes(self)
@@ -41,30 +40,35 @@ func _convert_to_physics() -> void:
 	for mesh_node in meshes:
 		if not is_instance_valid(mesh_node): continue
 		
-		# 2. Проверяем родителя перед добавлением нового узла
 		var parent_node = mesh_node.get_parent()
 		if not parent_node or not parent_node.is_inside_tree(): continue
 
-		var original_transform = mesh_node.transform
-		var original_scale = original_transform.basis.get_scale()
+		# 1. Берем глобальную трансформацию
+		var global_t = mesh_node.global_transform
+		var original_scale = global_t.basis.get_scale()
 		
-		# Лечим масштаб
+		# 2. Лечим масштаб (Fix Singular Basis)
+		# Jolt ненавидит масштаб 0. Если осколок плоский или нулевой - даем ему объем.
 		var safe_scale = original_scale
-		if abs(safe_scale.x) < 0.01: safe_scale.x = 0.05
-		if abs(safe_scale.y) < 0.01: safe_scale.y = 0.05
-		if abs(safe_scale.z) < 0.01: safe_scale.z = 0.05
+		if safe_scale.x < 0.05: safe_scale.x = 0.1
+		if safe_scale.y < 0.05: safe_scale.y = 0.1
+		if safe_scale.z < 0.05: safe_scale.z = 0.1
 
 		var rb = RigidBody3D.new()
 		rb.name = mesh_node.name + "_RB"
-		parent_node.add_child(rb) # Добавляем к родителю меша
-		
+		parent_node.add_child(rb)
 		rb.top_level = true 
 
-		var clean_basis = Basis() 
-		if not is_zero_approx(original_transform.basis.determinant()):
-			clean_basis = original_transform.basis.orthonormalized()
+		# 3. Создаем "Чистый" Базис (Только вращение, масштаб строго 1,1,1)
+		var clean_basis = Basis() # Identity по умолчанию
 		
-		rb.global_transform = Transform3D(clean_basis, mesh_node.global_transform.origin)
+		# Пытаемся сохранить вращение, только если объект не был сплющен в ноль
+		# (determinant == 0 означает, что базис сломан)
+		if abs(global_t.basis.determinant()) > 0.001:
+			clean_basis = global_t.basis.orthonormalized()
+		
+		# Присваиваем RB чистый базис и позицию
+		rb.global_transform = Transform3D(clean_basis, global_t.origin)
 		
 		rb.collision_layer = debris_layer
 		rb.collision_mask = debris_mask
@@ -78,29 +82,32 @@ func _convert_to_physics() -> void:
 		var col = CollisionShape3D.new()
 		if mesh_node.mesh:
 			var aabb = mesh_node.mesh.get_aabb()
-			if aabb.size.length_squared() > 0.0001:
-				var box_shape = BoxShape3D.new()
-				box_shape.size = aabb.size * safe_scale
-				col.shape = box_shape
-				col.position = aabb.get_center() * safe_scale
-			else:
-				# Если меш пустой/битый, удаляем RB и пропускаем
+			# Если меш сам по себе нулевой, пропускаем
+			if aabb.size.length_squared() < 0.001:
 				rb.queue_free()
 				continue
+				
+			var box_shape = BoxShape3D.new()
+			# Используем safe_scale для коллизии
+			box_shape.size = aabb.size * safe_scale
+			col.shape = box_shape
+			# Центр тоже скейлим
+			col.position = aabb.get_center() * safe_scale
 			
 		rb.add_child(col)
 		
-		# 3. КРИТИЧЕСКАЯ ПРОВЕРКА перед reparent()
 		if mesh_node.is_inside_tree() and rb.is_inside_tree():
 			mesh_node.reparent(rb)
+			# Сбрасываем трансформ меша в 0 относительно RB
 			mesh_node.transform = Transform3D.IDENTITY 
+			# И применяем к мешу исправленный масштаб
 			mesh_node.scale = safe_scale 
 			active_shards.append(rb)
 		else:
 			rb.queue_free()
 			continue
 		
-		# Применение сил (как и было)
+		# Применение сил
 		var world_up_impulse = Vector3(
 			randf_range(-0.8, 0.8),
 			randf_range(1.0, 3.0),
@@ -134,10 +141,23 @@ func _fade_out(shards: Array[RigidBody3D]) -> void:
 	
 	for shard in shards:
 		if is_instance_valid(shard):
+			# 1. Полностью выключаем физику, чтобы Jolt не ругался
 			shard.collision_layer = 0
 			shard.collision_mask = 0
-			tween.tween_property(shard, "scale", Vector3.ZERO, fade_duration)\
-				.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+			shard.freeze = true # Замораживаем (превращаем в статику)
+			
+			# 2. Ищем меш внутри и скейлим ЕГО, а не сам RigidBody
+			for child in shard.get_children():
+				if child is MeshInstance3D:
+					tween.tween_property(child, "scale", Vector3.ZERO, fade_duration)\
+						.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	
 	await tween.finished
+	
+	# 3. Гарантированно удаляем осколки из памяти
+	for shard in shards:
+		if is_instance_valid(shard):
+			shard.queue_free()
+			
+	# 4. Удаляем сам объект взрыва
 	queue_free()
