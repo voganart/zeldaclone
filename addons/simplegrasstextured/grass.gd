@@ -157,10 +157,18 @@ func _init():
 
 
 func _ready():
-	GraphicsManager.quality_changed.connect(_on_quality_changed)
+	if not Engine.is_editor_hint():
+		if has_node("/root/GraphicsManager"):
+			var gm = get_node("/root/GraphicsManager")
+			# Проверяем наличие сигнала перед подключением
+			if gm.has_signal("quality_changed"):
+				if not gm.quality_changed.is_connected(_on_quality_changed):
+					gm.quality_changed.connect(_on_quality_changed)
+			
+			# --- FIX: Вызываем обновление настроек ТОЛЬКО в игре, а не в редакторе ---
+			_on_quality_changed(gm.presets[gm.current_quality])
+			# -----------------------------------------------------------------------
 	
-	# Применяем текущие настройки сразу при старте (чтобы трава знала текущий пресет)
-	_on_quality_changed(GraphicsManager.presets[GraphicsManager.current_quality])
 	if Engine.is_editor_hint():
 		set_process(true)
 	else:
