@@ -528,7 +528,7 @@ func stop_hitbox_monitoring() -> void:
 func _check_attack_hit() -> void:
 	combat_component.activate_hitbox_check(0.1)
 
-func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool = false) -> void:
+func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool = false) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
 	
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
@@ -564,7 +564,7 @@ func _update_stun_timer(delta: float) -> void:
 			is_knockback_stun = false
 			is_knockbacked = false
 
-func _update_roll_timers(delta: float) -> void:
+func _update_roll_timers(_delta: float) -> void:
 	pass
 
 func push_obj():

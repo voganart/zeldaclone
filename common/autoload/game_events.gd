@@ -1,10 +1,10 @@
 extends Node
 
-## Сигнал вызывается при любом изменении здоровья игрока
+@warning_ignore("unused_signal")
 signal player_health_changed(current_hp: float, max_hp: float)
 
-## НОВЫЙ СИГНАЛ: Вызывается один раз при смерти игрока
+@warning_ignore("unused_signal")
 signal player_died
 
-## Запрос на тряску камеры
+@warning_ignore("unused_signal")
 signal camera_shake_requested(strength: float, duration: float)

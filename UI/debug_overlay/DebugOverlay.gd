@@ -27,10 +27,10 @@ func _update_ui():
 	var low_1_percent = _calculate_1_percent_low()
 	
 	# Красим 1% Low в красный, если он сильно ниже нормы (например, ниже 30)
-	var color_code = ""
-	if low_1_percent < 30: color_code = "[color=red]"
-	elif low_1_percent < 60: color_code = "[color=yellow]"
-	else: color_code = "[color=green]"
+	var _color_code = ""
+	if low_1_percent < 30: _color_code = "[color=red]"
+	elif low_1_percent < 60: _color_code = "[color=yellow]"
+	else: _color_code = "[color=green]"
 	
 	# Если у тебя Label поддерживает BBCode (RichTextLabel), используй цвета. 
 	# Если обычный Label, просто выводи текст:

@@ -46,7 +46,7 @@ func _ready() -> void:
 func init(character: CharacterBody3D) -> void:
 	actor = character
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if not actor: return
 	
 	if actor.is_on_floor() and not was_on_floor:

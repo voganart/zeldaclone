@@ -108,6 +108,6 @@ func _reset_platform() -> void:
 	if enabled:
 		_start_move_cycle()
 
-func _set_collision(enabled: bool) -> void:
+func _set_collision(is_active: bool) -> void:
 	var col = platform_body.get_node_or_null("CollisionShape3D")
-	if col: col.set_deferred("disabled", not enabled)
+	if col: col.set_deferred("disabled", not is_active)

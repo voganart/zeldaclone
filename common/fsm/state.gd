@@ -4,6 +4,7 @@ extends Node
 ## Сигнал для перехода в другое состояние.
 ## state: ссылка на вызывающее состояние (обычно self)
 ## new_state_name: имя состояния, в которое нужно перейти (в нижнем регистре)
+@warning_ignore("unused_signal")
 signal transitioned(state: State, new_state_name: String)
 @export var is_root_motion: bool = false
 ## Ссылка на сущность, которой управляет состояние (Игрок или Враг).
@@ -31,5 +32,5 @@ func update(_delta: float) -> void:
 func physics_update(_delta: float) -> void:
 	pass
 
-func on_damage_taken(is_heavy: bool = false) -> void:
+func on_damage_taken(_is_heavy: bool = false) -> void:
 	pass

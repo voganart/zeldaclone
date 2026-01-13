@@ -12,7 +12,7 @@ func _ready() -> void:
 	music_player.bus = "Music" # Убедись, что создал шину Music в настройках аудио
 	add_child(music_player)
 
-func play_music(stream: AudioStream, fade_duration: float = 1.0):
+func play_music(stream: AudioStream, _fade_duration: float = 1.0):
 	if music_player.stream == stream:
 		return
 		

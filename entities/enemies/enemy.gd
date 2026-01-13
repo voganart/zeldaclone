@@ -433,7 +433,7 @@ func _cry_for_help() -> void:
 		if dist <= help_radius:
 			enemy.hear_alert(player)
 
-func hear_alert(target: Node3D) -> void:
+func hear_alert(_target: Node3D) -> void:
 	if is_dead(): return
 	var current_state = state_machine.current_state.name.to_lower()
 	if current_state in ["attack", "chase", "combatstance", "hit", "dead"]:
