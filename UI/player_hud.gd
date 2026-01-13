@@ -56,14 +56,48 @@ func _ready() -> void:
 		_update_hearts(float(debug_hearts_count))
 		return
 	# ========================
-	
 	await get_tree().process_frame
-	_find_player()
+	if not player:
+		_find_player()
+
 	
 	if player and player.health_component:
 		_setup_hearts(player.health_component.max_health)
 		_update_hearts(player.health_component.current_health)
 
+func setup_player(new_player: Player) -> void:
+	player = new_player
+	
+	# Отключаем старые сигналы HP, если были
+	if GameEvents.player_health_changed.is_connected(_on_health_changed):
+		GameEvents.player_health_changed.disconnect(_on_health_changed)
+	
+	# Подключаем новые сигналы HP
+	GameEvents.player_health_changed.connect(_on_health_changed)
+	
+	# Инициализируем UI Здоровья
+	if player.health_component:
+		_setup_hearts(player.health_component.max_health)
+		_update_hearts(player.health_component.current_health)
+		
+	# Подключаем сигнал переката
+	if player.roll_ability:
+		# Создаем Callable для обновления UI переката
+		var roll_update_func = Callable(self, "_on_roll_charges_changed_from_player")
+		
+		# Если уже подключено - отключаем (на случай рестарта)
+		if player.roll_ability.roll_charges_changed.is_connected(roll_update_func):
+			player.roll_ability.roll_charges_changed.disconnect(roll_update_func)
+			
+		player.roll_ability.roll_charges_changed.connect(roll_update_func)
+		
+		# Принудительно обновляем UI сразу
+		_update_roll_pips()
+
+# Вспомогательная функция, чтобы сигнал приходил корректно
+func _on_roll_charges_changed_from_player(_current: int, _max_val: int, _is_penalty: bool) -> void:
+	# Мы просто вызываем обновление UI, так как оно берет данные из переменной player
+	_update_roll_pips()
 func _setup_progress_bar(bar: TextureProgressBar, tex: Texture2D) -> void:
 	bar.texture_under = tex
 	bar.texture_progress = tex

@@ -41,7 +41,7 @@ func _process(delta: float):
 		player_ref = get_tree().get_first_node_in_group("player")
 		if player_ref == null: return
 
-	if not is_instance_valid(player_ref):
+	if not is_instance_valid(player_ref) or not player_ref.is_inside_tree():
 		player_ref = null
 		return
 

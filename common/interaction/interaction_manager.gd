@@ -13,18 +13,17 @@ func unregister_area(area: InteractionArea):
 	active_areas.erase(area)
 
 func _process(_delta):
-	# 1. Очищаем список от удаленных объектов (на всякий случай)
 	active_areas = active_areas.filter(func(area): return is_instance_valid(area))
 	
 	if active_areas.is_empty():
 		return
 
-	# 2. Проверяем игрока ДО сортировки
+	# --- ЛЕНИВЫЙ ПОИСК ИГРОКА (С ОБНОВЛЕНИЕМ) ---
 	if not is_instance_valid(player):
 		player = get_tree().get_first_node_in_group("player")
-		return # Если игрока всё еще нет, сортировать нет смысла
+		if not player: return 
+	# --------------------------------------------
 
-	# 3. Сортируем только если областей больше одной
 	if active_areas.size() > 1:
 		var p_pos = player.global_position
 		active_areas.sort_custom(func(a, b):
@@ -33,6 +32,5 @@ func _process(_delta):
 			return dist_a < dist_b
 		)
 	
-	# 4. Взаимодействие с ближайшим
-	if Input.is_action_just_pressed("interact"):
+	if Input.is_action_just_pressed("interact"): # Убедись, что action называется "interact" в настройках
 		active_areas[0].interact.call()

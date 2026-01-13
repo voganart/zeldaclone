@@ -83,6 +83,9 @@ var current_rm_velocity: Vector3 = Vector3.ZERO
 
 var root_motion_speed_factor: float = 1.0
 
+# --- НОВОЕ: Кэш камеры ---
+var cached_camera: Camera3D = null
+
 # Геттеры свойств компонента Movement
 var base_speed: float:
 	get: return movement_component.walk_speed 
@@ -388,8 +391,43 @@ func trigger_hit() -> void:
 	
 # --- Helpers ---
 func get_movement_vector() -> Vector2:
-	if input_handler: return input_handler.move_vector
-	return Vector2.ZERO
+	if not input_handler: return Vector2.ZERO
+	
+	var raw_input = input_handler.move_vector
+	if raw_input.length_squared() < 0.01: return Vector2.ZERO
+		
+	# --- КАМЕРА: Кэширование и Валидация ---
+	if not is_instance_valid(cached_camera):
+		cached_camera = get_viewport().get_camera_3d()
+	
+	# Если вьюпорт вернул null (редко, но бывает), пробуем найти в группе
+	if not cached_camera:
+		cached_camera = get_tree().get_first_node_in_group("main_camera")
+		
+	# Если всё равно нет камеры, бежим по глобальным осям (Arcade Fallback)
+	if not cached_camera:
+		# print_debug("Player: No active camera found! Using global axes.")
+		return raw_input
+	
+	# --- РАСЧЕТ ОТНОСИТЕЛЬНО КАМЕРЫ ---
+	var cam_basis = cached_camera.global_transform.basis
+	
+	var forward = -cam_basis.z
+	var right = cam_basis.x
+	
+	forward.y = 0
+	right.y = 0
+	
+	forward = forward.normalized()
+	right = right.normalized()
+	
+	# Если вектора нулевые (камера смотрит строго вверх/вниз), фолбек на глобальные
+	if forward.is_zero_approx() or right.is_zero_approx():
+		return raw_input
+	
+	var direction_3d = (forward * -raw_input.y) + (right * raw_input.x)
+	
+	return Vector2(direction_3d.x, direction_3d.z)
 
 func apply_gravity(delta: float) -> void:
 	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming: return
@@ -410,7 +448,12 @@ func rot_char(delta: float) -> void:
 	if is_knockback_stun: return
 	var speed_mod = 1.0
 	if is_attacking: speed_mod = attack_rotation_influence
-	movement_component.rotate_towards(delta, input_handler.move_vector, speed_mod)
+	
+	# Получаем вектор движения, который УЖЕ учитывает поворот камеры (см. get_movement_vector)
+	var move_dir = get_movement_vector()
+	
+	# Вращаем персонажа к этому вектору
+	movement_component.rotate_towards(delta, move_dir, speed_mod)
 
 func tilt_character(delta: float) -> void:
 	movement_component.tilt_character(delta, _mesh, is_running)
