@@ -1,0 +1,41 @@
+[gd_scene load_steps=8 format=3 uid="uid://bka6ee6o3ddtw"]
+
+[ext_resource type="Material" uid="uid://bgew5q45iomvr" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.tres" id="1_lflr2"]
+[ext_resource type="Shader" uid="uid://bsl5od8uy2qhb" path="res://assets/shaders/Cloud_volumetric/cloud_billboard.gdshader" id="2_lflr2"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_4pu8x"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_lflr2"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_3bx7t"]
+frequency = 0.0038
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_qbj3r"]
+noise = SubResource("FastNoiseLite_3bx7t")
+seamless = true
+seamless_blend_skirt = 0.497
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nmgs7"]
+render_priority = 0
+shader = ExtResource("2_lflr2")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_qbj3r")
+shader_parameter/softness = 0.674000032015
+shader_parameter/color_light = Color(1, 1, 1, 1)
+shader_parameter/color_shadow = Color(0.53333336, 0.654902, 1, 1)
+shader_parameter/absorption = 3.0
+shader_parameter/density_multiplier = 2.0
+shader_parameter/fade_distance = 300.00001425
+shader_parameter/fade_margin = 50.0
+
+[node name="Cloud" type="Node3D"]
+
+[node name="VolumetricMesh" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = SubResource("BoxMesh_4pu8x")
+surface_material_override/0 = ExtResource("1_lflr2")
+
+[node name="BillboardMesh" type="MeshInstance3D" parent="."]
+visible = false
+cast_shadow = 0
+mesh = SubResource("QuadMesh_lflr2")
+surface_material_override/0 = SubResource("ShaderMaterial_nmgs7")

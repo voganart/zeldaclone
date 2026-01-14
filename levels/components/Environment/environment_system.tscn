@@ -1,0 +1,290 @@
+[gd_scene load_steps=18 format=3 uid="uid://dtyjvmt5s2rqu"]
+
+[ext_resource type="Script" uid="uid://c15f1fl3bcy6p" path="res://levels/components/Environment/DayNightCycle.gd" id="1_wx41k"]
+[ext_resource type="Material" uid="uid://bgew5q45iomvr" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.tres" id="2_3t2yg"]
+[ext_resource type="Shader" uid="uid://bny7nkedp7v2b" path="res://assets/shaders/sky_gradient.gdshader" id="3_84c8d"]
+[ext_resource type="Script" uid="uid://bkxenrfgp6a4l" path="res://levels/components/CloudManager/CloudManager.gd" id="4_qt6g3"]
+[ext_resource type="PackedScene" uid="uid://bka6ee6o3ddtw" path="res://assets/shaders/Cloud_volumetric/cloud.tscn" id="5_et50k"]
+
+[sub_resource type="Gradient" id="Gradient_c0er0"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1, 1, 0.6, 0.3, 1, 1, 0.95, 0.9, 1, 1, 0.45, 0.2, 1, 0.2, 0.1, 0.3, 1, 0, 0, 0, 1)
+
+[sub_resource type="Curve" id="Curve_ueypv"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.22, 0), 0.0, 0.0, 0, 0, Vector2(0.26, 0.5), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(0.74, 0.5), 0.0, 0.0, 0, 0, Vector2(0.78, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 7
+
+[sub_resource type="Gradient" id="Gradient_cktag"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0.6, 0.7, 0.9, 1, 0.6, 0.7, 0.9, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.7, 0.9, 1)
+
+[sub_resource type="Curve" id="Curve_1ah6d"]
+_data = [Vector2(0, 0.4), 0.0, 0.0, 0, 0, Vector2(0.2, 0.4), 0.0, 0.0, 0, 0, Vector2(0.25, 0), 0.0, 0.0, 0, 0, Vector2(0.75, 0), 0.0, 0.0, 0, 0, Vector2(0.8, 0.4), 0.0, 0.0, 0, 0, Vector2(1, 0.4), 0.0, 0.0, 0, 0]
+point_count = 6
+
+[sub_resource type="Gradient" id="Gradient_hr8er"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0.05, 0.1, 0.25, 1, 0.1, 0.15, 0.3, 1, 0.2, 0.5, 0.8, 1, 0, 0.45, 0.85, 1, 0.2, 0.1, 0.4, 1, 0.1, 0.1, 0.25, 1, 0.05, 0.1, 0.25, 1)
+
+[sub_resource type="Gradient" id="Gradient_2fo6c"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0.1, 0.2, 0.35, 1, 0.15, 0.2, 0.35, 1, 1, 0.8, 0.5, 1, 0.4, 0.75, 0.95, 1, 1, 0.3, 0.2, 1, 0.2, 0.15, 0.3, 1, 0.1, 0.2, 0.35, 1)
+
+[sub_resource type="Gradient" id="Gradient_r8j8t"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0.05, 0.1, 0.15, 1, 0.1, 0.1, 0.15, 1, 0.2, 0.3, 0.4, 1, 0.25, 0.35, 0.45, 1, 0.2, 0.1, 0.2, 1, 0.05, 0.1, 0.15, 1, 0.05, 0.1, 0.15, 1)
+
+[sub_resource type="Gradient" id="Gradient_ykjdn"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0.15, 0.2, 0.3, 1, 0.2, 0.2, 0.3, 1, 1, 0.85, 0.7, 1, 1, 1, 1, 1, 1, 0.6, 0.3, 1, 0.25, 0.2, 0.35, 1, 0.15, 0.2, 0.3, 1)
+
+[sub_resource type="Gradient" id="Gradient_nl450"]
+offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
+colors = PackedColorArray(0.05, 0.08, 0.15, 1, 0.05, 0.05, 0.1, 1, 0.3, 0.3, 0.5, 1, 0.25, 0.35, 0.55, 1, 0.25, 0.1, 0.3, 1, 0.1, 0.05, 0.15, 1, 0.05, 0.08, 0.15, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0iwge"]
+shader = ExtResource("3_84c8d")
+shader_parameter/sky_top_color = Color(0, 0.45, 0.85, 1)
+shader_parameter/sky_horizon_color = Color(0.4, 0.75, 0.95, 1)
+shader_parameter/sky_bottom_color = Color(0.25, 0.35, 0.45, 1)
+shader_parameter/horizon_curve = 0.6
+shader_parameter/stars_intensity = 0.0
+shader_parameter/stars_speed = 2.0
+shader_parameter/stars_density = 0.026000001235
+
+[sub_resource type="Sky" id="Sky_eidw4"]
+sky_material = SubResource("ShaderMaterial_0iwge")
+
+[sub_resource type="Environment" id="Environment_dp0gn"]
+background_mode = 2
+sky = SubResource("Sky_eidw4")
+ambient_light_source = 3
+ambient_light_color = Color(0, 0.77411205, 1.102, 1)
+tonemap_mode = 2
+ssr_enabled = true
+ssao_enabled = true
+ssao_radius = 0.5
+ssao_intensity = 3.0
+ssao_power = 3.2153225
+ssil_enabled = true
+ssil_intensity = 2.0
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+glow_enabled = true
+glow_normalized = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_albedo = Color(0.4509804, 0.72156864, 1, 1)
+volumetric_fog_sky_affect = 0.5
+adjustment_enabled = true
+adjustment_contrast = 1.2
+
+[node name="EnvironmentSystem" type="Node3D" node_paths=PackedStringArray("sun_light", "moon_light", "world_env")]
+script = ExtResource("1_wx41k")
+is_playing = false
+sun_light = NodePath("Sun")
+moon_light = NodePath("MoonLight")
+world_env = NodePath("WorldEnvironment")
+cloud_material = ExtResource("2_3t2yg")
+sun_color = SubResource("Gradient_c0er0")
+sun_energy = SubResource("Curve_ueypv")
+moon_color = SubResource("Gradient_cktag")
+moon_energy = SubResource("Curve_1ah6d")
+sky_top_color = SubResource("Gradient_hr8er")
+sky_horizon_color = SubResource("Gradient_2fo6c")
+sky_bottom_color = SubResource("Gradient_r8j8t")
+cloud_light_color = SubResource("Gradient_ykjdn")
+cloud_shadow_color = SubResource("Gradient_nl450")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." groups=["world_env"]]
+environment = SubResource("Environment_dp0gn")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.5, -2.1855694e-08, 0, -4.371139e-08, 1, -0.5, -0.8660254, -3.7855173e-08, 13, 6, 0)
+light_color = Color(1, 0.95, 0.9, 1)
+light_indirect_energy = 3.0
+light_angular_distance = 0.3
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_blur = 5.0
+directional_shadow_mode = 0
+directional_shadow_split_1 = 0.5
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 244.5
+directional_shadow_pancake_size = 10.0
+
+[node name="MoonLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, 0.5, -2.1855694e-08, 0, -4.371139e-08, -1, -0.5, 0.8660254, -3.7855173e-08, 13, 6, 0)
+light_color = Color(0, 0, 0, 1)
+light_energy = 0.0
+light_indirect_energy = 3.0
+light_angular_distance = 0.3
+shadow_bias = 0.01
+shadow_blur = 5.0
+directional_shadow_mode = 0
+directional_shadow_split_1 = 0.5
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 244.5
+directional_shadow_pancake_size = 10.0
+
+[node name="CloudManager" type="Node3D" parent="."]
+script = ExtResource("4_qt6g3")
+cloud_scene = ExtResource("5_et50k")
+cloud_count = 50
+rotation_speed = 1.0
+spawn_radius = 150.0
+shell_thickness = 50.0
+cluster_count = 40
+cluster_spread = 1.0
+scale_min = Vector3(40, 20, 80)
+scale_max = Vector3(100, 80, 150)
+
+[node name="Cloud" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-40.972355, 0, 114.67732, 0, 27.445583, 0, -85.40965, 0, -55.012516, 37.357975, 127.30825, 94.36838)
+
+[node name="@Node3D@44687" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(39.424286, 0, 83.10085, 0, 27.990414, 0, -39.49624, 0, 82.94946, -36.953983, 169.53159, 19.851204)
+
+[node name="@Node3D@44688" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-25.306063, 0, -110.12193, 0, 57.586567, 0, 82.512474, 0, -33.773712, -3.0563266, -139.94167, -88.798996)
+
+[node name="@Node3D@44689" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-12.59222, 0, 112.03564, 0, 54.92147, 0, -44.32998, 0, -31.824455, -6.4430428, 20.473783, 167.4049)
+
+[node name="@Node3D@44690" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-59.628635, 0, 60.691525, 0, 61.597248, 0, -61.806164, 0, -58.553265, 29.512957, -132.73059, 49.14391)
+
+[node name="@Node3D@44691" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(46.986965, 0, -19.453892, 0, 53.41546, 0, 8.832548, 0, 103.48987, -115.77479, 65.94695, -33.918976)
+
+[node name="@Node3D@44692" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(45.80467, 0, -15.576288, 0, 31.630188, 0, 7.188791, 0, 99.247116, -125.04743, -18.790758, -45.36858)
+
+[node name="@Node3D@44693" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-88.13981, 0, -14.370138, 0, 71.55271, 0, 15.936785, 0, -79.47533, 128.00987, 64.276726, -20.864779)
+
+[node name="@Node3D@44694" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-29.35877, 0, -118.86293, 0, 30.799612, 0, 84.50917, 0, -41.293385, 40.835766, 4.5795918, -143.2442)
+
+[node name="@Node3D@44695" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(61.210667, 0, -1.7872108, 0, 32.32787, 0, 0.76621884, 0, 142.7743, -67.643196, 153.81448, 5.002463)
+
+[node name="@Node3D@44696" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-36.134068, 0, 104.11218, 0, 22.840994, 0, -74.80876, 0, -50.28818, 31.781906, 128.85655, 67.51028)
+
+[node name="@Node3D@44697" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-50.245895, 0, -77.8228, 0, 44.29289, 0, 33.79931, 0, -115.69102, 124.20076, 15.516406, -75.40196)
+
+[node name="@Node3D@44698" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(38.25037, 0, -77.08253, 0, 78.604645, 0, 73.58321, 0, 40.0694, -75.071144, 81.28781, -97.51698)
+
+[node name="@Node3D@44699" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-0.8890358, 0, 140.58353, 0, 41.305737, 0, -44.59977, 0, -2.8023417, 9.774905, -90.17675, 89.54522)
+
+[node name="@Node3D@44700" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(5.687131, 0, -96.70577, 0, 21.653107, 0, 72.58154, 0, 7.5773864, -25.843975, 49.773643, -132.17)
+
+[node name="@Node3D@44701" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(55.16512, 0, 70.45825, 0, 64.355705, 0, -30.652803, 0, 126.80203, -108.07344, -114.91446, 55.659298)
+
+[node name="@Node3D@44702" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(80.11579, 0, -30.094116, 0, 49.06731, 0, 19.167158, 0, 125.7888, -134.40492, -22.700739, -25.336775)
+
+[node name="@Node3D@44703" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-27.032442, 0, 137.10225, 0, 22.752863, 0, -73.35527, 0, -50.524094, 10.497071, -153.86368, 32.79218)
+
+[node name="@Node3D@44704" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(10.0643835, 0, -94.62025, 0, 50.951153, 0, 56.43541, 0, 16.87406, -12.32065, -151.87917, -47.016068)
+
+[node name="@Node3D@44705" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-14.953613, 0, 131.17397, 0, 62.861042, 0, -76.35872, 0, -25.68829, 0.7546395, 1.9938961, 161.68047)
+
+[node name="@Node3D@44706" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(45.79404, 0, 114.08487, 0, 59.6508, 0, -66.62129, 0, 78.41948, -28.047373, 122.380646, 100.61676)
+
+[node name="@Node3D@44707" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-83.50476, 0, 45.79666, 0, 55.723972, 0, -33.334675, 0, -114.72256, 129.349, -59.89245, 58.252457)
+
+[node name="@Node3D@44708" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(48.938652, 0, -40.264217, 0, 24.186783, 0, 18.698208, 0, 105.38317, -34.968906, 118.45511, -27.536833)
+
+[node name="@Node3D@44709" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(52.890297, 0, -67.54206, 0, 55.999264, 0, 57.203197, 0, 62.44965, -84.26421, -36.715965, -103.90485)
+
+[node name="@Node3D@44710" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(37.19497, 0, -78.71806, 0, 54.23366, 0, 31.09241, 0, 94.16819, -92.894066, 34.463387, -143.69983)
+
+[node name="@Node3D@44711" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(34.463158, 0, -122.58371, 0, 39.59328, 0, 63.318478, 0, 66.7202, -97.11824, 81.29002, -87.455284)
+
+[node name="@Node3D@44712" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-41.032574, 0, 39.132133, 0, 26.030434, 0, -16.153496, 0, -99.40215, 111.67879, -45.7527, 96.716835)
+
+[node name="@Node3D@44713" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-30.908363, 0, -93.014404, 0, 29.701603, 0, 77.16606, 0, -37.256313, 47.488663, -12.199542, -126.68729)
+
+[node name="@Node3D@44714" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(17.317228, 0, -136.19493, 0, 44.999, 0, 58.901657, 0, 40.041637, -75.85902, 74.32327, -128.28474)
+
+[node name="@Node3D@44715" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-31.093855, 0, 70.66086, 0, 48.364937, 0, -43.196392, 0, -50.863472, 78.9755, 74.86782, 74.80695)
+
+[node name="@Node3D@44716" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(41.507526, 0, 123.310905, 0, 48.28974, 0, -82.38306, 0, 62.128437, -64.338776, 55.77095, 94.31015)
+
+[node name="@Node3D@44717" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-28.668457, 0, -104.87805, 0, 72.96247, 0, 42.340675, 0, -71.01191, 98.55036, 22.94171, -89.72352)
+
+[node name="@Node3D@44718" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(84.81352, 0, -39.048748, 0, 53.06026, 0, 38.63436, 0, 85.72322, -142.54742, 59.45155, -30.667475)
+
+[node name="@Node3D@44719" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-31.70315, 0, -124.52719, 0, 56.37371, 0, 55.67222, 0, -70.91336, 74.56536, -32.431957, -121.90249)
+
+[node name="@Node3D@44720" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(65.39232, 0, 44.437595, 0, 65.60609, 0, -41.52922, 0, 69.97187, -79.83844, -48.521954, 95.31343)
+
+[node name="@Node3D@44721" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(45.650696, 0, -78.82897, 0, 79.62081, 0, 61.025974, 0, 58.968292, -56.792843, -88.433334, -75.92878)
+
+[node name="@Node3D@44722" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(46.930138, 0, 81.37209, 0, 55.840084, 0, -32.610897, 0, 117.10207, -76.48637, 131.15613, 58.787216)
+
+[node name="@Node3D@44723" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-51.44186, 0, -100.53386, 0, 40.168095, 0, 71.900604, 0, -71.92775, 9.169131, -160.32852, -9.897806)
+
+[node name="@Node3D@44724" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-70.78179, 0, -52.50608, 0, 24.692999, 0, 39.91909, 0, -93.100174, 162.07265, -18.585213, -51.082733)
+
+[node name="@Node3D@44725" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(66.339775, 0, 16.118134, 0, 71.88146, 0, -11.725838, 0, 91.1895, -144.23366, 10.73157, 54.332893)
+
+[node name="@Node3D@44726" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-39.9687, 0, 9.788434, 0, 48.35052, 0, -2.7826555, 0, -140.59627, 148.95937, -34.465683, 41.76514)
+
+[node name="@Node3D@44727" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(30.047651, 0, 130.34935, 0, 32.357944, 0, -70.8869, 0, 55.252693, -37.030174, -145.22992, 49.880337)
+
+[node name="@Node3D@44728" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-6.542538, 0, 86.549644, 0, 65.880455, 0, -55.177383, 0, -10.262436, 31.199274, -104.91579, 74.33377)
+
+[node name="@Node3D@44729" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-0.01019581, 0, -147.10657, 0, 30.820328, 0, 68.78796, 0, -0.021804262, -7.408167, -34.783638, -123.04839)
+
+[node name="@Node3D@44730" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(11.217692, 0, 92.243286, 0, 75.811485, 0, -98.97119, 0, 10.455131, -36.954865, 88.15921, 101.304794)
+
+[node name="@Node3D@44731" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-19.384922, 0, 109.23236, 0, 40.618927, 0, -88.0062, 0, -24.06036, 65.89252, 10.14704, 127.41351)
+
+[node name="@Node3D@44732" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(72.73057, 0, -74.12765, 0, 74.92094, 0, 59.1074, 0, 91.21271, -111.884026, 114.64213, -54.853104)
+
+[node name="@Node3D@44733" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(53.35688, 0, -72.21878, 0, 75.05926, 0, 44.451385, 0, 86.687256, -36.452515, 169.92276, -14.618143)
+
+[node name="@Node3D@44734" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-60.55728, 0, -61.58187, 0, 34.70946, 0, 66.566986, 0, -56.022224, 84.67671, -44.729397, -84.363464)
+
+[node name="@Node3D@44735" type="Node3D" parent="CloudManager" instance=ExtResource("5_et50k")]
+transform = Transform3D(-22.935389, 0, -119.765175, 0, 58.73238, 0, 61.942604, 0, -44.345257, 62.45558, -100.99734, -90.53975)
