@@ -7,8 +7,8 @@ extends CharacterBody3D
 # EXPORTS & CONFIG
 # ============================================================================
 @export_group("Respawn Settings")
-@export var fall_limit_y: float = -20.0 ## Высота, при которой считается, что игрок упал
-@export var fall_damage: float = 1.0 ## Урон за падение
+@export var fall_limit_y: float = -20.0 
+@export var fall_damage: float = 1.0 
 
 @export_group("Idle Animations")
 @export var enable_idle_dance: bool = true 
@@ -22,7 +22,6 @@ extends CharacterBody3D
 @export var auto_run_latch_time: float = 0.3
 
 @export_group("Animation Blending")
-# walk_run_blend_smoothing удален, так как теперь мы берем Acceleration/Friction из компонента
 @export var blend_value_walk: float = 0.5 
 @export var blend_value_run: float = 1.0
 @export var stopping_threshold: float = 0.6 
@@ -58,7 +57,7 @@ extends CharacterBody3D
 @onready var shape_cast: ShapeCast3D = $RollSafetyCast
 
 var last_safe_position: Vector3 = Vector3.ZERO
-var safe_pos_timer: float = 0.0 # Таймер, чтобы не сохранять позицию каждую милисекунду
+var safe_pos_timer: float = 0.0 
 
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
@@ -83,7 +82,6 @@ var current_rm_velocity: Vector3 = Vector3.ZERO
 
 var root_motion_speed_factor: float = 1.0
 
-# --- НОВОЕ: Кэш камеры ---
 var cached_camera: Camera3D = null
 
 # Геттеры свойств компонента Movement
@@ -189,7 +187,7 @@ var roll_interval_timer: float:
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
-	last_safe_position = global_position # Стартовая точка безопасна
+	last_safe_position = global_position 
 	movement_component.init(self)
 	combat_component.init(self)
 	
@@ -211,7 +209,10 @@ func _process(delta: float) -> void:
 		grass_manager.set_player_position(global_position)
 
 func _physics_process(delta: float) -> void:
+	# 1. ОБРАБОТКА ROOT MOTION
+	var is_root_motion = false
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
+		is_root_motion = true
 		var rm_pos = anim_controller.get_root_motion_position()
 		var rm_rot = anim_controller.get_root_motion_rotation()
 		
@@ -229,42 +230,54 @@ func _physics_process(delta: float) -> void:
 			
 			if state_name == "roll" and roll_control > 0.0:
 				var input_dir = get_movement_vector() 
-				
 				if input_dir.length_squared() > 0.01:
 					var target_angle = atan2(input_dir.x, input_dir.y)
 					var steer_speed = movement_component.rotation_speed * roll_control
 					rotation.y = lerp_angle(rotation.y, target_angle, steer_speed * delta)
+			
 			var velocity_vector = (global_transform.basis * rm_pos) / delta
 			current_rm_velocity.x = velocity_vector.x * root_motion_speed_factor
 			current_rm_velocity.z = velocity_vector.z * root_motion_speed_factor
 	else:
 		current_rm_velocity = Vector3.ZERO
 
+	# 2. KNOCKBACK STUN
 	if is_knockback_stun:
 		apply_gravity(delta)
 		velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 5.0 * delta)
 		move_and_slide()
-		# Для стана тоже полезно, чтобы не застрял в углу при откидывании
-		_fix_wall_stuck() 
 		return
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	if state_machine.current_state and state_machine.current_state.is_root_motion:
+	# 3. ПРИМЕНЕНИЕ СКОРОСТИ (ГИБРИДНЫЙ МЕТОД)
+	if is_root_motion:
 		velocity.x = current_rm_velocity.x
 		velocity.z = current_rm_velocity.z
+		
+		# --- ФИКС ВИЗУАЛА СТЕНЫ ---
+		# Если мы используем Root Motion, но уперлись в стену, анимация замедлится (см. handle_move_animation).
+		# Это приведет к тому, что current_rm_velocity станет почти 0.
+		# Чтобы не застрять, мы должны применить "ручную" силу, если игрок все еще жмет кнопку.
+		if is_on_wall() and current_movement_blend < 0.1 and input_handler.move_vector.length() > 0.1:
+			# Получаем направление, куда игрок ХОЧЕТ идти (независимо от того, куда смотрит модель)
+			var manual_push = get_movement_vector() # Vector2 относит. камеры
+			if manual_push.length_squared() > 0.01:
+				# Применяем небольшую скорость (2.0 достаточно для скольжения, но не слишком быстро)
+				var push_vec3 = Vector3(manual_push.x, 0, manual_push.y).normalized() * 2.0
+				velocity.x = push_vec3.x
+				velocity.z = push_vec3.z
+		# ---------------------------
+		
 		apply_gravity(delta)
 		move_and_slide()
 	else:
 		move_and_slide()
 	
-	# <--- ВОТ ЗДЕСЬ ДОБАВЛЕН ФИКС --->
-	_fix_wall_stuck()
-	
 	movement_component.handle_pushing(is_rolling)
 
-	# 1. Обновляем безопасную позицию
+	# 4. БЕЗОПАСНАЯ ПОЗИЦИЯ И ПАДЕНИЕ
 	if is_on_floor():
 		safe_pos_timer += delta
 		if safe_pos_timer > 0.5:
@@ -273,25 +286,14 @@ func _physics_process(delta: float) -> void:
 	else:
 		safe_pos_timer = 0.0
 
-	# 2. Проверка падения
 	if global_position.y < fall_limit_y:
 		_handle_fall_respawn()
 
 func _handle_fall_respawn() -> void:
-	# Наносим урон (без отталкивания)
 	take_damage(fall_damage, Vector3.ZERO)
-	
-	# Если умер от урона - ничего не делаем, сработает _on_died
-	if health_component.current_health <= 0:
-		return
-
-	# Телепортируем обратно
+	if health_component.current_health <= 0: return
 	global_position = last_safe_position
-	velocity = Vector3.ZERO # Сбрасываем скорость падения
-	
-	# Визуал: можно добавить затемнение экрана на долю секунды
-	# Для этого нужен доступ к HUD или SceneManager
-	# Пока просто мигнем
+	velocity = Vector3.ZERO 
 	is_invincible = true
 	await get_tree().create_timer(1.0).timeout
 	is_invincible = false
@@ -314,29 +316,30 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 		target_movement_blend = 0.0
 		target_time_scale_rm = 1.0
 	
+	# --- НОВАЯ ЛОГИКА ДЛЯ СТЕНЫ ---
+	# Если мы на стене и жмем кнопку:
 	if has_input and is_on_wall():
-		var real_horizontal_speed = Vector2(velocity.x, velocity.z).length()
-		if real_horizontal_speed < 0.5:
-			target_movement_blend = 0.0
-	
-	# === ИСПРАВЛЕНИЕ: ПРИВЯЗКА ФИЗИКИ К ROOT MOTION ===
-	# Теперь переменные Acceleration и Friction из MovementComponent реально влияют на инерцию.
+		# 1. Получаем реальную скорость (насколько быстро нас пускает стена)
+		var real_vel = get_real_velocity()
+		var real_speed_h = Vector2(real_vel.x, real_vel.z).length()
+		
+		# 2. Вычисляем коэффициент (0.0 - стоим, 1.0 - полная скорость)
+		# Используем run_speed как эталон максимума
+		var wall_factor = clamp(real_speed_h / movement_component.run_speed, 0.0, 1.0)
+		
+		# 3. Ограничиваем целевой бленд этим фактором.
+		# Если стена остановила нас полностью (head-on), wall_factor = 0 -> blend = 0 (Idle).
+		# Если мы скользим (glancing), wall_factor > 0 -> blend > 0 (Walk/Slow Run).
+		target_movement_blend = min(target_movement_blend, wall_factor)
+	# ------------------------------
 	
 	var change_rate = 0.0
-	
-	# Если мы разгоняемся (текущий бленд меньше цели)
 	if target_movement_blend > current_movement_blend:
-		# Нормализуем ускорение относительно максимальной скорости бега
-		# Пример: Accel 8.0 / RunSpeed 4.5 = ~1.7 единиц бленда в секунду
 		change_rate = movement_component.acceleration / max(movement_component.run_speed, 0.1)
 	else:
-		# Если тормозим
-		# Пример: Friction 10.0 / RunSpeed 4.5 = ~2.2 единиц бленда в секунду
 		change_rate = movement_component.friction / max(movement_component.run_speed, 0.1)
 	
-	# Применяем calculated rate
 	current_movement_blend = move_toward(current_movement_blend, target_movement_blend, change_rate * delta)
-	# =================================================
 	
 	if current_movement_blend < 0.01: current_movement_blend = 0.0
 	
@@ -400,37 +403,25 @@ func get_movement_vector() -> Vector2:
 	var raw_input = input_handler.move_vector
 	if raw_input.length_squared() < 0.01: return Vector2.ZERO
 		
-	# --- КАМЕРА: Кэширование и Валидация ---
 	if not is_instance_valid(cached_camera):
 		cached_camera = get_viewport().get_camera_3d()
-	
-	# Если вьюпорт вернул null (редко, но бывает), пробуем найти в группе
 	if not cached_camera:
 		cached_camera = get_tree().get_first_node_in_group("main_camera")
-		
-	# Если всё равно нет камеры, бежим по глобальным осям (Arcade Fallback)
 	if not cached_camera:
-		# print_debug("Player: No active camera found! Using global axes.")
 		return raw_input
 	
-	# --- РАСЧЕТ ОТНОСИТЕЛЬНО КАМЕРЫ ---
 	var cam_basis = cached_camera.global_transform.basis
-	
 	var forward = -cam_basis.z
 	var right = cam_basis.x
-	
 	forward.y = 0
 	right.y = 0
-	
 	forward = forward.normalized()
 	right = right.normalized()
 	
-	# Если вектора нулевые (камера смотрит строго вверх/вниз), фолбек на глобальные
 	if forward.is_zero_approx() or right.is_zero_approx():
 		return raw_input
 	
 	var direction_3d = (forward * -raw_input.y) + (right * raw_input.x)
-	
 	return Vector2(direction_3d.x, direction_3d.z)
 
 func apply_gravity(delta: float) -> void:
@@ -453,10 +444,7 @@ func rot_char(delta: float) -> void:
 	var speed_mod = 1.0
 	if is_attacking: speed_mod = attack_rotation_influence
 	
-	# Получаем вектор движения, который УЖЕ учитывает поворот камеры (см. get_movement_vector)
 	var move_dir = get_movement_vector()
-	
-	# Вращаем персонажа к этому вектору
 	movement_component.rotate_towards(delta, move_dir, speed_mod)
 
 func tilt_character(delta: float) -> void:
@@ -532,16 +520,12 @@ func _check_attack_hit() -> void:
 
 func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool = false) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
-	
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
 	sfx_hurt.play_random()
-	
 	if has_hyper_armor: return
-	
 	trigger_hit()
-	
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 	is_knockback_stun = true
@@ -556,9 +540,9 @@ func _on_died() -> void:
 	if is_in_group(GameConstants.GROUP_PLAYER):
 		remove_from_group(GameConstants.GROUP_PLAYER)
 	state_machine.change_state(GameConstants.STATE_DEAD)
-	
 	await get_tree().create_timer(2.0).timeout
 	SceneManager.open_game_over()
+
 func _update_stun_timer(delta: float) -> void:
 	if current_knockback_timer > 0:
 		current_knockback_timer -= delta
@@ -584,40 +568,10 @@ func unlock_ability(ability_name: String) -> void:
 	print("Player unlocking: ", ability_name)
 	match ability_name:
 		"roll_ability":
-			if roll_ability:
-				roll_ability.is_unlocked = true
-				# Сообщаем UI (если есть такая логика)
-		
+			if roll_ability: roll_ability.is_unlocked = true
 		"double_jump":
-			if movement_component:
-				movement_component.unlock_double_jump()
-				
+			if movement_component: movement_component.unlock_double_jump()
 		"ground_slam":
-			if ground_slam_ability:
-				ground_slam_ability.is_unlocked = true
-				
+			if ground_slam_ability: ground_slam_ability.is_unlocked = true
 		"air_dash":
-			if air_dash_ability:
-				air_dash_ability.is_unlocked = true
-
-func _fix_wall_stuck() -> void:
-	# 1. Если не касаемся стены - выходим
-	if not is_on_wall(): return
-	
-	# 2. Если игрок не жмет кнопки (просто стоит у стены) - выходим
-	if input_handler.move_vector.length() < 0.1: return
-
-	# 3. Получаем данные коллизии
-	var collision = get_last_slide_collision()
-	if not collision: return
-	
-	# 4. Проверяем реальную скорость перемещения (а не velocity, которая может быть большой при упоре в стену)
-	var real_speed = get_real_velocity().length()
-	
-	# 5. Если мы жмем кнопки, но почти стоим на месте (< 5 см/сек) -> значит застряли
-	if real_speed < 0.05:
-		var normal = collision.get_normal()
-		normal.y = 0 # Толкаем только горизонтально
-		
-		# 6. Принудительно телепортируем на 1 см от стены
-		global_position += normal * 0.01
+			if air_dash_ability: air_dash_ability.is_unlocked = true
