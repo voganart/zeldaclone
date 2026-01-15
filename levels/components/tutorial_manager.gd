@@ -1,4 +1,4 @@
-class_name TutorialManager # <--- ЭТА СТРОКА ОЧЕНЬ ВАЖНА
+class_name TutorialManager
 extends Node
 
 var overlay: TutorialOverlay
@@ -17,7 +17,6 @@ var step_timer: float = 0.0
 var is_active: bool = false
 
 func _ready() -> void:
-	# Выключаем процесс, пока Level_01 не вызовет setup()
 	set_process(false)
 	set_process_input(false)
 
@@ -36,29 +35,46 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(player): return
 
 	match current_step:
+		# 1. ДВИЖЕНИЕ
 		Step.MOVE:
-			# Проверяем реальную скорость (больше 1 м/с)
 			if player.velocity.length() > 1.0:
 				step_timer += delta
 				if step_timer > 1.5:
 					_complete_step()
 					_start_camera_toggle_step()
 
+		# 2. СМЕНА КАМЕРЫ (F4 / Select)
 		Step.CAMERA_TOGGLE:
-			if Input.is_action_just_pressed("toggle_camera") or Input.is_key_pressed(KEY_F4):
+			if Input.is_action_just_pressed(GameConstants.INPUT_TOGGLE_CAMERA):
 				_complete_step()
 				await get_tree().create_timer(1.0).timeout
 				_start_camera_look_step()
 
+		# 3. ОБЗОР (Мышь / Стик)
 		Step.CAMERA_LOOK:
+			# А) Проверка ГЕЙМПАДА (Стик)
 			var look = Input.get_vector("camera_look_left", "camera_look_right", "camera_look_up", "camera_look_down")
-			# Если игрок крутит камерой (вектор больше 0.5)
-			if look.length() > 0.5:
+			if look.length() > 0.2:
 				step_timer += delta
-				if step_timer > 1.0:
-					_complete_step()
-					# Ждем, пока игрок дойдет до триггера прыжка
-					current_step = Step.JUMP
+			
+			# Б) Проверка МЫШИ - см. функцию _input() ниже!
+			# Мышь тоже добавляет время в step_timer.
+			
+			# Общая проверка завершения
+			if step_timer > 1.0: # Покрутил камерой 1 секунду
+				_complete_step()
+				# Дальше туториал замирает и ждет триггеров на уровне (например, прыжок)
+				current_step = Step.JUMP 
+
+func _input(event: InputEvent) -> void:
+	# Логика для МЫШИ в этапе обзора
+	if current_step == Step.CAMERA_LOOK:
+		if event is InputEventMouseMotion:
+			# Если мышь двигается достаточно быстро
+			if event.relative.length() > 2.0:
+				# Добавляем время кадра к таймеру.
+				# Событий мыши много, поэтому таймер наберется быстро.
+				step_timer += get_process_delta_time()
 
 func _complete_step():
 	if overlay: overlay.hide_prompt()
@@ -71,19 +87,19 @@ func _start_move_step():
 
 func _start_camera_toggle_step():
 	current_step = Step.CAMERA_TOGGLE
-	if overlay: overlay.show_prompt("toggle_camera", "tutorial_cam_toggle_prompt")
+	if overlay: overlay.show_prompt(GameConstants.INPUT_TOGGLE_CAMERA, "tutorial_cam_toggle_prompt")
 
 func _start_camera_look_step():
 	current_step = Step.CAMERA_LOOK
 	if overlay: overlay.show_prompt("camera", "tutorial_cam_look_prompt")
 
-# --- ПУБЛИЧНЫЕ МЕТОДЫ (для триггеров) ---
+# --- ПУБЛИЧНЫЕ МЕТОДЫ (для триггеров зон) ---
 func trigger_jump_tutorial():
-	if current_step != Step.JUMP and current_step != Step.FINISHED: return
-	if overlay: 
-		overlay.show_prompt("jump", "tutorial_jump_prompt")
-		# Скрываем через 4 секунды
-		get_tree().create_timer(4.0).timeout.connect(func(): overlay.hide_prompt())
+	# Запускаем только если мы прошли обзор камеры
+	if current_step == Step.JUMP or current_step == Step.FINISHED:
+		if overlay: 
+			overlay.show_prompt("jump", "tutorial_jump_prompt")
+			get_tree().create_timer(4.0).timeout.connect(func(): overlay.hide_prompt())
 
 func trigger_attack_tutorial():
 	if overlay:

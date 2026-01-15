@@ -2,8 +2,8 @@ class_name TutorialOverlay
 extends Control
 
 # Ссылка на вложенную сцену строки
-@onready var row = $PanelContainer/TutorialRow
-@onready var panel = $PanelContainer
+@onready var row = $MarginContainer/PanelContainer/TutorialRow
+@onready var panel = $MarginContainer/PanelContainer
 
 var current_action_name: String = ""
 var tween: Tween

@@ -38,7 +38,7 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	# Переключение режима
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F4:
+	if event.is_action_pressed(GameConstants.INPUT_TOGGLE_CAMERA):
 		set_camera_mode(!is_camera_locked)
 		return
 
