@@ -29,6 +29,7 @@ extends CharacterBody3D
 @export_group("Combat Assist")
 @export var soft_lock_range: float = 4.0 
 @export var soft_lock_angle: float = 90.0 
+@export var wall_pushback_force: float = 5.0 ## Сила отталкивания от стены при атаке
  
 # --- COMPONENTS ---
 @onready var anim_controller: AnimationController = $Components/AnimationController 
@@ -56,6 +57,9 @@ extends CharacterBody3D
 @onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
 @onready var shape_cast: ShapeCast3D = $RollSafetyCast
 
+# --- НОВОЕ: Детектор стен для атаки ---
+@onready var wall_detector: ShapeCast3D = $AttackWallDetector # Убедись, что создал узел в сцене!
+
 var last_safe_position: Vector3 = Vector3.ZERO
 var safe_pos_timer: float = 0.0 
 
@@ -79,6 +83,7 @@ var target_movement_blend: float = 0.0
 var current_time_scale: float = 1.0
 
 var current_rm_velocity: Vector3 = Vector3.ZERO
+var current_wall_push_velocity: Vector3 = Vector3.ZERO
 
 var root_motion_speed_factor: float = 1.0
 
@@ -96,7 +101,12 @@ var current_jump_count: int:
 # Геттеры для CombatComponent
 var is_attacking: bool:
 	get: return combat_component.is_attacking
-	set(val): combat_component.is_attacking = val
+	set(val): 
+		combat_component.is_attacking = val
+		# Автоматически включаем/выключаем детектор стен при смене состояния атаки
+		if wall_detector:
+			wall_detector.enabled = val 
+
 var can_attack: bool:
 	get: return combat_component.can_attack
 	set(val): combat_component.can_attack = val
@@ -251,24 +261,22 @@ func _physics_process(delta: float) -> void:
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	# 3. ПРИМЕНЕНИЕ СКОРОСТИ (ГИБРИДНЫЙ МЕТОД)
+	# 3. ПРИМЕНЕНИЕ СКОРОСТИ
 	if is_root_motion:
 		velocity.x = current_rm_velocity.x
 		velocity.z = current_rm_velocity.z
 		
-		# --- ФИКС ВИЗУАЛА СТЕНЫ ---
-		# Если мы используем Root Motion, но уперлись в стену, анимация замедлится (см. handle_move_animation).
-		# Это приведет к тому, что current_rm_velocity станет почти 0.
-		# Чтобы не застрять, мы должны применить "ручную" силу, если игрок все еще жмет кнопку.
+		# Фикс бега в стену (гибридный подход)
 		if is_on_wall() and current_movement_blend < 0.1 and input_handler.move_vector.length() > 0.1:
-			# Получаем направление, куда игрок ХОЧЕТ идти (независимо от того, куда смотрит модель)
-			var manual_push = get_movement_vector() # Vector2 относит. камеры
+			var manual_push = get_movement_vector() 
 			if manual_push.length_squared() > 0.01:
-				# Применяем небольшую скорость (2.0 достаточно для скольжения, но не слишком быстро)
 				var push_vec3 = Vector3(manual_push.x, 0, manual_push.y).normalized() * 2.0
 				velocity.x = push_vec3.x
 				velocity.z = push_vec3.z
-		# ---------------------------
+		
+		# --- ФИКС ПРОХОЖДЕНИЯ СКВОЗЬ СТЕНЫ ПРИ АТАКЕ (PUSHBACK) ---
+		_handle_wall_pushback(delta)
+		# --------------------------------------------------------
 		
 		apply_gravity(delta)
 		move_and_slide()
@@ -288,6 +296,57 @@ func _physics_process(delta: float) -> void:
 
 	if global_position.y < fall_limit_y:
 		_handle_fall_respawn()
+
+# ============================================================================
+# LOGIC: SMOOTH WALL PUSHBACK (АМОРТИЗАТОР)
+# ============================================================================
+func _handle_wall_pushback(delta: float) -> void:
+	# Если не атакуем или нет детектора - плавно гасим инерцию
+	if not is_attacking or not wall_detector:
+		current_wall_push_velocity = current_wall_push_velocity.move_toward(Vector3.ZERO, delta * 10.0)
+		velocity += current_wall_push_velocity
+		return
+	
+	wall_detector.force_shapecast_update()
+	
+	if wall_detector.is_colliding():
+		# Получаем реальную нормаль для отмены скольжения (чтобы не проходить сквозь стену)
+		var wall_normal = wall_detector.get_collision_normal(0)
+		wall_normal.y = 0 # Игнорируем пол
+		
+		# Защита от деления на ноль, если мы ударили пол
+		if wall_normal.length_squared() > 0.01:
+			wall_normal = wall_normal.normalized()
+			
+			# 1. СРЕЗАЕМ СКОРОСТЬ ВПЕРЕД (Root Motion)
+			# Если мы движемся навстречу стене, убиваем эту часть скорости
+			if velocity.dot(wall_normal) < 0:
+				velocity = velocity.slide(wall_normal)
+		
+		# 2. ОПРЕДЕЛЯЕМ НАПРАВЛЕНИЕ ОТТАЛКИВАНИЯ
+		# Вместо нормали стены берем "Зад" персонажа.
+		# В Godot +Z (basis.z) — это направление НАЗАД.
+		# Это гарантирует, что мы всегда отлетим ровно спиной назад.
+		var push_dir = -global_transform.basis.z.normalized()
+		
+		# Если ты вдруг используешь модели, где +Z это вперед, раскомментируй строку ниже:
+		# push_dir = -global_transform.basis.z.normalized() 
+		
+		push_dir.y = 0 # На всякий случай убираем высоту
+		
+		# 3. ПЛАВНЫЙ РАЗГОН НАЗАД
+		var target_push = push_dir * wall_pushback_force
+		
+		# Плавность (Acceleration) - поставь 5.0 или 10.0
+		current_wall_push_velocity = current_wall_push_velocity.move_toward(target_push, delta * 5.0)
+		
+	else:
+		# Если стена кончилась (отошли), плавно тормозим
+		current_wall_push_velocity = current_wall_push_velocity.move_toward(Vector3.ZERO, delta * 5.0)
+	
+	# Применяем итоговую силу
+	velocity += current_wall_push_velocity
+# ============================================================================
 
 func _handle_fall_respawn() -> void:
 	take_damage(fall_damage, Vector3.ZERO)
@@ -316,22 +375,11 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 		target_movement_blend = 0.0
 		target_time_scale_rm = 1.0
 	
-	# --- НОВАЯ ЛОГИКА ДЛЯ СТЕНЫ ---
-	# Если мы на стене и жмем кнопку:
 	if has_input and is_on_wall():
-		# 1. Получаем реальную скорость (насколько быстро нас пускает стена)
 		var real_vel = get_real_velocity()
 		var real_speed_h = Vector2(real_vel.x, real_vel.z).length()
-		
-		# 2. Вычисляем коэффициент (0.0 - стоим, 1.0 - полная скорость)
-		# Используем run_speed как эталон максимума
 		var wall_factor = clamp(real_speed_h / movement_component.run_speed, 0.0, 1.0)
-		
-		# 3. Ограничиваем целевой бленд этим фактором.
-		# Если стена остановила нас полностью (head-on), wall_factor = 0 -> blend = 0 (Idle).
-		# Если мы скользим (glancing), wall_factor > 0 -> blend > 0 (Walk/Slow Run).
 		target_movement_blend = min(target_movement_blend, wall_factor)
-	# ------------------------------
 	
 	var change_rate = 0.0
 	if target_movement_blend > current_movement_blend:
@@ -520,12 +568,16 @@ func _check_attack_hit() -> void:
 
 func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool = false) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
+	
 	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	if health_component: health_component.take_damage(amount)
 	$HitFlash.flash()
 	sfx_hurt.play_random()
+	
 	if has_hyper_armor: return
+	
 	trigger_hit()
+	
 	velocity += knockback_force
 	velocity.y = max(velocity.y, 2.0)
 	is_knockback_stun = true
@@ -540,9 +592,9 @@ func _on_died() -> void:
 	if is_in_group(GameConstants.GROUP_PLAYER):
 		remove_from_group(GameConstants.GROUP_PLAYER)
 	state_machine.change_state(GameConstants.STATE_DEAD)
+	
 	await get_tree().create_timer(2.0).timeout
 	SceneManager.open_game_over()
-
 func _update_stun_timer(delta: float) -> void:
 	if current_knockback_timer > 0:
 		current_knockback_timer -= delta
@@ -568,10 +620,17 @@ func unlock_ability(ability_name: String) -> void:
 	print("Player unlocking: ", ability_name)
 	match ability_name:
 		"roll_ability":
-			if roll_ability: roll_ability.is_unlocked = true
+			if roll_ability:
+				roll_ability.is_unlocked = true
+		
 		"double_jump":
-			if movement_component: movement_component.unlock_double_jump()
+			if movement_component:
+				movement_component.unlock_double_jump()
+				
 		"ground_slam":
-			if ground_slam_ability: ground_slam_ability.is_unlocked = true
+			if ground_slam_ability:
+				ground_slam_ability.is_unlocked = true
+				
 		"air_dash":
-			if air_dash_ability: air_dash_ability.is_unlocked = true
+			if air_dash_ability:
+				air_dash_ability.is_unlocked = true
