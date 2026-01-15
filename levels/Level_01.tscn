@@ -549,7 +549,7 @@ metadata/_editor_source_scene = "res://assets/models/environment/gridmap_meshlib
 transform_format = 1
 mesh = ExtResource("39_omflf")
 
-[sub_resource type="Resource" id="Resource_cktag"]
+[sub_resource type="Resource" id="Resource_nl450"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -557,20 +557,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_hr8er"]
+[sub_resource type="Resource" id="Resource_38226"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_2fo6c"]
+[sub_resource type="Resource" id="Resource_k3iq2"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_r8j8t"]
+[sub_resource type="Resource" id="Resource_d26xb"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -579,9 +579,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_ykjdn"]
+[sub_resource type="Resource" id="Resource_hq2cr"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_cktag"), SubResource("Resource_hr8er"), SubResource("Resource_2fo6c"), SubResource("Resource_r8j8t")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_nl450"), SubResource("Resource_38226"), SubResource("Resource_k3iq2"), SubResource("Resource_d26xb")])
 
 [sub_resource type="Resource" id="Resource_1ah6d"]
 script = ExtResource("25_diasq")
@@ -890,7 +890,7 @@ transform = Transform3D(0.7071067, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, 0.70710
 [node name="ProtonScatter" type="Node3D" parent="Zone02/Environment"]
 transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_ykjdn")
+modifier_stack = SubResource("Resource_hq2cr")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"

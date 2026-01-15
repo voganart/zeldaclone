@@ -88,6 +88,7 @@ level_detail_objects=""
 [gui]
 
 theme/default_theme_scale=0.9
+theme/custom="uid://dr2pg07g3aupy"
 
 [input]
 
