@@ -633,7 +633,7 @@ script = ExtResource("3_cktag")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
 [node name="PhantomCamera3D" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0, 8, 6)
+transform = Transform3D(1, 0, 0, 0, 0.8660252, 0.49999988, 0, -0.49999988, 0.8660252, 0, 8, 6)
 script = ExtResource("4_1ah6d")
 follow_mode = 6
 tween_resource = SubResource("Resource_wnpoo")
