@@ -1073,7 +1073,7 @@ transform = Transform3D(0.9999998, 0, 0, 0, 1, 0, 0, 0, 0.9999998, -12.386648, -
 transform = Transform3D(0.9999997, 0, 0, 0, 1, 0, 0, 0, 0.9999997, -8.521313, 0, 4.222124)
 
 [node name="Chest1" parent="." instance=ExtResource("36_r6k77")]
-transform = Transform3D(-0.9997683, -0.015429946, 0.015014857, -0.015890988, 0.99939054, -0.03108968, -0.01452601, -0.031321082, -0.99940383, 3.3396475, -0.0039824247, -2.3891358)
+transform = Transform3D(-1.0000001, 0, -8.742278e-08, 0, 1.0000002, 0, 8.7422784e-08, 0, -1, 1.3500497, 0, -2.3252182)
 up_velocity_min = 5.0
 up_velocity_max = 8.0
 spread_velocity = 3.0
@@ -1081,7 +1081,7 @@ launch_force_min = 4.0
 launch_force_max = 8.0
 
 [node name="Chest2" parent="." instance=ExtResource("36_r6k77")]
-transform = Transform3D(-0.9953929, 0, -0.09588045, 0, 1, 0, 0.09588045, 0, -0.9953929, 1.3500497, 1.9073486e-06, -2.3252182)
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.34, 1.9073486e-06, -2.389)
 up_velocity_min = 5.0
 up_velocity_max = 8.0
 spread_velocity = 3.0

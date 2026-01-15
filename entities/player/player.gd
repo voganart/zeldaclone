@@ -228,8 +228,6 @@ func _physics_process(delta: float) -> void:
 			global_transform = current_transform * Transform3D(Basis(rm_rot), Vector3.ZERO)
 			
 			if state_name == "roll" and roll_control > 0.0:
-				# БЫЛО: var input_dir = input_handler.move_vector
-				# СТАЛО: Используем вектор с учетом камеры
 				var input_dir = get_movement_vector() 
 				
 				if input_dir.length_squared() > 0.01:
@@ -247,6 +245,8 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 5.0 * delta)
 		move_and_slide()
+		# Для стана тоже полезно, чтобы не застрял в углу при откидывании
+		_fix_wall_stuck() 
 		return
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
@@ -259,15 +259,17 @@ func _physics_process(delta: float) -> void:
 	else:
 		move_and_slide()
 	
+	# <--- ВОТ ЗДЕСЬ ДОБАВЛЕН ФИКС --->
+	_fix_wall_stuck()
+	
 	movement_component.handle_pushing(is_rolling)
 
 	# 1. Обновляем безопасную позицию
 	if is_on_floor():
 		safe_pos_timer += delta
-		# Сохраняем позицию, только если мы стоим на земле больше 0.5 сек (чтобы не сохранить точку на краю обрыва)
 		if safe_pos_timer > 0.5:
 			last_safe_position = global_position
-			safe_pos_timer = 0.0 # Сброс, чтобы не обновлять слишком часто, но можно и оставить накапливаться
+			safe_pos_timer = 0.0
 	else:
 		safe_pos_timer = 0.0
 
@@ -597,3 +599,25 @@ func unlock_ability(ability_name: String) -> void:
 		"air_dash":
 			if air_dash_ability:
 				air_dash_ability.is_unlocked = true
+
+func _fix_wall_stuck() -> void:
+	# 1. Если не касаемся стены - выходим
+	if not is_on_wall(): return
+	
+	# 2. Если игрок не жмет кнопки (просто стоит у стены) - выходим
+	if input_handler.move_vector.length() < 0.1: return
+
+	# 3. Получаем данные коллизии
+	var collision = get_last_slide_collision()
+	if not collision: return
+	
+	# 4. Проверяем реальную скорость перемещения (а не velocity, которая может быть большой при упоре в стену)
+	var real_speed = get_real_velocity().length()
+	
+	# 5. Если мы жмем кнопки, но почти стоим на месте (< 5 см/сек) -> значит застряли
+	if real_speed < 0.05:
+		var normal = collision.get_normal()
+		normal.y = 0 # Толкаем только горизонтально
+		
+		# 6. Принудительно телепортируем на 1 см от стены
+		global_position += normal * 0.01
