@@ -6,10 +6,10 @@ uid="uid://dcnilejw2cfbd"
 
 [deps]
 
-files=["res://assets/translations/texts.ru.translation", "res://assets/translations/texts.en.translation"]
+files=["res://assets/translations/texts.en.translation", "res://assets/translations/texts.ru.translation"]
 
 source_file="res://assets/translations/texts.csv"
-dest_files=["res://assets/translations/texts.ru.translation", "res://assets/translations/texts.en.translation"]
+dest_files=["res://assets/translations/texts.en.translation", "res://assets/translations/texts.ru.translation"]
 
 [params]
 

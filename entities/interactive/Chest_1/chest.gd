@@ -81,9 +81,4 @@ func _unlock_ability_logic():
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		print("Ability UNLOCKED: ", ability_to_unlock)
-		# TODO: Здесь можно добавить вызов UI с поздравлением
-		
-		if ability_to_unlock == "air_dash" and player.air_dash_ability:
-			player.air_dash_ability.is_unlocked = true
-		elif ability_to_unlock == "ground_slam" and player.ground_slam_ability:
-			player.ground_slam_ability.is_unlocked = true
+		player.unlock_ability(ability_to_unlock)

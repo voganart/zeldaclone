@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://ce5yyn7a0hobe"]
+
+[ext_resource type="Script" uid="uid://dh84wsk4uun0o" path="res://ui/3d_prompts/interaction_hint_3d.gd" id="1_ksrto"]
+
+[node name="InteractionHint3d" type="Node3D"]
+script = ExtResource("1_ksrto")
+
+[node name="Icon" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+pixel_size = 0.002
+billboard = 1
+no_depth_test = true
+fixed_size = true
+
+[node name="Label" type="Label3D" parent="."]
+billboard = 1
+text = "Interact"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]

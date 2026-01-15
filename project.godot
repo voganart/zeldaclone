@@ -58,6 +58,7 @@ VfxPool="*res://common/autoload/VfxPool.tscn"
 GraphicsManager="*res://common/autoload/graphics_manager.gd"
 SceneManager="*res://common/autoload/scene_manager.gd"
 PlayerData="*res://common/autoload/player_data.gd"
+InputHelper="*res://common/autoload/input_helper.gd"
 
 [display]
 
@@ -173,11 +174,17 @@ camera_look_down={
 "events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":-1,"axis":3,"axis_value":1.0,"script":null)
 ]
 }
+toggle_camera={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194335,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":4,"pressure":0.0,"pressed":true,"script":null)
+]
+}
 
 [internationalization]
 
 locale/translations=PackedStringArray("res://assets/translations/texts.en.translation", "res://assets/translations/texts.ru.translation")
-locale/test="en"
+locale/test="ru"
 
 [layer_names]
 
@@ -208,10 +215,7 @@ common/physics_interpolation=true
 [rendering]
 
 textures/canvas_textures/default_texture_filter=2
-anti_aliasing/quality/msaa_2d=1
-anti_aliasing/quality/msaa_3d=1
 environment/volumetric_fog/volume_size=512
-anti_aliasing/quality/use_taa=true
 occlusion_culling/use_occlusion_culling=true
 
 [shader_globals]

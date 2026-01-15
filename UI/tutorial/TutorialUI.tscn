@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3 uid="uid://cu3kjede5cb86"]
+
+[ext_resource type="Script" uid="uid://br5kk8bgf87tc" path="res://ui/tutorial/tutorial_ui.gd" id="1_0utgl"]
+[ext_resource type="PackedScene" uid="uid://2xlqag0oa1i6" path="res://ui/tutorial/TutorialRow.tscn" id="2_kgdpk"]
+
+[node name="TutorialUi" type="Control"]
+layout_mode = 3
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+script = ExtResource("1_0utgl")
+row_scene = ExtResource("2_kgdpk")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+layout_mode = 2

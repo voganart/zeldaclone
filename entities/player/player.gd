@@ -577,3 +577,23 @@ func get_closest_nav_point() -> Vector3:
 func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()
+
+func unlock_ability(ability_name: String) -> void:
+	print("Player unlocking: ", ability_name)
+	match ability_name:
+		"roll_ability":
+			if roll_ability:
+				roll_ability.is_unlocked = true
+				# Сообщаем UI (если есть такая логика)
+		
+		"double_jump":
+			if movement_component:
+				movement_component.unlock_double_jump()
+				
+		"ground_slam":
+			if ground_slam_ability:
+				ground_slam_ability.is_unlocked = true
+				
+		"air_dash":
+			if air_dash_ability:
+				air_dash_ability.is_unlocked = true

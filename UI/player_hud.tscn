@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://bu1lpanm3apd7"]
+[gd_scene load_steps=6 format=3 uid="uid://bu1lpanm3apd7"]
 
 [ext_resource type="Script" uid="uid://374j6hiru2t7" path="res://ui/player_hud.gd" id="1_vctn3"]
 [ext_resource type="Texture2D" uid="uid://7fwdfjmywn81" path="res://assets/textures/ui/GroundSlam.png" id="2_mk51h"]
 [ext_resource type="Texture2D" uid="uid://crh0lxy4hljro" path="res://assets/textures/ui/Roll.png" id="3_0y4xh"]
 [ext_resource type="Texture2D" uid="uid://cn7nq1ds3kfix" path="res://assets/textures/ui/Heart.png" id="4_ry604"]
+[ext_resource type="PackedScene" uid="uid://d2l2i5saam18b" path="res://ui/tutorial/tutorial_overlay.tscn" id="5_7pawb"]
 
 [node name="PlayerHUD" type="Control"]
 layout_mode = 3
@@ -107,3 +108,6 @@ theme_override_constants/margin_top = -50
 [node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer"]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 2
+
+[node name="TutorialOverlay" parent="." instance=ExtResource("5_7pawb")]
+layout_mode = 1

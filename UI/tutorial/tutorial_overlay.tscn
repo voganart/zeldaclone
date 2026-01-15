@@ -1,0 +1,41 @@
+[gd_scene load_steps=4 format=3 uid="uid://d2l2i5saam18b"]
+
+[ext_resource type="Script" uid="uid://doe5vd3wf73ol" path="res://ui/tutorial/tutorial_overlay.gd" id="1_12842"]
+[ext_resource type="PackedScene" uid="uid://2xlqag0oa1i6" path="res://ui/tutorial/TutorialRow.tscn" id="2_ctibj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctibj"]
+content_margin_left = 15.0
+content_margin_top = 15.0
+content_margin_right = 15.0
+content_margin_bottom = 15.0
+bg_color = Color(0, 0, 0, 0.70000005)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[node name="TutorialOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_12842")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -77.0
+offset_top = -62.0
+offset_right = 77.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ctibj")
+
+[node name="TutorialRow" parent="PanelContainer" instance=ExtResource("2_ctibj")]
+layout_mode = 2

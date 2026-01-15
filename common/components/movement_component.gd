@@ -42,10 +42,14 @@ func _ready() -> void:
 	var p = get_parent()
 	if p and p.get_parent() is CharacterBody3D:
 		actor = p.get_parent()
-
+	max_jump_count = 1 
 func init(character: CharacterBody3D) -> void:
 	actor = character
 
+func unlock_double_jump():
+	max_jump_count = 2
+	print("MovementComponent: Double Jump Unlocked!")
+	
 func _physics_process(_delta: float) -> void:
 	if not actor: return
 	

@@ -4,6 +4,7 @@ extends Control
 
 @export_category("References")
 @export var player_path: NodePath
+@onready var tutorial_overlay: TutorialOverlay = $TutorialOverlay 
 
 @onready var pips = [
 	$ActionsContainer/VBoxContainer/RollContainer/Pip1,
