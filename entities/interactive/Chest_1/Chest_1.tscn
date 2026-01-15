@@ -1,9 +1,9 @@
-[gd_scene load_steps=21 format=3 uid="uid://tvcq0ve33rtx"]
+[gd_scene load_steps=20 format=3 uid="uid://tvcq0ve33rtx"]
 
 [ext_resource type="Script" uid="uid://363vi8q1enpq" path="res://entities/interactive/Chest_1/chest.gd" id="1_2d6lx"]
 [ext_resource type="PackedScene" uid="uid://du3p1kgaroc81" path="res://assets/models/interactive/Chest_1.glb" id="2_2d6lx"]
-[ext_resource type="Script" uid="uid://bhtun1q0dxlh2" path="res://common/interaction/interaction_area.gd" id="2_v43xn"]
 [ext_resource type="Texture2D" uid="uid://wefl13au7wey" path="res://assets/textures/vfx/fly_star.png" id="2_w6sjs"]
+[ext_resource type="PackedScene" uid="uid://bewqr6llcw7gv" path="res://common/interaction/InteractionArea.tscn" id="3_w6sjs"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_w6sjs"]
 friction = 0.0
@@ -90,8 +90,6 @@ material = SubResource("StandardMaterial3D_2d6lx")
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_w6sjs"]
 height = 1.7666016
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_m4fme"]
-
 [node name="Chest" type="Node3D" groups=["level_detail_objects"]]
 script = ExtResource("1_2d6lx")
 up_velocity_min = 2.0
@@ -126,12 +124,7 @@ omni_range = 0.782
 transform = Transform3D(-1.0184007e-08, 1, -1.7346553e-17, -1, -1.0183861e-08, 3.98984e-15, -6.938894e-18, 1.214307e-16, 1, -2.6980948e-20, 0.45798263, 3.1778813e-18)
 shape = SubResource("CapsuleShape3D_w6sjs")
 
-[node name="InteractionArea" type="Area3D" parent="."]
-script = ExtResource("2_v43xn")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 0, 0.5158441, 0)
-shape = SubResource("SphereShape3D_m4fme")
+[node name="InteractionArea" parent="." instance=ExtResource("3_w6sjs")]
 
 [node name="Chest_1" parent="." instance=ExtResource("2_2d6lx")]
 

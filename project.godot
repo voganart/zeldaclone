@@ -84,6 +84,7 @@ vfx_pool=""
 nav_region=""
 world_env=""
 level_detail_objects=""
+hud=""
 
 [gui]
 

@@ -23,7 +23,7 @@ extends Node3D
 
 func _ready():
 	if interaction_area:
-		interaction_area.interact = Callable(self, "_on_interact")
+		interaction_area.interact_callable = Callable(self, "_on_interact")
 
 func _on_interact():
 	if is_opened: return

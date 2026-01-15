@@ -1,4 +1,4 @@
-[gd_scene load_steps=92 format=4 uid="uid://e1q2o5wpoj38"]
+[gd_scene load_steps=93 format=4 uid="uid://e1q2o5wpoj38"]
 
 [ext_resource type="Script" uid="uid://d3xim38bh2dpt" path="res://levels/level_01.gd" id="1_4p2fq"]
 [ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://ui/debug_overlay/DebugOverlay.tscn" id="1_ueypv"]
@@ -34,6 +34,7 @@
 [ext_resource type="PackedScene" uid="uid://tvcq0ve33rtx" path="res://entities/interactive/Chest_1/Chest_1.tscn" id="36_r6k77"]
 [ext_resource type="PackedScene" uid="uid://dtbvpru2m570w" path="res://entities/environment/trees_generated/Tree2.tscn" id="37_d7mo5"]
 [ext_resource type="PackedScene" uid="uid://bu1lpanm3apd7" path="res://ui/player_hud.tscn" id="38_b6d53"]
+[ext_resource type="PackedScene" uid="uid://bewqr6llcw7gv" path="res://common/interaction/InteractionArea.tscn" id="38_f0gl8"]
 [ext_resource type="ArrayMesh" uid="uid://c8cionhhjm4tk" path="res://assets/models/environment/grass_Plane.res" id="39_omflf"]
 [ext_resource type="Script" uid="uid://2juaclm8gc1n" path="res://addons/simplegrasstextured/grass.gd" id="40_5jg2n"]
 [ext_resource type="Script" uid="uid://ch65agniubjdx" path="res://common/utils/occlusion_fader.gd" id="41_w7r3u"]
@@ -98,7 +99,7 @@ colors = PackedColorArray(0.10147208, 0.5, 0.05007395, 1, 0.87282026, 0.9670598,
 gradient = SubResource("Gradient_mnooe")
 fill_from = Vector2(1, 1)
 
-[sub_resource type="Resource" id="Resource_jygyi"]
+[sub_resource type="Resource" id="Resource_f0gl8"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -106,20 +107,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_f0gl8"]
+[sub_resource type="Resource" id="Resource_n6y4e"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_n6y4e"]
+[sub_resource type="Resource" id="Resource_c0er0"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_c0er0"]
+[sub_resource type="Resource" id="Resource_ueypv"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -128,9 +129,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_ueypv"]
+[sub_resource type="Resource" id="Resource_cktag"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_jygyi"), SubResource("Resource_f0gl8"), SubResource("Resource_n6y4e"), SubResource("Resource_c0er0")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_f0gl8"), SubResource("Resource_n6y4e"), SubResource("Resource_c0er0"), SubResource("Resource_ueypv")])
 
 [sub_resource type="Resource" id="Resource_aow8p"]
 script = ExtResource("25_diasq")
@@ -549,7 +550,7 @@ metadata/_editor_source_scene = "res://assets/models/environment/gridmap_meshlib
 transform_format = 1
 mesh = ExtResource("39_omflf")
 
-[sub_resource type="Resource" id="Resource_nl450"]
+[sub_resource type="Resource" id="Resource_hr8er"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -557,20 +558,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_38226"]
+[sub_resource type="Resource" id="Resource_2fo6c"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_k3iq2"]
+[sub_resource type="Resource" id="Resource_r8j8t"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_d26xb"]
+[sub_resource type="Resource" id="Resource_ykjdn"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -579,9 +580,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_hq2cr"]
+[sub_resource type="Resource" id="Resource_nl450"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_nl450"), SubResource("Resource_38226"), SubResource("Resource_k3iq2"), SubResource("Resource_d26xb")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_hr8er"), SubResource("Resource_2fo6c"), SubResource("Resource_r8j8t"), SubResource("Resource_ykjdn")])
 
 [sub_resource type="Resource" id="Resource_1ah6d"]
 script = ExtResource("25_diasq")
@@ -621,7 +622,7 @@ cloud_light_color = SubResource("Gradient_1ah6d")
 cloud_shadow_color = SubResource("Gradient_hr8er")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 6)
+transform = Transform3D(1, 0, 0, 0, 0.8660254, 0.5, 0, -0.5, 0.8660254, 0, 8, 6)
 cull_mask = 983039
 current = true
 fov = 50.0
@@ -703,7 +704,7 @@ metadata/SimpleGrassTextured = "2.0.5"
 [node name="ProtonScatter" type="Node3D" parent="Zone01/Environment"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_ueypv")
+modifier_stack = SubResource("Resource_cktag")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -903,7 +904,7 @@ transform = Transform3D(0.7071067, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, 0.70710
 [node name="ProtonScatter" type="Node3D" parent="Zone02/Environment"]
 transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_hq2cr")
+modifier_stack = SubResource("Resource_nl450")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -1010,70 +1011,70 @@ scale_max = 2.0
 ground_layer = 8
 
 [node name="Tree1" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(1.4646342, 0.06991231, -1.0088024, -0.03918682, 1.7781417, 0.06633573, 1.0104625, -0.0323775, 1.4648006, 12.01479, 0.16323471, -6.6862297)
+transform = Transform3D(1.464634, 0.06991229, -1.0088022, -0.03918682, 1.7781417, 0.06633573, 1.0104623, -0.032377493, 1.4648004, 12.01479, 0.16323471, -6.6862288)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree6" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(0.89241946, 0.045052752, 1.4001799, 0.043055966, 1.6584824, -0.08080617, -1.4002427, 0.07971008, 0.8898947, 2.587555, 0.17522812, 3.3395047)
+transform = Transform3D(0.89241934, 0.045052744, 1.4001796, 0.043055966, 1.6584824, -0.08080617, -1.4002424, 0.07971007, 0.8898946, 2.587555, 0.16773605, 3.3395042)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree5" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(1.2277368, 0.007891408, 1.419445, 0.034619678, 1.8760055, -0.040373653, -1.4190447, 0.052595425, 1.2270981, 4.1904182, 0.17322159, -14.600861)
+transform = Transform3D(1.2277366, 0.007891406, 1.4194448, 0.034619678, 1.8760055, -0.040373653, -1.4190445, 0.052595418, 1.2270979, 4.1904182, 0.17322159, -14.600859)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush1" parent="Zone02/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(0.9136752, -0.082807966, 1.4048818, 0.044093855, 1.6758565, 0.07010326, -1.4066293, -0.0012545125, 0.91473764, -0.6990814, 0.20679092, 17.519337)
+transform = Transform3D(0.91367507, -0.08280795, 1.4048816, 0.044093855, 1.6758565, 0.07010326, -1.4066291, -0.0012545122, 0.9147375, -0.6990814, 0.20679092, 17.519333)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush2" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-1.7267075, 0.0011812617, 0.70927274, -0.025582924, 1.8653843, -0.065387726, -0.7088122, -0.070204295, -1.7254694, -3.1959095, 0.17185593, 11.705286)
+transform = Transform3D(-1.7267072, 0.0011812615, 0.7092726, -0.025582924, 1.8653843, -0.065387726, -0.70881206, -0.07020428, -1.7254691, -3.1959095, 0.17185593, 11.705284)
 
 [node name="Bush5" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(1.599365, 0.059561636, 1.1043239, -0.07191244, 1.9431616, -0.00065527647, -1.1035885, -0.040301844, 1.6004735, -4.3644466, 0.18862152, -16.338057)
+transform = Transform3D(1.5993648, 0.05956163, 1.1043236, -0.07191244, 1.9431616, -0.00065527647, -1.1035882, -0.040301837, 1.6004733, -4.3644466, 0.18862152, -16.338053)
 
 [node name="Bush6" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(1.6987766, 0.029824406, -0.6645136, -0.04022862, 1.8238016, -0.020986233, 0.66396505, 0.03419456, 1.6989089, -12.947914, 0.14974976, -9.029609)
+transform = Transform3D(1.6987764, 0.029824402, -0.66451347, -0.04022862, 1.8238016, -0.020986233, 0.6639649, 0.03419455, 1.6989087, -12.947914, 0.14974976, -9.029607)
 
 [node name="Tree2" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-1.1837646, -0.011100035, -1.3920426, -0.045080982, 1.8266385, 0.023770476, 1.3913567, 0.04974052, -1.1835779, 13.788292, 0.12397003, 10.438344)
+transform = Transform3D(-1.1837643, -0.011100033, -1.3920424, -0.045080982, 1.8266385, 0.023770476, 1.3913565, 0.049740512, -1.1835777, 13.788292, 0.12397003, 10.438342)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree3" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-1.1890805, 0.101445846, -1.5420455, 0.09680509, 1.9467627, 0.053423796, 1.5423437, -0.043977976, -1.1922038, -1.2945061, 0.24030304, -9.447675)
+transform = Transform3D(-1.1890802, 0.10144583, -1.5420452, 0.09680509, 1.9467627, 0.053423796, 1.5423435, -0.04397797, -1.1922035, -1.2945061, 0.24045181, -9.447673)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush3" parent="Zone02/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(0.29034808, -0.054882184, -1.568472, 0.0070909546, 1.5951171, -0.054501873, 1.5694159, 0.002946343, 0.29041973, 5.7044106, 0.15691376, 6.6831)
+transform = Transform3D(0.29034802, -0.054882176, -1.5684718, 0.0070909546, 1.5951171, -0.054501873, 1.5694157, 0.0029463426, 0.29041967, 5.7044106, 0.15691376, 6.6830993)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush7" parent="Zone02/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(-1.4281931, -0.0070286454, 0.9093924, -0.0023044343, 1.693129, 0.0094670085, -0.9094166, 0.0067477976, -1.4281791, 6.197197, 0.1685524, -2.6443698)
+transform = Transform3D(-1.4281929, -0.0070286444, 0.9093923, -0.0023044343, 1.693129, 0.0094670085, -0.9094165, 0.0067477967, -1.4281789, 6.197197, 0.1685524, -2.6443694)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush4" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(0.25424325, -0.008979978, -1.8255866, -0.022039073, 1.843056, -0.012135216, 1.8254757, 0.023502, 0.25411218, 10.887138, -0.40076065, 17.580624)
+transform = Transform3D(0.25424317, -0.008979975, -1.8255862, -0.022039073, 1.843056, -0.012135216, 1.8254753, 0.023501994, 0.2541121, 20.04697, 0.14814377, 4.1083694)
 
 [node name="Tree4" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(1.2594572, -0.06756588, 0.9251175, 0.06527968, 1.5626074, 0.025252989, -0.92528164, 0.018275661, 1.2610155, -6.927927, 0.1978836, -11.420494)
+transform = Transform3D(1.259457, -0.067565866, 0.9251174, 0.06527968, 1.5626074, 0.025252989, -0.9252815, 0.018275658, 1.2610153, -6.927927, 0.1978836, -11.420492)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree7" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(0.23298912, -0.03625042, 1.7550077, 0.011607132, 1.7703924, 0.03502728, -1.7553437, 0.006895071, 0.23317611, 6.283695, 0.13446045, -9.726775)
+transform = Transform3D(0.23298909, -0.036250412, 1.7550075, 0.011607132, 1.7703924, 0.03502728, -1.7553434, 0.00689507, 0.23317608, 6.283695, 0.13446045, -9.726773)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree8" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-1.7137957, -0.042859998, 0.4123385, -0.048130795, 1.7624857, -0.016845912, -0.41175655, -0.027629305, -1.7142487, -11.410603, -0.7680092, 14.56615)
+transform = Transform3D(-1.7137952, -0.042859983, 0.41233838, -0.048130795, 1.7624857, -0.016845912, -0.41175643, -0.027629297, -1.7142482, -10.60841, 0.118961334, 11.663935)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
@@ -1100,3 +1101,15 @@ up_velocity_max = 8.0
 spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
+
+[node name="InteractionArea" parent="." instance=ExtResource("38_f0gl8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.521053, -0.06467056, 3.4960823)
+action_label_key = "tutorial_jump_prompt"
+input_action = "jump"
+hint_offset = Vector3(0, 2.5, 0)
+
+[node name="InteractionArea2" parent="." instance=ExtResource("38_f0gl8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.955648, -2.8937373, 4.4891195)
+action_label_key = "tutorial_attack_prompt"
+input_action = "first_attack"
+hint_offset = Vector3(0, 2.5, 0)

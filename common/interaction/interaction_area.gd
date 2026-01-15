@@ -1,20 +1,38 @@
 class_name InteractionArea
 extends Area3D
 
-@export var action_label_key: String = "ui_interact" # Ключ локализации (например, "Открыть")
-@export var input_action: String = "interact" # Название действия в InputMap
-@export var hint_offset: Vector3 = Vector3(0, 1.5, 0)
+# Сигнал, который срабатывает при нажатии кнопки взаимодействия
+signal triggered
+
+@export var action_label_key: String = "ui_interact" # Текст подсказки (ключ локализации)
+@export var input_action: String = "interact" # Кнопка (E, F, Квадрат и т.д.)
+@export var hint_offset: Vector3 = Vector3(0, 1.0, 0) # Высота подсказки над объектом
 
 const HINT_SCENE = preload("res://ui/3d_prompts/InteractionHint3D.tscn")
 
-var interact: Callable = func(): pass
+# Для обратной совместимости с кодом (сундуки)
+var interact_callable: Callable = Callable()
+
 var _hint_instance: Node3D = null
 
 func _ready():
+	# Слой 0 не сталкивается ни с чем, кроме того что в маске
 	collision_layer = 0 
-	collision_mask = 1
+	# Маска 2 (Игрок). Убедись, что слой игрока - это 2. 
+	# Если игрок на слое 1, ставь 1.
+	set_collision_mask_value(2, true) 
+	
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+
+# Эту функцию вызывает InteractionManager, когда игрок жмет кнопку
+func do_interact():
+	# 1. Испускаем сигнал (для объектов, настроенных через редактор)
+	triggered.emit()
+	
+	# 2. Вызываем функцию (для объектов, настроенных через код, типа сундуков)
+	if interact_callable.is_valid():
+		interact_callable.call()
 
 func _on_body_entered(body):
 	if body.is_in_group("player"):

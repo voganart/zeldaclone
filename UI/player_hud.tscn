@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cn7nq1ds3kfix" path="res://assets/textures/ui/Heart.png" id="4_ry604"]
 [ext_resource type="PackedScene" uid="uid://d2l2i5saam18b" path="res://ui/tutorial/tutorial_overlay.tscn" id="5_7pawb"]
 
-[node name="PlayerHUD" type="Control"]
+[node name="PlayerHUD" type="Control" groups=["hud"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
