@@ -639,7 +639,6 @@ tutorial_manager = NodePath("TutorialManager")
 script = ExtResource("3_jygyi")
 
 [node name="PlayerStart" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.617077, 0, -10.58576)
 
 [node name="DebugOverlay" parent="." instance=ExtResource("1_ueypv")]
 
@@ -979,40 +978,46 @@ metadata/_editor_floor_ = Vector3(0, 0, 0)
 [node name="breakable_object" type="Node3D" parent="Zone02"]
 
 [node name="WoodenCrate" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.9999995, 0, 0, 0, 1, 0, 0, 0, 0.9999995, -6.3383465, 0, 2.7799947)
+transform = Transform3D(0.9999994, 0, 0, 0, 1, 0, 0, 0, 0.9999994, -6.187208, 0, 2.3066292)
 
 [node name="WoodenCrate2" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.014764917, 0, -0.9998902, 0, 1, 0, 0.9998902, 0, 0.014764917, -6.3634663, 0, 3.9384332)
+transform = Transform3D(0.014764915, 0, -0.9998901, 0, 1, 0, 0.9998901, 0, 0.014764915, -6.162737, 0, 3.374545)
 
 [node name="WoodenCrate7" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.2588189, 0, -0.9659253, 0, 1, 0, 0.9659253, 0, 0.2588189, -4.8205643, 0, 4.0489745)
 
 [node name="WoodenCrate4" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-0.065542355, 0, -0.99784887, 0, 1, 0, 0.99784887, 0, -0.065542355, -6.2506905, 1, 3.888085)
+transform = Transform3D(0.9998147, 0, -0.019197404, 0, 1, 0, 0.019197404, 0, 0.9998147, -6.2506905, 1, 3.3241968)
 
 [node name="WoodenCrate5" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-0.011134891, 0, -0.99993694, 0, 1, 0, 0.99993694, 0, -0.011134891, -6.293804, 1, 2.7759254)
+transform = Transform3D(-0.01113489, 0, -0.9999369, 0, 1, 0, 0.9999369, 0, -0.01113489, -6.293804, 1, 2.30256)
 
 [node name="WoodenCrate3" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-0.9999993, 0, -8.742271e-08, 0, 1, 0, 8.742271e-08, 0, -0.9999993, -6.320141, 0, 6.1306353)
+transform = Transform3D(-0.99999917, 0, -8.74227e-08, 0, 1, 0, 8.74227e-08, 0, -0.99999917, -6.235861, 0, 6.495529)
 
 [node name="WoodenCrate17" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-0.014765003, 0, 0.9998901, 0, 1, 0, -0.9998901, 0, -0.014765003, -6.295021, 0, 4.9721966)
+transform = Transform3D(-0.014765001, 0, 0.99988997, 0, 1, 0, -0.99988997, 0, -0.014765001, -6.184532, 0, 5.429806)
 
 [node name="WoodenCrate18" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.065542236, 0, 0.9978487, 0, 1, 0, -0.9978487, 0, 0.065542236, -6.407797, 1, 5.022545)
+transform = Transform3D(0.06554223, 0, 0.99784863, 0, 1, 0, -0.99784863, 0, 0.06554223, -6.407797, 1, 5.480155)
+
+[node name="WoodenCrate24" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+transform = Transform3D(-0.014765, 0, 0.9998899, 0, 1, 0, -0.9998899, 0, -0.014765, -6.184532, 0, 4.3869014)
+
+[node name="WoodenCrate25" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+transform = Transform3D(0.99999535, 0, -0.0025829747, 0, 1, 0, 0.0025829747, 0, 0.99999535, -6.319523, 1, 4.4188285)
 
 [node name="WoodenCrate19" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.0111348, 0, 0.99993676, 0, 1, 0, -0.99993676, 0, 0.0111348, -6.364683, 1, 6.1347046)
+transform = Transform3D(0.011134798, 0, 0.99993664, 0, 1, 0, -0.99993664, 0, 0.011134798, -6.295372, 1, 6.4995985)
 
 [node name="WoodenCrate20" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.020331759, 0, -0.9997922, 0, 1, 0, 0.9997922, 0, 0.020331759, -6.3683796, 0, 7.4630713)
+transform = Transform3D(0.020331757, 0, -0.99979216, 0, 1, 0, 0.99979216, 0, 0.020331757, -6.2549076, 0, 7.602581)
 
 [node name="WoodenCrate21" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-0.9993829, 0, -0.035091396, 0, 1, 0, 0.035091396, 0, -0.9993829, -7.6595306, 0, 7.591819)
+transform = Transform3D(-0.9993828, 0, -0.03509139, 0, 1, 0, 0.03509139, 0, -0.9993828, -7.371689, 0, 7.5956883)
 
 [node name="WoodenCrate22" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-0.9989748, 0, 0.045240723, 0, 1, 0, -0.045240723, 0, -0.9989748, -7.606903, 1, 7.5791945)
+transform = Transform3D(-0.99897474, 0, 0.04524072, 0, 1, 0, -0.04524072, 0, -0.99897474, -7.4659615, 1, 7.5826883)
 
 [node name="WoodenCrate23" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99995613, 0, -0.009197906, 0, 1, 0, 0.009197906, 0, -0.99995613, -6.363405, 1, 7.5075216)

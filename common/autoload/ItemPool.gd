@@ -4,13 +4,10 @@ extends Node
 @export var pool_size_per_item: int = 10
 @export var auto_expand: bool = true
 
-# Массив очередей для каждого типа предмета
 var queues: Array = []
 
 func _ready():
 	add_to_group("item_pool")
-	
-	# Инициализируем пулы
 	for scene in item_scenes:
 		var queue = []
 		if scene:
@@ -21,12 +18,18 @@ func _ready():
 func _create_instance(scene: PackedScene):
 	var inst = scene.instantiate()
 	inst.visible = false
-	# Отключаем физику, чтобы объекты не падали в бездну пока они в пуле
 	inst.process_mode = Node.PROCESS_MODE_DISABLED 
+	
+	# Сразу вырубаем коллизию новым объектам в пуле
+	if inst is CollisionObject3D:
+		inst.collision_layer = 0
+		inst.collision_mask = 0
+		if inst is RigidBody3D:
+			inst.freeze = true
+			
 	add_child(inst)
 	return inst
 
-## Спавнит предмет по ИНДЕКСУ из массива item_scenes
 func spawn_item(index: int, pos: Vector3) -> RigidBody3D:
 	if index < 0 or index >= queues.size():
 		push_warning("ItemPool: Invalid index %d" % index)
@@ -43,9 +46,8 @@ func spawn_item(index: int, pos: Vector3) -> RigidBody3D:
 	else:
 		item = queue.pop_front()
 	
-	# Активация
 	item.get_parent().remove_child(item)
-	get_tree().current_scene.add_child(item) # Переносим в мир
+	get_tree().current_scene.add_child(item) 
 	
 	item.global_position = pos
 	item.rotation = Vector3.ZERO
@@ -53,38 +55,37 @@ func spawn_item(index: int, pos: Vector3) -> RigidBody3D:
 	item.angular_velocity = Vector3.ZERO
 	item.visible = true
 	item.process_mode = Node.PROCESS_MODE_INHERIT
+	
+	# reset_state() внутри base_pickup.gd сам включит коллизию обратно
 	if item.has_method("reset_state"):
 		item.reset_state()
-	# Сброс физики (важно для RigidBody!)
-	# Мы просто надеемся, что позиция применится, но для гарантии можно использовать PhysicsServer
-	# item.global_transform.origin = pos (сделано выше)
 	
 	return item
 
-## Возвращает предмет обратно в пул
 func return_item(item: RigidBody3D, index: int):
-	# Вызываем внутреннюю логику отложенно, чтобы выйти из физического шага
 	call_deferred("_return_item_deferred", item, index)
 
-# Внутренняя функция, которая выполнится в безопасное время (в конце кадра)
 func _return_item_deferred(item: RigidBody3D, index: int):
-	# Проверка на случай, если предмет удалили до вызова
 	if not is_instance_valid(item): return
 
-	# 1. Останавливаем твины
 	var tween = item.create_tween()
 	if tween: tween.kill()
 	
-	# 2. Скрываем и отключаем
 	item.visible = false
 	item.process_mode = Node.PROCESS_MODE_DISABLED
 	
-	# 3. Переносим в дерево пула (Безопасно, так как мы в deferred вызове)
+	# !!! ГЛАВНОЕ ИСПРАВЛЕНИЕ: ПОЛНОЕ ОТКЛЮЧЕНИЕ ФИЗИКИ !!!
+	item.freeze = true # Превращаем в статику
+	item.collision_layer = 0 # Убираем слои
+	item.collision_mask = 0
+	# Убираем далеко вниз, на всякий случай (чтобы рейкасты не ловили)
+	item.global_position = Vector3(0, -500, 0) 
+	# -----------------------------------------------------
+	
 	if item.get_parent():
 		item.get_parent().remove_child(item)
 	add_child(item) 
 	
-	# 4. Возвращаем в очередь
 	if index >= 0 and index < queues.size():
 		queues[index].append(item)
 	else:
