@@ -38,7 +38,13 @@ extends CharacterBody3D
 @onready var health_component: Node = $Components/HealthComponent
 @onready var input_handler: PlayerInput = $PlayerInput
 @onready var state_machine: StateMachine = $StateMachine
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
+var default_col_height: float = 2.0
+var default_col_y: float = 1.0
 
+# Настройки для переката (можешь подкрутить в инспекторе, если вынесешь в export)
+var roll_col_height: float = 0.9
+var roll_col_y: float = 0.45 
 # Abilities
 @onready var air_dash_ability: AirDashAbility = $Abilities/AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $Abilities/GroundSlamAbility
@@ -48,13 +54,13 @@ extends CharacterBody3D
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
 @onready var attack_timer: Timer = $FirstAttackTimer
 
-@onready var sfx_footsteps: RandomAudioPlayer3D = $SoundBank/SfxFootsteps
-@onready var sfx_attack: RandomAudioPlayer3D = $SoundBank/SfxAttack
-@onready var sfx_jump: RandomAudioPlayer3D = $SoundBank/SfxJump
-@onready var sfx_roll: RandomAudioPlayer3D = $SoundBank/SfxRoll
-@onready var sfx_hurt: RandomAudioPlayer3D = $SoundBank/SfxHurt
-@onready var sfx_dash: RandomAudioPlayer3D = $SoundBank/SfxDash
-@onready var sfx_slam_impact: RandomAudioPlayer3D = $SoundBank/SfxSlamImpact
+@onready var sfx_footsteps = $SoundBank/SfxFootsteps
+@onready var sfx_attack = $SoundBank/SfxAttack
+@onready var sfx_jump = $SoundBank/SfxJump
+@onready var sfx_roll = $SoundBank/SfxRoll
+@onready var sfx_hurt = $SoundBank/SfxHurt
+@onready var sfx_dash = $SoundBank/SfxDash
+@onready var sfx_slam_impact = $SoundBank/SfxSlamImpact
 @onready var shape_cast: ShapeCast3D = $RollSafetyCast
 
 # --- НОВОЕ: Детектор стен для атаки ---
@@ -201,6 +207,16 @@ func _ready() -> void:
 	movement_component.init(self)
 	combat_component.init(self)
 	
+	# !!! 1. ЗАПОМИНАЕМ СТАРТОВЫЕ ЗНАЧЕНИЯ КАПСУЛЫ !!!
+	if collision_shape and collision_shape.shape is CapsuleShape3D:
+		default_col_height = collision_shape.shape.height
+		default_col_y = collision_shape.position.y
+		
+		# Автоматически считаем высоту для переката (половина от обычной)
+		roll_col_height = default_col_height / 2.0
+		roll_col_y = default_col_y / 2.0
+	# ----------------------------------------------------
+
 	if roll_ability:
 		roll_ability.roll_charges_changed.connect(func(c, m, p): roll_charges_changed.emit(c, m, p))
 
@@ -634,3 +650,24 @@ func unlock_ability(ability_name: String) -> void:
 		"air_dash":
 			if air_dash_ability:
 				air_dash_ability.is_unlocked = true
+
+func shrink_collider() -> void:
+	if not collision_shape: return
+	if not collision_shape.shape is CapsuleShape3D: return
+	
+	# Используем запомненные "маленькие" значения
+	collision_shape.shape.height = roll_col_height
+	collision_shape.position.y = roll_col_y
+
+func restore_collider() -> void:
+	if not collision_shape: return
+	if not collision_shape.shape is CapsuleShape3D: return
+	
+	# Возвращаем запомненные "родные" значения
+	collision_shape.shape.height = default_col_height
+	collision_shape.position.y = default_col_y
+
+func is_roof_above() -> bool:
+	if not shape_cast: return false
+	shape_cast.force_shapecast_update()
+	return shape_cast.is_colliding()
