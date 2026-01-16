@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://b7dqtyei1ggjx"]
+[gd_scene load_steps=8 format=3 uid="uid://b7dqtyei1ggjx"]
 
 [ext_resource type="Script" uid="uid://cghbw6nlcm2el" path="res://vfx/blood_splash/VfxPool.gd" id="1_8cm2a"]
 [ext_resource type="PackedScene" uid="uid://81ioj6luekxt" path="res://vfx/blood_splash/blood_splash.tscn" id="2_mpjbu"]
@@ -6,7 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://b6nelwbpeak8a" path="res://vfx/VfxGroundSlam/vfx_ground_slam.tscn" id="4_17fw4"]
 [ext_resource type="PackedScene" uid="uid://dhw5djf47hw8l" path="res://vfx/PickupItemVfx/Heal_vfx.tscn" id="5_mpjbu"]
 [ext_resource type="PackedScene" uid="uid://ck8or4s38s7a3" path="res://vfx/PickupItemVfx/Vabo_vfx.tscn" id="6_ooko2"]
+[ext_resource type="PackedScene" uid="uid://dgdpjgd2jkh42" path="res://vfx/jump_dust/jump_dust.tscn" id="7_17fw4"]
 
 [node name="VfxPooll" type="Node" groups=["vfx_pool"]]
 script = ExtResource("1_8cm2a")
-effect_scenes = Array[PackedScene]([ExtResource("2_mpjbu"), ExtResource("3_ooko2"), ExtResource("4_17fw4"), ExtResource("5_mpjbu"), ExtResource("6_ooko2")])
+effect_scenes = Array[PackedScene]([ExtResource("2_mpjbu"), ExtResource("3_ooko2"), ExtResource("4_17fw4"), ExtResource("5_mpjbu"), ExtResource("6_ooko2"), ExtResource("7_17fw4")])

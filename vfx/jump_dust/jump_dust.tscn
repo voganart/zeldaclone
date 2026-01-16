@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://dgdpjgd2jkh42"]
+
+[ext_resource type="Texture2D" uid="uid://cex4n6b8f52ee" path="res://assets/textures/vfx/alphas_3.png" id="1_vscy5"]
+[ext_resource type="Material" uid="uid://cqlo7urbefec5" path="res://vfx/jump_dust/jump_dust.tres" id="2_vscy5"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cekqp"]
+transparency = 1
+shading_mode = 0
+diffuse_mode = 3
+specular_mode = 2
+disable_ambient_light = true
+disable_fog = true
+disable_specular_occlusion = true
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+albedo_color = Color(0.5757751, 0.5757751, 0.5757751, 0.409)
+albedo_texture = ExtResource("1_vscy5")
+albedo_texture_force_srgb = true
+albedo_texture_msdf = true
+disable_receive_shadows = true
+grow_amount = -2.058
+point_size = 56.7
+
+[sub_resource type="QuadMesh" id="QuadMesh_4g5ld"]
+
+[node name="GPUParticles3D" type="GPUParticles3D"]
+material_override = SubResource("StandardMaterial3D_cekqp")
+cast_shadow = 0
+lifetime = 3.0
+interp_to_end = 0.07
+one_shot = true
+explosiveness = 1.0
+randomness = 0.13
+visibility_aabb = AABB(-1, -1, -1, 2, 2, 2)
+transform_align = 1
+process_material = ExtResource("2_vscy5")
+draw_pass_1 = SubResource("QuadMesh_4g5ld")

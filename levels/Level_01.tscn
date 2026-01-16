@@ -1,4 +1,4 @@
-[gd_scene load_steps=100 format=4 uid="uid://e1q2o5wpoj38"]
+[gd_scene load_steps=112 format=4 uid="uid://e1q2o5wpoj38"]
 
 [ext_resource type="Script" uid="uid://d3xim38bh2dpt" path="res://levels/level_01.gd" id="1_4p2fq"]
 [ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://ui/debug_overlay/DebugOverlay.tscn" id="1_ueypv"]
@@ -627,6 +627,82 @@ stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_k3iq2"), SubResour
 script = ExtResource("25_diasq")
 size = Vector3(27.57573, 3.0480158, 29.490217)
 
+[sub_resource type="Resource" id="Resource_iijgv"]
+script = ExtResource("19_fbdqi")
+amount = 300
+override_global_seed = true
+custom_seed = 4
+restrict_height = true
+reference_frame = 1
+
+[sub_resource type="Resource" id="Resource_fbdqi"]
+script = ExtResource("20_j8a35")
+position = Vector3(0.15, 0.15, 0.15)
+rotation = Vector3(20, 360, 20)
+scale = Vector3(0.2, 0.2, 0.2)
+reference_frame = 2
+
+[sub_resource type="Resource" id="Resource_j8a35"]
+script = ExtResource("21_st04i")
+offset_step = 0.2
+consecutive_step_multiplier = 0.75
+restrict_height = true
+
+[sub_resource type="Resource" id="Resource_st04i"]
+script = ExtResource("22_ccvsj")
+ray_length = 5.0
+ray_offset = 5.0
+align_with_collision_normal = true
+max_slope = 30.0
+collision_mask = 8
+exclude_mask = 247
+
+[sub_resource type="Resource" id="Resource_ccvsj"]
+script = ExtResource("17_s8n2r")
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_iijgv"), SubResource("Resource_fbdqi"), SubResource("Resource_j8a35"), SubResource("Resource_st04i")])
+
+[sub_resource type="Resource" id="Resource_2sjeu"]
+script = ExtResource("25_diasq")
+size = Vector3(25.504715, 3.0480158, 26.962387)
+
+[sub_resource type="Resource" id="Resource_rf0p5"]
+script = ExtResource("19_fbdqi")
+amount = 300
+override_global_seed = true
+custom_seed = 4
+restrict_height = true
+reference_frame = 1
+
+[sub_resource type="Resource" id="Resource_diasq"]
+script = ExtResource("20_j8a35")
+position = Vector3(0.15, 0.15, 0.15)
+rotation = Vector3(20, 360, 20)
+scale = Vector3(0.2, 0.2, 0.2)
+reference_frame = 2
+
+[sub_resource type="Resource" id="Resource_laqti"]
+script = ExtResource("21_st04i")
+offset_step = 0.2
+consecutive_step_multiplier = 0.75
+restrict_height = true
+
+[sub_resource type="Resource" id="Resource_4kxhy"]
+script = ExtResource("22_ccvsj")
+ray_length = 5.0
+ray_offset = 5.0
+align_with_collision_normal = true
+max_slope = 30.0
+collision_mask = 8
+exclude_mask = 247
+
+[sub_resource type="Resource" id="Resource_g3i2w"]
+script = ExtResource("17_s8n2r")
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_rf0p5"), SubResource("Resource_diasq"), SubResource("Resource_laqti"), SubResource("Resource_4kxhy")])
+
+[sub_resource type="Resource" id="Resource_61rmp"]
+script = ExtResource("25_diasq")
+size = Vector3(25.504715, 3.0480158, 26.962387)
+
 [node name="Level01" type="Node3D" node_paths=PackedStringArray("player_start", "phantom_camera", "hud", "tutorial_manager")]
 script = ExtResource("1_4p2fq")
 player_scene = ExtResource("8_ykjdn")
@@ -648,7 +724,6 @@ script = ExtResource("3_jygyi")
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." instance=ExtResource("6_r6k77")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.043725967)
 sun_color = SubResource("Gradient_r6k77")
 sun_energy = SubResource("Curve_jygyi")
 moon_color = SubResource("Gradient_f0gl8")
@@ -700,7 +775,84 @@ script = ExtResource("12_7hxxo")
 mouse_sensitivity = 0.05
 min_pitch = -60.0
 
-[node name="Entities" type="Node3D" parent="."]
+[node name="Chests" type="Node3D" parent="."]
+
+[node name="Chest1" parent="Chests" instance=ExtResource("36_r6k77")]
+transform = Transform3D(-1.0000001, 0, -8.742278e-08, 0, 1.0000002, 0, 8.7422784e-08, 0, -1, 1.3500497, 0, -2.3252182)
+ability_to_unlock = "air_dash"
+up_velocity_min = 5.0
+up_velocity_max = 8.0
+spread_velocity = 3.0
+launch_force_min = 4.0
+launch_force_max = 8.0
+
+[node name="Chest3" parent="Chests" instance=ExtResource("36_r6k77")]
+transform = Transform3D(-0.2588192, 0, 0.9659258, 0, 1.0000002, 0, -0.96592593, 0, -0.25881916, 95.5608, -5, -25.061848)
+ability_to_unlock = "double_jump"
+up_velocity_min = 5.0
+up_velocity_max = 8.0
+spread_velocity = 3.0
+launch_force_min = 4.0
+launch_force_max = 8.0
+
+[node name="Chest5" parent="Chests" instance=ExtResource("36_r6k77")]
+transform = Transform3D(-0.2588192, 0, 0.9659258, 0, 1.0000002, 0, -0.96592593, 0, -0.25881916, -0.58017683, 2.3841858e-06, 1.1147366)
+ability_to_unlock = "double_jump"
+up_velocity_min = 5.0
+up_velocity_max = 8.0
+spread_velocity = 3.0
+launch_force_min = 4.0
+launch_force_max = 8.0
+
+[node name="Chest4" parent="Chests" instance=ExtResource("36_r6k77")]
+transform = Transform3D(-4.3711392e-08, 0, 1, 0, 1.0000002, 0, -1.0000001, 0, -4.371139e-08, 66.090034, -3, -11.180361)
+ability_to_unlock = "roll_ability"
+up_velocity_min = 5.0
+up_velocity_max = 8.0
+spread_velocity = 3.0
+launch_force_min = 4.0
+launch_force_max = 8.0
+
+[node name="Chest2" parent="Chests" instance=ExtResource("36_r6k77")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.34, 1.9073486e-06, -2.389)
+ability_to_unlock = "ground_slam"
+up_velocity_min = 5.0
+up_velocity_max = 8.0
+spread_velocity = 3.0
+launch_force_min = 4.0
+launch_force_max = 8.0
+
+[node name="Collectables" type="Node3D" parent="."]
+
+[node name="VaboPickup" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3600235, 0, 1.6990588)
+
+[node name="VaboPickup6" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.1739273, 0, -2.444413)
+
+[node name="VaboPickup7" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6762295, 0, 7.378163)
+
+[node name="VaboPickup8" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6300745, 0, 8.97094)
+
+[node name="VaboPickup9" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.564066, 0, 13.065391)
+
+[node name="VaboPickup10" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.718863, 0, 7.5994463)
+
+[node name="VaboPickup2" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.708307, 0, 1.805788)
+
+[node name="VaboPickup3" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.041814, 4.7683716e-07, 3.271511)
+
+[node name="VaboPickup5" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.133696, 4.7683716e-07, 3.9151435)
+
+[node name="VaboPickup4" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.001768, 1.2861544, 3.996716)
 
 [node name="Zone01" type="Node3D" parent="."]
 
@@ -871,38 +1023,6 @@ random_tilt = 0.5
 transform = Transform3D(-1.5968883, 0.0826155, 0.49564776, 0.06331467, 1.6712195, -0.074573465, -0.49848095, -0.0523892, -1.5972841, -15.741072, 0.10467911, -5.245287)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
-
-[node name="Collectables" type="Node3D" parent="Zone01"]
-
-[node name="VaboPickup" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3600235, 0, 1.6990588)
-
-[node name="VaboPickup6" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.1739273, 0, -2.444413)
-
-[node name="VaboPickup7" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6762295, 0, 7.378163)
-
-[node name="VaboPickup8" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6300745, 0, 8.97094)
-
-[node name="VaboPickup9" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.564066, 0, 13.065391)
-
-[node name="VaboPickup10" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.718863, 0, 7.5994463)
-
-[node name="VaboPickup2" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.708307, 0, 1.805788)
-
-[node name="VaboPickup3" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.041814, 4.7683716e-07, 3.271511)
-
-[node name="VaboPickup5" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.133696, 4.7683716e-07, 3.9151435)
-
-[node name="VaboPickup4" parent="Zone01/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.001768, 1.2861544, 3.996716)
 
 [node name="Zone02" type="Node3D" parent="."]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 34.309113, -3, 0)
@@ -1127,14 +1247,6 @@ transform = Transform3D(-1.7137952, -0.042859983, 0.41233838, -0.048130795, 1.76
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Collectables" type="Node3D" parent="Zone02"]
-
-[node name="VaboPickup" parent="Zone02/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(0.9999998, 0, 0, 0, 1, 0, 0, 0, 0.9999998, -12.386648, -9.536743e-07, 3.546146)
-
-[node name="VaboPickup2" parent="Zone02/Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(0.9999997, 0, 0, 0, 1, 0, 0, 0, 0.9999997, -8.521313, 0, 4.222124)
-
 [node name="Zone03" type="Node3D" parent="."]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 62.396965, -3, -20.045534)
 
@@ -1201,7 +1313,7 @@ collision_layer = 64
 collision_mask = 63
 bake_navigation = true
 data = {
-"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6, 65534, 6, 1441795, 65532, 4, 1441795, 65532, 3, 1441795, 65534, 8, 1048580, 65532, 8, 1441796, 65530, 6, 1441796, 65532, 6, 1048580, 65532, 10, 1048579, 65532, 11, 1048580, 65530, 8, 1048580, 65532, 2, 1441795, 65532, 1, 1441795, 65532, 0, 1441795, 65532, 65535, 1441795, 65532, 65534, 1441796, 65534, 1, 1441796, 65533, 65534, 3, 65535, 65534, 3, 65534, 65534, 3, 0, 65534, 3, 65535, 1, 3, 0, 1, 3, 65534, 5, 1441796, 65534, 3, 4, 0, 5, 655364, 0, 3, 1048580, 1, 2, 655363, 2, 2, 655363, 65535, 4, 1441797, 65535, 5, 1441797, 3, 2, 655364, 3, 6, 1048580, 3, 4, 1048579, 3, 5, 1048579, 2, 6, 655363, 1, 6, 655363, 0, 6, 655362)
+"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6, 65534, 6, 1441795, 65532, 4, 1441795, 65532, 3, 1441792, 65534, 8, 1048580, 65532, 8, 1441796, 65530, 6, 1441796, 65532, 6, 1048580, 65532, 10, 1048579, 65532, 11, 1048580, 65530, 8, 1048580, 65532, 2, 1441795, 65532, 1, 1441795, 65532, 0, 1441795, 65532, 65535, 1441792, 65532, 65534, 1441796, 65533, 65534, 3, 65535, 65534, 3, 65534, 65534, 3, 0, 65534, 3, 65534, 5, 1441796, 65534, 3, 4, 0, 5, 655364, 2, 2, 655363, 65535, 4, 1441797, 65535, 5, 1441797, 3, 2, 655364, 3, 6, 1048580, 3, 4, 1048579, 3, 5, 1048579, 2, 6, 655363, 1, 6, 655363, 0, 6, 655362, 1, 65534, 655360, 0, 3, 1048580, 0, 2, 1441796, 65534, 1, 1441794, 65534, 2, 1048579)
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
@@ -1238,114 +1350,338 @@ scale_min = 1.5
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree1" parent="Zone03/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(1.0246569, -0.013667431, -1.316093, 0.07044147, 1.6660846, 0.037540834, 1.3142776, -0.07864169, 1.02406, 9.828426, 0.20787048, 3.8520184)
-leaf_color = Color(1, 0, 0, 1)
-random_tilt = 0.5
-
-[node name="Tree6" parent="Zone03/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-0.7446989, 0.061739385, 1.821188, -0.05583856, 1.9657037, -0.08947141, -1.8213785, -0.085506275, -0.74187803, 13.951252, 0.1749649, 3.8556385)
-leaf_color = Color(1, 0, 0, 1)
-random_tilt = 0.5
-
 [node name="Tree5" parent="Zone03/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-1.868862, 0.059866965, 0.37228554, 0.06894535, 1.9048595, 0.039784472, -0.37071162, 0.052461524, -1.8693974, 4.1904106, 0.2179718, -14.600855)
+transform = Transform3D(0.54079014, -0.082774736, 1.7051673, 0.0101009505, 1.7888002, 0.08363107, -1.7071453, -0.015637323, 0.54065835, 4.1904106, 0.2179718, -14.600853)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush1" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(-0.85921097, -0.0025121868, -1.4049797, -0.05652808, 1.6456069, 0.03162713, 1.4038442, 0.06472549, -0.8586324, -8.659519, 0.17755318, 11.380192)
+transform = Transform3D(-0.3331466, -0.05854448, -1.8575588, -0.017441818, 1.8871831, -0.056350015, 1.8583993, 0.007216964, -0.33352482, -8.659519, 0.17121124, 11.38019)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush2" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-1.2826825, 0.007273742, 0.84334135, 0.012391957, 1.5350462, 0.005607952, -0.84328175, 0.011493583, -1.2826909, -0.28582, 0.21069336, 14.798063)
+transform = Transform3D(-0.85981315, 0.019769486, 1.3975607, 0.031629123, 1.6406802, -0.0037495838, -1.3973426, 0.024972545, -0.86003226, -0.28582, 0.2224884, 14.798061)
 
 [node name="Bush5" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-1.6595172, 0.096922256, -0.8246255, 0.074942105, 1.8529159, 0.06696503, 0.8269128, 0.026584066, -1.6609957, 8.019161, 0.18202972, -14.224825)
+transform = Transform3D(0.34201196, -0.061846636, -1.9017211, 0.05485754, 1.9317164, -0.052956354, 1.9019357, -0.044595037, 0.34350082, 8.019161, 0.18203354, -14.224823)
 
 [node name="Bush6" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(1.2101886, -0.012828673, 1.1023924, -0.04769762, 1.6348149, 0.07138621, -1.1014348, -0.084890984, 1.2081494, -12.236313, 0.20859909, -4.919689)
-
-[node name="Tree2" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-0.93656206, 0.010231015, 1.580524, 0.061922602, 1.8359901, 0.02480843, -1.5793436, 0.06591807, -0.9362893, 14.475826, 0.2312088, -0.94958115)
-leaf_count = 300
-leaf_color = Color(1, 0, 0, 1)
-random_tilt = 0.5
+transform = Transform3D(0.44537726, -0.08759662, -1.8153121, 0.07639005, 1.8682768, -0.0714105, 1.8158183, -0.05711154, 0.4482573, -12.236313, 0.20859528, -4.919689)
 
 [node name="Tree3" parent="Zone03/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-1.8796016, 0.09718483, 0.3685203, 0.08580831, 1.9147487, -0.0672937, -0.3713341, -0.049463294, -1.880909, -1.2945023, 0.20932388, -9.447672)
+transform = Transform3D(0.57701606, -0.026186155, 1.4511445, -0.03160966, 1.5610238, 0.040737845, -1.4510365, -0.044418763, 0.5761716, -1.2945023, 0.20932388, -9.44767)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush3" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(-1.1974871, -0.017523713, 1.4163437, 0.08187575, 1.8507085, 0.09212202, -1.4140837, 0.121996, -1.194067, 7.0015984, 0.1927414, -4.05999)
+transform = Transform3D(0.40131804, -0.04387146, 1.9228382, 0.037007146, 1.9640632, 0.037088234, -1.9229827, 0.028641934, 0.40200168, 7.0015984, 0.18693161, -4.05999)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush8" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(1.2336175, -0.0072234594, 0.8951928, -0.023153473, 1.5233995, 0.04419913, -0.89492244, -0.049370714, 1.2328466, 10.157841, 0.14367294, 6.193432)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush9" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(0.85253626, 0.006787803, -1.7997011, 0.014925724, 1.9913197, 0.014580979, 1.7996521, -0.019730885, 0.85243857, 14.2042885, 0.1837883, 4.271084)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush7" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(-1.7051845, 0.04226761, -0.539609, 0.049023747, 1.788294, -0.014839685, 0.53903717, -0.028930835, -1.7056439, 12.43742, 0.1784668, -7.0582294)
+transform = Transform3D(-1.9294538, 0.040951055, -0.23088647, 0.050101895, 1.9415832, -0.0743197, 0.22907498, -0.079728454, -1.9284568, 12.113918, 0.19999313, -5.128582)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush4" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-1.3867114, -0.07249636, -1.2223979, -0.05533155, 1.8485731, -0.04686357, 1.2232951, 0.0014329398, -1.387814, 11.280315, 0.22255707, -9.736387)
+transform = Transform3D(0.81492954, -0.1191395, -1.7805799, 0.07955315, 1.9579308, -0.09459654, 1.7827872, -0.0329087, 0.8181417, 11.280315, 0.15419388, -9.736385)
 
 [node name="Tree4" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-0.8366986, -0.01061136, -1.3059821, 0.024939243, 1.5505893, -0.028576575, 1.305787, -0.036414083, -0.8362777, -6.560135, 0.18261719, -7.4270954)
+transform = Transform3D(1.4184587, -0.0089754155, 1.3312371, 0.063848, 1.9435035, -0.054927863, -1.3297353, 0.083744116, 1.4174232, -6.560135, 0.18261719, -7.4270954)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree7" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-0.84518814, 0.03809331, -1.4925091, -0.04918739, 1.7134275, 0.071585976, 1.4921846, 0.078056715, -0.8430123, 6.2836876, 0.22119904, -9.72677)
+transform = Transform3D(-1.5385566, -0.086384654, 0.5063944, -0.06809701, 1.6191399, 0.06930908, -0.5091762, 0.044481907, -1.5394202, 6.2836876, 0.22119522, -9.7267685)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree8" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(0.46813637, -0.020245012, -1.8670789, 0.065059915, 1.9238741, -0.00454825, 1.8660549, -0.061996922, 0.46855184, -11.109592, 0.18382263, 2.5813808)
+transform = Transform3D(0.8592582, -0.00091278134, -1.4433854, 0.024643, 1.679552, 0.013608036, 1.4431752, -0.028135791, 0.85915095, -11.109592, 0.21237564, 2.5813808)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
-
-[node name="Collectables" type="Node3D" parent="Zone03"]
 
 [node name="Obstacle_roll" parent="Zone03" instance=ExtResource("37_n6y4e")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.049839, 0, 3.0455341)
 
-[node name="Chest1" parent="." instance=ExtResource("36_r6k77")]
-transform = Transform3D(-1.0000001, 0, -8.742278e-08, 0, 1.0000002, 0, 8.7422784e-08, 0, -1, 1.3500497, 0, -2.3252182)
-ability_to_unlock = "air_dash"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
+[node name="Zone04" type="Node3D" parent="."]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 95.040565, -5, -26.96973)
 
-[node name="Chest3" parent="." instance=ExtResource("36_r6k77")]
-transform = Transform3D(-1.0000001, 0, -8.742278e-08, 0, 1.0000002, 0, 8.7422784e-08, 0, -1, -0.64995027, 0, -2.3252182)
-ability_to_unlock = "double_jump"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
+[node name="SimpleGrassTextured" type="MultiMeshInstance3D" parent="Zone04" groups=["level_detail_objects"]]
+layers = 16
+cast_shadow = 0
+multimesh = SubResource("MultiMesh_6cw38")
+script = ExtResource("40_5jg2n")
+mesh = ExtResource("39_omflf")
+albedo = Color(0.89411765, 1, 0, 1)
+texture_albedo = SubResource("GradientTexture2D_gohh7")
+texture_filter = 0
+roughness = 0.8
+scale_h = 0.5
+scale_var = 0.5
+optimization_by_distance = true
+optimization_dist_min = 20.0
+optimization_dist_max = 100.0
+sgt_radius = 0.7
+sgt_density = 16
+sgt_scale = 1.0
+sgt_rotation = 0.0
+sgt_rotation_rand = 1.0
+sgt_dist_min = 0.3
+sgt_follow_normal = false
+sgt_slope = Vector2(0, 45)
+sgt_tool_shape = {
+"airbrush": 1,
+"eraser": 0,
+"pencil": 1
+}
+metadata/_custom_type_script = "uid://2juaclm8gc1n"
+metadata/SimpleGrassTextured = "2.0.5"
 
-[node name="Chest4" parent="." instance=ExtResource("36_r6k77")]
-transform = Transform3D(-4.3711392e-08, 0, 1, 0, 1.0000002, 0, -1.0000001, 0, -4.371139e-08, 66.090034, -3, -11.180361)
-ability_to_unlock = "roll_ability"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
+[node name="Environment" type="Node3D" parent="Zone04"]
 
-[node name="Chest2" parent="." instance=ExtResource("36_r6k77")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.34, 1.9073486e-06, -2.389)
-ability_to_unlock = "ground_slam"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
+[node name="island" parent="Zone04/Environment" instance=ExtResource("1_uw0fs")]
+transform = Transform3D(-0.2474126, 0, 0.76078016, 0, 0.64000005, 0, -0.76078016, 0, -0.2474126, 0, 0, 0)
+
+[node name="ProtonScatter" type="Node3D" parent="Zone04/Environment"]
+transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
+script = ExtResource("16_wd8iv")
+modifier_stack = SubResource("Resource_ccvsj")
+Performance/use_chunks = true
+Performance/chunk_dimensions = Vector3(15, 15, 15)
+metadata/_custom_type_script = "uid://bn8ms3g1y108p"
+
+[node name="ScatterItem" type="Node3D" parent="Zone04/Environment/ProtonScatter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42989397, 0, -0.7570038)
+script = ExtResource("23_2sjeu")
+source_scale_multiplier = 0.3
+path = "uid://gxav0cyjiosj"
+
+[node name="ScatterShape" type="Node3D" parent="Zone04/Environment/ProtonScatter"]
+transform = Transform3D(0.99999994, 0, -2.9802298e-08, 0, 1, 0, 2.9802298e-08, 0, 0.99999994, -2.809021, 0.7009983, 2.6121273)
+script = ExtResource("24_rf0p5")
+shape = SubResource("Resource_2sjeu")
+
+[node name="GridMap" type="GridMap" parent="Zone04"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+mesh_library = SubResource("MeshLibrary_o6xyf")
+cell_center_y = false
+collision_layer = 64
+collision_mask = 63
+bake_navigation = true
+data = {
+"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6)
+}
+metadata/_editor_floor_ = Vector3(0, 0, 0)
+
+[node name="breakable_object" type="Node3D" parent="Zone04"]
+
+[node name="Vegetation" type="Node3D" parent="Zone04" groups=["level_detail_objects"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
+script = ExtResource("33_v6w0b")
+scale_min = 1.5
+scale_max = 2.0
+ground_layer = 8
+
+[node name="Tree1" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+transform = Transform3D(-0.14492546, -0.039866846, -1.6304833, -0.07372155, 1.6353947, -0.0334342, 1.6293036, 0.07045103, -0.1465432, 9.828423, 0.22045135, 3.8520184)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree6" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+transform = Transform3D(-1.1878482, 0.046272986, 1.1231374, -0.009434073, 1.6335546, -0.07727969, -1.1240505, -0.06260959, -1.1862345, 13.951248, 0.22879028, 3.8556385)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree5" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+transform = Transform3D(-0.99123305, -0.049157027, -1.3025538, -0.02425257, 1.6368084, -0.043315433, 1.3032554, -0.0069282404, -0.99150556, 4.190407, 0.14688873, -14.600855)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush1" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(0.5886752, -0.042501774, 1.5337504, 0.047035202, 1.6424886, 0.027462242, -1.5336181, 0.03406, 0.5895683, -10.63324, 0.17289734, 9.754675)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush2" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(-0.018867625, -0.07266594, 1.5279431, 0.010165001, 1.5280195, 0.07279509, -1.5296363, 0.011050573, -0.018362988, 4.461235, 0.14050674, 11.942996)
+
+[node name="Bush5" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(-1.3449726, 0.04887248, -1.1393614, 0.06051288, 1.7623293, 0.0041613057, 1.1388024, -0.035925016, -1.3458538, 8.019157, 0.18609238, -14.224825)
+
+[node name="Bush6" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(0.71248156, 0.069219775, 1.81227, -0.046116903, 1.9471657, -0.056241583, -1.813005, -0.02232726, 0.71362334, -12.236313, 0.15275955, -4.919689)
+
+[node name="Bush8" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(-0.026801284, -0.018035531, -1.5379628, -0.05972022, 1.5370486, -0.016984098, 1.5369087, 0.059411142, -0.02747962, -7.7029343, 0.19115448, 6.561104)
+
+[node name="Tree2" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(1.3882011, 0.0015813246, -0.906733, 0.025598705, 1.6573604, 0.04208182, 0.90637285, -0.049230807, 1.3875641, 14.475822, 0.18003082, -0.94958115)
+leaf_count = 300
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree3" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+transform = Transform3D(-1.7784661, -0.10245047, 0.7350447, -0.09545774, 1.9243773, 0.037256226, -0.7359855, -0.00202728, -1.7810248, -1.2945023, 0.19820404, -9.447672)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush3" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(0.015142068, 0.0024774713, -1.540788, 0.015949631, 1.5407796, 0.0026342026, 1.5407075, -0.015974727, 0.015115589, 7.0015945, 0.1817398, -4.05999)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush7" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(1.054224, -0.001809724, -1.239211, -0.059507202, 1.6250186, -0.052997235, 1.2377827, 0.07966517, 1.0528927, 12.437416, 0.17056274, -7.0582294)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush4" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(-1.7962548, -0.06220967, -0.048165686, -0.06331794, 1.7963903, 0.041156176, 0.046699185, 0.04281297, -1.7968605, 11.280312, 0.22933578, -9.736387)
+
+[node name="Tree4" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(-1.7595705, -0.049843557, -0.84680504, -0.05541317, 1.9525831, 0.00021220905, 0.84645885, 0.024213316, -1.7602763, -6.6863785, 0.20641327, -5.8969746)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree7" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(-1.0558404, -0.0069377194, 1.5175979, -0.05247832, 1.8478119, -0.028063517, -1.5167062, -0.059105024, -1.0554901, 6.283684, 0.23018646, -9.72677)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree8" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(-0.8508645, 0.017298965, -1.2821496, 0.03314885, 1.5385307, -0.0012402553, 1.2818376, -0.028304245, -0.85103947, -4.4220963, 0.1921196, 12.386585)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Zone05" type="Node3D" parent="."]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 108.75582, -9, 1.0476158)
+
+[node name="SimpleGrassTextured" type="MultiMeshInstance3D" parent="Zone05" groups=["level_detail_objects"]]
+layers = 16
+cast_shadow = 0
+multimesh = SubResource("MultiMesh_6cw38")
+script = ExtResource("40_5jg2n")
+mesh = ExtResource("39_omflf")
+albedo = Color(0.89411765, 1, 0, 1)
+texture_albedo = SubResource("GradientTexture2D_gohh7")
+texture_filter = 0
+roughness = 0.8
+scale_h = 0.5
+scale_var = 0.5
+optimization_by_distance = true
+optimization_dist_min = 20.0
+optimization_dist_max = 100.0
+sgt_radius = 0.7
+sgt_density = 16
+sgt_scale = 1.0
+sgt_rotation = 0.0
+sgt_rotation_rand = 1.0
+sgt_dist_min = 0.3
+sgt_follow_normal = false
+sgt_slope = Vector2(0, 45)
+sgt_tool_shape = {
+"airbrush": 1,
+"eraser": 0,
+"pencil": 1
+}
+metadata/_custom_type_script = "uid://2juaclm8gc1n"
+metadata/SimpleGrassTextured = "2.0.5"
+
+[node name="Environment" type="Node3D" parent="Zone05"]
+
+[node name="island" parent="Zone05/Environment" instance=ExtResource("1_uw0fs")]
+transform = Transform3D(-0.46957532, 0, -0.3051206, 0, 0.448, 0, 0.3051206, 0, -0.46957532, 0, 0, 0)
+
+[node name="ProtonScatter" type="Node3D" parent="Zone05/Environment"]
+transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
+script = ExtResource("16_wd8iv")
+modifier_stack = SubResource("Resource_g3i2w")
+Performance/use_chunks = true
+Performance/chunk_dimensions = Vector3(15, 15, 15)
+metadata/_custom_type_script = "uid://bn8ms3g1y108p"
+
+[node name="ScatterItem" type="Node3D" parent="Zone05/Environment/ProtonScatter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42989397, 0, -0.7570038)
+script = ExtResource("23_2sjeu")
+source_scale_multiplier = 0.3
+path = "uid://gxav0cyjiosj"
+
+[node name="ScatterShape" type="Node3D" parent="Zone05/Environment/ProtonScatter"]
+transform = Transform3D(0.99999994, 0, -2.9802298e-08, 0, 1, 0, 2.9802298e-08, 0, 0.99999994, -2.809021, 0.7009983, 2.6121273)
+script = ExtResource("24_rf0p5")
+shape = SubResource("Resource_61rmp")
+
+[node name="GridMap" type="GridMap" parent="Zone05"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+mesh_library = SubResource("MeshLibrary_o6xyf")
+cell_center_y = false
+collision_layer = 64
+collision_mask = 63
+bake_navigation = true
+data = {
+"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6)
+}
+metadata/_editor_floor_ = Vector3(0, 0, 0)
+
+[node name="breakable_object" type="Node3D" parent="Zone05"]
+
+[node name="Vegetation" type="Node3D" parent="Zone05" groups=["level_detail_objects"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
+script = ExtResource("33_v6w0b")
+scale_min = 1.5
+scale_max = 2.0
+ground_layer = 8
+
+[node name="Tree1" parent="Zone05/Vegetation" instance=ExtResource("34_8twap")]
+transform = Transform3D(-0.14492543, -0.03986684, -1.630483, -0.07372155, 1.6353947, -0.0334342, 1.6293033, 0.070451014, -0.14654317, 0.62394714, 0.22045135, 6.9404736)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush1" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(0.58867514, -0.04250177, 1.5337503, 0.047035202, 1.6424886, 0.027462242, -1.533618, 0.034059998, 0.58956826, -7.716835, 0.17289734, 1.5552511)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush8" parent="Zone05/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(-0.026801283, -0.01803553, -1.5379627, -0.05972022, 1.5370486, -0.016984098, 1.5369086, 0.05941114, -0.027479619, -5.6979218, 0.19115448, 5.107073)
+
+[node name="Tree2" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(1.388201, 0.0015813245, -0.9067329, 0.025598705, 1.6573604, 0.04208182, 0.9063728, -0.049230803, 1.387564, 9.34095, 0.18003082, 2.4127712)
+leaf_count = 300
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush3" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(0.015142068, 0.0024774713, -1.540788, 0.015949631, 1.5407796, 0.0026342026, 1.5407075, -0.015974727, 0.015115589, 7.0015945, 0.1817398, -4.05999)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Bush7" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
+transform = Transform3D(1.0542239, -0.0018097239, -1.2392108, -0.059507202, 1.6250186, -0.052997235, 1.2377826, 0.07966516, 1.0528926, 4.3657455, 0.17056274, 4.3308525)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree4" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(-1.7595704, -0.049843553, -0.846805, -0.05541317, 1.9525831, 0.00021220905, 0.8464588, 0.024213314, -1.7602762, -10.100533, 0.20641327, -1.9920478)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
+
+[node name="Tree7" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
+transform = Transform3D(-1.0558403, -0.006937719, 1.5175978, -0.05247832, 1.8478119, -0.028063517, -1.5167061, -0.05910502, -1.05549, 3.7770157, 0.23018837, -7.968153)
+leaf_color = Color(1, 0, 0, 1)
+random_tilt = 0.5
 
 [node name="InteractionArea" parent="." instance=ExtResource("38_f0gl8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.521053, -0.06467056, 3.4960823)
