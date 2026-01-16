@@ -4,17 +4,23 @@ extends Node3D
 @onready var label: Label3D = $Label
 
 var current_action: String = ""
+# Переменная для целевого размера (по умолчанию 1.0)
+var target_scale_val: Vector3 = Vector3.ONE
 
 func _ready():
 	InputHelper.device_changed.connect(_on_device_changed)
-	# Анимация появления
+	
+	# Старт с нуля
 	scale = Vector3.ZERO
+	
+	# Анимация появления до target_scale_val
 	var tween = create_tween()
-	tween.tween_property(self, "scale", Vector3.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", target_scale_val, 0.2)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func setup(action: String, text: String):
 	current_action = action
-	label.text = text # Текст уже должен быть переведен через tr() перед передачей
+	label.text = text 
 	_update_icon()
 
 func _on_device_changed(_device, _id):
@@ -31,6 +37,8 @@ func _update_icon():
 func close():
 	InputHelper.device_changed.disconnect(_on_device_changed)
 	var tween = create_tween()
-	tween.tween_property(self, "scale", Vector3.ZERO, 0.15)
+	# Исчезаем обратно в ноль
+	tween.tween_property(self, "scale", Vector3.ZERO, 0.15)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	await tween.finished
 	queue_free()

@@ -8,6 +8,9 @@ signal triggered
 @export var input_action: String = "interact" # Кнопка (E, F, Квадрат и т.д.)
 @export var hint_offset: Vector3 = Vector3(0, 1.0, 0) # Высота подсказки над объектом
 
+# --- НОВОЕ: Настройка размера ---
+@export var prompt_scale: float = 1.0 # 0.5 сделает её в 2 раза меньше
+
 const HINT_SCENE = preload("res://ui/3d_prompts/InteractionHint3D.tscn")
 
 # Для обратной совместимости с кодом (сундуки)
@@ -19,7 +22,6 @@ func _ready():
 	# Слой 0 не сталкивается ни с чем, кроме того что в маске
 	collision_layer = 0 
 	# Маска 2 (Игрок). Убедись, что слой игрока - это 2. 
-	# Если игрок на слое 1, ставь 1.
 	set_collision_mask_value(2, true) 
 	
 	body_entered.connect(_on_body_entered)
@@ -47,6 +49,11 @@ func _on_body_exited(body):
 func _show_hint():
 	if _hint_instance: return
 	_hint_instance = HINT_SCENE.instantiate()
+	
+	# --- ПРИМЕНЯЕМ МАСШТАБ ---
+	# Важно задать это ДО add_child, чтобы _ready в hint_script подхватил правильное значение
+	_hint_instance.target_scale_val = Vector3(prompt_scale, prompt_scale, prompt_scale)
+	
 	add_child(_hint_instance)
 	_hint_instance.position = hint_offset
 	# Передаем tr(action_label_key) для перевода

@@ -5,7 +5,7 @@ extends Node3D
 @export var message_duration: float = 3.0
 
 # Ссылка на Area, если она лежит внутри
-@onready var interaction_area: InteractionArea = $InteractionArea
+@onready var interaction_area: InteractionArea = $"../InteractionArea"
 
 func _ready():
 	# Если Area есть внутри сцены, подписываемся автоматически

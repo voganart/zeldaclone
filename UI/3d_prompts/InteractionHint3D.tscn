@@ -15,5 +15,6 @@ fixed_size = true
 [node name="Label" type="Label3D" parent="."]
 billboard = 1
 text = "Interact"
+font_size = 62
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

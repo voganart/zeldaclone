@@ -8,6 +8,7 @@ radius = 1.5
 [node name="InteractionArea" type="Area3D"]
 script = ExtResource("1_6thkn")
 hint_offset = Vector3(0, 1.5, 0)
+prompt_scale = 0.5
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_i0bwp")

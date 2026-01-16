@@ -125,6 +125,8 @@ transform = Transform3D(-1.0184007e-08, 1, -1.7346553e-17, -1, -1.0183861e-08, 3
 shape = SubResource("CapsuleShape3D_w6sjs")
 
 [node name="InteractionArea" parent="." instance=ExtResource("3_w6sjs")]
+action_label_key = "ui_open"
+prompt_scale = 0.5
 
 [node name="Chest_1" parent="." instance=ExtResource("2_2d6lx")]
 
