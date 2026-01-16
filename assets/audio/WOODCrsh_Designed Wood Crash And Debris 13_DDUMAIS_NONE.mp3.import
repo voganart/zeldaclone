@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/WOODCrsh_Designed Wood Crash And Debris 13_DD
 [params]
 
 loop=false
-loop_offset=0
-bpm=0
+loop_offset=0.0
+bpm=0.0
 beat_count=0
 bar_beats=4

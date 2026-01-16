@@ -547,7 +547,7 @@ item/5/navigation_layers = 1
 item/5/preview = SubResource("ImageTexture_s8n2r")
 metadata/_editor_source_scene = "res://assets/models/environment/gridmap_meshlib.tscn"
 
-[sub_resource type="Resource" id="Resource_d26xb"]
+[sub_resource type="Resource" id="Resource_2fo6c"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -555,20 +555,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_hq2cr"]
+[sub_resource type="Resource" id="Resource_r8j8t"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_wurc4"]
+[sub_resource type="Resource" id="Resource_ykjdn"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_s8n2r"]
+[sub_resource type="Resource" id="Resource_nl450"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -577,15 +577,15 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_iijgv"]
+[sub_resource type="Resource" id="Resource_38226"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_d26xb"), SubResource("Resource_hq2cr"), SubResource("Resource_wurc4"), SubResource("Resource_s8n2r")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_2fo6c"), SubResource("Resource_r8j8t"), SubResource("Resource_ykjdn"), SubResource("Resource_nl450")])
 
 [sub_resource type="Resource" id="Resource_1ah6d"]
 script = ExtResource("25_diasq")
 size = Vector3(36.807037, 3.0480158, 40.160812)
 
-[sub_resource type="Resource" id="Resource_fbdqi"]
+[sub_resource type="Resource" id="Resource_k3iq2"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -593,20 +593,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_j8a35"]
+[sub_resource type="Resource" id="Resource_d26xb"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_st04i"]
+[sub_resource type="Resource" id="Resource_hq2cr"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_ccvsj"]
+[sub_resource type="Resource" id="Resource_wurc4"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -615,15 +615,15 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_rf0p5"]
+[sub_resource type="Resource" id="Resource_s8n2r"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_fbdqi"), SubResource("Resource_j8a35"), SubResource("Resource_st04i"), SubResource("Resource_ccvsj")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_k3iq2"), SubResource("Resource_d26xb"), SubResource("Resource_hq2cr"), SubResource("Resource_wurc4")])
 
 [sub_resource type="Resource" id="Resource_wd8iv"]
 script = ExtResource("25_diasq")
 size = Vector3(27.57573, 3.0480158, 29.490217)
 
-[sub_resource type="Resource" id="Resource_diasq"]
+[sub_resource type="Resource" id="Resource_iijgv"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -631,20 +631,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_laqti"]
+[sub_resource type="Resource" id="Resource_fbdqi"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_4kxhy"]
+[sub_resource type="Resource" id="Resource_j8a35"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_g3i2w"]
+[sub_resource type="Resource" id="Resource_st04i"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -653,15 +653,15 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_p7hnx"]
+[sub_resource type="Resource" id="Resource_ccvsj"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_diasq"), SubResource("Resource_laqti"), SubResource("Resource_4kxhy"), SubResource("Resource_g3i2w")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_iijgv"), SubResource("Resource_fbdqi"), SubResource("Resource_j8a35"), SubResource("Resource_st04i")])
 
 [sub_resource type="Resource" id="Resource_2sjeu"]
 script = ExtResource("25_diasq")
 size = Vector3(25.504715, 3.0480158, 26.962387)
 
-[sub_resource type="Resource" id="Resource_sghty"]
+[sub_resource type="Resource" id="Resource_rf0p5"]
 script = ExtResource("19_fbdqi")
 amount = 300
 override_global_seed = true
@@ -669,20 +669,20 @@ custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_mgiie"]
+[sub_resource type="Resource" id="Resource_diasq"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(0.2, 0.2, 0.2)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_v6w0b"]
+[sub_resource type="Resource" id="Resource_laqti"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_8twap"]
+[sub_resource type="Resource" id="Resource_4kxhy"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -691,9 +691,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_okxh1"]
+[sub_resource type="Resource" id="Resource_g3i2w"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_sghty"), SubResource("Resource_mgiie"), SubResource("Resource_v6w0b"), SubResource("Resource_8twap")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_rf0p5"), SubResource("Resource_diasq"), SubResource("Resource_laqti"), SubResource("Resource_4kxhy")])
 
 [sub_resource type="Resource" id="Resource_61rmp"]
 script = ExtResource("25_diasq")
@@ -711,6 +711,7 @@ tutorial_manager = NodePath("TutorialManager")
 script = ExtResource("3_jygyi")
 
 [node name="PlayerStart" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.58107, -3.8146973e-06, -10.028847)
 
 [node name="DebugOverlay" parent="." instance=ExtResource("1_ueypv")]
 
@@ -814,7 +815,7 @@ launch_force_min = 4.0
 launch_force_max = 8.0
 
 [node name="Chest3" parent="Chests" instance=ExtResource("36_r6k77")]
-transform = Transform3D(-0.2588192, 0, 0.9659258, 0, 1.0000002, 0, -0.96592593, 0, -0.25881916, 95.5608, -5, -25.061848)
+transform = Transform3D(-0.70710695, 0, 0.7071067, 0, 1.0000002, 0, -0.70710677, 0, -0.7071069, 94.85767, -5, -26.931147)
 ability_to_unlock = "double_jump"
 up_velocity_min = 5.0
 up_velocity_max = 8.0
@@ -877,6 +878,57 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.041814, 4.7683716e-07, 3.2
 
 [node name="VaboPickup5" parent="Collectables" instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.133696, 4.7683716e-07, 3.9151435)
+
+[node name="VaboPickup11" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.4454, -2.747975, 3.9151435)
+
+[node name="VaboPickup12" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.337585, -2.747975, 3.6121597)
+
+[node name="VaboPickup13" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.27203, -2.747975, 2.4257078)
+
+[node name="VaboPickup14" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.78477, -2.747975, 2.9850645)
+
+[node name="VaboPickup15" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.924606, -2.747975, 10.466455)
+
+[node name="VaboPickup16" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.259617, -2.747975, 2.402402)
+
+[node name="VaboPickup17" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.156166, -2.747975, 0.04844427)
+
+[node name="VaboPickup18" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.49118, -2.747975, -4.8459234)
+
+[node name="VaboPickup19" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.847317, -2.747975, -10.859003)
+
+[node name="VaboPickup20" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.135715, -2.747975, -19.97185)
+
+[node name="VaboPickup21" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.343296, -2.747975, -15.007562)
+
+[node name="VaboPickup22" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.13243, -2.747975, -19.943012)
+
+[node name="VaboPickup23" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 86.96174, -4.5892944, -24.772392)
+
+[node name="VaboPickup24" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.053406, -4.5892944, -20.476944)
+
+[node name="VaboPickup25" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93.175385, -4.5892944, -23.531092)
+
+[node name="VaboPickup26" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.10733, -8.709058, -6.287119)
+
+[node name="VaboPickup27" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 108.77119, -8.709058, 0.27626896)
 
 [node name="VaboPickup4" parent="Collectables" instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.001768, 1.2861544, 3.996716)
@@ -1031,7 +1083,7 @@ transform = Transform3D(0.7071067, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, 0.70710
 [node name="ProtonScatter" type="Node3D" parent="Zone02/Environment"]
 transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_iijgv")
+modifier_stack = SubResource("Resource_38226")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -1217,12 +1269,12 @@ transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 62.396965, 
 [node name="Environment" type="Node3D" parent="Zone03"]
 
 [node name="island" parent="Zone03/Environment" instance=ExtResource("1_uw0fs")]
-transform = Transform3D(-0.3999999, 0, 0.6928202, 0, 0.8, 0, -0.6928202, 0, -0.3999999, 0, 0, 0)
+transform = Transform3D(-0.39999986, 0, 0.69282013, 0, 0.8, 0, -0.69282013, 0, -0.39999986, -0.6690788, 0, 1.8112297)
 
 [node name="ProtonScatter" type="Node3D" parent="Zone03/Environment"]
 transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_rf0p5")
+modifier_stack = SubResource("Resource_s8n2r")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -1246,7 +1298,7 @@ collision_layer = 64
 collision_mask = 63
 bake_navigation = true
 data = {
-"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6, 65534, 6, 1441795, 65532, 4, 1441795, 65532, 3, 1441792, 65534, 8, 1048580, 65532, 8, 1441796, 65530, 6, 1441796, 65532, 6, 1048580, 65532, 10, 1048579, 65532, 11, 1048580, 65530, 8, 1048580, 65532, 2, 1441795, 65532, 1, 1441795, 65532, 0, 1441795, 65532, 65535, 1441792, 65532, 65534, 1441796, 65533, 65534, 3, 65535, 65534, 3, 65534, 65534, 3, 0, 65534, 3, 65534, 5, 1441796, 65534, 3, 4, 0, 5, 655364, 2, 2, 655363, 65535, 4, 1441797, 65535, 5, 1441797, 3, 2, 655364, 3, 6, 1048580, 3, 4, 1048579, 3, 5, 1048579, 2, 6, 655363, 1, 6, 655363, 0, 6, 655362, 1, 65534, 655360, 0, 3, 1048580, 0, 2, 1441796, 65534, 1, 1441794, 65534, 2, 1048579)
+"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6, 65534, 6, 1441795, 65532, 4, 1441795, 65532, 3, 1441792, 65534, 8, 1048580, 65532, 8, 1441796, 65530, 6, 1441796, 65532, 6, 1048580, 65532, 10, 1048579, 65532, 11, 1048580, 65530, 8, 1048580, 65532, 2, 1441795, 65532, 1, 1441795, 65532, 0, 1441795, 65532, 65535, 1441792, 65532, 65534, 1441796, 65533, 65534, 3, 65535, 65534, 3, 65534, 65534, 3, 0, 65534, 3, 65534, 5, 1441796, 65534, 3, 4, 0, 5, 655364, 2, 2, 655363, 3, 2, 655364, 3, 6, 1048580, 3, 4, 1048579, 3, 5, 1048579, 2, 6, 655363, 1, 6, 655363, 0, 6, 655362, 1, 65534, 655360, 0, 3, 1048580, 0, 2, 1441796, 65534, 1, 1441794, 65534, 2, 1048579)
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
@@ -1349,17 +1401,17 @@ random_tilt = 0.5
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.049839, 0, 3.0455341)
 
 [node name="Zone04" type="Node3D" parent="."]
-transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 95.040565, -5, -26.96973)
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 94.81114, -5, -26.819393)
 
 [node name="Environment" type="Node3D" parent="Zone04"]
 
 [node name="island" parent="Zone04/Environment" instance=ExtResource("1_uw0fs")]
-transform = Transform3D(-0.2474126, 0, 0.76078016, 0, 0.64000005, 0, -0.76078016, 0, -0.2474126, 0, 0, 0)
+transform = Transform3D(-0.27253973, 0, 0.75214446, 0, 0.64000005, 0, -0.75214446, 0, -0.27253973, 0, 0, 0)
 
 [node name="ProtonScatter" type="Node3D" parent="Zone04/Environment"]
 transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_p7hnx")
+modifier_stack = SubResource("Resource_ccvsj")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -1397,78 +1449,81 @@ scale_max = 2.0
 ground_layer = 8
 
 [node name="Tree1" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-0.14492546, -0.039866846, -1.6304833, -0.07372155, 1.6353947, -0.0334342, 1.6293036, 0.07045103, -0.1465432, 9.828423, 0.22045135, 3.8520184)
+transform = Transform3D(0.40933597, 0.059951052, 1.7918801, -0.054165773, 1.8375635, -0.049105886, -1.7920642, -0.041847218, 0.41077814, 9.828423, 0.23186111, 3.8520184)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree6" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-1.1878482, 0.046272986, 1.1231374, -0.009434073, 1.6335546, -0.07727969, -1.1240505, -0.06260959, -1.1862345, 13.951248, 0.22879028, 3.8556385)
+transform = Transform3D(1.3520619, -0.01893095, 1.4310354, -0.020267952, 1.9682071, 0.04518655, -1.4310172, -0.045762796, 1.351439, 13.951248, 0.23852539, 3.8556385)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree5" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-0.99123305, -0.049157027, -1.3025538, -0.02425257, 1.6368084, -0.043315433, 1.3032554, -0.0069282404, -0.99150556, 4.190407, 0.14688873, -14.600855)
+transform = Transform3D(1.7090104, -0.07615419, 0.037328444, 0.075827956, 1.7093608, 0.01565062, -0.037986748, -0.013977176, 1.7106346, 4.190407, 0.17300415, -14.600855)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush1" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(0.5886752, -0.042501774, 1.5337504, 0.047035202, 1.6424886, 0.027462242, -1.5336181, 0.03406, 0.5895683, -10.63324, 0.17289734, 9.754675)
+transform = Transform3D(1.2238392, -0.011374735, -1.1013902, 0.03742826, 1.6458938, 0.024591252, 1.1008129, -0.04331535, 1.2236449, -10.63324, 0.19381332, 9.754675)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush2" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-0.018867625, -0.07266594, 1.5279431, 0.010165001, 1.5280195, 0.07279509, -1.5296363, 0.011050573, -0.018362988, 4.461235, 0.14050674, 11.942996)
+transform = Transform3D(-1.7639805, -0.003327829, 0.7503334, 0.02453944, 1.9156346, 0.06618657, -0.7499394, 0.0705108, -1.7627414, 8.446426, 0.17784119, 7.9421387)
+
+[node name="Bush9" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+transform = Transform3D(-1.2853473, 0.068590075, 0.9578158, 0.027567703, 1.6023198, -0.07774895, -0.9598728, -0.045828786, -1.2848259, 1.5083313, 0.17666245, 11.144253)
 
 [node name="Bush5" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-1.3449726, 0.04887248, -1.1393614, 0.06051288, 1.7623293, 0.0041613057, 1.1388024, -0.035925016, -1.3458538, 8.019157, 0.18609238, -14.224825)
+transform = Transform3D(-1.6449462, -0.0753052, 0.9128414, -0.05295566, 1.8810698, 0.059753127, -0.9144102, 0.026530452, -1.6455845, 8.019157, 0.20436478, -14.224825)
 
 [node name="Bush6" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(0.71248156, 0.069219775, 1.81227, -0.046116903, 1.9471657, -0.056241583, -1.813005, -0.02232726, 0.71362334, -12.236313, 0.15275955, -4.919689)
+transform = Transform3D(-1.5920173, 0.037045572, 1.0036534, 0.054138213, 1.8814915, 0.016428016, -1.0028766, 0.042760395, -1.5923634, -12.236313, 0.17771149, -4.919689)
 
 [node name="Bush8" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-0.026801284, -0.018035531, -1.5379628, -0.05972022, 1.5370486, -0.016984098, 1.5369087, 0.059411142, -0.02747962, -7.7029343, 0.19115448, 6.561104)
+transform = Transform3D(-1.536124, 0.01417999, 0.28533375, 0.006930118, 1.5619284, -0.04031282, -0.28560182, -0.038367666, -1.5356604, -7.7029343, 0.20842361, 6.561104)
 
 [node name="Tree2" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(1.3882011, 0.0015813246, -0.906733, 0.025598705, 1.6573604, 0.04208182, 0.90637285, -0.049230807, 1.3875641, 14.475822, 0.18003082, -0.94958115)
+transform = Transform3D(-1.167385, -0.0151689965, 1.4944552, -0.004363094, 1.8963504, 0.015840098, -1.4945258, 0.0063124388, -1.167376, 14.475822, 0.19952011, -0.94958115)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree3" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-1.7784661, -0.10245047, 0.7350447, -0.09545774, 1.9243773, 0.037256226, -0.7359855, -0.00202728, -1.7810248, -1.2945023, 0.19820404, -9.447672)
+transform = Transform3D(1.51811, -0.034907766, 0.16435564, 0.036288872, 1.5269098, -0.010887911, -0.16405623, 0.014726741, 1.5184722, -1.2945023, 0.21405411, -9.447672)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush3" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(0.015142068, 0.0024774713, -1.540788, 0.015949631, 1.5407796, 0.0026342026, 1.5407075, -0.015974727, 0.015115589, 7.0015945, 0.1817398, -4.05999)
+transform = Transform3D(1.3054497, -0.11230625, 1.458627, 0.06560977, 1.9574567, 0.0919936, -1.461472, -0.0124407895, 1.3070382, 7.0015945, 0.20088577, -4.05999)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush7" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(1.054224, -0.001809724, -1.239211, -0.059507202, 1.6250186, -0.052997235, 1.2377827, 0.07966517, 1.0528927, 12.437416, 0.17056274, -7.0582294)
+transform = Transform3D(1.3054814, -0.01663282, -1.1128782, 0.024573274, 1.7153549, 0.003188817, 1.1127313, -0.018367462, 1.3055835, 12.437416, 0.19193268, -7.0582294)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush4" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
-transform = Transform3D(-1.7962548, -0.06220967, -0.048165686, -0.06331794, 1.7963903, 0.041156176, 0.046699185, 0.04281297, -1.7968605, 11.280312, 0.22933578, -9.736387)
+transform = Transform3D(1.9602671, 0.061421257, 0.29240352, -0.07104264, 1.980719, 0.06020552, -0.29021603, -0.06999422, 1.9603047, 11.280312, 0.2389679, -9.736387)
 
 [node name="Tree4" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-1.7595705, -0.049843557, -0.84680504, -0.05541317, 1.9525831, 0.00021220905, 0.84645885, 0.024213316, -1.7602763, -6.6863785, 0.20641327, -5.8969746)
+transform = Transform3D(1.4306407, -0.009454102, 0.9798373, -0.03216808, 1.7325739, 0.063684955, -0.97935474, -0.07071902, 1.4292536, -6.6863785, 0.22063065, -5.8969746)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree7" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-1.0558404, -0.0069377194, 1.5175979, -0.05247832, 1.8478119, -0.028063517, -1.5167062, -0.059105024, -1.0554901, 6.283684, 0.23018646, -9.72677)
+transform = Transform3D(1.371145, -0.01448905, 1.1499826, -0.04274578, 1.7875909, 0.07348908, -1.1492791, -0.08377299, 1.3692509, 6.283684, 0.23964691, -9.72677)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Tree8" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(-0.8508645, 0.017298965, -1.2821496, 0.03314885, 1.5385307, -0.0012402553, 1.2818376, -0.028304245, -0.85103947, -4.4220963, 0.1921196, 12.386585)
+transform = Transform3D(1.5016077, 0.06420977, -1.0788454, -0.034610875, 1.8487378, 0.06185787, 1.0802001, -0.030023558, 1.5017064, -4.4220963, 0.20919418, 12.386584)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Zone05" type="Node3D" parent="."]
-transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 108.75582, -9, 1.0476158)
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 108.5264, -9, 1.197953)
 
 [node name="Environment" type="Node3D" parent="Zone05"]
 
@@ -1478,7 +1533,7 @@ transform = Transform3D(-0.46957532, 0, -0.3051206, 0, 0.448, 0, 0.3051206, 0, -
 [node name="ProtonScatter" type="Node3D" parent="Zone05/Environment"]
 transform = Transform3D(0.99999976, 0, 0, 0, 1, 0, 0, 0, 0.99999976, 4.0708733, -0.34312105, -1.7272551)
 script = ExtResource("16_wd8iv")
-modifier_stack = SubResource("Resource_okxh1")
+modifier_stack = SubResource("Resource_g3i2w")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"

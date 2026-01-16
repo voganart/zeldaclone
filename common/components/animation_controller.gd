@@ -97,3 +97,14 @@ func get_root_motion_position() -> Vector3:
 
 func get_root_motion_rotation() -> Quaternion:
 	return anim_tree.get_root_motion_rotation()
+
+func set_crouch_state(is_crouching: bool) -> void:
+	if not anim_tree: return
+	
+	# Используем индексы (0 = stand, 1 = crouch) или имена, если настроены
+	var val = "crouch" if is_crouching else "stand"
+	anim_tree.set(GameConstants.TREE_PARAM_CROUCH, val)
+func abort_roll() -> void:
+	# ONE_SHOT_REQUEST_FADE_OUT плавно выключает OneShot, 
+	# позволяя проявиться тому, что подключено к его входу (нашему CrouchState)
+	anim_tree.set(GameConstants.TREE_PARAM_ROLL_SHOT, AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)

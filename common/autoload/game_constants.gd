@@ -48,6 +48,7 @@ const ANIM_PLAYER_ATTACK_3 = "Boy_attack_naked_3"
 const ANIM_PLAYER_SLAM_START = "Boy_attack_air_naked_start"
 const ANIM_PLAYER_SLAM_MID = "Boy_attack_air_naked_mid"
 const ANIM_PLAYER_SLAM_END = "Boy_attack_air_naked_end"
+const TREE_PARAM_CROUCH = "parameters/CrouchState/transition_request" # "stand", "crouch"
 
 # --- АНИМАЦИИ ВРАГА ---
 const ANIM_ENEMY_IDLE = "Monstr_idle"

@@ -3,8 +3,8 @@
 [node name="Obstacle_roll" type="Node3D"]
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3116093, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5616093, 0)
 use_collision = true
 collision_layer = 64
 collision_mask = 53
-size = Vector3(1, 0.6611328, 3)
+size = Vector3(1, 1, 3)

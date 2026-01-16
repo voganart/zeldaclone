@@ -42,9 +42,10 @@ extends CharacterBody3D
 var default_col_height: float = 2.0
 var default_col_y: float = 1.0
 
-# Настройки для переката (можешь подкрутить в инспекторе, если вынесешь в export)
+# Настройки для переката (автоматически рассчитываются в _ready)
 var roll_col_height: float = 0.9
 var roll_col_y: float = 0.45 
+
 # Abilities
 @onready var air_dash_ability: AirDashAbility = $Abilities/AirDashAbility
 @onready var ground_slam_ability: GroundSlamAbility = $Abilities/GroundSlamAbility
@@ -52,6 +53,8 @@ var roll_col_y: float = 0.45
 # ------------------
 
 @onready var anim_player: AnimationPlayer = $character/AnimationPlayer
+@onready var anim_tree: AnimationTree = $character/AnimationTree
+
 @onready var attack_timer: Timer = $FirstAttackTimer
 
 @onready var sfx_footsteps = $SoundBank/SfxFootsteps
@@ -61,10 +64,12 @@ var roll_col_y: float = 0.45
 @onready var sfx_hurt = $SoundBank/SfxHurt
 @onready var sfx_dash = $SoundBank/SfxDash
 @onready var sfx_slam_impact = $SoundBank/SfxSlamImpact
-@onready var shape_cast: ShapeCast3D = $RollSafetyCast
+
+# Ссылка на твой узел в сцене
+@onready var shape_cast: ShapeCast3D = get_node_or_null("RollSafetyCast")
 
 # --- НОВОЕ: Детектор стен для атаки ---
-@onready var wall_detector: ShapeCast3D = $AttackWallDetector # Убедись, что создал узел в сцене!
+@onready var wall_detector: ShapeCast3D = $AttackWallDetector 
 
 var last_safe_position: Vector3 = Vector3.ZERO
 var safe_pos_timer: float = 0.0 
@@ -109,9 +114,7 @@ var is_attacking: bool:
 	get: return combat_component.is_attacking
 	set(val): 
 		combat_component.is_attacking = val
-		# Автоматически включаем/выключаем детектор стен при смене состояния атаки
-		if wall_detector:
-			wall_detector.enabled = val 
+		if wall_detector: wall_detector.enabled = val 
 
 var can_attack: bool:
 	get: return combat_component.can_attack
@@ -207,15 +210,16 @@ func _ready() -> void:
 	movement_component.init(self)
 	combat_component.init(self)
 	
-	# !!! 1. ЗАПОМИНАЕМ СТАРТОВЫЕ ЗНАЧЕНИЯ КАПСУЛЫ !!!
+	# 1. ЗАПОМИНАЕМ СТАРТОВЫЕ ЗНАЧЕНИЯ КАПСУЛЫ
 	if collision_shape and collision_shape.shape is CapsuleShape3D:
 		default_col_height = collision_shape.shape.height
 		default_col_y = collision_shape.position.y
 		
-		# Автоматически считаем высоту для переката (половина от обычной)
 		roll_col_height = default_col_height / 2.0
 		roll_col_y = default_col_y / 2.0
-	# ----------------------------------------------------
+	
+	# 2. НАСТРАИВАЕМ КАСТ ПОТОЛКА
+	call_deferred("_setup_roll_safety_cast")
 
 	if roll_ability:
 		roll_ability.roll_charges_changed.connect(func(c, m, p): roll_charges_changed.emit(c, m, p))
@@ -227,6 +231,42 @@ func _ready() -> void:
 
 	state_machine.init(self)
 
+func _setup_roll_safety_cast() -> void:
+	# Если каст уже есть в сцене, мы его используем, но ПЕРЕНАСТРАИВАЕМ
+	# под реальные размеры капсулы, чтобы он работал корректно.
+	
+	if not shape_cast:
+		print("Player: Creating RollSafetyCast dynamically...")
+		shape_cast = ShapeCast3D.new()
+		shape_cast.name = "RollSafetyCast"
+		add_child(shape_cast)
+		# Исключаем самого игрока
+		shape_cast.add_exception(self)
+		shape_cast.collision_mask = 1 # Слой статики (Wall/Ground)
+	
+	# --- НАСТРОЙКА ГЕОМЕТРИИ ЛУЧА ---
+	# 1. Позиция начала: Примерно в районе пояса или чуть ниже
+	# Если капсула 2м, ставим начало на 0.5м от пола.
+	shape_cast.position = Vector3(0, 0.5, 0)
+	
+	# 2. Длина луча: Должна доставать до макушки СТОЯЩЕГО игрока.
+	# Если высота 2.0, а начали с 0.5, нам нужно проверить еще 1.5 метра вверх.
+	# Делаем чуть меньше (1.4), чтобы не цеплять "пограничные" потолки.
+	var check_distance = default_col_height - shape_cast.position.y - 0.1
+	shape_cast.target_position = Vector3(0, check_distance, 0)
+	
+	# 3. Форма: Сфера
+	if not shape_cast.shape or not (shape_cast.shape is SphereShape3D):
+		var sphere = SphereShape3D.new()
+		sphere.radius = 0.4 # Чуть меньше радиуса капсулы (0.5), чтобы не цеплять стены боками
+		shape_cast.shape = sphere
+	
+	shape_cast.enabled = false # Включаем только во время переката
+	
+	# Обновляем исключения на всякий случай
+	shape_cast.clear_exceptions()
+	shape_cast.add_exception(self)
+
 func _process(delta: float) -> void:
 	_update_stun_timer(delta)
 	
@@ -235,7 +275,6 @@ func _process(delta: float) -> void:
 		grass_manager.set_player_position(global_position)
 
 func _physics_process(delta: float) -> void:
-	# 1. ОБРАБОТКА ROOT MOTION
 	var is_root_motion = false
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
 		is_root_motion = true
@@ -267,7 +306,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		current_rm_velocity = Vector3.ZERO
 
-	# 2. KNOCKBACK STUN
 	if is_knockback_stun:
 		apply_gravity(delta)
 		velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
@@ -277,12 +315,10 @@ func _physics_process(delta: float) -> void:
 		
 	RenderingServer.global_shader_parameter_set(GameConstants.SHADER_PARAM_PLAYER_POS, global_transform.origin)
 	
-	# 3. ПРИМЕНЕНИЕ СКОРОСТИ
 	if is_root_motion:
 		velocity.x = current_rm_velocity.x
 		velocity.z = current_rm_velocity.z
 		
-		# Фикс бега в стену (гибридный подход)
 		if is_on_wall() and current_movement_blend < 0.1 and input_handler.move_vector.length() > 0.1:
 			var manual_push = get_movement_vector() 
 			if manual_push.length_squared() > 0.01:
@@ -290,10 +326,7 @@ func _physics_process(delta: float) -> void:
 				velocity.x = push_vec3.x
 				velocity.z = push_vec3.z
 		
-		# --- ФИКС ПРОХОЖДЕНИЯ СКВОЗЬ СТЕНЫ ПРИ АТАКЕ (PUSHBACK) ---
 		_handle_wall_pushback(delta)
-		# --------------------------------------------------------
-		
 		apply_gravity(delta)
 		move_and_slide()
 	else:
@@ -301,7 +334,6 @@ func _physics_process(delta: float) -> void:
 	
 	movement_component.handle_pushing(is_rolling)
 
-	# 4. БЕЗОПАСНАЯ ПОЗИЦИЯ И ПАДЕНИЕ
 	if is_on_floor():
 		safe_pos_timer += delta
 		if safe_pos_timer > 0.5:
@@ -313,11 +345,7 @@ func _physics_process(delta: float) -> void:
 	if global_position.y < fall_limit_y:
 		_handle_fall_respawn()
 
-# ============================================================================
-# LOGIC: SMOOTH WALL PUSHBACK (АМОРТИЗАТОР)
-# ============================================================================
 func _handle_wall_pushback(delta: float) -> void:
-	# Если не атакуем или нет детектора - плавно гасим инерцию
 	if not is_attacking or not wall_detector:
 		current_wall_push_velocity = current_wall_push_velocity.move_toward(Vector3.ZERO, delta * 10.0)
 		velocity += current_wall_push_velocity
@@ -326,43 +354,22 @@ func _handle_wall_pushback(delta: float) -> void:
 	wall_detector.force_shapecast_update()
 	
 	if wall_detector.is_colliding():
-		# Получаем реальную нормаль для отмены скольжения (чтобы не проходить сквозь стену)
 		var wall_normal = wall_detector.get_collision_normal(0)
-		wall_normal.y = 0 # Игнорируем пол
+		wall_normal.y = 0 
 		
-		# Защита от деления на ноль, если мы ударили пол
 		if wall_normal.length_squared() > 0.01:
 			wall_normal = wall_normal.normalized()
-			
-			# 1. СРЕЗАЕМ СКОРОСТЬ ВПЕРЕД (Root Motion)
-			# Если мы движемся навстречу стене, убиваем эту часть скорости
 			if velocity.dot(wall_normal) < 0:
 				velocity = velocity.slide(wall_normal)
 		
-		# 2. ОПРЕДЕЛЯЕМ НАПРАВЛЕНИЕ ОТТАЛКИВАНИЯ
-		# Вместо нормали стены берем "Зад" персонажа.
-		# В Godot +Z (basis.z) — это направление НАЗАД.
-		# Это гарантирует, что мы всегда отлетим ровно спиной назад.
 		var push_dir = -global_transform.basis.z.normalized()
-		
-		# Если ты вдруг используешь модели, где +Z это вперед, раскомментируй строку ниже:
-		# push_dir = -global_transform.basis.z.normalized() 
-		
-		push_dir.y = 0 # На всякий случай убираем высоту
-		
-		# 3. ПЛАВНЫЙ РАЗГОН НАЗАД
+		push_dir.y = 0 
 		var target_push = push_dir * wall_pushback_force
-		
-		# Плавность (Acceleration) - поставь 5.0 или 10.0
 		current_wall_push_velocity = current_wall_push_velocity.move_toward(target_push, delta * 5.0)
-		
 	else:
-		# Если стена кончилась (отошли), плавно тормозим
 		current_wall_push_velocity = current_wall_push_velocity.move_toward(Vector3.ZERO, delta * 5.0)
 	
-	# Применяем итоговую силу
 	velocity += current_wall_push_velocity
-# ============================================================================
 
 func _handle_fall_respawn() -> void:
 	take_damage(fall_damage, Vector3.ZERO)
@@ -426,7 +433,6 @@ func handle_move_animation(delta: float, current_input: Vector2) -> void:
 	else:
 		is_stopping = false
 
-# --- Wrappers ---
 func set_life_state(state_name: String) -> void:
 	anim_controller.set_state(state_name)
 
@@ -460,20 +466,16 @@ func set_slam_state(state_name: String) -> void:
 func trigger_hit() -> void:
 	anim_controller.trigger_hit()
 	
-# --- Helpers ---
 func get_movement_vector() -> Vector2:
 	if not input_handler: return Vector2.ZERO
-	
 	var raw_input = input_handler.move_vector
 	if raw_input.length_squared() < 0.01: return Vector2.ZERO
-		
 	if not is_instance_valid(cached_camera):
 		cached_camera = get_viewport().get_camera_3d()
 	if not cached_camera:
 		cached_camera = get_tree().get_first_node_in_group("main_camera")
 	if not cached_camera:
 		return raw_input
-	
 	var cam_basis = cached_camera.global_transform.basis
 	var forward = -cam_basis.z
 	var right = cam_basis.x
@@ -481,13 +483,16 @@ func get_movement_vector() -> Vector2:
 	right.y = 0
 	forward = forward.normalized()
 	right = right.normalized()
-	
 	if forward.is_zero_approx() or right.is_zero_approx():
 		return raw_input
-	
 	var direction_3d = (forward * -raw_input.y) + (right * raw_input.x)
 	return Vector2(direction_3d.x, direction_3d.z)
 
+func play_footstep_event() -> void:
+	if is_on_floor() and velocity.length() > 0.1:
+		if sfx_footsteps:
+			sfx_footsteps.play_random()
+			
 func apply_gravity(delta: float) -> void:
 	if air_dash_ability.is_dashing or ground_slam_ability.is_slamming: return
 	movement_component.apply_gravity(delta)
@@ -496,7 +501,6 @@ func perform_jump() -> void:
 	var bonus_jump = false
 	if current_jump_count == 2 and air_dash_ability.bonus_jump_granted:
 		bonus_jump = true
-	
 	if movement_component.jump(bonus_jump):
 		sfx_jump.play_random()
 
@@ -507,7 +511,6 @@ func rot_char(delta: float) -> void:
 	if is_knockback_stun: return
 	var speed_mod = 1.0
 	if is_attacking: speed_mod = attack_rotation_influence
-	
 	var move_dir = get_movement_vector()
 	movement_component.rotate_towards(delta, move_dir, speed_mod)
 
@@ -551,10 +554,6 @@ func _find_soft_lock_target() -> Node3D:
 			min_dist = dist
 			best_target = enemy
 	return best_target
-
-# ============================================================================
-# COMBAT WRAPPERS
-# ============================================================================
 
 func start_combo_cooldown() -> void:
 	combat_component.combo_count = 0

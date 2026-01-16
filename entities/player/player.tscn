@@ -1,4 +1,4 @@
-[gd_scene load_steps=69 format=3 uid="uid://c364awakh0qqj"]
+[gd_scene load_steps=75 format=3 uid="uid://c364awakh0qqj"]
 
 [ext_resource type="Script" uid="uid://pvqa8xdknxqq" path="res://entities/player/player.gd" id="1_1hmtu"]
 [ext_resource type="PackedScene" uid="uid://bh7ppnkyaubf7" path="res://vfx/hit_flash/HitFlash.tscn" id="2_8fjmc"]
@@ -23,12 +23,16 @@
 [ext_resource type="AudioStream" uid="uid://brmacg7k6wp2q" path="res://assets/audio/cloth4.ogg" id="21_ghoj8"]
 [ext_resource type="AudioStream" uid="uid://b5ih0roqoy1jr" path="res://assets/audio/cloth2.ogg" id="21_wuv6x"]
 [ext_resource type="AudioStream" uid="uid://dg5ngud7k65p6" path="res://assets/audio/cloth3.ogg" id="23_t1t22"]
-[ext_resource type="AudioStream" uid="uid://bvyod7y3eljo5" path="res://assets/audio/footstep04.ogg" id="25_gt4e4"]
-[ext_resource type="AudioStream" uid="uid://df42wus2m56kp" path="res://assets/audio/footstep05.ogg" id="26_24ehl"]
-[ext_resource type="AudioStream" uid="uid://736kq4k4v73q" path="res://assets/audio/footstep01.ogg" id="27_bwdx1"]
+[ext_resource type="AudioStream" uid="uid://bitdpkqmkqyqy" path="res://assets/audio/dropLeather.ogg" id="24_2soq1"]
+[ext_resource type="AudioStream" uid="uid://coith3e8ag1vr" path="res://assets/audio/mixkit-footsteps-on-tall-grass-533.ogg" id="25_gt4e4"]
+[ext_resource type="AudioStream" uid="uid://dtoalmsh30vrr" path="res://assets/audio/mixkit-footsteps-on-tall-grass-532.ogg" id="25_wq0jh"]
+[ext_resource type="AudioStream" uid="uid://dlgcny2b28sof" path="res://assets/audio/HMNBrth_Human, Adult, Male, Breath.wav" id="27_bwdx1"]
 [ext_resource type="Shader" uid="uid://bxxg6h5x5fm3t" path="res://assets/shaders/GrassCollisionSphere.gdshader" id="28_24ehl"]
 [ext_resource type="PackedScene" uid="uid://buj16fcko6idg" path="res://vfx/drop_shadow/drop_shadow.tscn" id="28_bwdx1"]
 [ext_resource type="AudioStream" uid="uid://m4u3iwb18gff" path="res://assets/audio/WHSH_Pure SciFi-Whoosh Fast 03_RSCPC_DW.mp3" id="28_gt4e4"]
+[ext_resource type="AudioStream" uid="uid://bsjnq837dpfv2" path="res://assets/audio/mixkit-boxer-getting-hit-2055.wav" id="28_vewsg"]
+[ext_resource type="AudioStream" uid="uid://dcy134nnxc32n" path="res://assets/audio/mixkit-boxer-punch-exhaling-2054.wav" id="29_2soq1"]
+[ext_resource type="AudioStream" uid="uid://dnaaijg7b2y3f" path="res://assets/audio/mixkit-body-punch-quick-hit-2153.wav" id="30_vewsg"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_wq0jh"]
 animation = &"Boy_air_dash"
@@ -57,7 +61,21 @@ loop_mode = 1
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wq0jh"]
 
+[sub_resource type="AnimationNodeTransition" id="AnimationNodeTransition_2soq1"]
+xfade_time = 0.2
+input_0/name = "stand"
+input_0/auto_advance = false
+input_0/break_loop_at_end = false
+input_0/reset = true
+input_1/name = "crouch"
+input_1/auto_advance = false
+input_1/break_loop_at_end = false
+input_1/reset = true
+
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_gt4e4"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_np63p"]
+animation = &"Boy_roll_crouch"
 
 [sub_resource type="AnimationNodeTransition" id="AnimationNodeTransition_wq0jh"]
 xfade_time = 0.2
@@ -208,6 +226,7 @@ fadein_time = 0.2
 fadeout_time = 0.2
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_fkugw"]
+graph_offset = Vector2(-385.36734, -349.00153)
 nodes/output/position = Vector2(1712, -192)
 nodes/end/node = SubResource("AnimationNodeAnimation_wy7bt")
 nodes/end/position = Vector2(-64, 176)
@@ -244,7 +263,7 @@ nodes/death/position = Vector2(1216, -144)
 nodes/hit_oneshot/node = SubResource("AnimationNodeOneShot_8q4fm")
 nodes/hit_oneshot/position = Vector2(1216, -400)
 nodes/locomotion_blend/node = SubResource("AnimationNodeBlendSpace1D_vewsg")
-nodes/locomotion_blend/position = Vector2(-320, -240)
+nodes/locomotion_blend/position = Vector2(-496, -304)
 nodes/air_transition/node = SubResource("AnimationNodeTransition_wq0jh")
 nodes/air_transition/position = Vector2(304, -224)
 nodes/slam_state/node = SubResource("AnimationNodeTransition_2h0qb")
@@ -267,7 +286,11 @@ nodes/Animation/node = SubResource("AnimationNodeAnimation_8q4fm")
 nodes/Animation/position = Vector2(1360, -16)
 nodes/dance_oneshot/node = SubResource("AnimationNodeOneShot_np63p")
 nodes/dance_oneshot/position = Vector2(1520, -224)
-node_connections = [&"output", 0, &"dance_oneshot", &"jump_state", 0, &"start", &"jump_state", 1, &"mid", &"jump_state", 2, &"end", &"dash_oneshot", 0, &"roll_oneshot", &"dash_oneshot", 1, &"Animation 2", &"roll_oneshot", 0, &"attack_oneshot", &"roll_oneshot", 1, &"roll", &"state", 0, &"hit_oneshot", &"state", 1, &"death", &"hit_oneshot", 0, &"dash_oneshot", &"hit_oneshot", 1, &"hit", &"air_transition", 0, &"stopping_oneshot", &"air_transition", 1, &"jump_state", &"slam_state", 0, &"Animation 5", &"slam_state", 1, &"Animation 6", &"slam_state", 2, &"Animation 7", &"slam_state", 3, &"air_transition", &"attack_oneshot", 0, &"slam_state", &"attack_oneshot", 1, &"AttackSpeed", &"LocomotionSpeed", 0, &"locomotion_blend", &"attack_idx", 0, &"atk1", &"attack_idx", 1, &"atk2", &"attack_idx", 2, &"atk3", &"AttackSpeed", 0, &"attack_idx", &"stopping_oneshot", 0, &"LocomotionSpeed", &"stopping_oneshot", 1, &"stopping", &"dance_oneshot", 0, &"state", &"dance_oneshot", 1, &"Animation"]
+nodes/CrouchState/node = SubResource("AnimationNodeTransition_2soq1")
+nodes/CrouchState/position = Vector2(-288, -240)
+nodes/Roll_crouch_loop/node = SubResource("AnimationNodeAnimation_np63p")
+nodes/Roll_crouch_loop/position = Vector2(-496, -112)
+node_connections = [&"output", 0, &"dance_oneshot", &"jump_state", 0, &"start", &"jump_state", 1, &"mid", &"jump_state", 2, &"end", &"dash_oneshot", 0, &"roll_oneshot", &"dash_oneshot", 1, &"Animation 2", &"roll_oneshot", 0, &"attack_oneshot", &"roll_oneshot", 1, &"roll", &"state", 0, &"hit_oneshot", &"state", 1, &"death", &"hit_oneshot", 0, &"dash_oneshot", &"hit_oneshot", 1, &"hit", &"air_transition", 0, &"stopping_oneshot", &"air_transition", 1, &"jump_state", &"slam_state", 0, &"Animation 5", &"slam_state", 1, &"Animation 6", &"slam_state", 2, &"Animation 7", &"slam_state", 3, &"air_transition", &"attack_oneshot", 0, &"slam_state", &"attack_oneshot", 1, &"AttackSpeed", &"LocomotionSpeed", 0, &"CrouchState", &"attack_idx", 0, &"atk1", &"attack_idx", 1, &"atk2", &"attack_idx", 2, &"atk3", &"AttackSpeed", 0, &"attack_idx", &"stopping_oneshot", 0, &"LocomotionSpeed", &"stopping_oneshot", 1, &"stopping", &"dance_oneshot", 0, &"state", &"dance_oneshot", 1, &"Animation", &"CrouchState", 0, &"locomotion_blend", &"CrouchState", 1, &"Roll_crouch_loop"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
 margin = 0.01
@@ -276,6 +299,7 @@ margin = 0.01
 size = Vector3(1.7636719, 1.2625732, 1.5506058)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_qpopc"]
+radius = 0.3
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2soq1"]
 size = Vector3(0.8, 1, 0.8)
@@ -401,52 +425,52 @@ flash_time = 0.2
 [node name="character" parent="." instance=ExtResource("2_635qg")]
 
 [node name="punch_hand_r" parent="character/HitboxesContainer" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.43402943, 0.5495275, -0.11316819)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.43072212, 0.53008616, -0.105834424)
 collision_mask = 212
 
 [node name="punch_hand_l" parent="character/HitboxesContainer" index="1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.43501437, 0.53395206, -0.07710418)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4341028, 0.52832645, -0.06559957)
 collision_mask = 212
 
 [node name="Skeleton3D" parent="character/root" index="0"]
 bones/0/rotation = Quaternion(4.86768e-08, 8.742278e-08, 3.300119e-15, 1)
-bones/1/position = Vector3(-2.2268526e-10, 0.45999646, 0.0010360198)
-bones/2/position = Vector3(-0.011855081, 0.19587575, -0.011786257)
-bones/2/rotation = Quaternion(-0.0021533011, -0.005859519, -0.0073034987, 0.99995387)
-bones/3/position = Vector3(-0.01176147, 0.20222299, -0.011942447)
-bones/3/rotation = Quaternion(0.008551451, -0.0057838834, -0.007364485, 0.9999196)
-bones/5/rotation = Quaternion(-0.15920791, -2.9808407e-06, -2.4622566e-06, 0.9872451)
-bones/7/rotation = Quaternion(-0.5169168, 0.105692476, -0.07423704, 0.8462358)
-bones/8/rotation = Quaternion(6.131355e-08, -0.05352177, 1.1338963e-07, 0.99856675)
-bones/9/rotation = Quaternion(4.6210047e-08, 3.8988794e-08, -0.2110778, 0.9774693)
-bones/10/rotation = Quaternion(2.0540403e-08, 0.07051631, -1.7438664e-08, 0.9975106)
-bones/11/rotation = Quaternion(-0.18143824, 0.073053114, 0.04043242, 0.9798513)
-bones/20/rotation = Quaternion(-0.6022414, -0.09818959, -0.1467583, 0.778541)
-bones/21/rotation = Quaternion(1.9438555e-07, -0.052840356, 9.878416e-08, 0.998603)
-bones/22/rotation = Quaternion(-1.6756447e-07, -2.6635973e-08, 0.20662197, 0.978421)
-bones/23/rotation = Quaternion(2.8656284e-09, -0.10397328, -1.7571762e-09, 0.99458015)
-bones/24/rotation = Quaternion(-0.10216739, -0.11553065, 0.06870796, 0.9856438)
-bones/32/rotation = Quaternion(0.7714162, 0.056855872, 0.633765, 0.0051375194)
-bones/32/scale = Vector3(0.9999989, 0.9956648, 1.0000006)
-bones/34/rotation = Quaternion(-1.3938855e-07, -2.5832563e-08, 0.11310247, 0.9935833)
-bones/34/scale = Vector3(1.0002198, 0.99931765, 0.99999994)
-bones/35/rotation = Quaternion(-0.37901977, -0.59820205, -0.31452483, 0.6321174)
-bones/35/scale = Vector3(1.0000143, 1.0011994, 1.0035694)
-bones/38/rotation = Quaternion(0.77141184, -0.056856178, -0.63377035, 0.005138216)
-bones/38/scale = Vector3(0.9999987, 0.99566454, 1.0000007)
-bones/40/rotation = Quaternion(2.8424267e-09, -2.2027228e-08, -0.11310376, 0.9935832)
-bones/40/scale = Vector3(1.0002197, 0.99931747, 1)
-bones/41/rotation = Quaternion(-0.3790196, 0.5982022, 0.3145246, 0.63211745)
-bones/41/scale = Vector3(1.0000144, 1.0011994, 1.0035692)
+bones/1/position = Vector3(-3.1345695e-10, 0.4485161, 0.0007714489)
+bones/2/position = Vector3(-0.011906207, 0.1901066, -0.011764497)
+bones/2/rotation = Quaternion(-0.007692218, -0.005559253, -0.0040938538, 0.99994665)
+bones/3/position = Vector3(-0.011809542, 0.2030327, -0.012119635)
+bones/3/rotation = Quaternion(0.0030397146, -0.0055233925, -0.0041602706, 0.9999715)
+bones/5/rotation = Quaternion(-0.16742231, -2.9590738e-06, -2.4876083e-06, 0.9858853)
+bones/7/rotation = Quaternion(-0.5125884, 0.12302872, -0.058797892, 0.84773815)
+bones/8/rotation = Quaternion(2.721682e-07, -0.06044889, 7.013513e-08, 0.9981713)
+bones/9/rotation = Quaternion(5.202891e-07, 1.6641327e-07, -0.27309993, 0.96198577)
+bones/10/rotation = Quaternion(6.489639e-08, 0.052995995, -4.783601e-09, 0.99859476)
+bones/11/rotation = Quaternion(-0.18087292, 0.052434027, 0.05505095, 0.98056364)
+bones/20/rotation = Quaternion(-0.59925514, -0.115843356, -0.16055095, 0.7756913)
+bones/21/rotation = Quaternion(9.415265e-08, -0.042897135, -1.5790948e-07, 0.9990796)
+bones/22/rotation = Quaternion(1.3340244e-07, -8.319552e-08, 0.25359154, 0.96731144)
+bones/23/rotation = Quaternion(3.4932786e-08, -0.09076173, 1.3120339e-09, 0.9958727)
+bones/24/rotation = Quaternion(-0.10086946, -0.102068156, 0.067946404, 0.98731494)
+bones/32/rotation = Quaternion(0.7673749, 0.10097936, 0.631925, 0.040122844)
+bones/32/scale = Vector3(0.9999989, 0.98808753, 1.0000008)
+bones/34/rotation = Quaternion(-7.739896e-08, -6.5036424e-08, 0.23083745, 0.97299236)
+bones/34/scale = Vector3(1.0024387, 0.99630594, 0.9999999)
+bones/35/rotation = Quaternion(-0.4167802, -0.57276154, -0.35292554, 0.6112954)
+bones/35/scale = Vector3(1.0000285, 1.0021956, 1.0108898)
+bones/38/rotation = Quaternion(0.7673705, -0.10097947, -0.6319301, 0.040123794)
+bones/38/scale = Vector3(0.999999, 0.98808765, 1.0000007)
+bones/40/rotation = Quaternion(-8.597411e-08, -7.730357e-09, -0.23083839, 0.9729921)
+bones/40/scale = Vector3(1.0024384, 0.99630654, 1.0000001)
+bones/41/rotation = Quaternion(-0.41677997, 0.5727618, 0.35292524, 0.61129564)
+bones/41/scale = Vector3(1.0000286, 1.0021957, 1.0108892)
 
 [node name="Character_mesh" parent="character/root/Skeleton3D" index="0"]
 layers = 2
 
 [node name="hand_r" parent="character/root/Skeleton3D" index="1"]
-transform = Transform3D(-0.22015479, -0.118937135, -0.968186, -0.08736249, -0.9861449, 0.14100902, -0.9715439, 0.11562683, 0.20671405, -0.43402943, 0.5495275, -0.11316819)
+transform = Transform3D(-0.22037078, -0.107179835, -0.9695089, -0.16050683, -0.9764097, 0.14442664, -0.96211857, 0.18744014, 0.19796924, -0.43072212, 0.53008616, -0.105834424)
 
 [node name="hand_l" parent="character/root/Skeleton3D" index="2"]
-transform = Transform3D(-0.25117683, 0.06733546, 0.96559525, 0.098013215, -0.9906795, 0.0945811, 0.9629652, 0.11839818, 0.24223657, 0.43501437, 0.53395206, -0.07710418)
+transform = Transform3D(-0.2515039, 0.073324084, 0.96507394, 0.16674078, -0.9789339, 0.11783123, 0.9533844, 0.19055276, 0.23398018, 0.4341028, 0.52832645, -0.06559957)
 
 [node name="AnimationPlayer" parent="character" index="2"]
 physics_interpolation_mode = 1
@@ -499,6 +523,9 @@ parameters/stopping_oneshot/request = 0
 parameters/dance_oneshot/active = false
 parameters/dance_oneshot/internal_active = false
 parameters/dance_oneshot/request = 0
+parameters/CrouchState/current_state = "stand"
+parameters/CrouchState/transition_request = ""
+parameters/CrouchState/current_index = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -517,7 +544,7 @@ shape = SubResource("BoxShape3D_abrql")
 [node name="SoundBank" type="Node3D" parent="."]
 
 [node name="SfxJump" type="AudioStreamPlayer" parent="SoundBank"]
-volume_db = -5.0
+volume_db = -10.0
 bus = &"SFX"
 script = ExtResource("20_wuv6x")
 streams = Array[AudioStream]([ExtResource("21_ghoj8"), ExtResource("21_wuv6x"), ExtResource("23_t1t22")])
@@ -528,7 +555,7 @@ max_pitch = 1.5
 volume_db = -10.0
 bus = &"SFX"
 script = ExtResource("20_wuv6x")
-streams = Array[AudioStream]([ExtResource("28_gt4e4")])
+streams = Array[AudioStream]([ExtResource("24_2soq1")])
 min_pitch = 1.3
 max_pitch = 1.5
 
@@ -542,17 +569,19 @@ streams = Array[AudioStream]([ExtResource("28_gt4e4")])
 volume_db = -10.0
 bus = &"SFX"
 script = ExtResource("20_wuv6x")
-streams = Array[AudioStream]([ExtResource("25_gt4e4"), ExtResource("26_24ehl"), ExtResource("27_bwdx1")])
+streams = Array[AudioStream]([ExtResource("25_gt4e4"), ExtResource("25_wq0jh")])
 
 [node name="SfxAttack" type="AudioStreamPlayer" parent="SoundBank"]
 volume_db = 20.0
 bus = &"SFX"
 script = ExtResource("20_wuv6x")
+streams = Array[AudioStream]([null])
 
 [node name="SfxHurt" type="AudioStreamPlayer" parent="SoundBank"]
 volume_db = -5.0
 bus = &"SFX"
 script = ExtResource("20_wuv6x")
+streams = Array[AudioStream]([ExtResource("27_bwdx1"), ExtResource("28_vewsg"), ExtResource("29_2soq1"), ExtResource("30_vewsg")])
 
 [node name="SfxSlamImpact" type="AudioStreamPlayer" parent="SoundBank"]
 volume_db = -5.0
@@ -561,6 +590,8 @@ script = ExtResource("20_wuv6x")
 
 [node name="RollSafetyCast" type="ShapeCast3D" parent="."]
 shape = SubResource("SphereShape3D_qpopc")
+target_position = Vector3(0, 0.5, 0)
+collision_mask = 64
 
 [node name="AttackWallDetector" type="ShapeCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.5)

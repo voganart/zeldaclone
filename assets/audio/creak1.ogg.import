@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/creak1.ogg-326ff39780bdd9da75409246d2782948.o
 [params]
 
 loop=false
-loop_offset=0
-bpm=0
+loop_offset=0.0
+bpm=0.0
 beat_count=0
 bar_beats=4

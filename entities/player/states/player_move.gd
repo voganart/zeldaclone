@@ -5,18 +5,16 @@ var player: Player
 # --- ПЕРЕМЕННЫЕ ДЛЯ ТАНЦА ---
 var current_idle_time: float = 0.0
 var is_dancing: bool = false
-# ----------------------------
 
 func enter() -> void:
 	player = entity as Player
 	player.is_attacking = false
 	player.is_rolling = false
 	
-	# Сброс таймера танца при входе
+	# Сброс
 	current_idle_time = 0.0
 	is_dancing = false
 	
-	# Сброс дерева анимации
 	player.set_life_state("alive")
 	player.set_air_state("ground")
 	player.set_slam_state("off")
@@ -41,8 +39,7 @@ func physics_update(delta: float) -> void:
 	var input_vec = player.get_movement_vector()
 	var has_input = input_vec.length() > 0.01
 	
-	# Считаем только горизонтальную скорость (игнорируем гравитацию)
-	# Это решает проблему с "0.77", когда персонаж стоит
+	# Считаем только горизонтальную скорость
 	var horizontal_speed = Vector2(player.velocity.x, player.velocity.z).length()
 
 	# --- ЛОГИКА ТАНЦА ---
