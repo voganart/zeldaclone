@@ -5,7 +5,7 @@ const MAIN_MENU_PATH = "res://ui/menus/main_menu.tscn"
 const LOADING_SCREEN_PATH = "res://ui/menus/loading_screen.tscn"
 const GAME_OVER_PATH = "res://ui/menus/game_over.tscn"
 # Укажи путь к твоему первому уровню
-const LEVEL_1_PATH = "res://levels/test_level/level.tscn" 
+const LEVEL_1_PATH = "res://levels/level_01.tscn" 
 
 var _target_scene_path: String = ""
 var last_played_level: String = "" 

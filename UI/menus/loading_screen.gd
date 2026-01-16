@@ -11,7 +11,7 @@ func _ready():
 	base_text = tr("ui_loading")
 	label.text = base_text
 	timer.timeout.connect(_on_timer_timeout)
-
+	MusicBrain.start_loading_music()
 func _on_timer_timeout():
 	dot_count = (dot_count + 1) % 4 # Цикл от 0 до 3
 	

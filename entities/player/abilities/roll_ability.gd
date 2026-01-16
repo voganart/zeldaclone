@@ -11,6 +11,9 @@ extends Node
 @export var roll_cooldown: float = 0.5
 @export var roll_recharge_time: float = 3.0
 
+# !!! НОВОЕ: Флаг доступности способности !!!
+@export var is_unlocked: bool = false 
+
 # --- СОСТОЯНИЕ ---
 var current_roll_charges: int = 3
 var roll_penalty_timer: float = 0.0
@@ -28,6 +31,9 @@ func _process(delta: float) -> void:
 	_update_roll_timers(delta)
 
 func can_roll() -> bool:
+	# !!! НОВОЕ: Проверка на то, открыта ли способность !!!
+	if not is_unlocked: return false
+	
 	if current_roll_charges <= 0: return false
 	if roll_interval_timer > 0: return false
 	if is_roll_recharging: return false

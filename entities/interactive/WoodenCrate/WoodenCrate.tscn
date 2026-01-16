@@ -1,12 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://csvu7l0q7xvit"]
+[gd_scene load_steps=8 format=3 uid="uid://csvu7l0q7xvit"]
 
 [ext_resource type="Script" uid="uid://tb6xtkrjbiys" path="res://ui/health_component/health_component.gd" id="1_njo25"]
 [ext_resource type="Script" uid="uid://ddapxe0483vqb" path="res://entities/interactive/WoodenCrate/breakable_object.gd" id="1_uf1ar"]
 [ext_resource type="AudioStream" uid="uid://b1kl4cjk8vu1u" path="res://assets/audio/WOODCrsh_Designed Wood Crash And Debris 13_DDUMAIS_NONE.mp3" id="2_420b2"]
 [ext_resource type="PackedScene" uid="uid://bk0jojvlhos42" path="res://vfx/CrateExplosion/CrateExplosion.tscn" id="2_hxdnf"]
 [ext_resource type="ArrayMesh" uid="uid://cgytmjt2upi22" path="res://assets/models/interactive/crate.res" id="2_l4mhh"]
-[ext_resource type="PackedScene" uid="uid://bewqr6llcw7gv" path="res://common/interaction/InteractionArea.tscn" id="6_72non"]
-[ext_resource type="Script" uid="uid://ddsdeay46mqd2" path="res://common/interaction/readable_object.gd" id="7_ycbcw"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_uf1ar"]
 friction = 0.3
@@ -45,11 +43,3 @@ mesh = ExtResource("2_l4mhh")
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("1_njo25")
 max_health = 1.0
-
-[node name="InteractionArea" parent="." instance=ExtResource("6_72non")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-prompt_scale = 0.5
-
-[node name="ReadableObject" type="Node3D" parent="."]
-script = ExtResource("7_ycbcw")
-message_text = "Это просто ящик"

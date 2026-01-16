@@ -161,6 +161,17 @@ func _update_hearts(current_hp: float) -> void:
 			heart.modulate = color_heart_empty
 
 func _update_roll_pips() -> void:
+	# !!! НОВОЕ: Если способность закрыта, скрываем пипсы !!!
+	if not player.roll_ability or not player.roll_ability.is_unlocked:
+		for pip in pips:
+			pip.visible = false
+		return
+	else:
+		# Если открыта, показываем (если они были скрыты)
+		for pip in pips:
+			if not pip.visible: pip.visible = true
+	# -----------------------------------------------------
+
 	var current_charges = player.current_roll_charges
 	var is_penalty = player.is_roll_recharging
 	
@@ -187,6 +198,13 @@ func _update_roll_pips() -> void:
 			pip.value = 0.0
 
 func _update_slam_bar() -> void:
+	# То же самое для Slam (если он закрыт)
+	if not player.ground_slam_ability or not player.ground_slam_ability.is_unlocked:
+		slam_bar.visible = false
+		return
+	else:
+		slam_bar.visible = true
+		
 	var timer = player.ground_slam_ability.cooldown_timer
 	var max_time = player.ground_slam_ability.slam_cooldown
 	if timer > 0:

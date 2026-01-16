@@ -43,8 +43,15 @@ func _ready() -> void:
 			if not tutorial_manager: print("- TutorialManager node not assigned in Level Inspector")
 			if not hud: print("- HUD not assigned")
 			elif not hud.tutorial_overlay: print("- TutorialOverlay not found in HUD scene")
-
-# ... (Остальные функции: _spawn_player, _setup_camera, _setup_hud остаются без изменений) ...
+	await get_tree().process_frame # Ждем кадр для надежности
+	
+	if current_player:
+		_setup_camera(current_player)
+		_setup_hud(current_player)
+	
+	# ЗАПУСКАЕМ МУЗЫКУ УРОВНЯ
+	MusicBrain.play_level_music()
+	
 func _spawn_player() -> CharacterBody3D:
 	var new_player = player_scene.instantiate()
 	add_child(new_player)

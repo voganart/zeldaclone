@@ -13,9 +13,7 @@ func _ready():
 	btn_exit.pressed.connect(_on_exit_pressed)
 	
 	# Проигрываем музыку меню (если есть)
-	if MusicBrain.has_method("play_menu_music"):
-		# MusicBrain.play_menu_music() # Реализуй позже в MusicBrain
-		pass
+	MusicBrain.play_menu_music()
 
 func _on_new_game_pressed():
 	# Используем наш новый метод с загрузкой!

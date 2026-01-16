@@ -450,6 +450,7 @@ func _on_died() -> void:
 func _finalize_death() -> void:
 	pending_death = false
 	AIDirector.return_attack_token(self)
+	MusicBrain.set_combat_state(false)
 	emit_signal("died")
 	if health_bar: health_bar.visible = false
 	if combat_component: combat_component._stop_hitbox_monitoring()

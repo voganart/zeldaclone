@@ -1,24 +1,4 @@
 extends Node
-# Каналы для музыки
-var music_player: AudioStreamPlayer
-
-func _ready() -> void:
-	MusicBrain.bpm = 110
-	MusicBrain.setup_track("Base", load("res://assets/audio/music/Music_layer_base.mp3"))
-	MusicBrain.setup_track("Flute", load("res://assets/audio/music/Music_layer_calm.mp3"))
-	MusicBrain.setup_track("Drums", load("res://assets/audio/music/Music_layer_combat.mp3"))
-	MusicBrain.start_music()
-	music_player = AudioStreamPlayer.new()
-	music_player.bus = "Music" # Убедись, что создал шину Music в настройках аудио
-	add_child(music_player)
-
-func play_music(stream: AudioStream, _fade_duration: float = 1.0):
-	if music_player.stream == stream:
-		return
-		
-	# Простой кроссфейд (можно усложнить через Tween)
-	music_player.stream = stream
-	music_player.play()
 
 # Для 2D звуков (UI и т.д.)
 func play_ui_sound(stream: AudioStream):
@@ -30,6 +10,7 @@ func play_ui_sound(stream: AudioStream):
 	await player.finished
 	player.queue_free()
 	
+# Для 3D звуков (удары, шаги, взрывы)
 func play_sfx_3d(stream: AudioStream, position: Vector3, pitch_random: bool = true, volume_db: float = 0.0):
 	var player = AudioStreamPlayer3D.new()
 	player.stream = stream
