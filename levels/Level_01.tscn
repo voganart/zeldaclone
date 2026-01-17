@@ -100,27 +100,27 @@ colors = PackedColorArray(0.10147208, 0.5, 0.05007395, 1, 0.87282026, 0.9670598,
 gradient = SubResource("Gradient_mnooe")
 fill_from = Vector2(1, 1)
 
-[sub_resource type="Resource" id="Resource_ueypv"]
+[sub_resource type="Resource" id="Resource_n6y4e"]
 script = ExtResource("19_fbdqi")
 amount = 500
 custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_cktag"]
+[sub_resource type="Resource" id="Resource_c0er0"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(1, 1, 1)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_1ah6d"]
+[sub_resource type="Resource" id="Resource_ueypv"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_hr8er"]
+[sub_resource type="Resource" id="Resource_cktag"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -129,9 +129,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_2fo6c"]
+[sub_resource type="Resource" id="Resource_1ah6d"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_ueypv"), SubResource("Resource_cktag"), SubResource("Resource_1ah6d"), SubResource("Resource_hr8er")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_n6y4e"), SubResource("Resource_c0er0"), SubResource("Resource_ueypv"), SubResource("Resource_cktag")])
 
 [sub_resource type="Resource" id="Resource_aow8p"]
 script = ExtResource("25_diasq")
@@ -654,7 +654,7 @@ metadata/SimpleGrassTextured = "2.0.5"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
 script = ExtResource("16_wd8iv")
 keep_static_colliders = true
-modifier_stack = SubResource("Resource_2fo6c")
+modifier_stack = SubResource("Resource_1ah6d")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
