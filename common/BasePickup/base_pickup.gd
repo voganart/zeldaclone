@@ -5,6 +5,10 @@ extends RigidBody3D
 @export var immunity_time: float = 0.5
 @export var collect_vfx_index: int = 2 
 
+@export_group("Audio")
+@export var pickup_sound: AudioStream 
+@export_range(-80.0, 24.0) var sound_volume_db: float = 0.0 # Громкость
+
 @export_group("Attraction")
 @export var attraction_start_speed: float = 5.0 
 @export var attraction_acceleration: float = 35.0 
@@ -16,7 +20,6 @@ var is_being_collected: bool = false
 var timer: float = 0.0
 var current_speed: float = 0.0
 
-# !!! НОВОЕ: Запоминаем настройки физики !!!
 var default_layer: int = 1
 var default_mask: int = 1
 
@@ -24,7 +27,6 @@ func _ready():
 	$InteractionArea.body_entered.connect(_on_pickup)
 	is_collectable = true
 	
-	# Запоминаем слои, которые были настроены в инспекторе
 	default_layer = collision_layer
 	default_mask = collision_mask
 
@@ -60,9 +62,13 @@ func _on_pickup(body):
 	if body.is_in_group("player"):
 		is_being_collected = true 
 		
-		# Сразу отключаем коллизию, чтобы не мешался пока играет анимация
 		collision_layer = 0
 		collision_mask = 0
+		
+		# --- ВОТ ИСПРАВЛЕННЫЙ ВЫЗОВ ---
+		if pickup_sound:
+			AudioManager.play_ui_sound(pickup_sound, sound_volume_db)
+		# ------------------------------
 		
 		_apply_effect(body)
 		
@@ -94,11 +100,9 @@ func reset_state():
 	
 	$Visuals.scale = Vector3.ONE 
 	
-	# !!! ВОССТАНАВЛИВАЕМ ФИЗИКУ !!!
-	freeze = false # Размораживаем
+	freeze = false 
 	collision_layer = default_layer
 	collision_mask = default_mask
-	# ------------------------------
 	
 	$AnimationPlayer.play("Spawn")
 	$AnimationPlayer.queue("Idle")

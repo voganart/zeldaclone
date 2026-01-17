@@ -1,4 +1,3 @@
-# Содержимое файла: "zeldaclone/entities/PickupItems/VaboPickup/vabo.gd"
 extends BasePickup
 
 @export var amount: int = 1

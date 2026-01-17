@@ -18,7 +18,6 @@ var is_unlocked: bool = false
 var actor: CharacterBody3D
 
 func _ready() -> void:
-	# Ищем CharacterBody3D вверх по иерархии (Player -> Abilities -> ThisNode)
 	var parent = get_parent()
 	if parent is CharacterBody3D:
 		actor = parent
@@ -40,11 +39,20 @@ func _physics_process(_delta: float) -> void:
 	if is_dashing:
 		_handle_dash_physics()
 
+# Это старый метод для приземления
 func reset_air_state() -> void:
 	dash_used_in_air = false
 	bonus_jump_granted = false
 	if is_dashing:
 		stop_dash()
+
+# === НОВЫЙ МЕТОД ДЛЯ ПОЛНОГО СБРОСА (при смерти/респавне) ===
+func reset_ability_completely() -> void:
+	is_dashing = false
+	dash_used_in_air = false
+	bonus_jump_granted = false
+	cooldown_timer = 0.0
+# ==========================================================
 
 func can_dash() -> bool:
 	if not is_unlocked: return false
@@ -64,26 +72,20 @@ func perform_dash() -> void:
 	bonus_jump_granted = true
 	cooldown_timer = air_dash_cooldown
 	_start_position = actor.global_position
-	# --- ФИКС AIR DASH В 3D КАМЕРЕ ---
 	
-	# 1. Пытаемся получить вектор ввода относительно камеры
 	var move_dir = Vector3.ZERO
 	if actor.has_method("get_movement_vector"):
 		var vec2 = actor.get_movement_vector()
 		move_dir = Vector3(vec2.x, 0, vec2.y).normalized()
 	
-	# 2. Если есть ввод - дэшим туда и поворачиваем модель
 	if move_dir.length_squared() > 0.01:
 		_dash_direction = move_dir
-		# Мгновенный разворот в сторону рывка (для отзывчивости)
 		var target_angle = atan2(_dash_direction.x, _dash_direction.z)
 		actor.rotation.y = target_angle
 	else:
-		# 3. Если ввода нет - дэшим туда, куда смотрит персонаж (Forward)
 		var forward = actor.global_transform.basis.z.normalized()
 		_dash_direction = Vector3(forward.x, 0, forward.z).normalized()
 	
-	# ---------------------------------
 	if actor.has_method("trigger_air_dash"):
 		actor.trigger_air_dash()
 	

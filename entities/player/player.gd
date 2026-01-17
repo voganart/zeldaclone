@@ -10,9 +10,8 @@ extends CharacterBody3D
 @export var fall_limit_y: float = -20.0 
 @export var fall_damage: float = 1.0 
 @export var safe_ground_margin: float = 1.5 
-# НОВЫЕ НАСТРОЙКИ ТАЙМИНГОВ
-@export var respawn_fade_duration: float = 0.5 ## Время затемнения/просветления
-@export var respawn_hold_time: float = 0.8 ## Сколько ждать в темноте после телепортации (увеличь, если видно падение)
+@export var respawn_fade_duration: float = 0.5 
+@export var respawn_hold_time: float = 0.8 
 
 @export_group("Idle Animations")
 @export var enable_idle_dance: bool = true 
@@ -382,43 +381,40 @@ func _handle_fall_respawn() -> void:
 	if is_respawning: return
 	is_respawning = true
 	
-	# 1. Затемняем экран
 	if SceneManager:
 		SceneManager.fade_screen_to_black(respawn_fade_duration)
-		# Ждем чуть меньше, чем длится фейд, чтобы не было видно "рывка" урона
 		await get_tree().create_timer(respawn_fade_duration * 0.8).timeout
 	
-	# 2. Тихий урон
 	take_damage(fall_damage, Vector3.ZERO, false, true)
 	
 	if health_component.current_health <= 0:
 		is_respawning = false
 		return
 
-	# 3. Перемещение
+	# === СБРОС ВСЕХ СПОСОБНОСТЕЙ (FIX) ===
+	if ground_slam_ability:
+		ground_slam_ability.reset_state()
+	if air_dash_ability:
+		air_dash_ability.reset_ability_completely()
+	# =====================================
+
 	global_position = last_safe_position
 	
-	# Сброс инерции
 	velocity = Vector3.ZERO
 	current_rm_velocity = Vector3.ZERO
 	
-	# Сброс состояний
 	state_machine.change_state(GameConstants.STATE_MOVE)
 	anim_controller.set_state("alive")
 	anim_controller.set_air_state("ground")
 	anim_controller.set_jump_state("End")
 	anim_controller.set_locomotion_blend(0.0)
 	
-	# ПРИНУДИТЕЛЬНЫЙ ФИЗИЧЕСКИЙ СНАП К ПОЛУ
-	# Задаем скорость вниз и обновляем физику в "черном" кадре
 	velocity = Vector3.DOWN * 10.0
-	move_and_slide() # Это заставит is_on_floor() стать true
-	velocity = Vector3.ZERO # Снова сбрасываем, чтобы не накапливать
+	move_and_slide() 
+	velocity = Vector3.ZERO 
 	
-	# Ждем в темноте (respawn_hold_time)
 	await get_tree().create_timer(respawn_hold_time).timeout
 	
-	# 4. Возвращаем свет
 	if SceneManager:
 		await SceneManager.fade_screen_from_black(respawn_fade_duration)
 	

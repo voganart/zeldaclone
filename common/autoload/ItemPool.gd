@@ -20,12 +20,13 @@ func _create_instance(scene: PackedScene):
 	inst.visible = false
 	inst.process_mode = Node.PROCESS_MODE_DISABLED 
 	
-	# Сразу вырубаем коллизию новым объектам в пуле
-	if inst is CollisionObject3D:
-		inst.collision_layer = 0
-		inst.collision_mask = 0
-		if inst is RigidBody3D:
-			inst.freeze = true
+	# === ИСПРАВЛЕНИЕ ===
+	# Мы НЕ должны обнулять слои здесь, потому что это происходит ДО того,
+	# как BasePickup успеет сохранить свои дефолтные слои в _ready().
+	# Достаточно просто "заморозить" объект.
+	if inst is RigidBody3D:
+		inst.freeze = true
+	# ===================
 			
 	add_child(inst)
 	return inst
@@ -56,7 +57,6 @@ func spawn_item(index: int, pos: Vector3) -> RigidBody3D:
 	item.visible = true
 	item.process_mode = Node.PROCESS_MODE_INHERIT
 	
-	# reset_state() внутри base_pickup.gd сам включит коллизию обратно
 	if item.has_method("reset_state"):
 		item.reset_state()
 	
@@ -74,13 +74,12 @@ func _return_item_deferred(item: RigidBody3D, index: int):
 	item.visible = false
 	item.process_mode = Node.PROCESS_MODE_DISABLED
 	
-	# !!! ГЛАВНОЕ ИСПРАВЛЕНИЕ: ПОЛНОЕ ОТКЛЮЧЕНИЕ ФИЗИКИ !!!
-	item.freeze = true # Превращаем в статику
-	item.collision_layer = 0 # Убираем слои
+	# А вот здесь обнуление слоев и заморозка ОБЯЗАТЕЛЬНЫ,
+	# чтобы "очистить" предмет перед возвращением в пул.
+	item.freeze = true 
+	item.collision_layer = 0 
 	item.collision_mask = 0
-	# Убираем далеко вниз, на всякий случай (чтобы рейкасты не ловили)
 	item.global_position = Vector3(0, -500, 0) 
-	# -----------------------------------------------------
 	
 	if item.get_parent():
 		item.get_parent().remove_child(item)

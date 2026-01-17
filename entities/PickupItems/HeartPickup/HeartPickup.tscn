@@ -9,6 +9,9 @@ script = ExtResource("2_yae3l")
 heal_amount = 1.0
 immunity_time = 0.3
 collect_vfx_index = 3
+attraction_start_speed = 1.0
+attraction_acceleration = 10.0
+attraction_radius = 2.0
 
 [node name="OmniLight3D" parent="." index="0"]
 light_energy = 3.0

@@ -100,27 +100,27 @@ colors = PackedColorArray(0.10147208, 0.5, 0.05007395, 1, 0.87282026, 0.9670598,
 gradient = SubResource("Gradient_mnooe")
 fill_from = Vector2(1, 1)
 
-[sub_resource type="Resource" id="Resource_n6y4e"]
+[sub_resource type="Resource" id="Resource_ueypv"]
 script = ExtResource("19_fbdqi")
 amount = 500
 custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_c0er0"]
+[sub_resource type="Resource" id="Resource_cktag"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(1, 1, 1)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_ueypv"]
+[sub_resource type="Resource" id="Resource_1ah6d"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_cktag"]
+[sub_resource type="Resource" id="Resource_hr8er"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -129,9 +129,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_1ah6d"]
+[sub_resource type="Resource" id="Resource_2fo6c"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_n6y4e"), SubResource("Resource_c0er0"), SubResource("Resource_ueypv"), SubResource("Resource_cktag")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_ueypv"), SubResource("Resource_cktag"), SubResource("Resource_1ah6d"), SubResource("Resource_hr8er")])
 
 [sub_resource type="Resource" id="Resource_aow8p"]
 script = ExtResource("25_diasq")
@@ -558,7 +558,7 @@ tutorial_manager = NodePath("TutorialManager")
 script = ExtResource("3_jygyi")
 
 [node name="PlayerStart" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.29664, -2.4790552, -16.194492)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.02026, -2.272491, -8.735751)
 
 [node name="DebugOverlay" parent="." instance=ExtResource("1_ueypv")]
 
@@ -654,7 +654,7 @@ metadata/SimpleGrassTextured = "2.0.5"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
 script = ExtResource("16_wd8iv")
 keep_static_colliders = true
-modifier_stack = SubResource("Resource_1ah6d")
+modifier_stack = SubResource("Resource_2fo6c")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -837,6 +837,26 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 108.77119, -8.709058, 0.27626
 
 [node name="VaboPickup4" parent="Collectables" instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.001768, 1.2861544, 3.996716)
+
+[node name="Obstacles" type="Node3D" parent="."]
+
+[node name="Obstacle_roll" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+transform = Transform3D(-4.3711385e-08, 0, -0.99999994, 0, 1, 0, 0.99999994, 0, -4.3711385e-08, 57.347126, -3, -17)
+
+[node name="Obstacle_roll3" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+transform = Transform3D(-0.9999995, 0, 8.742273e-08, 0, 1, 0, -8.742273e-08, 0, -0.9999995, 59.48516, -1.4056733, -11.1603365)
+
+[node name="Obstacle_roll4" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+transform = Transform3D(0.9999994, 0, -1.7484543e-07, 0, 1, 0, 1.7484543e-07, 0, 0.9999994, 63.398808, -1.4056733, -11.160338)
+
+[node name="Obstacle_roll5" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+transform = Transform3D(1.2999985, 0, -2.2729895e-07, 0, 1.3, 0, 2.2729895e-07, 0, 1.2999985, 61.547634, -1.6452625, -11.160344)
+
+[node name="Obstacle_roll6" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+transform = Transform3D(1.7047414e-07, 0, 1.299998, 0, 1.3, 0, -1.299998, 0, 1.7047414e-07, 53.404373, -1.6452634, -2.992342)
+
+[node name="Obstacle_roll2" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+transform = Transform3D(-0.9999995, 0, 8.742273e-08, 0, 1, 0, -8.742273e-08, 0, -0.9999995, 65.42333, -3, -20.966526)
 
 [node name="Zone01" type="Node3D" parent="."]
 
@@ -1146,35 +1166,35 @@ collision_layer = 64
 collision_mask = 63
 bake_navigation = true
 data = {
-"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6, 65534, 6, 1441795, 65532, 4, 1441795, 65532, 3, 1441792, 65534, 8, 1048580, 65532, 8, 1441796, 65530, 6, 1441796, 65532, 6, 1048580, 65532, 10, 1048579, 65532, 11, 1048580, 65530, 8, 1048580, 65532, 2, 1441795, 65532, 1, 655364, 65532, 0, 1441795, 65532, 65535, 1441792, 65532, 65534, 1441796, 65533, 65534, 3, 65535, 65534, 3, 65534, 65534, 0, 0, 65534, 3, 65534, 5, 1441796, 65534, 3, 4, 0, 5, 655364, 2, 2, 655363, 3, 2, 655364, 3, 6, 1048580, 3, 4, 1048579, 3, 5, 1048579, 2, 6, 655363, 1, 6, 655363, 0, 6, 655362, 1, 65534, 655362, 0, 3, 1048580, 0, 2, 1441796, 65534, 1, 1441794, 65534, 2, 1048579, 1, 0, 655362, 1, 1, 1048579, 1, 2, 1048579)
+"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6, 65534, 6, 1441795, 65532, 4, 1441795, 65532, 3, 1441792, 65534, 8, 1048580, 65532, 8, 1441796, 65530, 6, 1441796, 65532, 6, 1048580, 65532, 10, 1048579, 65532, 11, 1048580, 65530, 8, 1048580, 65532, 2, 1441795, 65532, 1, 655364, 65532, 0, 1441795, 65532, 65535, 1441792, 65532, 65534, 1441796, 65533, 65534, 3, 65535, 65534, 3, 65534, 65534, 0, 0, 65534, 3, 65534, 5, 1441796, 65534, 3, 4, 0, 5, 655364, 2, 2, 655363, 3, 2, 655364, 3, 6, 1048580, 3, 4, 1048579, 3, 5, 1048579, 2, 6, 655363, 1, 6, 655363, 0, 6, 655362, 1, 65534, 655362, 0, 3, 1048580, 0, 2, 1441796, 65534, 1, 1441794, 65534, 2, 1048579, 1, 0, 655362, 1, 1, 1048579, 1, 2, 1048579, 65535, 5, 1441794, 65535, 3, 2)
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
 [node name="breakable_object" type="Node3D" parent="Zone03"]
 
 [node name="WoodenCrate" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.99999934, 0, 0, 0, 1, 0, 0, 0, 0.99999934, -3.344452, 0, 8.356219)
+transform = Transform3D(0.9999992, 0, 0, 0, 1, 0, 0, 0, 0.9999992, -3.1798973, 0, 8.356217)
 
 [node name="WoodenCrate2" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-4.3711353e-08, 0, -0.99999917, 0, 1, 0, 0.99999917, 0, -4.3711353e-08, -3.344452, 0, 9.504553)
+transform = Transform3D(-4.3711346e-08, 0, -0.99999905, 0, 1, 0, 0.99999905, 0, -4.3711346e-08, -3.1798973, 0, 9.504551)
 
 [node name="WoodenCrate3" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.9999993, 0, 0, 0, 1, 0, 0, 0, 0.9999993, -3.344452, 1, 8.356218)
+transform = Transform3D(0.99999917, 0, 0, 0, 1, 0, 0, 0, 0.99999917, -3.1798973, 1, 8.356216)
 
 [node name="WoodenCrate4" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-4.371135e-08, 0, -0.9999991, 0, 1, 0, 0.9999991, 0, -4.371135e-08, -3.344452, 1, 9.504552)
+transform = Transform3D(-4.3711342e-08, 0, -0.999999, 0, 1, 0, 0.999999, 0, -4.3711342e-08, -3.1798973, 1, 9.50455)
 
 [node name="WoodenCrate5" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.9999993, 0, 0, 0, 1, 0, 0, 0, 0.9999993, -2.2597656, 0, 8.356218)
+transform = Transform3D(0.99999917, 0, 0, 0, 1, 0, 0, 0, 0.99999917, -2.095211, 0, 8.356216)
 
 [node name="WoodenCrate6" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-4.371135e-08, 0, -0.9999991, 0, 1, 0, 0.9999991, 0, -4.371135e-08, -2.2597656, 0, 9.504552)
+transform = Transform3D(-4.3711342e-08, 0, -0.999999, 0, 1, 0, 0.999999, 0, -4.3711342e-08, -2.095211, 0, 9.50455)
 
 [node name="WoodenCrate7" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(0.9999992, 0, 0, 0, 1, 0, 0, 0, 0.9999992, -2.2597656, 1, 8.356217)
+transform = Transform3D(0.9999991, 0, 0, 0, 1, 0, 0, 0, 0.9999991, -2.095211, 1, 8.3562155)
 
 [node name="WoodenCrate8" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
-transform = Transform3D(-4.3711346e-08, 0, -0.99999905, 0, 1, 0, 0.99999905, 0, -4.3711346e-08, -2.2597656, 1, 9.504551)
+transform = Transform3D(-4.371134e-08, 0, -0.9999989, 0, 1, 0, 0.9999989, 0, -4.371134e-08, -2.095211, 1, 9.504549)
 
 [node name="Vegetation" type="Node3D" parent="Zone03" groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
@@ -1244,12 +1264,6 @@ random_tilt = 0.5
 transform = Transform3D(0.8592582, -0.00091278134, -1.4433854, 0.024643, 1.679552, 0.013608036, 1.4431752, -0.028135791, 0.85915095, -11.109592, 0.21237564, 2.5813808)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
-
-[node name="Obstacle_roll" parent="Zone03" instance=ExtResource("37_n6y4e")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -5.049839, 0, 3.0455341)
-
-[node name="Obstacle_roll2" parent="Zone03" instance=ExtResource("37_n6y4e")]
-transform = Transform3D(-0.9999996, 0, 8.7422734e-08, 0, 1, 0, -8.7422734e-08, 0, -0.9999996, 3.0263672, 0, -0.9209919)
 
 [node name="Zone04" type="Node3D" parent="."]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 94.81114, -5, -26.819393)

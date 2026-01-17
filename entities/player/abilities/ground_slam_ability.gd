@@ -13,13 +13,11 @@ extends Node
 @export var slam_end_anim_speed: float = 1.5
 @export var slam_vfx_index: int = 2
 
-# --- НОВЫЕ НАСТРОЙКИ "СОЧНОСТИ" ---
 @export_group("Juice & Feedback")
 @export var hs_time_scale: float = 0.05
 @export var hs_duration: float = 0.15
 @export var camera_shake_strength: float = 0.8
 @export var camera_shake_duration: float = 0.25
-# ------------------------------------
 
 var is_slamming: bool = false
 var is_recovering: bool = false
@@ -35,14 +33,12 @@ var is_unlocked: bool = false
 var actor: CharacterBody3D
 var anim_player: AnimationPlayer
 
-# --- НОВОЕ: Area3D для детекции ---
 var slam_area: Area3D
 var slam_shape: CollisionShape3D
 
 signal cooldown_updated(time_left: float, max_time: float)
 
 func _ready() -> void:
-	# Ищем CharacterBody3D вверх по иерархии
 	var parent = get_parent()
 	if parent is CharacterBody3D:
 		actor = parent
@@ -50,35 +46,23 @@ func _ready() -> void:
 		actor = parent.get_parent()
 	
 	if actor:
-		# Ищем AnimationPlayer внутри игрока
 		anim_player = actor.get_node_or_null("character/AnimationPlayer")
 		if not anim_player:
 			anim_player = actor.find_child("AnimationPlayer", true, false)
-			
-		# ИСПРАВЛЕНИЕ: Используем call_deferred, чтобы избежать ошибки "Parent node is busy"
-		# Это отложит создание Area3D до момента, когда дерево узлов будет готово
 		call_deferred("_setup_slam_area")
 
 func _setup_slam_area() -> void:
 	if not is_instance_valid(actor): return
 
-	# Создаем Area3D программно
 	slam_area = Area3D.new()
 	slam_area.name = "SlamDetectionArea"
 	actor.add_child(slam_area)
-	
-	# Поднимаем зону поражения на 1 метр вверх от ног, 
-	# чтобы не цеплять пол и лучше попадать по врагам
 	slam_area.position = Vector3(0, 1.0, 0)
-	
-	# Настраиваем коллизии
-	slam_area.collision_layer = 0 # Сама зона не является препятствием
-	# Сканируем всё (позже отфильтруем в коде)
+	slam_area.collision_layer = 0 
 	slam_area.collision_mask = 0xFFFFFFFF 
-	slam_area.monitorable = false # Игрок не должен "видеться" этой зоной как препятствие для других
-	slam_area.monitoring = false # Выключено по умолчанию для экономии ресурсов
+	slam_area.monitorable = false 
+	slam_area.monitoring = false 
 	
-	# Создаем шейп
 	slam_shape = CollisionShape3D.new()
 	var sphere = SphereShape3D.new()
 	sphere.radius = slam_radius
@@ -94,6 +78,21 @@ func _process(delta: float) -> void:
 			cooldown_updated.emit(0.0, slam_cooldown)
 			cooldown_timer = -2.0
 
+# === НОВАЯ ФУНКЦИЯ СБРОСА ===
+func reset_state() -> void:
+	is_slamming = false
+	is_recovering = false
+	_impact_processed = false
+	_playing_end_anim = false
+	
+	if slam_area:
+		slam_area.monitoring = false
+		
+	# Возвращаем коллизию с врагами (слой 3), если она была отключена
+	if actor:
+		actor.set_collision_mask_value(3, true)
+# ============================
+
 func can_slam() -> bool:
 	if not is_unlocked: return false
 	if is_slamming or is_recovering: return false
@@ -102,7 +101,6 @@ func can_slam() -> bool:
 	if "current_jump_count" in actor and actor.current_jump_count < 2:
 		return false
 	
-	# Проверка высоты (Raycast вниз)
 	var space_state = actor.get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(actor.global_position, actor.global_position + Vector3(0, -slam_min_height, 0))
 	query.exclude = [actor]
@@ -122,11 +120,9 @@ func start_slam() -> void:
 	_impact_processed = false
 	_playing_end_anim = false
 	
-	# Обновляем радиус, если он менялся в инспекторе (с проверкой на существование)
 	if slam_shape and slam_shape.shape is SphereShape3D:
 		slam_shape.shape.radius = slam_radius
 	
-	# Включаем мониторинг в начале слэма (с проверкой на существование)
 	if slam_area:
 		slam_area.monitoring = true
 	
@@ -229,9 +225,8 @@ func _perform_impact() -> void:
 	
 	var wait_time = anim_len / slam_end_anim_speed
 	
-	_deal_damage() # Наносим урон
+	_deal_damage() 
 	
-	# Выключаем Area3D после удара
 	if slam_area:
 		slam_area.monitoring = false
 	
@@ -252,9 +247,7 @@ func _perform_impact() -> void:
 func _deal_damage() -> void:
 	if not slam_area: return
 	
-	# --- ИСПОЛЬЗУЕМ AREA3D ВМЕСТО INTERSECT_SHAPE ---
 	var bodies = slam_area.get_overlapping_bodies()
-	# ------------------------------------------------
 	
 	var targets_hit = 0
 	
@@ -262,7 +255,6 @@ func _deal_damage() -> void:
 		if not is_instance_valid(body): continue
 		if body == actor: continue
 		
-		# Проверка: есть ли у объекта метод получения урона
 		if body.has_method("take_damage"):
 			targets_hit += 1 
 			
