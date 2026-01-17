@@ -9,6 +9,10 @@ extends CharacterBody3D
 @export_group("Respawn Settings")
 @export var fall_limit_y: float = -20.0 
 @export var fall_damage: float = 1.0 
+@export var safe_ground_margin: float = 1.5 
+# НОВЫЕ НАСТРОЙКИ ТАЙМИНГОВ
+@export var respawn_fade_duration: float = 0.5 ## Время затемнения/просветления
+@export var respawn_hold_time: float = 0.8 ## Сколько ждать в темноте после телепортации (увеличь, если видно падение)
 
 @export_group("Idle Animations")
 @export var enable_idle_dance: bool = true 
@@ -29,7 +33,7 @@ extends CharacterBody3D
 @export_group("Combat Assist")
 @export var soft_lock_range: float = 4.0 
 @export var soft_lock_angle: float = 90.0 
-@export var wall_pushback_force: float = 5.0 ## Сила отталкивания от стены при атаке
+@export var wall_pushback_force: float = 5.0
  
 # --- COMPONENTS ---
 @onready var anim_controller: AnimationController = $Components/AnimationController 
@@ -42,7 +46,6 @@ extends CharacterBody3D
 var default_col_height: float = 2.0
 var default_col_y: float = 1.0
 
-# Настройки для переката (автоматически рассчитываются в _ready)
 var roll_col_height: float = 0.9
 var roll_col_y: float = 0.45 
 
@@ -65,10 +68,7 @@ var roll_col_y: float = 0.45
 @onready var sfx_dash = $SoundBank/SfxDash
 @onready var sfx_slam_impact = $SoundBank/SfxSlamImpact
 
-# Ссылка на твой узел в сцене
 @onready var shape_cast: ShapeCast3D = get_node_or_null("RollSafetyCast")
-
-# --- НОВОЕ: Детектор стен для атаки ---
 @onready var wall_detector: ShapeCast3D = $AttackWallDetector 
 
 var last_safe_position: Vector3 = Vector3.ZERO
@@ -88,6 +88,7 @@ var roll_threshold: float = 0.18
 var current_knockback_timer: float = 0.0
 var is_knockbacked: bool = false
 var is_knockback_stun: bool = false
+var is_respawning: bool = false 
 
 var current_movement_blend: float = 0.0
 var target_movement_blend: float = 0.0
@@ -100,7 +101,7 @@ var root_motion_speed_factor: float = 1.0
 
 var cached_camera: Camera3D = null
 
-# Геттеры свойств компонента Movement
+# Геттеры свойств
 var base_speed: float:
 	get: return movement_component.walk_speed 
 var run_speed: float:
@@ -108,14 +109,11 @@ var run_speed: float:
 var current_jump_count: int:
 	get: return movement_component.current_jump_count
 	set(val): movement_component.current_jump_count = val
-
-# Геттеры для CombatComponent
 var is_attacking: bool:
 	get: return combat_component.is_attacking
 	set(val): 
 		combat_component.is_attacking = val
 		if wall_detector: wall_detector.enabled = val 
-
 var can_attack: bool:
 	get: return combat_component.can_attack
 	set(val): combat_component.can_attack = val
@@ -174,8 +172,6 @@ var attack_rotation_influence: float:
 	get: return combat_component.attack_rotation_influence
 var attack_roll_cancel_threshold: float:
 	get: return combat_component.attack_roll_cancel_threshold
-
-# Геттеры для RollAbility
 var current_roll_charges: int:
 	get: return roll_ability.current_roll_charges
 	set(val): roll_ability.current_roll_charges = val
@@ -210,7 +206,6 @@ func _ready() -> void:
 	movement_component.init(self)
 	combat_component.init(self)
 	
-	# 1. ЗАПОМИНАЕМ СТАРТОВЫЕ ЗНАЧЕНИЯ КАПСУЛЫ
 	if collision_shape and collision_shape.shape is CapsuleShape3D:
 		default_col_height = collision_shape.shape.height
 		default_col_y = collision_shape.position.y
@@ -218,7 +213,6 @@ func _ready() -> void:
 		roll_col_height = default_col_height / 2.0
 		roll_col_y = default_col_y / 2.0
 	
-	# 2. НАСТРАИВАЕМ КАСТ ПОТОЛКА
 	call_deferred("_setup_roll_safety_cast")
 
 	if roll_ability:
@@ -232,38 +226,23 @@ func _ready() -> void:
 	state_machine.init(self)
 
 func _setup_roll_safety_cast() -> void:
-	# Если каст уже есть в сцене, мы его используем, но ПЕРЕНАСТРАИВАЕМ
-	# под реальные размеры капсулы, чтобы он работал корректно.
-	
 	if not shape_cast:
-		print("Player: Creating RollSafetyCast dynamically...")
 		shape_cast = ShapeCast3D.new()
 		shape_cast.name = "RollSafetyCast"
 		add_child(shape_cast)
-		# Исключаем самого игрока
 		shape_cast.add_exception(self)
-		shape_cast.collision_mask = 1 # Слой статики (Wall/Ground)
+		shape_cast.collision_mask = 1 
 	
-	# --- НАСТРОЙКА ГЕОМЕТРИИ ЛУЧА ---
-	# 1. Позиция начала: Примерно в районе пояса или чуть ниже
-	# Если капсула 2м, ставим начало на 0.5м от пола.
 	shape_cast.position = Vector3(0, 0.5, 0)
-	
-	# 2. Длина луча: Должна доставать до макушки СТОЯЩЕГО игрока.
-	# Если высота 2.0, а начали с 0.5, нам нужно проверить еще 1.5 метра вверх.
-	# Делаем чуть меньше (1.4), чтобы не цеплять "пограничные" потолки.
 	var check_distance = default_col_height - shape_cast.position.y - 0.1
 	shape_cast.target_position = Vector3(0, check_distance, 0)
 	
-	# 3. Форма: Сфера
 	if not shape_cast.shape or not (shape_cast.shape is SphereShape3D):
 		var sphere = SphereShape3D.new()
-		sphere.radius = 0.4 # Чуть меньше радиуса капсулы (0.5), чтобы не цеплять стены боками
+		sphere.radius = 0.4 
 		shape_cast.shape = sphere
 	
-	shape_cast.enabled = false # Включаем только во время переката
-	
-	# Обновляем исключения на всякий случай
+	shape_cast.enabled = false 
 	shape_cast.clear_exceptions()
 	shape_cast.add_exception(self)
 
@@ -275,6 +254,8 @@ func _process(delta: float) -> void:
 		grass_manager.set_player_position(global_position)
 
 func _physics_process(delta: float) -> void:
+	if is_respawning: return
+
 	var is_root_motion = false
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
 		is_root_motion = true
@@ -336,14 +317,40 @@ func _physics_process(delta: float) -> void:
 
 	if is_on_floor():
 		safe_pos_timer += delta
-		if safe_pos_timer > 0.5:
-			last_safe_position = global_position
+		if safe_pos_timer > 0.2:
+			if _is_position_safe_and_grounded():
+				last_safe_position = global_position
 			safe_pos_timer = 0.0
 	else:
 		safe_pos_timer = 0.0
 
 	if global_position.y < fall_limit_y:
 		_handle_fall_respawn()
+
+func _is_position_safe_and_grounded() -> bool:
+	var space_state = get_world_3d().direct_space_state
+	var offset_y = 0.5 
+	var check_dist = 2.0 
+	
+	var checks = [
+		Vector3(0, 0, 0), 
+		Vector3(safe_ground_margin, 0, 0),
+		Vector3(-safe_ground_margin, 0, 0),
+		Vector3(0, 0, safe_ground_margin),
+		Vector3(0, 0, -safe_ground_margin)
+	]
+	
+	for offset in checks:
+		var from = global_position + offset + Vector3(0, offset_y, 0)
+		var to = from + Vector3(0, -check_dist, 0)
+		var query = PhysicsRayQueryParameters3D.create(from, to)
+		query.exclude = [self] 
+		
+		var result = space_state.intersect_ray(query)
+		if not result:
+			return false 
+	
+	return true
 
 func _handle_wall_pushback(delta: float) -> void:
 	if not is_attacking or not wall_detector:
@@ -372,14 +379,52 @@ func _handle_wall_pushback(delta: float) -> void:
 	velocity += current_wall_push_velocity
 
 func _handle_fall_respawn() -> void:
-	take_damage(fall_damage, Vector3.ZERO)
-	if health_component.current_health <= 0: return
-	global_position = last_safe_position
-	velocity = Vector3.ZERO 
-	is_invincible = true
-	await get_tree().create_timer(1.0).timeout
-	is_invincible = false
+	if is_respawning: return
+	is_respawning = true
 	
+	# 1. Затемняем экран
+	if SceneManager:
+		SceneManager.fade_screen_to_black(respawn_fade_duration)
+		# Ждем чуть меньше, чем длится фейд, чтобы не было видно "рывка" урона
+		await get_tree().create_timer(respawn_fade_duration * 0.8).timeout
+	
+	# 2. Тихий урон
+	take_damage(fall_damage, Vector3.ZERO, false, true)
+	
+	if health_component.current_health <= 0:
+		is_respawning = false
+		return
+
+	# 3. Перемещение
+	global_position = last_safe_position
+	
+	# Сброс инерции
+	velocity = Vector3.ZERO
+	current_rm_velocity = Vector3.ZERO
+	
+	# Сброс состояний
+	state_machine.change_state(GameConstants.STATE_MOVE)
+	anim_controller.set_state("alive")
+	anim_controller.set_air_state("ground")
+	anim_controller.set_jump_state("End")
+	anim_controller.set_locomotion_blend(0.0)
+	
+	# ПРИНУДИТЕЛЬНЫЙ ФИЗИЧЕСКИЙ СНАП К ПОЛУ
+	# Задаем скорость вниз и обновляем физику в "черном" кадре
+	velocity = Vector3.DOWN * 10.0
+	move_and_slide() # Это заставит is_on_floor() стать true
+	velocity = Vector3.ZERO # Снова сбрасываем, чтобы не накапливать
+	
+	# Ждем в темноте (respawn_hold_time)
+	await get_tree().create_timer(respawn_hold_time).timeout
+	
+	# 4. Возвращаем свет
+	if SceneManager:
+		await SceneManager.fade_screen_from_black(respawn_fade_duration)
+	
+	is_invincible = false
+	is_respawning = false
+
 func apply_movement_velocity(delta: float, input_dir: Vector2, target_speed: float) -> void:
 	movement_component.move(delta, input_dir, target_speed, state_machine.current_state.is_root_motion)
 
@@ -581,11 +626,14 @@ func stop_hitbox_monitoring() -> void:
 func _check_attack_hit() -> void:
 	combat_component.activate_hitbox_check(0.1)
 
-func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool = false) -> void:
+func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool = false, silent: bool = false) -> void:
 	if ground_slam_ability.is_slamming or is_invincible: return
 	
-	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	if health_component: health_component.take_damage(amount)
+	
+	if silent: return
+
+	VfxPool.spawn_effect(0, global_position + Vector3(0, 1.5, 0))
 	$HitFlash.flash()
 	sfx_hurt.play_random()
 	
@@ -654,7 +702,6 @@ func shrink_collider() -> void:
 	if not collision_shape: return
 	if not collision_shape.shape is CapsuleShape3D: return
 	
-	# Используем запомненные "маленькие" значения
 	collision_shape.shape.height = roll_col_height
 	collision_shape.position.y = roll_col_y
 
@@ -662,7 +709,6 @@ func restore_collider() -> void:
 	if not collision_shape: return
 	if not collision_shape.shape is CapsuleShape3D: return
 	
-	# Возвращаем запомненные "родные" значения
 	collision_shape.shape.height = default_col_height
 	collision_shape.position.y = default_col_y
 

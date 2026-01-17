@@ -12,3 +12,4 @@ prompt_scale = 0.5
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_i0bwp")
+debug_color = Color(18.892157, 0, 17.547016, 1)

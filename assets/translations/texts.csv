@@ -21,6 +21,7 @@ tutorial_move_prompt,"Use to Move","Используйте для перемещ
 tutorial_cam_toggle_prompt,"Change Camera Mode","Сменить режим камеры"
 tutorial_cam_look_prompt,"Look Around","Осмотреться"
 tutorial_jump_prompt,"Jump over obstacle","Прыжок через препятствие"
+tutorial_double_jump_prompt,"Use double jump to jump over the gap","Используйте двойной прыжок чтобы перепрыгнуть пропасть"
 tutorial_attack_prompt,"Break the obstacle","Разбейте препятствие"
 tutorial_roll_prompt,"Roll to pass under","Кувырок чтобы пролезть"
 ui_toggle_camera,"Camera Mode","Режим камеры"
