@@ -1,10 +1,13 @@
-[gd_scene format=3 uid="uid://rvj1nwhlubs3"]
+[gd_scene load_steps=2 format=3 uid="uid://rvj1nwhlubs3"]
+
+[ext_resource type="PackedScene" uid="uid://c81l11fjitx1j" path="res://assets/models/environment/Obstacle_roll.blend" id="1_rl8km"]
 
 [node name="Obstacle_roll" type="Node3D"]
 
-[node name="CSGBox3D" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5616093, 0)
-use_collision = true
+[node name="Obstacle_roll" parent="." instance=ExtResource("1_rl8km")]
+
+[node name="Obstacle_roll" parent="Obstacle_roll/Obstacle_roll" index="0"]
 collision_layer = 256
 collision_mask = 53
-size = Vector3(1, 1, 3)
+
+[editable path="Obstacle_roll"]
