@@ -1509,15 +1509,7 @@ random_tilt = 0.5
 [node name="MovingPlatformRoot" parent="." instance=ExtResource("40_c0er0")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 116.53875, -10.036977, 9.656663)
 move_offset = Vector3(-10, 0, 0)
-preview_progress = 0.161
-
-[node name="MovingPlatformRoot3" parent="." instance=ExtResource("40_c0er0")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 106.432816, -8.7153, -1.2325015)
-move_offset = Vector3(0, 5, 0)
-
-[node name="MovingPlatformRoot4" parent="." instance=ExtResource("40_c0er0")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 111.34843, -8.7153, -0.5178168)
-move_offset = Vector3(-4.9, 0, 0)
+preview_progress = 0.061
 
 [node name="MovingPlatformRoot2" parent="." instance=ExtResource("40_c0er0")]
 transform = Transform3D(-0.4726277, 0, -0.8812622, 0, 1, 0, 0.8812622, 0, -0.4726277, 110.64269, -15.410415, 31.411152)

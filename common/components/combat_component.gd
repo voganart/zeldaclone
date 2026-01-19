@@ -67,6 +67,9 @@ var can_attack: bool = true
 var combo_count: int = 0
 var current_attack_damage: float = 1.0
 
+# === НОВОЕ: Максимальное количество ударов в серии (по дефолту 2) ===
+var max_combo_hits: int = 2 
+
 # Параметры текущего удара
 var current_knockback_strength: float = 0.0 
 var current_knockback_height: float = 0.0
@@ -129,7 +132,8 @@ func end_attack_sequence() -> void:
 	is_attacking = false
 	combo_count += 1
 	
-	if combo_count >= 3:
+	# Используем переменную max_combo_hits вместо хардкода
+	if combo_count >= max_combo_hits:
 		can_attack = false
 		combo_cooldown_timer.start(combo_cooldown_after_combo)
 		combo_count = 0 
@@ -274,22 +278,16 @@ func _apply_hit(body: Node3D, is_prop: bool) -> void:
 		if self_recoil_strength > 0:
 			actor.velocity -= dir * self_recoil_strength
 
-# --- ФИКС ЛОГИКИ ЛУЧА ДЛЯ ПЕРЕВЕРНУТЫХ ОБЪЕКТОВ ---
 func _has_line_of_sight(target: Node3D) -> bool:
 	if not actor: return false
 	var space_state = actor.get_world_3d().direct_space_state
 	
 	var origin = actor.global_position + Vector3(0, 1.0, 0)
-	
-	# ИЗМЕНЕНИЕ: Используем to_global, чтобы учитывать поворот объекта (для ящиков)
-	# Для RigidBody (ящик 1м высотой, origin внизу) центр находится в локальных (0, 0.5, 0).
-	# Функция to_global переведет это в правильную мировую точку, даже если ящик перевернут.
 	var dest = Vector3.ZERO
 	
 	if target is RigidBody3D:
 		dest = target.to_global(Vector3(0, 0.5, 0))
 	else:
-		# Для врагов (CharacterBody) Origin обычно в ногах, центр груди ~1.0
 		dest = target.global_position + Vector3(0, 1.0, 0)
 	
 	var query = PhysicsRayQueryParameters3D.create(origin, dest)

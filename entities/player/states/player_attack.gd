@@ -12,20 +12,14 @@ var is_chaining: bool = false
 func enter() -> void:
 	player = entity as Player
 	player.is_attacking = true
-	# Мы НЕ ставим can_attack = false здесь, если это чейнинг,
-	# но так как мы контролируем это вручную, можно оставить как есть.
 	player.can_attack = false
 	
-	# === ИСПРАВЛЕНИЕ НАЧАЛО ===
-	# 1. Сбрасываем таймер активности хитбокса. 
-	# Это предотвращает "перенос" активной фазы удара с предыдущей атаки на новую,
-	# что вызывало мгновенную регистрацию удара на 1-м кадре и блокировку реального удара.
+	# Сброс таймера активности хитбокса
 	player.hitbox_active_timer = 0.0
 	
-	# 2. Принудительно очищаем список, чтобы гарантировать, что враги могут получить урон снова.
+	# Очистка списка попаданий
 	if player.hit_enemies_current_attack:
 		player.hit_enemies_current_attack.clear()
-	# === ИСПРАВЛЕНИЕ КОНЕЦ ===
 	
 	elapsed_time = 0.0
 	is_chaining = false
@@ -73,8 +67,12 @@ func physics_update(delta: float) -> void:
 				return
 
 	# --- 2. ЛОГИКА КОМБО (CHAINING) ---
-	# Если это не финишер (combo_count 2 в примере, то есть 3-й удар)
-	if player.combo_count < 2:
+	# Разрешаем чейнинг только если мы НЕ достигли предела комбо
+	var max_hits = player.combat_component.max_combo_hits
+	
+	# Если сейчас combo_count = 0 (1й удар), то следующий будет 1. Если max=2, то 1 < 2 - ок.
+	# Если сейчас combo_count = 1 (2й удар), то следующий 2. Если max=2, то нельзя.
+	if player.combo_count < (max_hits - 1):
 		# Проверяем, прошло ли минимальное время (Cancel Window)
 		if elapsed_time >= player.attack_cooldown:
 			# Если есть ввод атаки
@@ -103,7 +101,6 @@ func _setup_combo_parameters() -> void:
 		player.current_attack_damage = 1.0
 		player.has_hyper_armor = false
 		
-		# Настройки отталкивания NORMAL
 		player.current_knockback_strength = player.kb_strength_normal
 		player.current_knockback_height = player.kb_height_normal
 		
@@ -113,7 +110,6 @@ func _setup_combo_parameters() -> void:
 		player.current_attack_damage = 1.0
 		player.has_hyper_armor = false
 		
-		# Настройки отталкивания NORMAL
 		player.current_knockback_strength = player.kb_strength_normal
 		player.current_knockback_height = player.kb_height_normal
 		
@@ -124,7 +120,6 @@ func _setup_combo_parameters() -> void:
 		player.combo_cooldown_active = true
 		player.has_hyper_armor = true
 		
-		# Настройки отталкивания FINISHER
 		player.current_knockback_strength = player.kb_strength_finisher
 		player.current_knockback_height = player.kb_height_finisher
 
@@ -136,18 +131,14 @@ func exit() -> void:
 	player.has_hyper_armor = false
 	
 	if is_chaining:
-		# !!! ВАЖНОЕ ИСПРАВЛЕНИЕ !!!
-		# Если мы переходим в следующую атаку, НЕ выключаем хитбоксы,
-		# чтобы избежать состояния "monitoring = false" на одном кадре,
-		# что вызывает краш при вызове get_overlapping_bodies.
-		# (Список попаданий очистится в enter -> start_hitbox_monitoring)
 		pass
 	else:
 		player.stop_hitbox_monitoring()
 		player.is_attacking = false
 		player.combo_count += 1
 		
-		if player.combo_count >= 3:
+		# Используем переменную компонента для проверки финишера
+		if player.combo_count >= player.combat_component.max_combo_hits:
 			player.start_combo_cooldown() # Долгий откат после финишера
 		else:
 			player.combo_cooldown_active = false

@@ -6,6 +6,13 @@ extends CharacterBody3D
 # ============================================================================
 # EXPORTS & CONFIG
 # ============================================================================
+@export_group("Debug & Unlocks")
+@export var debug_unlock_double_jump: bool = false
+@export var debug_unlock_air_dash: bool = false
+@export var debug_unlock_ground_slam: bool = false
+@export var debug_unlock_roll: bool = false
+@export var debug_unlock_3_hit_combo: bool = false
+
 @export_group("Respawn Settings")
 @export var fall_limit_y: float = -20.0 
 @export var fall_damage: float = 1.0 
@@ -223,6 +230,41 @@ func _ready() -> void:
 		_on_health_changed(health_component.get_health(), health_component.get_max_health())
 
 	state_machine.init(self)
+	
+	# === ПРИМЕНЕНИЕ ДЕБАГ-НАСТРОЕК (UNLOCKS) ===
+	_apply_unlocks()
+
+func _apply_unlocks() -> void:
+	if movement_component:
+		movement_component.max_jump_count = 2 if debug_unlock_double_jump else 1
+	if air_dash_ability:
+		air_dash_ability.is_unlocked = debug_unlock_air_dash
+	if ground_slam_ability:
+		ground_slam_ability.is_unlocked = debug_unlock_ground_slam
+	if roll_ability:
+		roll_ability.is_unlocked = debug_unlock_roll
+	if combat_component:
+		combat_component.max_combo_hits = 3 if debug_unlock_3_hit_combo else 2
+
+func unlock_ability(ability_name: String) -> void:
+	print("Player unlocking: ", ability_name)
+	match ability_name:
+		"roll_ability":
+			if roll_ability: roll_ability.is_unlocked = true
+		
+		"double_jump":
+			if movement_component: movement_component.unlock_double_jump()
+				
+		"ground_slam":
+			if ground_slam_ability: ground_slam_ability.is_unlocked = true
+				
+		"air_dash":
+			if air_dash_ability: air_dash_ability.is_unlocked = true
+			
+		"combo_finisher", "3_hit_combo":
+			if combat_component: 
+				combat_component.max_combo_hits = 3
+				print("3-Hit Combo Unlocked!")
 
 func _setup_roll_safety_cast() -> void:
 	if not shape_cast:
@@ -391,12 +433,10 @@ func _handle_fall_respawn() -> void:
 		is_respawning = false
 		return
 
-	# === СБРОС ВСЕХ СПОСОБНОСТЕЙ (FIX) ===
 	if ground_slam_ability:
 		ground_slam_ability.reset_state()
 	if air_dash_ability:
 		air_dash_ability.reset_ability_completely()
-	# =====================================
 
 	global_position = last_safe_position
 	
@@ -674,25 +714,6 @@ func get_closest_nav_point() -> Vector3:
 func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()
-
-func unlock_ability(ability_name: String) -> void:
-	print("Player unlocking: ", ability_name)
-	match ability_name:
-		"roll_ability":
-			if roll_ability:
-				roll_ability.is_unlocked = true
-		
-		"double_jump":
-			if movement_component:
-				movement_component.unlock_double_jump()
-				
-		"ground_slam":
-			if ground_slam_ability:
-				ground_slam_ability.is_unlocked = true
-				
-		"air_dash":
-			if air_dash_ability:
-				air_dash_ability.is_unlocked = true
 
 func shrink_collider() -> void:
 	if not collision_shape: return
