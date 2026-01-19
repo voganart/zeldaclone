@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bpblln46bvwd8"]
+[gd_scene load_steps=13 format=3 uid="uid://bpblln46bvwd8"]
 
 [ext_resource type="Script" uid="uid://dl56xvifm56pk" path="res://levels/components/MovingPlatform/moving_platform.gd" id="1_gg3px"]
 [ext_resource type="ArrayMesh" uid="uid://cgim3f1ntr7cq" path="res://assets/models/environment/moving_platform/moving_platform.res" id="2_m623m"]
+[ext_resource type="Texture2D" uid="uid://wefl13au7wey" path="res://assets/textures/vfx/fly_star.png" id="3_fgtfb"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fgtfb"]
 size = Vector3(3.2406616, 0.46142578, 1.7545166)
@@ -9,10 +10,66 @@ size = Vector3(3.2406616, 0.46142578, 1.7545166)
 [sub_resource type="BoxShape3D" id="BoxShape3D_uqct2"]
 size = Vector3(2, 0.06536865, 1)
 
+[sub_resource type="Curve" id="Curve_fgtfb"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.51875, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_2uo5v"]
+curve = SubResource("Curve_fgtfb")
+
+[sub_resource type="Curve" id="Curve_2uo5v"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_kdkvl"]
+curve = SubResource("Curve_2uo5v")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_m623m"]
+emission_shape_offset = Vector3(0, -0.105, 0)
+emission_shape_scale = Vector3(1, 0.525, 1)
+emission_shape = 3
+emission_box_extents = Vector3(1.445, 0.23, 0.655)
+angle_min = -99.899994
+angle_max = 81.10001
+angle_curve = SubResource("CurveTexture_kdkvl")
+velocity_pivot = Vector3(0, -1, 0)
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 0.19999999
+initial_velocity_max = 0.79999995
+gravity = Vector3(0, -1, 0)
+damping_min = 0.5
+damping_max = 1.0
+scale_min = 0.049999997
+scale_max = 0.099999994
+color = Color(1.8645576, 0.8159999, 1.964, 0.585)
+alpha_curve = SubResource("CurveTexture_2uo5v")
+hue_variation_min = -0.09000002
+hue_variation_max = -0.050000023
+turbulence_noise_strength = 4.65
+turbulence_influence_min = 0.19000001
+turbulence_influence_max = 0.19000001
+turbulence_initial_displacement_min = -0.4999985
+turbulence_initial_displacement_max = 44.300003
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hoosm"]
+transparency = 4
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("3_fgtfb")
+disable_receive_shadows = true
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_5bnf1"]
+material = SubResource("StandardMaterial3D_hoosm")
+orientation = 2
+
 [node name="MovingPlatform" type="Node3D" node_paths=PackedStringArray("platform_node")]
 script = ExtResource("1_gg3px")
 platform_node = NodePath("PlatformBody")
-move_offset = Vector3(0, 0, 0)
 
 [node name="PlatformBody" type="AnimatableBody3D" parent="."]
 collision_layer = 64
@@ -30,6 +87,12 @@ debug_fill = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformBody/TriggerArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1109314, 0)
 shape = SubResource("BoxShape3D_uqct2")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="PlatformBody"]
+amount = 50
+lifetime = 1.5
+process_material = SubResource("ParticleProcessMaterial_m623m")
+draw_pass_1 = SubResource("PlaneMesh_5bnf1")
 
 [node name="WaitTimer" type="Timer" parent="."]
 one_shot = true

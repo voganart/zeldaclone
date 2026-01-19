@@ -1438,7 +1438,7 @@ leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Zone06" type="Node3D" parent="."]
-transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 97.83149, -22, 54.23413)
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 91.01251, -22.000004, 67.5875)
 
 [node name="Environment" type="Node3D" parent="Zone06"]
 
@@ -1513,3 +1513,8 @@ preview_progress = 0.061
 [node name="MovingPlatformRoot2" parent="." instance=ExtResource("40_c0er0")]
 transform = Transform3D(-0.4726277, 0, -0.8812622, 0, 1, 0, 0.8812622, 0, -0.4726277, 110.64269, -15.410415, 31.411152)
 move_offset = Vector3(-10, 5, 0)
+is_fragile = true
+
+[node name="MovingPlatformRoot3" parent="." instance=ExtResource("40_c0er0")]
+transform = Transform3D(-0.35734123, 0, -0.933974, 0, 1, 0, 0.933974, 0, -0.35734123, 104.098595, -18.41615, 45.173653)
+move_offset = Vector3(-10, 2.5, 0)

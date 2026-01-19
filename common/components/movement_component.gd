@@ -1,7 +1,7 @@
 class_name MovementComponent
 extends Node
 
-# --- ГЛАВНЫЕ НАСТРОЙКИ ДВИЖЕНИЯ (SHARED) ---
+# --- ГЛАВНЫЕ НАСТРОЙКИ ДВИЖЕНИЯ ---
 @export_group("Speed Stats")
 @export var walk_speed: float = 3.0   
 @export var run_speed: float = 4.5    
@@ -13,7 +13,8 @@ extends Node
 
 @export_group("Air Physics")
 @export var air_acceleration: float = 4.0 
-@export var air_friction: float = 1.0     
+## Трение в воздухе. Ставим маленькое значение, чтобы инерция от платформы сохранялась.
+@export var air_friction: float = 0.5     
 
 @export_group("Physics Interaction")
 @export var push_force: float = 200.0 
@@ -23,7 +24,7 @@ extends Node
 @export var jump_height: float = 1.25
 @export var jump_time_to_peak: float = 0.45
 @export var jump_time_to_descent: float = 0.28
-@export var max_jump_count: int = 1
+@export var max_jump_count: int = 1 
 @export var second_jump_multiplier: float = 1.2
 
 @export_group("Visuals")
@@ -74,10 +75,6 @@ func apply_gravity(delta: float) -> void:
 func move(delta: float, input_dir: Vector2, target_speed: float, is_root_motion: bool = false) -> void:
 	if not actor: return
 	
-	# === ЧИСТАЯ ЛОГИКА ДВИЖЕНИЯ ===
-	# Мы НЕ прибавляем скорость платформы здесь.
-	# Godot (move_and_slide) сам двигает нас вместе с AnimatableBody3D, пока мы на полу.
-	
 	if is_root_motion and actor.is_on_floor():
 		pass 
 	else:
@@ -86,17 +83,24 @@ func move(delta: float, input_dir: Vector2, target_speed: float, is_root_motion:
 		
 		if not actor.is_on_floor():
 			current_accel = air_acceleration
-			current_friction = air_friction
+			current_friction = air_friction # Здесь теперь используется низкое значение (0.5)
 
 		var velocity_2d = Vector2(actor.velocity.x, actor.velocity.z)
 		
 		if input_dir != Vector2.ZERO:
+			# Если есть ввод, мы управляем персонажем
 			velocity_2d = velocity_2d.move_toward(input_dir * target_speed, current_accel * delta)
 		else:
-			var fric = current_friction
+			# Если ввода НЕТ:
 			if actor.is_on_floor():
-				fric = max(fric, stop_speed) 
-			velocity_2d = velocity_2d.move_toward(Vector2.ZERO, fric * delta)
+				# На земле тормозим быстро (как раньше)
+				var fric = max(current_friction, stop_speed)
+				velocity_2d = velocity_2d.move_toward(Vector2.ZERO, fric * delta)
+			else:
+				# В ВОЗДУХЕ тормозим ОЧЕНЬ МЕДЛЕННО (сохраняем инерцию платформы)
+				# velocity_2d.move_toward уменьшает длину вектора.
+				# С маленьким air_friction (0.5) скорость почти не падает.
+				velocity_2d = velocity_2d.move_toward(Vector2.ZERO, current_friction * delta)
 			
 		actor.velocity.x = velocity_2d.x
 		actor.velocity.z = velocity_2d.y
@@ -108,15 +112,16 @@ func jump(bonus_jump_allowed: bool = false) -> bool:
 	elif current_jump_count == max_jump_count and bonus_jump_allowed: can_jump = true
 	
 	if can_jump:
-		# === ПЕРЕДАЧА ИНЕРЦИИ ===
-		# Когда мы прыгаем, мы отрываемся от пола.
-		# В этот момент мы должны "забрать" скорость платформы с собой,
-		# иначе платформа уедет из-под нас, а мы останемся висеть в воздухе.
+		# === ИНЕРЦИЯ ПЛАТФОРМЫ (ИСПРАВЛЕНО) ===
+		# Мы добавляем скорость платформы к скорости игрока ТОЛЬКО в момент прыжка.
+		# Так как мы уходим с пола, move_and_slide перестанет нас тащить,
+		# но добавленная здесь скорость сохранится в actor.velocity благодаря низкому air_friction.
 		if actor.is_on_floor():
 			var platform_vel = _get_floor_velocity()
+			# Добавляем только X и Z, чтобы не портить высоту прыжка
 			actor.velocity.x += platform_vel.x
 			actor.velocity.z += platform_vel.z
-		# ========================
+		# ======================================
 		
 		var multiplier = second_jump_multiplier if current_jump_count >= 1 else 1.0
 		actor.velocity.y = -jump_velocity * multiplier
@@ -129,14 +134,14 @@ func jump(bonus_jump_allowed: bool = false) -> bool:
 		return true
 	return false
 
-# Хелпер для получения скорости пола
+# Хелпер для получения скорости пола (ищем MovingPlatform)
 func _get_floor_velocity() -> Vector3:
 	var col_count = actor.get_slide_collision_count()
 	for i in range(col_count):
 		var col = actor.get_slide_collision(i)
 		var collider = col.get_collider()
 		
-		# Ищем свойство current_velocity у коллайдера или его родителя (наш MovingPlatform)
+		# Пытаемся найти переменную current_velocity у коллайдера или его родителя
 		if is_instance_valid(collider):
 			if "current_velocity" in collider:
 				return collider.current_velocity

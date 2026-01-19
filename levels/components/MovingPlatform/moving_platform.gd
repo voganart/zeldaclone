@@ -4,7 +4,7 @@ extends Node3D
 @export_category("Movement Configuration")
 @export var platform_node: AnimatableBody3D
 
-@export var move_offset: Vector3 = Vector3(0, 5, 0):
+@export var move_offset: Vector3 = Vector3(0, 0, 0):
 	set(value):
 		move_offset = value
 		if Engine.is_editor_hint():

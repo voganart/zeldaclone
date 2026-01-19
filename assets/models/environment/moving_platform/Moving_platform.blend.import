@@ -41,8 +41,13 @@ _subresources={
 "materials": {
 "Concreate": {
 "use_external/enabled": true,
-"use_external/fallback_path": "res://assets/materials/Mat_concrete_wall_03_1k.tres",
-"use_external/path": "uid://b21pobpqda3oi"
+"use_external/fallback_path": "res://assets/materials/Mat_concrete_wall_10_1k.tres",
+"use_external/path": "uid://dud7lb5dbur4w"
+},
+"Roots": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/materials/Mat_bark_02_1k.tres",
+"use_external/path": "uid://co0dfpo0lv30i"
 }
 },
 "meshes": {
