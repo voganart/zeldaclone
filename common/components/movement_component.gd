@@ -23,23 +23,19 @@ extends Node
 @export var jump_height: float = 1.25
 @export var jump_time_to_peak: float = 0.45
 @export var jump_time_to_descent: float = 0.28
-@export var max_jump_count: int = 1 # Изначально 1, меняется через unlock
+@export var max_jump_count: int = 1
 @export var second_jump_multiplier: float = 1.2
 
-# !!! НОВОЕ: Настройки визуальных эффектов !!!
 @export_group("Visuals")
-@export var jump_vfx_index: int = 5 # Облачко при двойном прыжке
-@export var land_vfx_index: int = 5 # Пыль при приземлении
-# --------------------------------------------
+@export var jump_vfx_index: int = 5
+@export var land_vfx_index: int = 5
 
-# Внутренние переменные
 var actor: CharacterBody3D
 var current_jump_count: int = 0
 var was_on_floor: bool = true
 var is_passing_through: bool = false 
 var stop_speed: float = 8.0 
 
-# Кэшированная гравитация
 @onready var jump_velocity: float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity: float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
 @onready var fall_gravity: float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
@@ -48,8 +44,6 @@ func _ready() -> void:
 	var p = get_parent()
 	if p and p.get_parent() is CharacterBody3D:
 		actor = p.get_parent()
-	# Убеждаемся, что при старте у нас 1 прыжок (если не загружено сохранение)
-	# max_jump_count уже задан в export, не переписываем его тут жестко, если хотим менять в инспекторе
 
 func init(character: CharacterBody3D) -> void:
 	actor = character
@@ -61,17 +55,13 @@ func unlock_double_jump():
 func _physics_process(_delta: float) -> void:
 	if not actor: return
 	
-	# --- ЛОГИКА ПРИЗЕМЛЕНИЯ ---
 	if actor.is_on_floor() and not was_on_floor:
 		current_jump_count = 0
 		if actor.has_method("reset_air_abilities"):
 			actor.reset_air_abilities()
 		
-		# !!! СПАВН ЭФФЕКТА ПРИЗЕМЛЕНИЯ !!!
 		if actor.has_node("/root/VfxPool"):
-			# Спавним прямо в ногах (global_position у CharacterBody обычно в ногах)
 			VfxPool.spawn_effect(land_vfx_index, actor.global_position)
-		# ---------------------------------
 			
 	was_on_floor = actor.is_on_floor()
 	_handle_pass_through()
@@ -81,32 +71,35 @@ func apply_gravity(delta: float) -> void:
 	var gravity = jump_gravity if actor.velocity.y > 0.0 else fall_gravity
 	actor.velocity.y -= gravity * delta
 
-# Универсальная функция движения
 func move(delta: float, input_dir: Vector2, target_speed: float, is_root_motion: bool = false) -> void:
 	if not actor: return
+	
+	# === ЧИСТАЯ ЛОГИКА ДВИЖЕНИЯ ===
+	# Мы НЕ прибавляем скорость платформы здесь.
+	# Godot (move_and_slide) сам двигает нас вместе с AnimatableBody3D, пока мы на полу.
+	
 	if is_root_motion and actor.is_on_floor():
-		return 
-
-	var current_accel = acceleration
-	var current_friction = friction
-	
-	if not actor.is_on_floor():
-		current_accel = air_acceleration
-		current_friction = air_friction
-
-	var velocity_2d = Vector2(actor.velocity.x, actor.velocity.z)
-	
-	if input_dir != Vector2.ZERO:
-		velocity_2d = velocity_2d.move_toward(input_dir * target_speed, current_accel * delta)
+		pass 
 	else:
-		var fric = current_friction
-		if actor.is_on_floor():
-			fric = max(fric, stop_speed) 
-			
-		velocity_2d = velocity_2d.move_toward(Vector2.ZERO, fric * delta)
+		var current_accel = acceleration
+		var current_friction = friction
 		
-	actor.velocity.x = velocity_2d.x
-	actor.velocity.z = velocity_2d.y
+		if not actor.is_on_floor():
+			current_accel = air_acceleration
+			current_friction = air_friction
+
+		var velocity_2d = Vector2(actor.velocity.x, actor.velocity.z)
+		
+		if input_dir != Vector2.ZERO:
+			velocity_2d = velocity_2d.move_toward(input_dir * target_speed, current_accel * delta)
+		else:
+			var fric = current_friction
+			if actor.is_on_floor():
+				fric = max(fric, stop_speed) 
+			velocity_2d = velocity_2d.move_toward(Vector2.ZERO, fric * delta)
+			
+		actor.velocity.x = velocity_2d.x
+		actor.velocity.z = velocity_2d.y
 
 func jump(bonus_jump_allowed: bool = false) -> bool:
 	if not actor: return false
@@ -115,20 +108,41 @@ func jump(bonus_jump_allowed: bool = false) -> bool:
 	elif current_jump_count == max_jump_count and bonus_jump_allowed: can_jump = true
 	
 	if can_jump:
+		# === ПЕРЕДАЧА ИНЕРЦИИ ===
+		# Когда мы прыгаем, мы отрываемся от пола.
+		# В этот момент мы должны "забрать" скорость платформы с собой,
+		# иначе платформа уедет из-под нас, а мы останемся висеть в воздухе.
+		if actor.is_on_floor():
+			var platform_vel = _get_floor_velocity()
+			actor.velocity.x += platform_vel.x
+			actor.velocity.z += platform_vel.z
+		# ========================
+		
 		var multiplier = second_jump_multiplier if current_jump_count >= 1 else 1.0
 		actor.velocity.y = -jump_velocity * multiplier
 		
-		# !!! ЭФФЕКТ ДВОЙНОГО ПРЫЖКА !!!
-		# Спавним только если это прыжок в воздухе (второй и далее)
 		if current_jump_count >= 1:
 			if actor.has_node("/root/VfxPool"):
-				# Спавним чуть выше ног (0.5), чтобы облачко было красивым
 				VfxPool.spawn_effect(jump_vfx_index, actor.global_position + Vector3(0, 0.5, 0))
-		# ------------------------------
 		
 		current_jump_count += 1
 		return true
 	return false
+
+# Хелпер для получения скорости пола
+func _get_floor_velocity() -> Vector3:
+	var col_count = actor.get_slide_collision_count()
+	for i in range(col_count):
+		var col = actor.get_slide_collision(i)
+		var collider = col.get_collider()
+		
+		# Ищем свойство current_velocity у коллайдера или его родителя (наш MovingPlatform)
+		if is_instance_valid(collider):
+			if "current_velocity" in collider:
+				return collider.current_velocity
+			elif collider.get_parent() and "current_velocity" in collider.get_parent():
+				return collider.get_parent().current_velocity
+	return Vector3.ZERO
 
 func rotate_towards(delta: float, direction: Vector2, speed_modifier: float = 1.0) -> void:
 	if not actor: return

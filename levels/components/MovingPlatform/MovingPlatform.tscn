@@ -1,27 +1,29 @@
-[gd_scene load_steps=4 format=3 uid="uid://bpblln46bvwd8"]
+[gd_scene load_steps=5 format=3 uid="uid://bpblln46bvwd8"]
 
 [ext_resource type="Script" uid="uid://dl56xvifm56pk" path="res://levels/components/MovingPlatform/moving_platform.gd" id="1_gg3px"]
+[ext_resource type="ArrayMesh" uid="uid://cgim3f1ntr7cq" path="res://assets/models/environment/moving_platform/moving_platform.res" id="2_m623m"]
 
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_uqct2"]
-data = PackedVector3Array(-1, -0.1, 0.5, -1, -0.1, -0.5, -1, 0.1, -0.5, 1, -0.1, -0.5, -1, -0.1, -0.5, -1, -0.1, 0.5, -1, 0.1, -0.5, -1, -0.1, -0.5, 1, -0.1, -0.5, -1, 0.1, -0.5, -1, 0.1, 0.5, -1, -0.1, 0.5, -1, -0.1, 0.5, -1, 0.1, 0.5, 1, 0.1, 0.5, 1, 0.1, 0.5, -1, 0.1, 0.5, -1, 0.1, -0.5, -1, -0.1, 0.5, 1, -0.1, 0.5, 1, -0.1, -0.5, 1, 0.1, 0.5, 1, -0.1, 0.5, -1, -0.1, 0.5, 1, -0.1, -0.5, 1, -0.1, 0.5, 1, 0.1, 0.5, 1, -0.1, -0.5, 1, 0.1, -0.5, -1, 0.1, -0.5, -1, 0.1, -0.5, 1, 0.1, -0.5, 1, 0.1, 0.5, 1, 0.1, 0.5, 1, 0.1, -0.5, 1, -0.1, -0.5)
+[sub_resource type="BoxShape3D" id="BoxShape3D_fgtfb"]
+size = Vector3(3.2406616, 0.46142578, 1.7545166)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_uqct2"]
 size = Vector3(2, 0.06536865, 1)
 
-[node name="MovingPlatformRoot" type="Node3D"]
+[node name="MovingPlatform" type="Node3D" node_paths=PackedStringArray("platform_node")]
 script = ExtResource("1_gg3px")
-
-[node name="EndPoint" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
+platform_node = NodePath("PlatformBody")
+move_offset = Vector3(0, 0, 0)
 
 [node name="PlatformBody" type="AnimatableBody3D" parent="."]
 collision_layer = 64
 
-[node name="CSGBox3D" type="CSGBox3D" parent="PlatformBody"]
-size = Vector3(3, 0.2, 1.5)
+[node name="Visuals" type="MeshInstance3D" parent="PlatformBody"]
+mesh = ExtResource("2_m623m")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformBody"]
-shape = SubResource("ConcavePolygonShape3D_uqct2")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.017242432, 0.22827148, -0.06072998)
+shape = SubResource("BoxShape3D_fgtfb")
+debug_fill = false
 
 [node name="TriggerArea" type="Area3D" parent="PlatformBody"]
 
