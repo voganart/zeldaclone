@@ -14,7 +14,13 @@ extends CharacterBody3D
 @export var debug_unlock_3_hit_combo: bool = false
 
 @export_group("Respawn Settings")
-@export var fall_limit_y: float = -20.0 
+## Абсолютная высота, ниже которой игрок умрет гарантированно (например -100)
+@export var absolute_fall_limit: float = -100.0 
+## На сколько метров вниз от последней безопасной точки можно упасть, прежде чем включится проверка "Бездны"
+@export var safe_fall_distance: float = 12.0
+## Дистанция проверки земли внизу. Если в пределах этого луча нет земли - респавн.
+@export var void_check_distance: float = 30.0
+
 @export var fall_damage: float = 1.0 
 @export var safe_ground_margin: float = 1.5 
 @export var respawn_fade_duration: float = 0.5 
@@ -231,7 +237,6 @@ func _ready() -> void:
 
 	state_machine.init(self)
 	
-	# === ПРИМЕНЕНИЕ ДЕБАГ-НАСТРОЕК (UNLOCKS) ===
 	_apply_unlocks()
 
 func _apply_unlocks() -> void:
@@ -365,8 +370,39 @@ func _physics_process(delta: float) -> void:
 	else:
 		safe_pos_timer = 0.0
 
-	if global_position.y < fall_limit_y:
+	# === НОВАЯ ЛОГИКА ПРОВЕРКИ ПАДЕНИЯ ===
+	_check_fall_logic()
+
+# Функция проверки падения (вызывается каждый физический кадр)
+func _check_fall_logic() -> void:
+	# 1. Абсолютный предел (если игрок упал в бесконечность мимо всего)
+	if global_position.y < absolute_fall_limit:
 		_handle_fall_respawn()
+		return
+
+	# 2. Динамическая проверка "Бездны"
+	# Проверяем только если падаем и не на земле
+	if velocity.y < 0 and not is_on_floor():
+		var dist_below_safe = last_safe_position.y - global_position.y
+		
+		# Если мы упали ниже "безопасной высоты" от последнего чекпоинта
+		if dist_below_safe > safe_fall_distance:
+			# Пускаем луч вниз, чтобы проверить, есть ли там земля
+			if not _check_ground_below(void_check_distance):
+				# Если земли нет - респавним
+				_handle_fall_respawn()
+
+func _check_ground_below(check_distance: float) -> bool:
+	var space_state = get_world_3d().direct_space_state
+	var from = global_position
+	var to = from + Vector3.DOWN * check_distance
+	
+	var query = PhysicsRayQueryParameters3D.create(from, to)
+	query.exclude = [self] # Игнорируем себя
+	
+	var result = space_state.intersect_ray(query)
+	
+	return not result.is_empty()
 
 func _is_position_safe_and_grounded() -> bool:
 	var space_state = get_world_3d().direct_space_state

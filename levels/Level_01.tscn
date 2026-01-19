@@ -569,7 +569,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.15124, -8.225775, 0.13336
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." instance=ExtResource("6_r6k77")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00079345703, 0.010941505, -0.013683319)
 sun_color = SubResource("Gradient_r6k77")
 sun_energy = SubResource("Curve_jygyi")
 moon_color = SubResource("Gradient_f0gl8")
