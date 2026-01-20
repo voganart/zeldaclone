@@ -578,6 +578,7 @@ sky_horizon_color = SubResource("Gradient_ueypv")
 sky_bottom_color = SubResource("Gradient_cktag")
 cloud_light_color = SubResource("Gradient_1ah6d")
 cloud_shadow_color = SubResource("Gradient_hr8er")
+metadata/_edit_lock_ = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 8, 6)
@@ -834,7 +835,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93.66197, -4.5892944, -21.720
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.10733, -8.709058, -6.287119)
 
 [node name="VaboPickup27" parent="Collectables" instance=ExtResource("33_6cw38")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 108.77119, -8.709058, 0.27626896)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.38341, -8.709058, -0.08897495)
+
+[node name="VaboPickup30" parent="Collectables" instance=ExtResource("33_6cw38")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.76062, -8.709058, 5.4588137)
 
 [node name="VaboPickup4" parent="Collectables" instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.001768, 1.2861544, 3.996716)
@@ -1399,7 +1403,7 @@ scale_max = 2.0
 ground_layer = 8
 
 [node name="Tree1" parent="Zone05/Vegetation" instance=ExtResource("34_8twap")]
-transform = Transform3D(-0.14492543, -0.03986684, -1.630483, -0.07372155, 1.6353947, -0.0334342, 1.6293033, 0.070451014, -0.14654317, 0.62394714, 0.22045135, 6.9404736)
+transform = Transform3D(-0.1449254, -0.03986683, -1.6304828, -0.07372155, 1.6353947, -0.0334342, 1.6293031, 0.070451, -0.14654315, -2.5715256, 0.22045135, 8.678367)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
@@ -1412,7 +1416,7 @@ random_tilt = 0.5
 transform = Transform3D(-0.026801283, -0.01803553, -1.5379627, -0.05972022, 1.5370486, -0.016984098, 1.5369086, 0.05941114, -0.027479619, -5.6979218, 0.19115448, 5.107073)
 
 [node name="Tree2" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
-transform = Transform3D(1.388201, 0.0015813245, -0.9067329, 0.025598705, 1.6573604, 0.04208182, 0.9063728, -0.049230803, 1.387564, 9.34095, 0.18003082, 2.4127712)
+transform = Transform3D(1.3882009, 0.0015813244, -0.90673286, 0.025598705, 1.6573604, 0.04208182, 0.9063727, -0.0492308, 1.3875638, 11.541847, 0.18003082, 1.1004493)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
@@ -1423,7 +1427,7 @@ leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="Bush7" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
-transform = Transform3D(1.0542239, -0.0018097239, -1.2392108, -0.059507202, 1.6250186, -0.052997235, 1.2377826, 0.07966516, 1.0528926, 4.3657455, 0.17056274, 4.3308525)
+transform = Transform3D(1.0542235, -0.0018097236, -1.2392105, -0.059507202, 1.6250186, -0.052997235, 1.2377822, 0.07966514, 1.0528922, 5.8777847, 0.17056274, -0.41208243)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
@@ -1506,15 +1510,14 @@ leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
 [node name="MovingPlatformRoot" parent="." instance=ExtResource("40_c0er0")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 116.53875, -10.036977, 9.656663)
+transform = Transform3D(-0.19149432, 0, 0.9814937, 0, 1, 0, -0.9814937, 0, -0.19149432, 115.63686, -10.036977, 11.050493)
 move_offset = Vector3(-10, 0, 0)
-preview_progress = 0.061
 
 [node name="MovingPlatformRoot2" parent="." instance=ExtResource("40_c0er0")]
-transform = Transform3D(-0.4726277, 0, -0.8812622, 0, 1, 0, 0.8812622, 0, -0.4726277, 110.64269, -15.410415, 31.411152)
+transform = Transform3D(-0.5596849, 0, -0.82870567, 0, 1, 0, 0.82870567, 0, -0.5596849, 109.24886, -15.410415, 33.00996)
 move_offset = Vector3(-10, 5, 0)
 is_fragile = true
 
 [node name="MovingPlatformRoot3" parent="." instance=ExtResource("40_c0er0")]
-transform = Transform3D(-0.35734123, 0, -0.933974, 0, 1, 0, 0.933974, 0, -0.35734123, 104.098595, -18.41615, 45.173653)
+transform = Transform3D(-0.35734123, 0, -0.933974, 0, 1, 0, 0.933974, 0, -0.35734123, 103.43285, -18.41615, 46.27477)
 move_offset = Vector3(-10, 2.5, 0)

@@ -14,13 +14,9 @@ extends CharacterBody3D
 @export var debug_unlock_3_hit_combo: bool = false
 
 @export_group("Respawn Settings")
-## Абсолютная высота, ниже которой игрок умрет гарантированно (например -100)
 @export var absolute_fall_limit: float = -100.0 
-## На сколько метров вниз от последней безопасной точки можно упасть, прежде чем включится проверка "Бездны"
 @export var safe_fall_distance: float = 12.0
-## Дистанция проверки земли внизу. Если в пределах этого луча нет земли - респавн.
 @export var void_check_distance: float = 30.0
-
 @export var fall_damage: float = 1.0 
 @export var safe_ground_margin: float = 1.5 
 @export var respawn_fade_duration: float = 0.5 
@@ -83,8 +79,12 @@ var roll_col_y: float = 0.45
 @onready var shape_cast: ShapeCast3D = get_node_or_null("RollSafetyCast")
 @onready var wall_detector: ShapeCast3D = $AttackWallDetector 
 
-var last_safe_position: Vector3 = Vector3.ZERO
+# === ДАННЫЕ ДЛЯ РЕСПАВНА ===
+var last_safe_global_position: Vector3 = Vector3.ZERO
+var last_safe_platform: Node3D = null 
+var last_safe_local_position: Vector3 = Vector3.ZERO
 var safe_pos_timer: float = 0.0 
+# ===========================
 
 var movement_input: Vector2 = Vector2.ZERO
 var is_running: bool = false
@@ -214,7 +214,7 @@ var roll_interval_timer: float:
 signal roll_charges_changed(current: int, max_val: int, is_recharging_penalty: bool)
 
 func _ready() -> void:
-	last_safe_position = global_position 
+	last_safe_global_position = global_position 
 	movement_component.init(self)
 	combat_component.init(self)
 	
@@ -300,7 +300,15 @@ func _process(delta: float) -> void:
 		grass_manager.set_player_position(global_position)
 
 func _physics_process(delta: float) -> void:
-	if is_respawning: return
+	if is_respawning: 
+		# === ЛОГИКА "ПРИЛИПАНИЯ" ПРИ РЕСПАВНЕ ===
+		# Если мы висим над движущейся платформой, обновляем позицию, чтобы не отставать
+		if is_instance_valid(last_safe_platform):
+			var target_pos = last_safe_platform.to_global(last_safe_local_position)
+			target_pos.y += 0.5 # Держим высоту, чтобы не провалиться
+			global_position = target_pos
+		# ========================================
+		return
 
 	var is_root_motion = false
 	if state_machine.current_state and state_machine.current_state.is_root_motion:
@@ -364,32 +372,22 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		safe_pos_timer += delta
 		if safe_pos_timer > 0.2:
-			if _is_position_safe_and_grounded():
-				last_safe_position = global_position
+			_check_and_update_safe_position()
 			safe_pos_timer = 0.0
 	else:
 		safe_pos_timer = 0.0
 
-	# === НОВАЯ ЛОГИКА ПРОВЕРКИ ПАДЕНИЯ ===
 	_check_fall_logic()
 
-# Функция проверки падения (вызывается каждый физический кадр)
 func _check_fall_logic() -> void:
-	# 1. Абсолютный предел (если игрок упал в бесконечность мимо всего)
 	if global_position.y < absolute_fall_limit:
 		_handle_fall_respawn()
 		return
 
-	# 2. Динамическая проверка "Бездны"
-	# Проверяем только если падаем и не на земле
 	if velocity.y < 0 and not is_on_floor():
-		var dist_below_safe = last_safe_position.y - global_position.y
-		
-		# Если мы упали ниже "безопасной высоты" от последнего чекпоинта
+		var dist_below_safe = last_safe_global_position.y - global_position.y
 		if dist_below_safe > safe_fall_distance:
-			# Пускаем луч вниз, чтобы проверить, есть ли там земля
 			if not _check_ground_below(void_check_distance):
-				# Если земли нет - респавним
 				_handle_fall_respawn()
 
 func _check_ground_below(check_distance: float) -> bool:
@@ -398,19 +396,33 @@ func _check_ground_below(check_distance: float) -> bool:
 	var to = from + Vector3.DOWN * check_distance
 	
 	var query = PhysicsRayQueryParameters3D.create(from, to)
-	query.exclude = [self] # Игнорируем себя
+	query.exclude = [self] 
 	
 	var result = space_state.intersect_ray(query)
-	
 	return not result.is_empty()
 
-func _is_position_safe_and_grounded() -> bool:
+func _check_and_update_safe_position() -> void:
 	var space_state = get_world_3d().direct_space_state
 	var offset_y = 0.5 
 	var check_dist = 2.0 
 	
+	var from_center = global_position + Vector3(0, offset_y, 0)
+	var to_center = from_center + Vector3(0, -check_dist, 0)
+	var query_center = PhysicsRayQueryParameters3D.create(from_center, to_center)
+	query_center.exclude = [self]
+	
+	var center_result = space_state.intersect_ray(query_center)
+	if not center_result: return
+		
+	var collider = center_result.collider
+	
+	# Если это движущаяся платформа - сразу сохраняем
+	if collider is AnimatableBody3D or collider is RigidBody3D or (collider is Node3D and "current_velocity" in collider):
+		_save_safe_state(collider)
+		return
+		
+	# Иначе проверяем края
 	var checks = [
-		Vector3(0, 0, 0), 
 		Vector3(safe_ground_margin, 0, 0),
 		Vector3(-safe_ground_margin, 0, 0),
 		Vector3(0, 0, safe_ground_margin),
@@ -422,12 +434,18 @@ func _is_position_safe_and_grounded() -> bool:
 		var to = from + Vector3(0, -check_dist, 0)
 		var query = PhysicsRayQueryParameters3D.create(from, to)
 		query.exclude = [self] 
-		
 		var result = space_state.intersect_ray(query)
-		if not result:
-			return false 
+		if not result: return
 	
-	return true
+	_save_safe_state(collider)
+
+func _save_safe_state(collider: Object) -> void:
+	last_safe_global_position = global_position
+	if is_instance_valid(collider) and collider is Node3D:
+		last_safe_platform = collider
+		last_safe_local_position = collider.to_local(global_position)
+	else:
+		last_safe_platform = null
 
 func _handle_wall_pushback(delta: float) -> void:
 	if not is_attacking or not wall_detector:
@@ -440,7 +458,6 @@ func _handle_wall_pushback(delta: float) -> void:
 	if wall_detector.is_colliding():
 		var wall_normal = wall_detector.get_collision_normal(0)
 		wall_normal.y = 0 
-		
 		if wall_normal.length_squared() > 0.01:
 			wall_normal = wall_normal.normalized()
 			if velocity.dot(wall_normal) < 0:
@@ -474,7 +491,13 @@ func _handle_fall_respawn() -> void:
 	if air_dash_ability:
 		air_dash_ability.reset_ability_completely()
 
-	global_position = last_safe_position
+	# Устанавливаем начальную позицию
+	var respawn_pos = last_safe_global_position
+	if is_instance_valid(last_safe_platform):
+		respawn_pos = last_safe_platform.to_global(last_safe_local_position)
+		respawn_pos.y += 0.5
+	
+	global_position = respawn_pos
 	
 	velocity = Vector3.ZERO
 	current_rm_velocity = Vector3.ZERO
@@ -485,10 +508,12 @@ func _handle_fall_respawn() -> void:
 	anim_controller.set_jump_state("End")
 	anim_controller.set_locomotion_blend(0.0)
 	
+	# Небольшая гравитация, чтобы приземлиться
 	velocity = Vector3.DOWN * 10.0
 	move_and_slide() 
 	velocity = Vector3.ZERO 
 	
+	# Ждем, пока пройдет затемнение (позиция обновляется в _physics_process)
 	await get_tree().create_timer(respawn_hold_time).timeout
 	
 	if SceneManager:
