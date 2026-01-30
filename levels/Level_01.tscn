@@ -1,4 +1,4 @@
-[gd_scene load_steps=88 format=4 uid="uid://e1q2o5wpoj38"]
+[gd_scene format=4 uid="uid://e1q2o5wpoj38"]
 
 [ext_resource type="Script" uid="uid://d3xim38bh2dpt" path="res://levels/level_01.gd" id="1_4p2fq"]
 [ext_resource type="PackedScene" uid="uid://biv4p35iwqj6n" path="res://ui/debug_overlay/DebugOverlay.tscn" id="1_ueypv"]
@@ -136,7 +136,7 @@ stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_c0er0"), SubResour
 
 [sub_resource type="Resource" id="Resource_aow8p"]
 script = ExtResource("25_diasq")
-size = Vector3(155.39853, 17.336212, 102.831635)
+size = Vector3(228.14183, 104.04208, 214.02214)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_f0gl8"]
 _surfaces = [{
@@ -547,7 +547,7 @@ item/5/navigation_layers = 1
 item/5/preview = SubResource("ImageTexture_s8n2r")
 metadata/_editor_source_scene = "res://assets/models/environment/gridmap_meshlib.tscn"
 
-[node name="Level01" type="Node3D" node_paths=PackedStringArray("player_start", "phantom_camera", "hud", "tutorial_manager")]
+[node name="Level01" type="Node3D" unique_id=219459109 node_paths=PackedStringArray("player_start", "phantom_camera", "hud", "tutorial_manager")]
 script = ExtResource("1_4p2fq")
 player_scene = ExtResource("8_ykjdn")
 player_start = NodePath("PlayerStart")
@@ -555,20 +555,23 @@ phantom_camera = NodePath("PhantomCamera3D")
 hud = NodePath("PlayerHUD")
 tutorial_manager = NodePath("TutorialManager")
 
-[node name="TutorialManager" type="Node" parent="."]
+[node name="TutorialManager" type="Node" parent="." unique_id=1848019878]
 script = ExtResource("3_jygyi")
 
-[node name="PlayerStart" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.15124, -8.225775, 0.1333623)
+[node name="PlayerStart" type="Marker3D" parent="." unique_id=313089551]
 
-[node name="DebugOverlay" parent="." instance=ExtResource("1_ueypv")]
+[node name="DebugOverlay" parent="." unique_id=438052665 instance=ExtResource("1_ueypv")]
 
-[node name="PlayerHUD" parent="." instance=ExtResource("38_b6d53")]
+[node name="PlayerHUD" parent="." unique_id=1334867485 instance=ExtResource("38_b6d53")]
 
-[node name="OcclusionManager" type="Node3D" parent="."]
+[node name="OcclusionManager" type="Node3D" parent="." unique_id=591246773]
 script = ExtResource("41_w7r3u")
 
-[node name="EnvironmentSystem" parent="." instance=ExtResource("6_r6k77")]
+[node name="EnvironmentSystem" parent="." unique_id=988376034 instance=ExtResource("6_r6k77")]
+time_of_day = 5.79
+is_playing = true
+outline_opacity_day = 1.0
+outline_opacity_night = 0.2
 sun_color = SubResource("Gradient_r6k77")
 sun_energy = SubResource("Curve_jygyi")
 moon_color = SubResource("Gradient_f0gl8")
@@ -580,19 +583,19 @@ cloud_light_color = SubResource("Gradient_1ah6d")
 cloud_shadow_color = SubResource("Gradient_hr8er")
 metadata/_edit_lock_ = true
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=469480615]
 transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 8, 6)
 cull_mask = 983039
 current = true
 fov = 50.0
 
-[node name="PhantomCameraHost" type="Node" parent="Camera3D"]
+[node name="PhantomCameraHost" type="Node" parent="Camera3D" unique_id=1261480379]
 process_priority = 300
 process_physics_priority = 300
 script = ExtResource("3_cktag")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
-[node name="PhantomCamera3D" type="Node3D" parent="."]
+[node name="PhantomCamera3D" type="Node3D" parent="." unique_id=912738974]
 transform = Transform3D(1, 0, 0, 0, 0.7071066, 0.7071066, 0, -0.7071066, 0.7071066, 0, 8, 6)
 script = ExtResource("4_1ah6d")
 follow_mode = 6
@@ -612,16 +615,16 @@ _preview_noise = false
 noise_emitter_layer = 32
 metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
-[node name="CameraShaker" type="Node" parent="PhantomCamera3D"]
+[node name="CameraShaker" type="Node" parent="PhantomCamera3D" unique_id=789147670]
 script = ExtResource("7_r8j8t")
 trauma_decay = 1.5
 
-[node name="CameraInput" type="Node" parent="PhantomCamera3D"]
+[node name="CameraInput" type="Node" parent="PhantomCamera3D" unique_id=84444854]
 script = ExtResource("12_7hxxo")
 mouse_sensitivity = 0.05
 min_pitch = -60.0
 
-[node name="SimpleGrassTextured" type="MultiMeshInstance3D" parent="." groups=["level_detail_objects"]]
+[node name="SimpleGrassTextured" type="MultiMeshInstance3D" parent="." unique_id=506005959 groups=["level_detail_objects"]]
 layers = 16
 cast_shadow = 0
 multimesh = SubResource("MultiMesh_n6y4e")
@@ -652,8 +655,7 @@ sgt_tool_shape = {
 metadata/_custom_type_script = "uid://2juaclm8gc1n"
 metadata/SimpleGrassTextured = "2.0.5"
 
-[node name="ProtonScatter" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4388628, -0.34312105, -1.6475191)
+[node name="ProtonScatter" type="Node3D" parent="." unique_id=642895029]
 script = ExtResource("16_wd8iv")
 keep_static_colliders = true
 modifier_stack = SubResource("Resource_hr8er")
@@ -661,52 +663,52 @@ Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
 
-[node name="ScatterItem" type="Node3D" parent="ProtonScatter"]
+[node name="ScatterItem" type="Node3D" parent="ProtonScatter" unique_id=1580819526]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42989397, 0, -0.7570038)
 script = ExtResource("23_2sjeu")
 source_scale_multiplier = 0.3
 path = "uid://gxav0cyjiosj"
 
-[node name="ScatterShape" type="Node3D" parent="ProtonScatter"]
-transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 49.653645, -3.5480747, -2.8675728)
+[node name="ScatterShape" type="Node3D" parent="ProtonScatter" unique_id=535373414]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 50.850807, -0.5992937, 21.018332)
 script = ExtResource("24_rf0p5")
 shape = SubResource("Resource_aow8p")
 
-[node name="Tutorials" type="Node3D" parent="."]
+[node name="Tutorials" type="Node3D" parent="." unique_id=982234857]
 
-[node name="InteractionArea" parent="Tutorials" instance=ExtResource("38_f0gl8")]
+[node name="InteractionArea" parent="Tutorials" unique_id=1470514420 instance=ExtResource("38_f0gl8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.521053, -0.06467056, 3.4960823)
 action_label_key = "tutorial_jump_prompt"
 input_action = "jump"
 hint_offset = Vector3(0, 2.5, 0)
 
-[node name="InteractionArea2" parent="Tutorials" instance=ExtResource("38_f0gl8")]
+[node name="InteractionArea2" parent="Tutorials" unique_id=525641139 instance=ExtResource("38_f0gl8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.955648, -2.8937373, 4.4891195)
 action_label_key = "tutorial_attack_prompt"
 input_action = "first_attack"
 hint_offset = Vector3(0, 2.5, 0)
 
-[node name="InteractionArea3" parent="Tutorials" instance=ExtResource("38_f0gl8")]
+[node name="InteractionArea3" parent="Tutorials" unique_id=949651627 instance=ExtResource("38_f0gl8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.372253, -2.8937373, -15.696906)
 action_label_key = "tutorial_roll_prompt"
 input_action = "run"
 hint_offset = Vector3(0, 2.5, 0)
 
-[node name="InteractionArea4" parent="Tutorials" instance=ExtResource("38_f0gl8")]
+[node name="InteractionArea4" parent="Tutorials" unique_id=1986974929 instance=ExtResource("38_f0gl8")]
 transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 76.615776, -2.8937373, -20.933903)
 action_label_key = "tutorial_jump_prompt"
 input_action = "jump"
 hint_offset = Vector3(0, 2.5, 0)
 
-[node name="InteractionArea5" parent="Tutorials" instance=ExtResource("38_f0gl8")]
+[node name="InteractionArea5" parent="Tutorials" unique_id=1140074431 instance=ExtResource("38_f0gl8")]
 transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 98.957664, -4.8937373, -14.619238)
 action_label_key = "tutorial_double_jump_prompt"
 input_action = "jump"
 hint_offset = Vector3(0, 2.5, 0)
 
-[node name="Chests" type="Node3D" parent="."]
+[node name="Chests" type="Node3D" parent="." unique_id=1393766150]
 
-[node name="Chest1" parent="Chests" instance=ExtResource("36_r6k77")]
+[node name="Chest1" parent="Chests" unique_id=267668521 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-1.0000001, 0, -8.742278e-08, 0, 1.0000002, 0, 8.7422784e-08, 0, -1, 1.3500497, 0, -2.3252182)
 ability_to_unlock = "air_dash"
 up_velocity_min = 5.0
@@ -715,7 +717,7 @@ spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
 
-[node name="Chest3" parent="Chests" instance=ExtResource("36_r6k77")]
+[node name="Chest3" parent="Chests" unique_id=253966559 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-0.70710695, 0, 0.7071067, 0, 1.0000002, 0, -0.70710677, 0, -0.7071069, 94.85767, -5, -26.931147)
 ability_to_unlock = "double_jump"
 up_velocity_min = 5.0
@@ -724,7 +726,7 @@ spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
 
-[node name="Chest5" parent="Chests" instance=ExtResource("36_r6k77")]
+[node name="Chest5" parent="Chests" unique_id=566739628 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-0.2588192, 0, 0.9659258, 0, 1.0000002, 0, -0.96592593, 0, -0.25881916, -0.58017683, 2.3841858e-06, 1.1147366)
 ability_to_unlock = "double_jump"
 up_velocity_min = 5.0
@@ -733,7 +735,7 @@ spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
 
-[node name="Chest4" parent="Chests" instance=ExtResource("36_r6k77")]
+[node name="Chest4" parent="Chests" unique_id=814478403 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-4.3711392e-08, 0, 1, 0, 1.0000002, 0, -1.0000001, 0, -4.371139e-08, 66.090034, -3, -11.180361)
 ability_to_unlock = "roll_ability"
 up_velocity_min = 5.0
@@ -742,7 +744,7 @@ spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
 
-[node name="Chest2" parent="Chests" instance=ExtResource("36_r6k77")]
+[node name="Chest2" parent="Chests" unique_id=2115274845 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.34, 1.9073486e-06, -2.389)
 ability_to_unlock = "ground_slam"
 up_velocity_min = 5.0
@@ -751,125 +753,125 @@ spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
 
-[node name="Collectables" type="Node3D" parent="."]
+[node name="Collectables" type="Node3D" parent="." unique_id=363757418]
 
-[node name="VaboPickup" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup" parent="Collectables" unique_id=1915978968 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3600235, 0, 1.6990588)
 
-[node name="VaboPickup6" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup6" parent="Collectables" unique_id=1084989558 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.1739273, 0, -2.444413)
 
-[node name="VaboPickup7" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup7" parent="Collectables" unique_id=1461045763 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6762295, 0, 7.378163)
 
-[node name="VaboPickup8" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup8" parent="Collectables" unique_id=1164791236 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6300745, 0, 8.97094)
 
-[node name="VaboPickup9" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup9" parent="Collectables" unique_id=1206939713 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.564066, 0, 13.065391)
 
-[node name="VaboPickup10" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup10" parent="Collectables" unique_id=581273888 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.718863, 0, 7.5994463)
 
-[node name="VaboPickup2" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup2" parent="Collectables" unique_id=508236304 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.708307, 0, 1.805788)
 
-[node name="VaboPickup3" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup3" parent="Collectables" unique_id=832311669 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.041814, 4.7683716e-07, 3.271511)
 
-[node name="VaboPickup5" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup5" parent="Collectables" unique_id=1689639014 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.133696, 4.7683716e-07, 3.9151435)
 
-[node name="VaboPickup11" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup11" parent="Collectables" unique_id=7174099 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.4454, -2.747975, 3.9151435)
 
-[node name="VaboPickup12" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup12" parent="Collectables" unique_id=1388480708 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.337585, -2.747975, 3.6121597)
 
-[node name="VaboPickup13" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup13" parent="Collectables" unique_id=98516787 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.27203, -2.747975, 2.4257078)
 
-[node name="VaboPickup14" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup14" parent="Collectables" unique_id=2058683707 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.78477, -2.747975, 2.9850645)
 
-[node name="VaboPickup15" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup15" parent="Collectables" unique_id=388094000 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.924606, -2.747975, 10.466455)
 
-[node name="VaboPickup16" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup16" parent="Collectables" unique_id=646954855 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.259617, -2.747975, 2.402402)
 
-[node name="VaboPickup17" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup17" parent="Collectables" unique_id=1850968544 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.156166, -2.747975, 0.04844427)
 
-[node name="VaboPickup18" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup18" parent="Collectables" unique_id=1060366150 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.49118, -2.747975, -4.8459234)
 
-[node name="VaboPickup19" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup19" parent="Collectables" unique_id=1833111967 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.39469, -2.747975, -10.954387)
 
-[node name="VaboPickup29" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup29" parent="Collectables" unique_id=1874449446 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.369, -2.747975, -14.793376)
 
-[node name="VaboPickup20" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup20" parent="Collectables" unique_id=2061911612 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 62.135715, -2.747975, -19.97185)
 
-[node name="VaboPickup21" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup21" parent="Collectables" unique_id=1329106399 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.343296, -2.747975, -15.007562)
 
-[node name="VaboPickup22" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup22" parent="Collectables" unique_id=1834647978 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 75.958336, -2.747975, -19.837387)
 
-[node name="VaboPickup28" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup28" parent="Collectables" unique_id=1360941580 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.47979, -2.747975, -18.792334)
 
-[node name="VaboPickup23" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup23" parent="Collectables" unique_id=1716155378 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.73491, -4.5892944, -23.46287)
 
-[node name="VaboPickup24" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup24" parent="Collectables" unique_id=1837804049 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.840355, -4.5892944, -16.717876)
 
-[node name="VaboPickup25" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup25" parent="Collectables" unique_id=1165008793 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93.66197, -4.5892944, -21.72066)
 
-[node name="VaboPickup26" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup26" parent="Collectables" unique_id=344351580 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.10733, -8.709058, -6.287119)
 
-[node name="VaboPickup27" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup27" parent="Collectables" unique_id=1579568062 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.38341, -8.709058, -0.08897495)
 
-[node name="VaboPickup30" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup30" parent="Collectables" unique_id=1570304322 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.76062, -8.709058, 5.4588137)
 
-[node name="VaboPickup4" parent="Collectables" instance=ExtResource("33_6cw38")]
+[node name="VaboPickup4" parent="Collectables" unique_id=636107903 instance=ExtResource("33_6cw38")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.001768, 1.2861544, 3.996716)
 
-[node name="Obstacles" type="Node3D" parent="."]
+[node name="Obstacles" type="Node3D" parent="." unique_id=1522211707]
 
-[node name="Obstacle_roll" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+[node name="Obstacle_roll" parent="Obstacles" unique_id=1327851236 instance=ExtResource("37_n6y4e")]
 transform = Transform3D(-4.3711385e-08, 0, -0.99999994, 0, 1, 0, 0.99999994, 0, -4.3711385e-08, 57.347126, -3, -17)
 
-[node name="Obstacle_roll3" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+[node name="Obstacle_roll3" parent="Obstacles" unique_id=1076739859 instance=ExtResource("37_n6y4e")]
 transform = Transform3D(-0.9999995, 0, 8.742273e-08, 0, 1, 0, -8.742273e-08, 0, -0.9999995, 59.48516, -1.4056733, -11.1603365)
 
-[node name="Obstacle_roll4" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+[node name="Obstacle_roll4" parent="Obstacles" unique_id=612138163 instance=ExtResource("37_n6y4e")]
 transform = Transform3D(0.9999994, 0, -1.7484543e-07, 0, 1, 0, 1.7484543e-07, 0, 0.9999994, 63.398808, -1.4056733, -11.160338)
 
-[node name="Obstacle_roll5" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+[node name="Obstacle_roll5" parent="Obstacles" unique_id=800153832 instance=ExtResource("37_n6y4e")]
 transform = Transform3D(1.2999985, 0, -2.2729895e-07, 0, 1.3, 0, 2.2729895e-07, 0, 1.2999985, 61.547634, -1.6452625, -11.160344)
 
-[node name="Obstacle_roll6" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+[node name="Obstacle_roll6" parent="Obstacles" unique_id=1530837479 instance=ExtResource("37_n6y4e")]
 transform = Transform3D(1.7047414e-07, 0, 1.299998, 0, 1.3, 0, -1.299998, 0, 1.7047414e-07, 53.404373, -1.6452634, -2.992342)
 
-[node name="Obstacle_roll2" parent="Obstacles" instance=ExtResource("37_n6y4e")]
+[node name="Obstacle_roll2" parent="Obstacles" unique_id=1385374322 instance=ExtResource("37_n6y4e")]
 transform = Transform3D(-0.9999995, 0, 8.742273e-08, 0, 1, 0, -8.742273e-08, 0, -0.9999995, 65.42333, -3, -20.966526)
 
-[node name="Zone01" type="Node3D" parent="."]
+[node name="Zone01" type="Node3D" parent="." unique_id=113663862]
 
-[node name="Environment" type="Node3D" parent="Zone01"]
+[node name="Environment" type="Node3D" parent="Zone01" unique_id=1495485673]
 
-[node name="island" parent="Zone01/Environment" instance=ExtResource("1_uw0fs")]
+[node name="island" parent="Zone01/Environment" unique_id=2133351653 instance=ExtResource("1_uw0fs")]
 
-[node name="GridMap" type="GridMap" parent="Zone01"]
+[node name="GridMap" type="GridMap" parent="Zone01" unique_id=893143437]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 mesh_library = SubResource("MeshLibrary_o6xyf")
 cell_center_y = false
@@ -881,7 +883,7 @@ data = {
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
-[node name="GridMap2" type="GridMap" parent="Zone01"]
+[node name="GridMap2" type="GridMap" parent="Zone01" unique_id=450105841]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 mesh_library = SubResource("MeshLibrary_o6xyf")
 cell_center_y = false
@@ -893,105 +895,105 @@ data = {
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
-[node name="Vegetation" type="Node3D" parent="Zone01" groups=["level_detail_objects"]]
+[node name="Vegetation" type="Node3D" parent="Zone01" unique_id=1854715082 groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
 script = ExtResource("33_v6w0b")
 scale_min = 1.2
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree1" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree1" parent="Zone01/Vegetation" unique_id=1070386662 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.6085398, -0.07442805, -0.3527795, 0.07370163, 1.6467639, -0.011376606, 0.35293198, -0.004671475, 1.6102206, 12.408476, 0.20192719, -10.982757)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree6" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree6" parent="Zone01/Vegetation" unique_id=1097041069 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.6875004, 0.07257306, 0.36094695, -0.07231539, 1.7256588, -0.008876922, -0.3609987, -0.006439463, 1.6890367, -8.758578, 0.14151001, -16.854996)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree5" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree5" parent="Zone01/Vegetation" unique_id=2063818125 instance=ExtResource("34_8twap")]
 transform = Transform3D(-1.137863, 0.028962001, 1.5292096, 0.012335857, 1.9060893, -0.026920862, -1.529434, -0.00617323, -1.1379132, 4.19042, 0.18252945, -14.600863)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree9" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree9" parent="Zone01/Vegetation" unique_id=1568674143 instance=ExtResource("34_8twap")]
 transform = Transform3D(-1.0887164, 0.016916072, -0.50935197, 0.025732782, 1.2017233, -0.015092242, 0.50898266, -0.024572307, -1.0887433, -10.062902, 0.153862, -1.0870389)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree11" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree11" parent="Zone01/Vegetation" unique_id=980931801 instance=ExtResource("34_8twap")]
 transform = Transform3D(0.07130932, -0.01899194, 1.4330353, 0.020673262, 1.4346724, 0.017984916, -1.4330119, 0.019752141, 0.07156994, -4.5876, 0.15786362, 8.770476)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree10" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree10" parent="Zone01/Vegetation" unique_id=1658398814 instance=ExtResource("34_8twap")]
 transform = Transform3D(-1.0000836, 0.040545087, -1.5072513, 0.011302181, 1.8088106, 0.04115788, 1.5077541, 0.013334385, -1.0000585, -3.1422434, 0.13111877, -12.561511)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush1" parent="Zone01/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush1" parent="Zone01/Vegetation" unique_id=517181505 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.677291, -0.03934029, -1.2616178, -0.03672742, 1.4305465, -0.06432477, 1.2616965, 0.06276082, 0.6753762, -0.6990824, 0.17131424, 17.519342)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush2" parent="Zone01/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush2" parent="Zone01/Vegetation" unique_id=1270323491 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-0.70581084, 0.0066965166, 1.1859099, 0.055999197, 1.3786979, 0.025543567, -1.184606, 0.061184477, -0.7053803, -7.710784, 0.18811798, 13.21559)
 
-[node name="Bush5" parent="Zone01/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush5" parent="Zone01/Vegetation" unique_id=1726528417 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.1978557, -0.04114689, 1.588614, -0.05832202, 1.9891676, 0.007545379, -1.5880764, -0.042015757, -1.1985385, -6.7435465, 0.19670868, -9.325144)
 
-[node name="Bush6" parent="Zone01/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush6" parent="Zone01/Vegetation" unique_id=2044348500 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(1.7972589, -0.06237587, 0.75746787, 0.049332872, 1.9502455, 0.043545514, -0.758429, -0.02095697, 1.7978137, -12.947914, 0.20497131, -9.029612)
 
-[node name="Tree2" parent="Zone01/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree2" parent="Zone01/Vegetation" unique_id=506371279 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(0.013402172, 0.09017844, 1.8950601, 0.0903822, 1.8929253, -0.09071605, -1.8950503, 0.09091861, 0.009075645, -13.577335, 0.15249634, -15.542475)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree3" parent="Zone01/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree3" parent="Zone01/Vegetation" unique_id=1836044168 instance=ExtResource("34_8twap")]
 transform = Transform3D(-1.7036487, 0.059252173, -0.2902747, 0.07443941, 1.7255374, -0.08466723, 0.286756, -0.09591112, -1.7025747, -2.4565005, 0.1966362, -2.8302765)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush3" parent="Zone01/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush3" parent="Zone01/Vegetation" unique_id=1686974503 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.77842164, 0.03480671, 1.5589479, 0.05072657, 1.7409123, -0.06419849, -1.5585111, 0.07404811, 0.77655023, 5.70441, 0.19829178, 6.6831017)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush7" parent="Zone01/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush7" parent="Zone01/Vegetation" unique_id=2066143137 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.38851258, -0.016773047, -1.3017706, 0.015815495, 1.358461, -0.012783365, 1.3017826, -0.011498231, 0.38866434, 6.197198, 0.26179123, -2.6443706)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush4" parent="Zone01/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush4" parent="Zone01/Vegetation" unique_id=650883984 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.421023, -0.0277501, -0.32468668, -0.038916178, 1.4566687, 0.0458229, 0.32353833, 0.053330477, -1.4205551, 10.88714, 0.15958786, 17.58063)
 
-[node name="Tree4" parent="Zone01/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree4" parent="Zone01/Vegetation" unique_id=867555205 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-0.71167433, -0.068438284, -1.6351517, -0.07815565, 1.7824504, -0.04058735, 1.634716, 0.055424184, -0.71380454, -10.885075, 0.19574738, 8.1474695)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree7" parent="Zone01/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree7" parent="Zone01/Vegetation" unique_id=1007659519 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.0735492, 0.012306585, -1.1425272, 0.05691754, 1.5663486, -0.03660952, 1.141175, -0.066546306, -1.0729953, 14.284154, 0.18101883, -6.3867702)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree8" parent="Zone01/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree8" parent="Zone01/Vegetation" unique_id=1672284239 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.5968883, 0.0826155, 0.49564776, 0.06331467, 1.6712195, -0.074573465, -0.49848095, -0.0523892, -1.5972841, -15.741072, 0.10467911, -5.245287)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Zone02" type="Node3D" parent="."]
+[node name="Zone02" type="Node3D" parent="." unique_id=123426235]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 34.309113, -3, 0)
 
-[node name="Environment" type="Node3D" parent="Zone02"]
+[node name="Environment" type="Node3D" parent="Zone02" unique_id=2097706175]
 
-[node name="island" parent="Zone02/Environment" instance=ExtResource("1_uw0fs")]
+[node name="island" parent="Zone02/Environment" unique_id=15779740 instance=ExtResource("1_uw0fs")]
 transform = Transform3D(0.7071067, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, 0.7071067, 0, 0, 0)
 
-[node name="GridMap" type="GridMap" parent="Zone02"]
+[node name="GridMap" type="GridMap" parent="Zone02" unique_id=1304033560]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 mesh_library = SubResource("MeshLibrary_o6xyf")
 cell_center_y = false
@@ -1003,167 +1005,167 @@ data = {
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
-[node name="breakable_object" type="Node3D" parent="Zone02"]
+[node name="breakable_object" type="Node3D" parent="Zone02" unique_id=403461599]
 
-[node name="WoodenCrate" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate" parent="Zone02/breakable_object" unique_id=1716194065 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.9999994, 0, 0, 0, 1, 0, 0, 0, 0.9999994, -6.187208, 0, 2.3066292)
 
-[node name="WoodenCrate2" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate2" parent="Zone02/breakable_object" unique_id=1069470240 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.014764915, 0, -0.9998901, 0, 1, 0, 0.9998901, 0, 0.014764915, -6.162737, 0, 3.374545)
 
-[node name="WoodenCrate7" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate7" parent="Zone02/breakable_object" unique_id=158631195 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.2588189, 0, -0.9659253, 0, 1, 0, 0.9659253, 0, 0.2588189, -4.8205643, 0, 4.0489745)
 
-[node name="WoodenCrate4" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate4" parent="Zone02/breakable_object" unique_id=1296520806 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.9998147, 0, -0.019197404, 0, 1, 0, 0.019197404, 0, 0.9998147, -6.2506905, 1, 3.3241968)
 
-[node name="WoodenCrate5" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate5" parent="Zone02/breakable_object" unique_id=821213909 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.01113489, 0, -0.9999369, 0, 1, 0, 0.9999369, 0, -0.01113489, -6.293804, 1, 2.30256)
 
-[node name="WoodenCrate3" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate3" parent="Zone02/breakable_object" unique_id=1931811606 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99999917, 0, -8.74227e-08, 0, 1, 0, 8.74227e-08, 0, -0.99999917, -6.235861, 0, 6.495529)
 
-[node name="WoodenCrate17" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate17" parent="Zone02/breakable_object" unique_id=2143721890 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.014765001, 0, 0.99988997, 0, 1, 0, -0.99988997, 0, -0.014765001, -6.184532, 0, 5.429806)
 
-[node name="WoodenCrate18" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate18" parent="Zone02/breakable_object" unique_id=445206493 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.06554223, 0, 0.99784863, 0, 1, 0, -0.99784863, 0, 0.06554223, -6.407797, 1, 5.480155)
 
-[node name="WoodenCrate24" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate24" parent="Zone02/breakable_object" unique_id=1254530681 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.014765, 0, 0.9998899, 0, 1, 0, -0.9998899, 0, -0.014765, -6.184532, 0, 4.3869014)
 
-[node name="WoodenCrate25" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate25" parent="Zone02/breakable_object" unique_id=1372675650 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.99999535, 0, -0.0025829747, 0, 1, 0, 0.0025829747, 0, 0.99999535, -6.319523, 1, 4.4188285)
 
-[node name="WoodenCrate19" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate19" parent="Zone02/breakable_object" unique_id=1036674903 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.011134798, 0, 0.99993664, 0, 1, 0, -0.99993664, 0, 0.011134798, -6.295372, 1, 6.4995985)
 
-[node name="WoodenCrate20" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate20" parent="Zone02/breakable_object" unique_id=1790632754 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.020331757, 0, -0.99979216, 0, 1, 0, 0.99979216, 0, 0.020331757, -6.2549076, 0, 7.602581)
 
-[node name="WoodenCrate21" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate21" parent="Zone02/breakable_object" unique_id=1359395340 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.9993828, 0, -0.03509139, 0, 1, 0, 0.03509139, 0, -0.9993828, -7.371689, 0, 7.5956883)
 
-[node name="WoodenCrate22" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate22" parent="Zone02/breakable_object" unique_id=358665801 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99897474, 0, 0.04524072, 0, 1, 0, -0.04524072, 0, -0.99897474, -7.4659615, 1, 7.5826883)
 
-[node name="WoodenCrate23" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate23" parent="Zone02/breakable_object" unique_id=518565876 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99995613, 0, -0.009197906, 0, 1, 0, 0.009197906, 0, -0.99995613, -6.363405, 1, 7.5075216)
 
-[node name="WoodenCrate6" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate6" parent="Zone02/breakable_object" unique_id=1904877347 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.03114903, 0, -0.99951375, 0, 1, 0, 0.99951375, 0, -0.03114903, -5.139488, 1, 4.0754294)
 
-[node name="WoodenCrate14" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate14" parent="Zone02/breakable_object" unique_id=1209473844 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.26738945, 0, -0.9635874, 0, 1, 0, 0.9635874, 0, 0.26738945, -3.9811764, 1, 3.7463098)
 
-[node name="WoodenCrate15" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate15" parent="Zone02/breakable_object" unique_id=42363477 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.9995525, 0, 0.029875547, 0, 1, 0, -0.029875547, 0, 0.9995525, -2.738121, 1, 3.6719122)
 
-[node name="WoodenCrate8" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate8" parent="Zone02/breakable_object" unique_id=1403118144 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.96183616, 0, -0.27362326, 0, 1, 0, 0.27362326, 0, -0.96183616, -3.652586, 0, 5.1828613)
 
-[node name="WoodenCrate10" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate10" parent="Zone02/breakable_object" unique_id=348999109 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99291706, 0, 0.11880248, 0, 1, 0, -0.11880248, 0, -0.99291706, -3.6223297, 0, 3.8776202)
 
-[node name="WoodenCrate11" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate11" parent="Zone02/breakable_object" unique_id=263103964 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.992917, 0, 0.11880247, 0, 1, 0, -0.11880247, 0, -0.992917, -3.4893742, 4.7683716e-07, 2.705944)
 
-[node name="WoodenCrate16" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate16" parent="Zone02/breakable_object" unique_id=58961696 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99036396, 0, -0.13848159, 0, 1, 0, 0.13848159, 0, -0.99036396, -2.334238, 4.7683716e-07, 2.4118652)
 
-[node name="WoodenCrate12" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate12" parent="Zone02/breakable_object" unique_id=884702222 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.99291694, 0, 0.118802465, 0, 1, 0, -0.118802465, 0, -0.99291694, -2.4893742, 4.7683716e-07, 3.7059438)
 
-[node name="WoodenCrate13" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate13" parent="Zone02/breakable_object" unique_id=1269346084 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.94508475, 0, -0.32682163, 0, 1, 0, 0.32682163, 0, -0.94508475, -2.4112873, 0, 4.9908905)
 
-[node name="WoodenCrate9" parent="Zone02/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate9" parent="Zone02/breakable_object" unique_id=1109584702 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-0.959367, 0, -0.2821569, 0, 1, 0, 0.2821569, 0, -0.959367, -3.6839352, 1, 4.8643813)
 
-[node name="Vegetation" type="Node3D" parent="Zone02" groups=["level_detail_objects"]]
+[node name="Vegetation" type="Node3D" parent="Zone02" unique_id=440370716 groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
 script = ExtResource("33_v6w0b")
 scale_min = 1.5
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree1" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree1" parent="Zone02/Vegetation" unique_id=2117435227 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.464634, 0.06991229, -1.0088022, -0.03918682, 1.7781417, 0.06633573, 1.0104623, -0.032377493, 1.4648004, 12.01479, 0.16323471, -6.6862288)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree6" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree6" parent="Zone02/Vegetation" unique_id=1108236307 instance=ExtResource("34_8twap")]
 transform = Transform3D(0.8924193, 0.04505274, 1.4001795, 0.043055966, 1.6584824, -0.08080617, -1.4002423, 0.07971006, 0.88989455, 3.1363716, 0.16773605, 14.577866)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree5" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree5" parent="Zone02/Vegetation" unique_id=1555711065 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.2277366, 0.007891406, 1.4194448, 0.034619678, 1.8760055, -0.040373653, -1.4190445, 0.052595418, 1.2270979, 4.1904182, 0.17322159, -14.600859)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush1" parent="Zone02/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush1" parent="Zone02/Vegetation" unique_id=196493371 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.91367507, -0.08280795, 1.4048816, 0.044093855, 1.6758565, 0.07010326, -1.4066291, -0.0012545122, 0.9147375, -0.6990814, 0.20679092, 17.519333)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush2" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush2" parent="Zone02/Vegetation" unique_id=949901638 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.7267072, 0.0011812615, 0.7092726, -0.025582924, 1.8653843, -0.065387726, -0.70881206, -0.07020428, -1.7254691, -3.1959095, 0.17185593, 11.705284)
 
-[node name="Bush5" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush5" parent="Zone02/Vegetation" unique_id=1883333560 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(1.5993648, 0.05956163, 1.1043236, -0.07191244, 1.9431616, -0.00065527647, -1.1035882, -0.040301837, 1.6004733, -4.3644466, 0.18862152, -16.338053)
 
-[node name="Bush6" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush6" parent="Zone02/Vegetation" unique_id=32600581 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(1.6987764, 0.029824402, -0.66451347, -0.04022862, 1.8238016, -0.020986233, 0.6639649, 0.03419455, 1.6989087, -12.947914, 0.14974976, -9.029607)
 
-[node name="Tree2" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree2" parent="Zone02/Vegetation" unique_id=10650831 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.1837643, -0.011100033, -1.3920424, -0.045080982, 1.8266385, 0.023770476, 1.3913565, 0.049740512, -1.1835777, 13.788292, 0.12397003, 10.438342)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree3" parent="Zone02/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree3" parent="Zone02/Vegetation" unique_id=1580407401 instance=ExtResource("34_8twap")]
 transform = Transform3D(-1.1890802, 0.10144583, -1.5420452, 0.09680509, 1.9467627, 0.053423796, 1.5423435, -0.04397797, -1.1922035, -1.2945061, 0.24045181, -9.447673)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush3" parent="Zone02/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush3" parent="Zone02/Vegetation" unique_id=1646918049 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.29034802, -0.054882176, -1.5684718, 0.0070909546, 1.5951171, -0.054501873, 1.5694157, 0.0029463426, 0.29041967, 5.7044106, 0.15691376, 6.6830993)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush7" parent="Zone02/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush7" parent="Zone02/Vegetation" unique_id=542358458 instance=ExtResource("35_okxh1")]
 transform = Transform3D(-1.4281929, -0.0070286444, 0.9093923, -0.0023044343, 1.693129, 0.0094670085, -0.9094165, 0.0067477967, -1.4281789, 6.197197, 0.1685524, -2.6443694)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush4" parent="Zone02/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush4" parent="Zone02/Vegetation" unique_id=361746795 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(0.25424314, -0.008979974, -1.8255861, -0.022039073, 1.843056, -0.012135216, 1.8254752, 0.023501992, 0.25411206, 20.375362, 0.14814377, 6.0576105)
 
-[node name="Tree4" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree4" parent="Zone02/Vegetation" unique_id=1533233311 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.259457, -0.067565866, 0.9251174, 0.06527968, 1.5626074, 0.025252989, -0.9252815, 0.018275658, 1.2610153, -6.927927, 0.1978836, -11.420492)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree7" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree7" parent="Zone02/Vegetation" unique_id=2038377635 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(0.23298909, -0.036250412, 1.7550075, 0.011607132, 1.7703924, 0.03502728, -1.7553434, 0.00689507, 0.23317608, 6.283695, 0.13446045, -9.726773)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree8" parent="Zone02/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree8" parent="Zone02/Vegetation" unique_id=230969711 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.7137952, -0.042859983, 0.41233838, -0.048130795, 1.7624857, -0.016845912, -0.41175643, -0.027629297, -1.7142482, -10.60841, 0.118961334, 11.663935)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Zone03" type="Node3D" parent="."]
+[node name="Zone03" type="Node3D" parent="." unique_id=1989455679]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 62.396965, -3, -20.045534)
 
-[node name="Environment" type="Node3D" parent="Zone03"]
+[node name="Environment" type="Node3D" parent="Zone03" unique_id=1618323938]
 
-[node name="island" parent="Zone03/Environment" instance=ExtResource("1_uw0fs")]
+[node name="island" parent="Zone03/Environment" unique_id=324875454 instance=ExtResource("1_uw0fs")]
 transform = Transform3D(-0.39999986, 0, 0.69282013, 0, 0.8, 0, -0.69282013, 0, -0.39999986, -0.6690788, 0, 1.8112297)
 
-[node name="GridMap" type="GridMap" parent="Zone03"]
+[node name="GridMap" type="GridMap" parent="Zone03" unique_id=357230209]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 mesh_library = SubResource("MeshLibrary_o6xyf")
 cell_center_y = false
@@ -1175,349 +1177,315 @@ data = {
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
-[node name="breakable_object" type="Node3D" parent="Zone03"]
+[node name="breakable_object" type="Node3D" parent="Zone03" unique_id=477280609]
 
-[node name="WoodenCrate" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate" parent="Zone03/breakable_object" unique_id=1478858169 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.9999992, 0, 0, 0, 1, 0, 0, 0, 0.9999992, -3.1798973, 0, 8.356217)
 
-[node name="WoodenCrate2" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate2" parent="Zone03/breakable_object" unique_id=527117035 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-4.3711346e-08, 0, -0.99999905, 0, 1, 0, 0.99999905, 0, -4.3711346e-08, -3.1798973, 0, 9.504551)
 
-[node name="WoodenCrate3" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate3" parent="Zone03/breakable_object" unique_id=511240491 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.99999917, 0, 0, 0, 1, 0, 0, 0, 0.99999917, -3.1798973, 1, 8.356216)
 
-[node name="WoodenCrate4" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate4" parent="Zone03/breakable_object" unique_id=1173606453 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-4.3711342e-08, 0, -0.999999, 0, 1, 0, 0.999999, 0, -4.3711342e-08, -3.1798973, 1, 9.50455)
 
-[node name="WoodenCrate5" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate5" parent="Zone03/breakable_object" unique_id=1788887038 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.99999917, 0, 0, 0, 1, 0, 0, 0, 0.99999917, -2.095211, 0, 8.356216)
 
-[node name="WoodenCrate6" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate6" parent="Zone03/breakable_object" unique_id=383663274 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-4.3711342e-08, 0, -0.999999, 0, 1, 0, 0.999999, 0, -4.3711342e-08, -2.095211, 0, 9.50455)
 
-[node name="WoodenCrate7" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate7" parent="Zone03/breakable_object" unique_id=1976540563 instance=ExtResource("32_mgiie")]
 transform = Transform3D(0.9999991, 0, 0, 0, 1, 0, 0, 0, 0.9999991, -2.095211, 1, 8.3562155)
 
-[node name="WoodenCrate8" parent="Zone03/breakable_object" instance=ExtResource("32_mgiie")]
+[node name="WoodenCrate8" parent="Zone03/breakable_object" unique_id=333558122 instance=ExtResource("32_mgiie")]
 transform = Transform3D(-4.371134e-08, 0, -0.9999989, 0, 1, 0, 0.9999989, 0, -4.371134e-08, -2.095211, 1, 9.504549)
 
-[node name="Vegetation" type="Node3D" parent="Zone03" groups=["level_detail_objects"]]
+[node name="Vegetation" type="Node3D" parent="Zone03" unique_id=1304160063 groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
 script = ExtResource("33_v6w0b")
 scale_min = 1.5
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree5" parent="Zone03/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree5" parent="Zone03/Vegetation" unique_id=1515080918 instance=ExtResource("34_8twap")]
 transform = Transform3D(0.54079014, -0.082774736, 1.7051673, 0.0101009505, 1.7888002, 0.08363107, -1.7071453, -0.015637323, 0.54065835, 4.1904106, 0.2179718, -14.600853)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush1" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush1" parent="Zone03/Vegetation" unique_id=521572116 instance=ExtResource("35_okxh1")]
 transform = Transform3D(-0.3331466, -0.05854448, -1.8575588, -0.017441818, 1.8871831, -0.056350015, 1.8583993, 0.007216964, -0.33352482, -8.659519, 0.17121124, 11.38019)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush2" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush2" parent="Zone03/Vegetation" unique_id=1335176300 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-0.85981315, 0.019769486, 1.3975607, 0.031629123, 1.6406802, -0.0037495838, -1.3973426, 0.024972545, -0.86003226, -0.28582, 0.2224884, 14.798061)
 
-[node name="Bush5" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush5" parent="Zone03/Vegetation" unique_id=1503459672 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(0.34201196, -0.061846636, -1.9017211, 0.05485754, 1.9317164, -0.052956354, 1.9019357, -0.044595037, 0.34350082, 8.019161, 0.18203354, -14.224823)
 
-[node name="Bush6" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush6" parent="Zone03/Vegetation" unique_id=1989975225 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(0.44537726, -0.08759662, -1.8153121, 0.07639005, 1.8682768, -0.0714105, 1.8158183, -0.05711154, 0.4482573, -12.236313, 0.20859528, -4.919689)
 
-[node name="Tree3" parent="Zone03/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree3" parent="Zone03/Vegetation" unique_id=780923468 instance=ExtResource("34_8twap")]
 transform = Transform3D(0.57701606, -0.026186155, 1.4511445, -0.03160966, 1.5610238, 0.040737845, -1.4510365, -0.044418763, 0.5761716, -1.2945023, 0.20932388, -9.44767)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush3" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush3" parent="Zone03/Vegetation" unique_id=1569252250 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.40131804, -0.04387146, 1.9228382, 0.037007146, 1.9640632, 0.037088234, -1.9229827, 0.028641934, 0.40200168, 7.0015984, 0.18693161, -4.05999)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush8" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush8" parent="Zone03/Vegetation" unique_id=2084219299 instance=ExtResource("35_okxh1")]
 transform = Transform3D(1.2336175, -0.0072234594, 0.8951928, -0.023153473, 1.5233995, 0.04419913, -0.89492244, -0.049370714, 1.2328466, 10.157841, 0.14367294, 6.193432)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush9" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush9" parent="Zone03/Vegetation" unique_id=407084835 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.85253626, 0.006787803, -1.7997011, 0.014925724, 1.9913197, 0.014580979, 1.7996521, -0.019730885, 0.85243857, 14.2042885, 0.1837883, 4.271084)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush7" parent="Zone03/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush7" parent="Zone03/Vegetation" unique_id=1835394702 instance=ExtResource("35_okxh1")]
 transform = Transform3D(-1.9294538, 0.040951055, -0.23088647, 0.050101895, 1.9415832, -0.0743197, 0.22907498, -0.079728454, -1.9284568, 12.113918, 0.19999313, -5.128582)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush4" parent="Zone03/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush4" parent="Zone03/Vegetation" unique_id=1774772644 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(0.81492954, -0.1191395, -1.7805799, 0.07955315, 1.9579308, -0.09459654, 1.7827872, -0.0329087, 0.8181417, 11.280315, 0.15419388, -9.736385)
 
-[node name="Tree4" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree4" parent="Zone03/Vegetation" unique_id=188256178 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.4184587, -0.0089754155, 1.3312371, 0.063848, 1.9435035, -0.054927863, -1.3297353, 0.083744116, 1.4174232, -6.560135, 0.18261719, -7.4270954)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree7" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree7" parent="Zone03/Vegetation" unique_id=725480428 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.5385566, -0.086384654, 0.5063944, -0.06809701, 1.6191399, 0.06930908, -0.5091762, 0.044481907, -1.5394202, 6.2836876, 0.22119522, -9.7267685)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree8" parent="Zone03/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree8" parent="Zone03/Vegetation" unique_id=1452522523 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(0.8592582, -0.00091278134, -1.4433854, 0.024643, 1.679552, 0.013608036, 1.4431752, -0.028135791, 0.85915095, -11.109592, 0.21237564, 2.5813808)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Zone04" type="Node3D" parent="."]
+[node name="Zone04" type="Node3D" parent="." unique_id=1572951070]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 94.81114, -5, -26.819393)
 
-[node name="Environment" type="Node3D" parent="Zone04"]
+[node name="Environment" type="Node3D" parent="Zone04" unique_id=1542846428]
 
-[node name="island" parent="Zone04/Environment" instance=ExtResource("1_uw0fs")]
+[node name="island" parent="Zone04/Environment" unique_id=1358734126 instance=ExtResource("1_uw0fs")]
 transform = Transform3D(-0.49642527, 0, 0.6273444, 0, 0.64, 0, -0.6273444, 0, -0.49642527, 0, 0, 0)
 
-[node name="GridMap" type="GridMap" parent="Zone04"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
-mesh_library = SubResource("MeshLibrary_o6xyf")
-cell_center_y = false
-collision_layer = 64
-collision_mask = 63
-bake_navigation = true
-data = {
-"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6)
-}
-metadata/_editor_floor_ = Vector3(0, 0, 0)
+[node name="breakable_object" type="Node3D" parent="Zone04" unique_id=1900093829]
 
-[node name="breakable_object" type="Node3D" parent="Zone04"]
-
-[node name="Vegetation" type="Node3D" parent="Zone04" groups=["level_detail_objects"]]
+[node name="Vegetation" type="Node3D" parent="Zone04" unique_id=2011172844 groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
 script = ExtResource("33_v6w0b")
 scale_min = 1.5
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree1" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree1" parent="Zone04/Vegetation" unique_id=1576334361 instance=ExtResource("34_8twap")]
 transform = Transform3D(0.40933594, 0.05995105, 1.79188, -0.054165773, 1.8375635, -0.049105886, -1.7920641, -0.041847214, 0.4107781, 6.425461, 0.2318573, 2.1101341)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree6" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree6" parent="Zone04/Vegetation" unique_id=1118628393 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.3520617, -0.018930947, 1.4310353, -0.020267952, 1.9682071, 0.04518655, -1.431017, -0.045762792, 1.3514389, 13.433609, 0.23852539, 3.2859669)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree5" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree5" parent="Zone04/Vegetation" unique_id=696022232 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.7090102, -0.07615418, 0.03732844, 0.075827956, 1.7093608, 0.01565062, -0.037986744, -0.013977175, 1.7106345, 2.7457504, 0.17300415, -15.357981)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush1" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush1" parent="Zone04/Vegetation" unique_id=1633934484 instance=ExtResource("35_okxh1")]
 transform = Transform3D(1.2238389, -0.011374733, -1.10139, 0.03742826, 1.6458938, 0.024591252, 1.1008127, -0.043315344, 1.2236446, -14.259239, 0.19381332, -0.8252926)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush2" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush2" parent="Zone04/Vegetation" unique_id=1089356680 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.7639804, -0.0033278288, 0.75033337, 0.02453944, 1.9156346, 0.06618657, -0.7499393, 0.07051079, -1.7627413, 8.962486, 0.1778431, 7.8990726)
 
-[node name="Bush9" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush9" parent="Zone04/Vegetation" unique_id=1852089578 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.2853472, 0.06859007, 0.95781577, 0.027567703, 1.6023198, -0.07774895, -0.9598727, -0.045828782, -1.2848258, -1.0860825, 0.17666435, 15.280283)
 
-[node name="Bush5" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush5" parent="Zone04/Vegetation" unique_id=1576300 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.6449462, -0.0753052, 0.9128414, -0.05295566, 1.8810698, 0.059753127, -0.9144102, 0.026530452, -1.6455845, 8.019157, 0.20436478, -14.224825)
 
-[node name="Bush6" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush6" parent="Zone04/Vegetation" unique_id=141477457 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.5920173, 0.037045572, 1.0036534, 0.054138213, 1.8814915, 0.016428016, -1.0028766, 0.042760395, -1.5923634, -12.236313, 0.17771149, -4.919689)
 
-[node name="Bush8" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush8" parent="Zone04/Vegetation" unique_id=708558546 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-1.5361239, 0.014179989, 0.28533372, 0.006930118, 1.5619284, -0.04031282, -0.2856018, -0.038367663, -1.5356603, -9.668762, 0.20842361, 6.877529)
 
-[node name="Tree2" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree2" parent="Zone04/Vegetation" unique_id=1644474288 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.167385, -0.0151689965, 1.4944552, -0.004363094, 1.8963504, 0.015840098, -1.4945258, 0.0063124388, -1.167376, 14.475822, 0.19952011, -0.94958115)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree3" parent="Zone04/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree3" parent="Zone04/Vegetation" unique_id=907951463 instance=ExtResource("34_8twap")]
 transform = Transform3D(1.51811, -0.034907766, 0.16435564, 0.036288872, 1.5269098, -0.010887911, -0.16405623, 0.014726741, 1.5184722, -1.2945023, 0.21405411, -9.447672)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush3" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush3" parent="Zone04/Vegetation" unique_id=1277550525 instance=ExtResource("35_okxh1")]
 transform = Transform3D(1.3054497, -0.11230625, 1.458627, 0.06560977, 1.9574567, 0.0919936, -1.461472, -0.0124407895, 1.3070382, 7.0015945, 0.20088577, -4.05999)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush7" parent="Zone04/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush7" parent="Zone04/Vegetation" unique_id=2085600483 instance=ExtResource("35_okxh1")]
 transform = Transform3D(1.3054814, -0.01663282, -1.1128782, 0.024573274, 1.7153549, 0.003188817, 1.1127313, -0.018367462, 1.3055835, 12.437416, 0.19193268, -7.0582294)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush4" parent="Zone04/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush4" parent="Zone04/Vegetation" unique_id=1865735051 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(1.9602671, 0.061421257, 0.29240352, -0.07104264, 1.980719, 0.06020552, -0.29021603, -0.06999422, 1.9603047, 11.280312, 0.2389679, -9.736387)
 
-[node name="Tree4" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree4" parent="Zone04/Vegetation" unique_id=1613488932 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.4306407, -0.009454102, 0.9798373, -0.03216808, 1.7325739, 0.063684955, -0.97935474, -0.07071902, 1.4292536, -6.6863785, 0.22063065, -5.8969746)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree7" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree7" parent="Zone04/Vegetation" unique_id=263513833 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.371145, -0.01448905, 1.1499826, -0.04274578, 1.7875909, 0.07348908, -1.1492791, -0.08377299, 1.3692509, 6.283684, 0.23964691, -9.72677)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree8" parent="Zone04/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree8" parent="Zone04/Vegetation" unique_id=285080999 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.5016077, 0.06420977, -1.0788454, -0.034610875, 1.8487378, 0.06185787, 1.0802001, -0.030023558, 1.5017064, -4.4220963, 0.20919418, 12.386584)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Zone05" type="Node3D" parent="."]
+[node name="Zone05" type="Node3D" parent="." unique_id=1008653292]
 transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 108.5264, -9, 1.197953)
 
-[node name="Environment" type="Node3D" parent="Zone05"]
+[node name="Environment" type="Node3D" parent="Zone05" unique_id=1616151924]
 
-[node name="island" parent="Zone05/Environment" instance=ExtResource("1_uw0fs")]
+[node name="island" parent="Zone05/Environment" unique_id=1483491786 instance=ExtResource("1_uw0fs")]
 transform = Transform3D(-0.41460723, 0, -0.37643105, 0, 0.44800007, 0, 0.37643105, 0, -0.41460723, 0.28901672, 0, 0.23121452)
 
-[node name="GridMap" type="GridMap" parent="Zone05"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
-mesh_library = SubResource("MeshLibrary_o6xyf")
-cell_center_y = false
-collision_layer = 64
-collision_mask = 63
-bake_navigation = true
-data = {
-"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6)
-}
-metadata/_editor_floor_ = Vector3(0, 0, 0)
+[node name="breakable_object" type="Node3D" parent="Zone05" unique_id=1961927750]
 
-[node name="breakable_object" type="Node3D" parent="Zone05"]
-
-[node name="Vegetation" type="Node3D" parent="Zone05" groups=["level_detail_objects"]]
+[node name="Vegetation" type="Node3D" parent="Zone05" unique_id=251245908 groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
 script = ExtResource("33_v6w0b")
 scale_min = 1.5
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree1" parent="Zone05/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree1" parent="Zone05/Vegetation" unique_id=617987058 instance=ExtResource("34_8twap")]
 transform = Transform3D(-0.1449254, -0.03986683, -1.6304828, -0.07372155, 1.6353947, -0.0334342, 1.6293031, 0.070451, -0.14654315, -2.5715256, 0.22045135, 8.678367)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush1" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush1" parent="Zone05/Vegetation" unique_id=1205686675 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.58867514, -0.04250177, 1.5337503, 0.047035202, 1.6424886, 0.027462242, -1.533618, 0.034059998, 0.58956826, -7.716835, 0.17289734, 1.5552511)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush8" parent="Zone05/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush8" parent="Zone05/Vegetation" unique_id=1896259034 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-0.026801283, -0.01803553, -1.5379627, -0.05972022, 1.5370486, -0.016984098, 1.5369086, 0.05941114, -0.027479619, -5.6979218, 0.19115448, 5.107073)
 
-[node name="Tree2" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree2" parent="Zone05/Vegetation" unique_id=979521006 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.3882009, 0.0015813244, -0.90673286, 0.025598705, 1.6573604, 0.04208182, 0.9063727, -0.0492308, 1.3875638, 11.541847, 0.18003082, 1.1004493)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush3" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush3" parent="Zone05/Vegetation" unique_id=863431654 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.015142068, 0.0024774713, -1.540788, 0.015949631, 1.5407796, 0.0026342026, 1.5407075, -0.015974727, 0.015115589, 7.0015945, 0.1817398, -4.05999)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush7" parent="Zone05/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush7" parent="Zone05/Vegetation" unique_id=2024064588 instance=ExtResource("35_okxh1")]
 transform = Transform3D(1.0542235, -0.0018097236, -1.2392105, -0.059507202, 1.6250186, -0.052997235, 1.2377822, 0.07966514, 1.0528922, 5.8777847, 0.17056274, -0.41208243)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree4" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree4" parent="Zone05/Vegetation" unique_id=1050423175 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.7595704, -0.049843553, -0.846805, -0.05541317, 1.9525831, 0.00021220905, 0.8464588, 0.024213314, -1.7602762, -10.100533, 0.20641327, -1.9920478)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree7" parent="Zone05/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree7" parent="Zone05/Vegetation" unique_id=1217157016 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.0558403, -0.006937719, 1.5175978, -0.05247832, 1.8478119, -0.028063517, -1.5167061, -0.05910502, -1.05549, 3.7770157, 0.23018837, -7.968153)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Zone06" type="Node3D" parent="."]
-transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 91.01251, -22.000004, 67.5875)
+[node name="Zone06" type="Node3D" parent="." unique_id=1065764972]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 91.68897, -22.000004, 65.084625)
 
-[node name="Environment" type="Node3D" parent="Zone06"]
+[node name="Environment" type="Node3D" parent="Zone06" unique_id=156096015]
 
-[node name="island" parent="Zone06/Environment" instance=ExtResource("1_uw0fs")]
-transform = Transform3D(0.7864353, 0, 0.1466944, 0, 0.79999995, 0, -0.1466944, 0, 0.7864353, 0.28901672, 0, 0.23121452)
+[node name="island" parent="Zone06/Environment" unique_id=1886346956 instance=ExtResource("1_uw0fs")]
+transform = Transform3D(0.7858715, 0, 0.14968559, 0, 0.8000001, 0, -0.14968559, 0, 0.7858715, 0.28901672, 0, 0.23121643)
 
-[node name="GridMap" type="GridMap" parent="Zone06"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
-mesh_library = SubResource("MeshLibrary_o6xyf")
-cell_center_y = false
-collision_layer = 64
-collision_mask = 63
-bake_navigation = true
-data = {
-"cells": PackedInt32Array(262166, 65525, 9, 262163, 65521, 11, 262160, 65521, 655371, 262169, 65523, 9, 262161, 65514, 6, 262165, 65513, 1441798, 262157, 65516, 655366, 262159, 65516, 655366, 262168, 65514, 1048582, 262172, 65513, 1048582, 262161, 65518, 1048582, 262164, 65519, 1048582, 262173, 65527, 6, 262167, 65528, 655366, 262173, 65517, 655366, 262175, 65511, 655366, 262176, 65514, 655366, 262174, 65513, 1048582, 262175, 65513, 1048582, 262174, 65512, 6)
-}
-metadata/_editor_floor_ = Vector3(0, 0, 0)
+[node name="breakable_object" type="Node3D" parent="Zone06" unique_id=425989736]
 
-[node name="breakable_object" type="Node3D" parent="Zone06"]
-
-[node name="Vegetation" type="Node3D" parent="Zone06" groups=["level_detail_objects"]]
+[node name="Vegetation" type="Node3D" parent="Zone06" unique_id=975218577 groups=["level_detail_objects"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064640045, -0.2774849, 0.19522667)
 script = ExtResource("33_v6w0b")
 scale_min = 1.5
 scale_max = 2.0
 ground_layer = 8
 
-[node name="Tree1" parent="Zone06/Vegetation" instance=ExtResource("34_8twap")]
+[node name="Tree1" parent="Zone06/Vegetation" unique_id=1473422503 instance=ExtResource("34_8twap")]
 transform = Transform3D(-0.1449254, -0.03986683, -1.6304828, -0.07372155, 1.6353947, -0.0334342, 1.6293031, 0.070451, -0.14654315, 7.141182, 0.22045135, 11.943279)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush1" parent="Zone06/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush1" parent="Zone06/Vegetation" unique_id=1112576224 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.5886751, -0.042501766, 1.5337502, 0.047035202, 1.6424886, 0.027462242, -1.5336179, 0.034059994, 0.5895682, -11.813332, 0.17289352, -1.3374329)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush8" parent="Zone06/Vegetation" instance=ExtResource("36_r3wh6")]
+[node name="Bush8" parent="Zone06/Vegetation" unique_id=781453626 instance=ExtResource("36_r3wh6")]
 transform = Transform3D(-0.02680128, -0.018035527, -1.5379626, -0.05972022, 1.5370486, -0.016984098, 1.5369085, 0.059411135, -0.027479617, -5.7982635, 0.19115448, 12.287514)
 
-[node name="Tree2" parent="Zone06/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree2" parent="Zone06/Vegetation" unique_id=1285369182 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(1.3882009, 0.0015813244, -0.90673286, 0.025598705, 1.6573604, 0.04208182, 0.9063727, -0.0492308, 1.3875638, 11.866676, 0.18003082, 6.600582)
 leaf_count = 300
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush3" parent="Zone06/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush3" parent="Zone06/Vegetation" unique_id=1674031235 instance=ExtResource("35_okxh1")]
 transform = Transform3D(0.015142067, 0.002477471, -1.5407879, 0.015949631, 1.5407796, 0.0026342026, 1.5407073, -0.015974725, 0.015115588, -3.8861694, 0.1817398, -9.89394)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Bush7" parent="Zone06/Vegetation" instance=ExtResource("35_okxh1")]
+[node name="Bush7" parent="Zone06/Vegetation" unique_id=1789897968 instance=ExtResource("35_okxh1")]
 transform = Transform3D(1.0542238, -0.0018097238, -1.2392107, -0.059507202, 1.6250186, -0.052997235, 1.2377825, 0.079665154, 1.0528924, 2.332138, 0.17056274, 13.176121)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree4" parent="Zone06/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree4" parent="Zone06/Vegetation" unique_id=355136323 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.7595701, -0.049843546, -0.84680486, -0.05541317, 1.9525831, 0.00021220905, 0.8464587, 0.02421331, -1.760276, -13.29731, 0.20641327, -10.905239)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="Tree7" parent="Zone06/Vegetation" instance=ExtResource("37_d7mo5")]
+[node name="Tree7" parent="Zone06/Vegetation" unique_id=1252111689 instance=ExtResource("37_d7mo5")]
 transform = Transform3D(-1.0558401, -0.0069377185, 1.5175977, -0.05247832, 1.8478119, -0.028063517, -1.516706, -0.059105016, -1.0554899, -11.065155, 0.23018837, 2.7043)
 leaf_color = Color(1, 0, 0, 1)
 random_tilt = 0.5
 
-[node name="MovingPlatformRoot" parent="." instance=ExtResource("40_c0er0")]
+[node name="MovingPlatformRoot" parent="." unique_id=1566775427 instance=ExtResource("40_c0er0")]
 transform = Transform3D(-0.19149432, 0, 0.9814937, 0, 1, 0, -0.9814937, 0, -0.19149432, 115.63686, -10.036977, 11.050493)
 move_offset = Vector3(-10, 0, 0)
 
-[node name="MovingPlatformRoot2" parent="." instance=ExtResource("40_c0er0")]
+[node name="MovingPlatformRoot2" parent="." unique_id=2119860378 instance=ExtResource("40_c0er0")]
 transform = Transform3D(-0.5596849, 0, -0.82870567, 0, 1, 0, 0.82870567, 0, -0.5596849, 109.24886, -15.410415, 33.00996)
 move_offset = Vector3(-10, 5, 0)
+preview_progress = 0.817
 is_fragile = true
 
-[node name="MovingPlatformRoot3" parent="." instance=ExtResource("40_c0er0")]
+[node name="MovingPlatformRoot3" parent="." unique_id=54872993 instance=ExtResource("40_c0er0")]
 transform = Transform3D(-0.35734123, 0, -0.933974, 0, 1, 0, 0.933974, 0, -0.35734123, 103.43285, -18.41615, 46.27477)
 move_offset = Vector3(-10, 2.5, 0)
+preview_progress = 0.78

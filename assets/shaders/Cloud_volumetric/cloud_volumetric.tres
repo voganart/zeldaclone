@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://bgew5q45iomvr"]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bgew5q45iomvr"]
 
 [ext_resource type="Shader" uid="uid://cimb2ey2iw13o" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.gdshader" id="1_sk7x7"]
 
@@ -32,8 +32,8 @@ shader_parameter/erosion_scale = 0.03400000091648
 shader_parameter/erosion_offset_speed = 0.3010000142975
 shader_parameter/sphere_radius = 0.60000002384186
 shader_parameter/softness = 0.6620000307464801
-shader_parameter/color_light = Color(1, 1, 1, 1)
-shader_parameter/color_shadow = Color(0.25, 0.35, 0.55, 1)
+shader_parameter/color_light = Color(0.625, 0.5453125, 0.5125, 1)
+shader_parameter/color_shadow = Color(0.1828125, 0.1828125, 0.3125, 1)
 shader_parameter/shadow_threshold = 0.70400003344
 shader_parameter/shadow_softness = 0.61100002832398
 shader_parameter/density_shadow_power = 0.078000003705

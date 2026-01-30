@@ -32,11 +32,15 @@ Shortcuts/density_decrement=Object(Shortcut,"resource_local_to_scene":false,"res
 ],"script":null)
 
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="ZeldaClone"
 run/main_scene="uid://3um71gotlboh"
-config/features=PackedStringArray("4.5", "Mobile")
+config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
 [audio]
@@ -45,7 +49,7 @@ buses/default_bus_layout="res://assets/audio/default_bus_layout.tres"
 
 [autoload]
 
-PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
+PhantomCameraManager="*uid://duq6jhf6unyis"
 SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
 GameEvents="*res://common/autoload/game_events.gd"
 AIDirector="*res://common/autoload/ai_director.gd"

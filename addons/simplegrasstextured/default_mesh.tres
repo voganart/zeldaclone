@@ -1,35 +1,4 @@
-[gd_resource type="ArrayMesh" load_steps=4 format=4 uid="uid://sptcpdx6wtm8"]
-
-[ext_resource type="Shader" uid="uid://bi3o8elbtqoni" path="res://addons/simplegrasstextured/shaders/grass.gdshader" id="1_flbdh"]
-[ext_resource type="Texture2D" uid="uid://c4ggdp0kg5wjk" path="res://addons/simplegrasstextured/textures/grassbushcc008.png" id="2_vifad"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_3hnmp"]
-resource_local_to_scene = true
-render_priority = 0
-shader = ExtResource("1_flbdh")
-shader_parameter/albedo = Color(1, 1, 1, 1)
-shader_parameter/texture_albedo = ExtResource("2_vifad")
-shader_parameter/texture_frames = Vector2(1, 1)
-shader_parameter/light_mode = 1
-shader_parameter/alpha_scissor_threshold = 0.5
-shader_parameter/normal_scale = 1.0
-shader_parameter/metallic = 0.0
-shader_parameter/metallic_texture_channel = Vector4(1, 0, 0, 0)
-shader_parameter/roughness = 1.0
-shader_parameter/roughness_texture_channel = Vector4(1, 0, 0, 0)
-shader_parameter/specular = 0.5
-shader_parameter/scale_h = 1.0
-shader_parameter/scale_w = 1.0
-shader_parameter/scale_var = -0.25
-shader_parameter/grass_strength = 0.55
-shader_parameter/optimization_by_distance = false
-shader_parameter/optimization_level = 7.0
-shader_parameter/optimization_dist_min = 10.0
-shader_parameter/optimization_dist_max = 50.0
-shader_parameter/grass_size_y = 1.0
-shader_parameter/interactive_mode = true
-shader_parameter/interactive_level_xz = 3.0
-shader_parameter/interactive_level_y = 0.3
+[gd_resource type="ArrayMesh" format=4 uid="uid://sptcpdx6wtm8"]
 
 [resource]
 _surfaces = [{
@@ -38,10 +7,9 @@ _surfaces = [{
 "format": 34359742495,
 "index_count": 12,
 "index_data": PackedByteArray("AAABAAIAAwABAAAABAAFAAYABwAFAAQA"),
-"material": SubResource("ShaderMaterial_3hnmp"),
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 8,
 "vertex_data": PackedByteArray("AAAAvwAAgD8AAAAAAAAAPwAAAAAAAAAAAAAAvwAAAAAAAAAAAAAAPwAAgD8AAAAAAAAAAAAAgD8AAAC/AAAAAAAAAAAAAAA/AAAAAAAAAAAAAAC/AAAAAAAAgD8AAAA//3//f////7//f/9/////v/9//3////+//3//f////78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vw==")
 }]
-metadata/GodotVersion = "4.5.1-stable (steam)"
+metadata/GodotVersion = "4.6-stable (steam)"
