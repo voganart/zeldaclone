@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://c1qkhcqkuoks7"]
+[gd_scene format=3 uid="uid://c1qkhcqkuoks7"]
 
 [ext_resource type="Shader" uid="uid://dmd7y6fsoqikt" path="res://assets/shaders/clouds.gdshader" id="1_krsim"]
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="1_vyg8u"]
@@ -102,11 +102,11 @@ cell_size = 0.15
 agent_height = 2.0
 vertices_per_polygon = 9.0
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" unique_id=1586332136]
 
-[node name="Lights" type="Node3D" parent="."]
+[node name="Lights" type="Node3D" parent="." unique_id=446889470]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lights"]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lights" unique_id=1054259783]
 transform = Transform3D(0.8059284, 0.35710707, -0.47218016, 0, 0.7975839, 0.60320795, 0.59201324, -0.48614237, 0.6427954, 13, 6, 0)
 light_color = Color(1, 0.7488306, 0.49473882, 1)
 light_indirect_energy = 3.0
@@ -120,23 +120,23 @@ directional_shadow_blend_splits = true
 directional_shadow_max_distance = 244.5
 directional_shadow_pancake_size = 10.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Lights" groups=["world_env"]]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Lights" unique_id=479082371 groups=["world_env"]]
 environment = SubResource("Environment_lvx3p")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=328484829]
 physics_interpolation_mode = 1
 transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.70710677, 0, -0.7071068, 0.70710677, -5.224, 8, 18.508)
 cull_mask = 983039
 current = true
 fov = 50.0
 
-[node name="PhantomCameraHost" type="Node" parent="Camera3D"]
+[node name="PhantomCameraHost" type="Node" parent="Camera3D" unique_id=1310057407]
 process_priority = 300
 process_physics_priority = 300
 script = ExtResource("1_vyg8u")
 metadata/_custom_type_script = "uid://bd046eokvcnu2"
 
-[node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
+[node name="PhantomCamera3D" type="Node3D" parent="." unique_id=1591352013 node_paths=PackedStringArray("follow_target")]
 transform = Transform3D(0.999998, 0, 0, 0, 0.7071065, 0.7071041, 0, -0.7071065, 0.7071041, -5.224, 8, 18.508)
 top_level = true
 script = ExtResource("2_krsim")
@@ -153,84 +153,86 @@ spring_length = 10.0
 noise = SubResource("Resource_xn148")
 _preview_noise = false
 noise_emitter_layer = 32
+align_transform_with_view = Callable()
+align_position_with_view = Callable()
 metadata/_custom_type_script = "uid://csjccrhj5wnx7"
 
-[node name="CameraShaker" type="Node" parent="PhantomCamera3D"]
+[node name="CameraShaker" type="Node" parent="PhantomCamera3D" unique_id=14834785]
 script = ExtResource("5_t3ff0")
 trauma_decay = 1.5
 
-[node name="Entities" type="Node3D" parent="."]
+[node name="Entities" type="Node3D" parent="." unique_id=203559268]
 
-[node name="Player" parent="Entities" instance=ExtResource("1_woe6r")]
+[node name="Player" parent="Entities" unique_id=239495721 instance=ExtResource("1_woe6r")]
 transform = Transform3D(0.877983, 0, -0.47869185, 0, 1, 0, 0.47869185, 0, 0.877983, -5.224, 0, 12.508)
 
-[node name="PatrolZone" type="Area3D" parent="Entities"]
+[node name="PatrolZone" type="Area3D" parent="Entities" unique_id=907313582]
 collision_layer = 4
 collision_mask = 4
 
-[node name="EnemySpawner" parent="Entities/PatrolZone" instance=ExtResource("2_xmqbo")]
+[node name="EnemySpawner" parent="Entities/PatrolZone" unique_id=760338768 instance=ExtResource("2_xmqbo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2373433, 0, 2.46294)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Entities/PatrolZone"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Entities/PatrolZone" unique_id=1305762709]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0692639, -1.6758299, 1.4174955)
 shape = SubResource("BoxShape3D_vyg8u")
 debug_color = Color(1, 0, 0, 1)
 
-[node name="Enemy38" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy38" parent="Entities/PatrolZone" unique_id=1497582076 instance=ExtResource("3_j5x01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.90906, 3.8146973e-06, -3.7101824)
 
-[node name="Enemy42" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy42" parent="Entities/PatrolZone" unique_id=1145193274 instance=ExtResource("3_j5x01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6358066, -3.8146973e-06, 1.6507359)
 
-[node name="Enemy40" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy40" parent="Entities/PatrolZone" unique_id=485584093 instance=ExtResource("3_j5x01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.93013, 0, -5.067836)
 
-[node name="Enemy43" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy43" parent="Entities/PatrolZone" unique_id=1866936238 instance=ExtResource("3_j5x01")]
 transform = Transform3D(-0.9901805, 0, 0.13979536, 0, 1, 0, -0.13979536, 0, -0.9901805, -3.2066417, 2.861023e-06, 7.380973)
 
-[node name="Enemy45" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy45" parent="Entities/PatrolZone" unique_id=1085574001 instance=ExtResource("3_j5x01")]
 transform = Transform3D(-0.86140764, 0, -0.5079142, 0, 1, 0, 0.5079142, 0, -0.86140764, 2.6842825, 0, -5.4282207)
 
-[node name="Enemy48" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy48" parent="Entities/PatrolZone" unique_id=73463929 instance=ExtResource("3_j5x01")]
 transform = Transform3D(-0.86140764, 0, -0.5079142, 0, 1, 0, 0.5079142, 0, -0.86140764, 6.2915473, 0, -1.1736125)
 
-[node name="Enemy46" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy46" parent="Entities/PatrolZone" unique_id=1558856915 instance=ExtResource("3_j5x01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6821437, -3.8146973e-06, -3.6403599)
 
-[node name="Enemy47" parent="Entities/PatrolZone" instance=ExtResource("3_j5x01")]
+[node name="Enemy47" parent="Entities/PatrolZone" unique_id=1586514075 instance=ExtResource("3_j5x01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12831068, 2.3841858e-06, -5.099948)
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["nav_region"]]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1273299195 groups=["nav_region"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0606575, -0.26426268, 0.19495583)
 navigation_mesh = SubResource("NavigationMesh_krsim")
 
-[node name="Chests" type="Node3D" parent="NavigationRegion3D"]
+[node name="Chests" type="Node3D" parent="NavigationRegion3D" unique_id=1464021965]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003982544, -0.013222218, 0.0002708435)
 
-[node name="Chest1" parent="NavigationRegion3D/Chests" instance=ExtResource("4_32jpy")]
+[node name="Chest1" parent="NavigationRegion3D/Chests" unique_id=206583096 instance=ExtResource("4_32jpy")]
 transform = Transform3D(-0.9997683, -0.015429946, 0.015014857, -0.015890988, 0.99939054, -0.03108968, -0.01452601, -0.031321082, -0.99940383, -9.038655, -0.0039824247, 11.035268)
 ability_to_unlock = "air_dash"
 
-[node name="Chest5" parent="NavigationRegion3D/Chests" instance=ExtResource("4_32jpy")]
+[node name="Chest5" parent="NavigationRegion3D/Chests" unique_id=1631558438 instance=ExtResource("4_32jpy")]
 transform = Transform3D(-0.047367916, 0, 0.9988775, 0, 1, 0, -0.9988775, 0, -0.047367916, -8.664636, 0, -0.567752)
 ability_to_unlock = "air_dash"
 
-[node name="Chest6" parent="NavigationRegion3D/Chests" instance=ExtResource("4_32jpy")]
+[node name="Chest6" parent="NavigationRegion3D/Chests" unique_id=132974546 instance=ExtResource("4_32jpy")]
 transform = Transform3D(-0.047367916, 0, 0.9988775, 0, 1, 0, -0.9988775, 0, -0.047367916, -8.546474, 0, 1.3308346)
 ability_to_unlock = "air_dash"
 
-[node name="Chest2" parent="NavigationRegion3D/Chests" instance=ExtResource("4_32jpy")]
+[node name="Chest2" parent="NavigationRegion3D/Chests" unique_id=284166018 instance=ExtResource("4_32jpy")]
 transform = Transform3D(-0.9862914, 0, 0.16501322, 0, 1, 0, -0.16501322, 0, -0.9862914, -5.2469893, 1.9073486e-06, 10.424707)
 ability_to_unlock = "ground_slam"
 
-[node name="Chest3" parent="NavigationRegion3D/Chests" instance=ExtResource("4_32jpy")]
+[node name="Chest3" parent="NavigationRegion3D/Chests" unique_id=1398168900 instance=ExtResource("4_32jpy")]
 transform = Transform3D(-0.9999987, 0, -0.0016231686, 0, 1, 0, 0.0016231686, 0, -0.9999987, -7.409265, -0.11247802, 5.0033193)
 
-[node name="Chest4" parent="NavigationRegion3D/Chests" instance=ExtResource("4_32jpy")]
+[node name="Chest4" parent="NavigationRegion3D/Chests" unique_id=592802966 instance=ExtResource("4_32jpy")]
 transform = Transform3D(0.734133, 0, 0.6790058, 0, 1, 0, -0.6790058, 0, 0.734133, 8.334567, 0, 12.771293)
 
-[node name="Environment" type="Node3D" parent="NavigationRegion3D"]
+[node name="Environment" type="Node3D" parent="NavigationRegion3D" unique_id=781520253]
 
-[node name="island" parent="NavigationRegion3D/Environment" instance=ExtResource("5_k2y52")]
+[node name="island" parent="NavigationRegion3D/Environment" unique_id=1578821715 instance=ExtResource("5_k2y52")]
 
 [editable path="NavigationRegion3D/Environment/island"]

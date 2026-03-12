@@ -1,4 +1,4 @@
-[gd_resource type="QuadMesh" load_steps=2 format=3 uid="uid://dmhox60kobeu2"]
+[gd_resource type="QuadMesh" format=3 uid="uid://dmhox60kobeu2"]
 
 [ext_resource type="Material" uid="uid://br1nrjywyx4pb" path="res://assets/materials/Trees/TreeShader.tres" id="1_h8bs7"]
 

@@ -190,7 +190,7 @@ toggle_camera={
 [internationalization]
 
 locale/translations=PackedStringArray("res://assets/translations/texts.en.translation", "res://assets/translations/texts.ru.translation")
-locale/test="ru"
+locale/test="en"
 
 [layer_names]
 

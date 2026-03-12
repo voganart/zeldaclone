@@ -8,7 +8,7 @@ transparency = 1
 vertex_color_use_as_albedo = true
 albedo_color = Color(0.18281268, 1.8247963, 0, 1)
 emission_enabled = true
-emission = Color(0, 2.454227, 0, 1)
+emission = Color(0, 1.353256, 0, 1)
 
 [node name="HealFVX" type="GPUParticles3D" unique_id=461554976]
 material_override = SubResource("StandardMaterial3D_b3r45")
