@@ -7,6 +7,7 @@
 render_priority = 0
 shader = ExtResource("1_sk7x7")
 shader_parameter/steps = 64
+shader_parameter/cheap_steps = 16
 shader_parameter/step_size = 0.02
 shader_parameter/noise_texture = ExtResource("2_noise")
 shader_parameter/cloud_scale = 0.06700000248398

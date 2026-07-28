@@ -4,7 +4,9 @@ render_mode unshaded, cull_front; // Вернули обычный режим
 // --- КАЧЕСТВО ---
 group_uniforms Rendering;
 uniform int steps : hint_range(16, 128) = 64;
+uniform int cheap_steps : hint_range(4, 64) = 16;
 uniform float step_size : hint_range(0.01, 0.1) = 0.02;
+instance uniform float volume_lod_factor : hint_range(0.0, 1.0) = 0.0;
 
 // --- ФОРМА ---
 group_uniforms Shape_Base;
@@ -154,20 +156,26 @@ void fragment() {
 	float t_end = t_hit.y;
 	if (t_start >= t_end) discard;
 
+	int active_steps = int(round(mix(
+		float(steps),
+		float(cheap_steps),
+		clamp(volume_lod_factor, 0.0, 1.0)
+	)));
+	float active_step_size = (t_end - t_start) / max(float(active_steps), 1.0);
 	float dist = t_start;
 	vec3 accum_color = vec3(0.0);
 	float transmittance = 1.0;
-	float dither = fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453) * step_size;
+	float dither = fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453) * active_step_size;
 	dist += dither;
 
-	for(int i = 0; i < steps; i++) {
-		if(dist >= t_end || transmittance < 0.01) break;
+	for(int i = 0; i < 128; i++) {
+		if(i >= active_steps || dist >= t_end || transmittance < 0.01) break;
 		
 		vec3 pos = ray_origin + ray_dir * dist;
 		float density = get_density(pos, v_world_dist);
 		
 		if(density > 0.001) {
-			float step_dens = density * step_size;
+			float step_dens = density * active_step_size;
 			float alpha = 1.0 - exp(-step_dens);
 			
 			float height_projection = dot(pos, v_local_up_dir);
@@ -181,7 +189,7 @@ void fragment() {
 			accum_color += step_color * alpha * transmittance;
 			transmittance *= (1.0 - alpha);
 		}
-		dist += step_size;
+		dist += active_step_size;
 	}
 	
 	float physical_alpha = 1.0 - transmittance;

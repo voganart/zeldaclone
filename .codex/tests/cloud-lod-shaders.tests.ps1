@@ -39,7 +39,10 @@ $volumeSource = Get-Content -LiteralPath (
 foreach ($requiredToken in @(
     'shape_override_enabled',
     'shape_override_scale',
-    'shape_override_offset'
+    'shape_override_offset',
+    'instance uniform float volume_lod_factor',
+    'uniform int cheap_steps',
+    'active_steps'
 )) {
     if (-not $volumeSource.Contains($requiredToken)) {
         throw "Cloud volume shader is missing preview/bake override token: $requiredToken"
