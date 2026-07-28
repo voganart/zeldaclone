@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bkxenrfgp6a4l" path="res://levels/components/CloudManager/CloudManager.gd" id="4_qt6g3"]
 [ext_resource type="PackedScene" uid="uid://bka6ee6o3ddtw" path="res://assets/shaders/Cloud_volumetric/cloud.tscn" id="5_et50k"]
 [ext_resource type="Script" uid="uid://db32vuuhraipx" path="res://levels/components/CloudManager/cloud_lod_controller.gd" id="7_84c8d"]
+[ext_resource type="Material" path="res://assets/shaders/Cloud_impostor/cloud_procedural_billboard.tres" id="8_billboard"]
 
 [sub_resource type="Gradient" id="Gradient_wx41k"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -89,6 +90,7 @@ sun_light = NodePath("Sun")
 moon_light = NodePath("MoonLight")
 world_env = NodePath("WorldEnvironment")
 cloud_material = ExtResource("2_3t2yg")
+cloud_billboard_material = ExtResource("8_billboard")
 master_material_ref = ExtResource("3_3t2yg")
 sun_color = SubResource("Gradient_wx41k")
 sun_energy = SubResource("Curve_3t2yg")

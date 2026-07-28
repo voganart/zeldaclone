@@ -143,12 +143,68 @@ func _connect_graphics_manager() -> void:
 	if _graphics_manager == null:
 		return
 	quality_policy = int(_graphics_manager.current_quality)
+	var settings: Dictionary = _graphics_manager.presets.get(
+		_graphics_manager.current_quality,
+		{}
+	)
+	_apply_quality_settings(settings)
 	if not _graphics_manager.quality_changed.is_connected(_on_graphics_quality_changed):
 		_graphics_manager.quality_changed.connect(_on_graphics_quality_changed)
 
 
 func _on_graphics_quality_changed(settings: Dictionary) -> void:
-	set_quality_policy(int(settings.get("cloud_quality", quality_policy)))
+	_apply_quality_settings(settings)
+	apply_distance(_distance_to_camera())
+
+
+func _apply_quality_settings(settings: Dictionary) -> void:
+	if settings.is_empty():
+		return
+	quality_policy = int(settings.get("cloud_quality", quality_policy))
+	cheap_volume_start = float(settings.get(
+		"cloud_cheap_start",
+		cheap_volume_start
+	))
+	transition_start = float(settings.get(
+		"cloud_transition_start",
+		transition_start
+	))
+	transition_end = maxf(
+		float(settings.get("cloud_transition_end", transition_end)),
+		transition_start + 0.01
+	)
+	_set_volume_material_parameter(
+		&"steps",
+		int(settings.get("cloud_full_steps", 64))
+	)
+	_set_volume_material_parameter(
+		&"cheap_steps",
+		int(settings.get("cloud_cheap_steps", 16))
+	)
+	_set_impostor_material_parameter(
+		&"billboard_steps",
+		int(settings.get("cloud_billboard_steps", 8))
+	)
+
+
+func _set_volume_material_parameter(name: StringName, value: Variant) -> void:
+	_resolve_meshes()
+	for volume_mesh in _volume_meshes:
+		if not is_instance_valid(volume_mesh):
+			continue
+		var material := volume_mesh.get_active_material(0) as ShaderMaterial
+		if material != null:
+			material.set_shader_parameter(name, value)
+			return
+
+
+func _set_impostor_material_parameter(name: StringName, value: Variant) -> void:
+	_resolve_meshes()
+	if not is_instance_valid(_impostor_mesh):
+		return
+	var material := _impostor_mesh.get_active_material(0) as ShaderMaterial
+	if material != null:
+		material.set_shader_parameter(name, value)
 
 
 func _resolve_meshes() -> void:

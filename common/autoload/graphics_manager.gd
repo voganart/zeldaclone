@@ -36,6 +36,12 @@ var presets = {
 		"grass_distance": 20.0, "grass_level": 2.0,
 		"vis_range": 30.0, "vis_margin": 5.0,
 		"cloud_quality": Quality.LOW,
+		"cloud_cheap_start": 0.0,
+		"cloud_transition_start": 45.0,
+		"cloud_transition_end": 75.0,
+		"cloud_full_steps": 20,
+		"cloud_cheap_steps": 8,
+		"cloud_billboard_steps": 5,
 		
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [5.0*5.0, 10.0*10.0, 15.0*15.0] as Array[float],
@@ -69,6 +75,12 @@ var presets = {
 		"grass_distance": 60.0, "grass_level": 10.0,
 		"vis_range": 80.0, "vis_margin": 20.0,
 		"cloud_quality": Quality.MEDIUM,
+		"cloud_cheap_start": 55.0,
+		"cloud_transition_start": 110.0,
+		"cloud_transition_end": 165.0,
+		"cloud_full_steps": 36,
+		"cloud_cheap_steps": 12,
+		"cloud_billboard_steps": 6,
 
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [7.0*7.0, 12.0*12.0, 18.0*18.0] as Array[float],
@@ -102,6 +114,12 @@ var presets = {
 		"grass_distance": 120.0, "grass_level": 20.0,
 		"vis_range": 500.0, "vis_margin": 50.0,
 		"cloud_quality": Quality.HIGH,
+		"cloud_cheap_start": 80.0,
+		"cloud_transition_start": 150.0,
+		"cloud_transition_end": 210.0,
+		"cloud_full_steps": 64,
+		"cloud_cheap_steps": 16,
+		"cloud_billboard_steps": 8,
 
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [8.0*8.0, 15.0*15.0, 20.0*20.0] as Array[float],

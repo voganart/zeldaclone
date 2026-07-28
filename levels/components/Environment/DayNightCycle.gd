@@ -16,6 +16,7 @@ extends Node3D
 
 @export_group("Cloud Material")
 @export var cloud_material: ShaderMaterial 
+@export var cloud_billboard_material: ShaderMaterial
 
 # === НОВЫЕ НАСТРОЙКИ ОБВОДКИ ===
 @export_group("Outline Dimming")
@@ -142,14 +143,26 @@ func update_environment():
 			sky_mat.set_shader_parameter("stars_intensity", stars_val)
 
 	# 4. Облака
-	if cloud_material:
-		if cloud_light_color:
-			cloud_material.set_shader_parameter("color_light", cloud_light_color.sample(sample_pos))
-		if cloud_shadow_color:
-			cloud_material.set_shader_parameter("color_shadow", cloud_shadow_color.sample(sample_pos))
+	_apply_cloud_colors(cloud_material, sample_pos)
+	_apply_cloud_colors(cloud_billboard_material, sample_pos)
 
 	# 5. ОБНОВЛЕНИЕ ОБВОДКИ (OUTLINE)
 	_update_outline_opacity(sample_pos)
+
+
+func _apply_cloud_colors(material: ShaderMaterial, sample_pos: float) -> void:
+	if material == null:
+		return
+	if cloud_light_color:
+		material.set_shader_parameter(
+			"color_light",
+			cloud_light_color.sample(sample_pos)
+		)
+	if cloud_shadow_color:
+		material.set_shader_parameter(
+			"color_shadow",
+			cloud_shadow_color.sample(sample_pos)
+		)
 
 func _update_outline_opacity(sample_pos: float):
 	# Если ссылка потерялась (например, при перезагрузке сцены в редакторе), ищем снова

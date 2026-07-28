@@ -36,8 +36,8 @@ extends Node3D
 
 @export_category("Cloud LOD")
 @export_range(0.0, 1000.0, 1.0, "or_greater") var lod_cheap_volume_start: float = 80.0
-@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_start: float = 50.0
-@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_end: float = 90.0
+@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_start: float = 150.0
+@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_end: float = 210.0
 @export_range(0.0, 10.0, 0.05, "or_greater") var lod_local_radius: float = 1.5
 @export var preview_lod_in_editor: bool = true
 
