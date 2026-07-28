@@ -1,39 +1,62 @@
 shader_type spatial;
 render_mode unshaded, blend_mix, depth_draw_opaque, cull_disabled;
 
-uniform sampler2D albedo_atlas : source_color, filter_linear_mipmap;
-uniform float atlas_frames : hint_range(2.0, 16.0, 1.0) = 8.0;
-uniform vec4 color_modulate : source_color = vec4(1.0);
+group_uniforms Rendering;
+uniform int billboard_steps : hint_range(4, 16) = 8;
+
+group_uniforms Shape;
+uniform sampler3D noise_texture : source_color;
+uniform float cloud_scale : hint_range(0.1, 4.0) = 1.0;
+uniform float density_threshold : hint_range(0.0, 1.0) = 0.2;
+uniform float density_multiplier : hint_range(0.0, 20.0) = 8.0;
+uniform vec3 move_speed = vec3(0.05, 0.0, 0.05);
+uniform float erosion_strength : hint_range(0.0, 1.0) = 0.5;
+uniform float erosion_scale : hint_range(0.01, 2.0) = 0.3;
+uniform float erosion_offset_speed : hint_range(0.0, 1.0) = 0.1;
+uniform float sphere_radius : hint_range(0.1, 0.75) = 0.6;
+uniform float softness : hint_range(0.01, 1.0) = 0.2;
+
+group_uniforms Coloring;
+uniform vec3 color_light : source_color = vec3(1.0);
+uniform vec3 color_shadow : source_color = vec3(0.25, 0.35, 0.55);
+uniform float shadow_threshold : hint_range(0.0, 1.0) = 0.5;
+uniform float shadow_softness : hint_range(0.01, 1.0) = 0.2;
+uniform float density_shadow_power : hint_range(0.0, 5.0) = 2.0;
+uniform float top_highlight_strength : hint_range(0.0, 2.0) = 1.0;
+
+group_uniforms LOD;
+uniform float lod_noise_start : hint_range(0.0, 500.0) = 50.0;
+uniform float lod_noise_end : hint_range(0.0, 1000.0) = 400.0;
+uniform float lod_noise_factor : hint_range(0.1, 1.0) = 0.4;
 instance uniform float lod_fade : hint_range(0.0, 1.0) = 1.0;
 instance uniform bool lod_is_impostor = true;
 
-varying flat vec2 v_grid_base;
-varying flat vec2 v_grid_fract;
+varying flat vec3 v_obj_scale;
+varying flat vec3 v_world_center;
+varying flat float v_world_dist;
 
 
 void vertex() {
-	vec3 camera_position_local = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
+	vec3 camera_position_local =
+		(inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
 	vec3 view_direction = normalize(camera_position_local);
-	view_direction.y = max(-view_direction.y, 0.001);
-	view_direction = normalize(view_direction);
-	vec3 octant = sign(view_direction);
-	float octa_sum = max(dot(view_direction, octant), 0.001);
-	vec3 octahedron = view_direction / octa_sum;
-	vec2 hemi_coord = vec2(
-		octahedron.x + octahedron.z,
-		octahedron.z - octahedron.x
-	);
-	vec2 grid = clamp(
-		(hemi_coord + 1.0) * 0.5,
-		vec2(0.0),
-		vec2(1.0)
-	) * (atlas_frames - 1.0);
-	v_grid_base = floor(grid);
-	v_grid_fract = fract(grid);
 
 	float scale_x = length(MODEL_MATRIX[0].xyz);
 	float scale_y = length(MODEL_MATRIX[1].xyz);
 	float scale_z = length(MODEL_MATRIX[2].xyz);
+	float projected_horizontal = sqrt(
+		scale_x * scale_x * view_direction.z * view_direction.z
+		+ scale_z * scale_z * view_direction.x * view_direction.x
+	);
+	projected_horizontal = max(
+		projected_horizontal,
+		min(scale_x, scale_z) * 0.5
+	);
+
+	v_obj_scale = vec3(scale_x, scale_y, scale_z);
+	v_world_center = MODEL_MATRIX[3].xyz;
+	v_world_dist = distance(CAMERA_POSITION_WORLD, v_world_center);
+
 	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(
 		INV_VIEW_MATRIX[0],
 		INV_VIEW_MATRIX[1],
@@ -41,11 +64,69 @@ void vertex() {
 		MODEL_MATRIX[3]
 	);
 	MODELVIEW_MATRIX *= mat4(
-		vec4(scale_x, 0.0, 0.0, 0.0),
+		vec4(projected_horizontal, 0.0, 0.0, 0.0),
 		vec4(0.0, scale_y, 0.0, 0.0),
-		vec4(0.0, 0.0, scale_z, 0.0),
+		vec4(0.0, 0.0, 1.0, 0.0),
 		vec4(0.0, 0.0, 0.0, 1.0)
 	);
+}
+
+
+vec2 ray_box_intersection(
+	vec3 ray_origin,
+	vec3 ray_dir,
+	vec3 box_min,
+	vec3 box_max
+) {
+	vec3 safe_dir = ray_dir;
+	safe_dir.x = abs(safe_dir.x) < 0.0001 ? 0.0001 : safe_dir.x;
+	safe_dir.y = abs(safe_dir.y) < 0.0001 ? 0.0001 : safe_dir.y;
+	safe_dir.z = abs(safe_dir.z) < 0.0001 ? 0.0001 : safe_dir.z;
+	vec3 t_min = (box_min - ray_origin) / safe_dir;
+	vec3 t_max = (box_max - ray_origin) / safe_dir;
+	vec3 t1 = min(t_min, t_max);
+	vec3 t2 = max(t_min, t_max);
+	return vec2(
+		max(max(t1.x, t1.y), t1.z),
+		min(min(t2.x, t2.y), t2.z)
+	);
+}
+
+
+float get_density(vec3 p, float dist_to_cam) {
+	float dist_to_edge = max(abs(p.x), max(abs(p.y), abs(p.z)));
+	float edge_mask = 1.0 - smoothstep(0.35, 0.5, dist_to_edge);
+	if (edge_mask <= 0.0) {
+		return 0.0;
+	}
+
+	float sphere_mask = 1.0 - smoothstep(
+		sphere_radius - softness,
+		sphere_radius,
+		length(p)
+	);
+	vec3 erosion_uv =
+		(p * v_obj_scale * erosion_scale)
+		+ (v_world_center * 0.1)
+		+ (TIME * move_speed * erosion_offset_speed);
+	float erosion_val = texture(noise_texture, erosion_uv).r;
+	float shape_mask = sphere_mask - erosion_val * erosion_strength;
+	if (shape_mask <= 0.0) {
+		return 0.0;
+	}
+
+	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
+	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
+	vec3 detail_uv =
+		p * v_obj_scale * cloud_scale * current_scale_mod
+		+ TIME * move_speed;
+	float detail_noise = texture(noise_texture, detail_uv).r;
+	float final_density = detail_noise * shape_mask * edge_mask;
+	return smoothstep(
+		density_threshold,
+		density_threshold + 0.1,
+		final_density
+	) * density_multiplier;
 }
 
 
@@ -77,13 +158,6 @@ float lod_bayer4x4(vec2 pixel_position) {
 }
 
 
-vec4 sample_atlas_frame(vec2 frame, vec2 local_uv) {
-	vec2 safe_frame = clamp(frame, vec2(0.0), vec2(atlas_frames - 1.0));
-	vec2 safe_uv = clamp(local_uv, vec2(0.002), vec2(0.998));
-	return texture(albedo_atlas, (safe_frame + safe_uv) / atlas_frames);
-}
-
-
 void fragment() {
 	float lod_threshold = lod_bayer4x4(FRAGCOORD.xy);
 	if ((!lod_is_impostor && lod_threshold < lod_fade)
@@ -91,16 +165,66 @@ void fragment() {
 		discard;
 	}
 
-	vec4 frame_00 = sample_atlas_frame(v_grid_base, UV);
-	vec4 frame_10 = sample_atlas_frame(v_grid_base + vec2(1.0, 0.0), UV);
-	vec4 frame_01 = sample_atlas_frame(v_grid_base + vec2(0.0, 1.0), UV);
-	vec4 frame_11 = sample_atlas_frame(v_grid_base + vec2(1.0, 1.0), UV);
-	vec4 albedo_x0 = mix(frame_00, frame_10, v_grid_fract.x);
-	vec4 albedo_x1 = mix(frame_01, frame_11, v_grid_fract.x);
-	vec4 albedo = mix(albedo_x0, albedo_x1, v_grid_fract.y) * color_modulate;
-	if (albedo.a < 0.01) {
+	vec2 plane_position = (UV - vec2(0.5)) * 1.4;
+	vec3 ray_origin = vec3(plane_position, -0.75);
+	vec3 ray_dir = vec3(0.0, 0.0, 1.0);
+	vec2 t_hit = ray_box_intersection(
+		ray_origin,
+		ray_dir,
+		vec3(-0.5),
+		vec3(0.5)
+	);
+	float t_start = max(t_hit.x, 0.0);
+	float t_end = t_hit.y;
+	if (t_start >= t_end) {
 		discard;
 	}
-	ALBEDO = albedo.rgb;
-	ALPHA = albedo.a;
+
+	float active_step_size =
+		(t_end - t_start) / max(float(billboard_steps), 1.0);
+	float dist = t_start;
+	float jitter =
+		fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453)
+		* active_step_size;
+	dist += jitter;
+
+	vec3 accum_color = vec3(0.0);
+	float transmittance = 1.0;
+	for (int i = 0; i < 16; i++) {
+		if (
+			i >= billboard_steps
+			|| dist >= t_end
+			|| transmittance < 0.01
+		) {
+			break;
+		}
+
+		vec3 pos = ray_origin + ray_dir * dist;
+		float density = get_density(pos, v_world_dist);
+		if (density > 0.001) {
+			float step_dens = density * active_step_size;
+			float alpha = 1.0 - exp(-step_dens);
+			float height_factor = clamp(pos.y + 0.5, 0.0, 1.0);
+			float density_factor = exp(-density * density_shadow_power);
+			float light_energy =
+				density_factor * 0.5
+				+ height_factor * top_highlight_strength;
+			float light_mix = smoothstep(
+				shadow_threshold - shadow_softness,
+				shadow_threshold + shadow_softness,
+				light_energy
+			);
+			vec3 step_color = mix(color_shadow, color_light, light_mix);
+			accum_color += step_color * alpha * transmittance;
+			transmittance *= 1.0 - alpha;
+		}
+		dist += active_step_size;
+	}
+
+	float physical_alpha = 1.0 - transmittance;
+	if (physical_alpha < 0.01) {
+		discard;
+	}
+	ALBEDO = accum_color / max(physical_alpha, 0.001);
+	ALPHA = physical_alpha;
 }

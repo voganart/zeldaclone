@@ -3,8 +3,7 @@
 [ext_resource type="Material" uid="uid://bgew5q45iomvr" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.tres" id="1_lflr2"]
 [ext_resource type="Shader" uid="uid://bsl5od8uy2qhb" path="res://assets/shaders/Cloud_volumetric/cloud_billboard.gdshader" id="2_lflr2"]
 [ext_resource type="Script" uid="uid://db32vuuhraipx" path="res://levels/components/CloudManager/cloud_lod_controller.gd" id="3_lod"]
-[ext_resource type="Shader" uid="uid://bnj0b832fat6h" path="res://assets/shaders/Cloud_impostor/cloud_impostor.gdshader" id="4_impostor"]
-[ext_resource type="Texture2D" uid="uid://7su7ftuf2nge" path="res://assets/shaders/Cloud_impostor/generated/cloud_01_albedo.png" id="5_atlas"]
+[ext_resource type="Material" path="res://assets/shaders/Cloud_impostor/cloud_procedural_billboard.tres" id="4_impostor_material"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_4pu8x"]
 
@@ -31,14 +30,7 @@ shader_parameter/fade_distance = 300.00001425
 shader_parameter/fade_margin = 50.0
 
 [sub_resource type="QuadMesh" id="QuadMesh_impostor"]
-size = Vector2(1.15, 1.15)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_impostor"]
-render_priority = 0
-shader = ExtResource("4_impostor")
-shader_parameter/albedo_atlas = ExtResource("5_atlas")
-shader_parameter/atlas_frames = 8.0
-shader_parameter/color_modulate = Color(1, 1, 1, 1)
+size = Vector2(1.5, 1.5)
 
 [node name="Cloud" type="Node3D" unique_id=1919448125]
 script = ExtResource("3_lod")
@@ -62,7 +54,8 @@ surface_material_override/0 = SubResource("ShaderMaterial_nmgs7")
 [node name="ImpostorMesh" type="MeshInstance3D" parent="." unique_id=1794189865]
 visible = false
 cast_shadow = 0
+extra_cull_margin = 25.0
 instance_shader_parameters/lod_fade = 0.0
 instance_shader_parameters/lod_is_impostor = true
 mesh = SubResource("QuadMesh_impostor")
-surface_material_override/0 = SubResource("ShaderMaterial_impostor")
+surface_material_override/0 = ExtResource("4_impostor_material")

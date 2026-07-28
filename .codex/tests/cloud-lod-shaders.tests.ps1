@@ -27,9 +27,21 @@ foreach ($relativePath in $shaderPaths) {
 $impostorSource = Get-Content -LiteralPath (
     Join-Path $projectRoot 'assets/shaders/Cloud_impostor/cloud_impostor.gdshader'
 ) -Raw
-foreach ($requiredToken in @('albedo_atlas', 'atlas_frames', 'sample_atlas_frame', 'v_grid_fract')) {
+foreach ($requiredToken in @(
+    'uniform sampler3D noise_texture',
+    'uniform int billboard_steps',
+    'ray_box_intersection',
+    'get_density',
+    'color_light',
+    'color_shadow'
+)) {
     if (-not $impostorSource.Contains($requiredToken)) {
-        throw "Cloud impostor shader is missing atlas blending token: $requiredToken"
+        throw "Cloud billboard shader is missing procedural token: $requiredToken"
+    }
+}
+foreach ($forbiddenToken in @('albedo_atlas', 'atlas_frames', 'sample_atlas_frame')) {
+    if ($impostorSource.Contains($forbiddenToken)) {
+        throw "Runtime cloud billboard still depends on baked atlas token: $forbiddenToken"
     }
 }
 

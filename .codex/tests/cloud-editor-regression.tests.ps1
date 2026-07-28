@@ -26,8 +26,8 @@ $impostorSection = [regex]::Match(
 if ($impostorSection -notmatch '(?m)^visible = false$') {
     throw 'ImpostorMesh must start hidden until the LOD controller selects it'
 }
-if ($cloudScene -notmatch 'size = Vector2\(1\.15, 1\.15\)') {
-    throw 'Impostor quad must use the single-cloud reference size'
+if ($cloudScene -notmatch 'size = Vector2\(1\.5, 1\.5\)') {
+    throw 'Procedural billboard quad must include a silhouette safety margin'
 }
 
 $controller = Get-Content -LiteralPath (
