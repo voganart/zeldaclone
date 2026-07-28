@@ -35,6 +35,7 @@ extends Node3D
 @export var scale_max: Vector3 = Vector3(8.0, 3.0, 8.0)
 
 @export_category("Cloud LOD")
+@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_cheap_volume_start: float = 80.0
 @export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_start: float = 50.0
 @export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_end: float = 90.0
 @export_range(0.0, 10.0, 0.05, "or_greater") var lod_local_radius: float = 1.5
@@ -64,6 +65,7 @@ func _configure_cloud_lod(cloud: Node) -> void:
 		return
 	cloud.call(
 		"configure_lod",
+		lod_cheap_volume_start,
 		lod_transition_start,
 		lod_transition_end,
 		lod_local_radius,

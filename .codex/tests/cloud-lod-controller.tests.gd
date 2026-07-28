@@ -19,17 +19,19 @@ func _ready() -> void:
 	controller.volume_mesh_path = NodePath("Volume")
 	controller.impostor_mesh_path = NodePath("Impostor")
 	controller.quality_policy = 2
-	controller.transition_start = 120.0
-	controller.transition_end = 180.0
+	controller.cheap_volume_start = 80.0
+	controller.transition_start = 150.0
+	controller.transition_end = 210.0
 
-	_expect_state(controller, volume, impostor, 100.0, true, false, 0.0)
-	_expect_state(controller, volume, impostor, 150.0, true, true, 0.5)
-	_expect_state(controller, volume, impostor, 200.0, false, true, 1.0)
+	_expect_state(controller, volume, impostor, 40.0, true, false, 0.0, 0.0)
+	_expect_state(controller, volume, impostor, 120.0, true, false, 0.0, 1.0)
+	_expect_state(controller, volume, impostor, 180.0, true, true, 0.5, 1.0)
+	_expect_state(controller, volume, impostor, 240.0, false, true, 1.0, 1.0)
 
 	controller.quality_policy = 1
-	_expect_state(controller, volume, impostor, 20.0, false, true, 1.0)
+	_expect_state(controller, volume, impostor, 20.0, true, false, 0.0, 0.65)
 	controller.quality_policy = 0
-	_expect_state(controller, volume, impostor, 20.0, false, false, 1.0)
+	_expect_state(controller, volume, impostor, 20.0, true, false, 0.0, 1.0)
 	_finish()
 
 
@@ -42,6 +44,7 @@ func _make_mesh(node_name: String) -> MeshInstance3D:
 shader_type spatial;
 instance uniform float lod_fade = 0.0;
 instance uniform bool lod_is_impostor = false;
+instance uniform float volume_lod_factor = 0.0;
 void fragment() { ALBEDO = vec3(lod_fade); }
 """
 	var material := ShaderMaterial.new()
@@ -57,7 +60,8 @@ func _expect_state(
 	distance: float,
 	expected_volume: bool,
 	expected_impostor: bool,
-	expected_fade: float
+	expected_fade: float,
+	expected_volume_lod: float
 ) -> void:
 	controller.apply_distance(distance)
 	if volume.visible != expected_volume:
@@ -72,6 +76,11 @@ func _expect_state(
 		_fail("Volume must use the volume half of complementary dither")
 	if not bool(impostor.get_instance_shader_parameter("lod_is_impostor")):
 		_fail("Impostor must use the impostor half of complementary dither")
+	if not is_equal_approx(
+		float(volume.get_instance_shader_parameter("volume_lod_factor")),
+		expected_volume_lod
+	):
+		_fail("Distance %.1f: wrong volume raymarch LOD" % distance)
 
 
 func _fail(message: String) -> void:

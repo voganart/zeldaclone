@@ -37,7 +37,10 @@ foreach ($requiredToken in @(
     '_editor_preview_distance',
     'get_tree().edited_scene_root == self',
     '_set_shape_override',
-    'shape_override_enabled'
+    'shape_override_enabled',
+    'volume_lod_factor',
+    'PreviewMode',
+    'cheap_volume_start'
 )) {
     if (-not $controller.Contains($requiredToken)) {
         throw "Cloud LOD controller is missing editor-safe behavior: $requiredToken"

@@ -4,12 +4,21 @@ extends Node3D
 
 const LodPolicy = preload("res://levels/components/CloudManager/cloud_lod_policy.gd")
 
+enum PreviewMode {
+	AUTO,
+	FULL_VOLUME,
+	CHEAP_VOLUME,
+	BILLBOARD,
+	TRANSITION,
+}
+
 @export_category("Cloud Meshes")
 @export var volume_mesh_path: NodePath = NodePath("VolumetricMesh")
 @export var impostor_mesh_path: NodePath = NodePath("ImpostorMesh")
 
 @export_category("LOD")
 @export_enum("Low", "Medium", "High") var quality_policy: int = LodPolicy.QualityPolicy.HIGH
+@export_range(0.0, 10000.0, 1.0, "or_greater") var cheap_volume_start: float = 80.0
 @export_range(0.0, 10000.0, 1.0, "or_greater") var transition_start: float = 50.0
 @export_range(0.0, 10000.0, 1.0, "or_greater") var transition_end: float = 90.0
 @export_range(0.0, 100.0, 0.05, "or_greater") var lod_local_radius: float = 1.5
@@ -18,6 +27,8 @@ const LodPolicy = preload("res://levels/components/CloudManager/cloud_lod_policy
 @export var camera_path: NodePath
 @export var auto_update_from_camera: bool = true
 @export var preview_lod_in_editor: bool = true
+@export_enum("Auto", "Full Volume", "Cheap Volume", "Billboard", "Transition")
+var preview_mode: int = PreviewMode.AUTO : set = _set_preview_mode
 @export_range(0.05, 1.0, 0.05) var update_interval: float = 0.15
 
 @export_category("Editor Preview Shape")
@@ -36,7 +47,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		if preview_lod_in_editor:
 			_set_shape_override(true)
-			apply_distance(_editor_preview_distance())
+			apply_distance(_preview_distance())
 		else:
 			_set_shape_override(false)
 	else:
@@ -50,13 +61,17 @@ func _process(delta: float) -> void:
 		return
 	if Engine.is_editor_hint() and not preview_lod_in_editor:
 		return
-	if Engine.is_editor_hint() and _is_editing_cloud_scene():
+	if (
+		Engine.is_editor_hint()
+		and _is_editing_cloud_scene()
+		and preview_mode == PreviewMode.AUTO
+	):
 		return
 	_update_accumulator += delta
 	if _update_accumulator < update_interval:
 		return
 	_update_accumulator = 0.0
-	apply_distance(_editor_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+	apply_distance(_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
 
 
 func apply_distance(distance: float) -> void:
@@ -64,10 +79,12 @@ func apply_distance(distance: float) -> void:
 	var state: Dictionary = LodPolicy.evaluate(
 		distance,
 		quality_policy,
+		cheap_volume_start,
 		transition_start,
 		transition_end
 	)
 	var fade := float(state["lod_fade"])
+	var volume_lod_factor := float(state["volume_lod_factor"])
 
 	for volume_mesh in _volume_meshes:
 		if not is_instance_valid(volume_mesh):
@@ -75,6 +92,10 @@ func apply_distance(distance: float) -> void:
 		volume_mesh.visible = bool(state["show_volume"])
 		volume_mesh.set_instance_shader_parameter(&"lod_fade", fade)
 		volume_mesh.set_instance_shader_parameter(&"lod_is_impostor", false)
+		volume_mesh.set_instance_shader_parameter(
+			&"volume_lod_factor",
+			volume_lod_factor
+		)
 
 	if is_instance_valid(_impostor_mesh):
 		_impostor_mesh.visible = bool(state["show_impostor"])
@@ -88,16 +109,19 @@ func set_quality_policy(value: int) -> void:
 		LodPolicy.QualityPolicy.LOW,
 		LodPolicy.QualityPolicy.HIGH
 	)
-	apply_distance(_editor_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+	apply_distance(_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
 
 
 func configure_lod(
+	cheap_start_distance: float,
 	start_distance: float,
 	end_distance: float,
 	local_radius: float,
 	editor_preview_enabled: bool = true
 ) -> void:
+	cheap_volume_start = maxf(cheap_start_distance, 0.0)
 	transition_start = maxf(start_distance, 0.0)
+	cheap_volume_start = minf(cheap_volume_start, transition_start)
 	transition_end = maxf(end_distance, transition_start + 0.01)
 	lod_local_radius = maxf(local_radius, 0.0)
 	if Engine.is_editor_hint():
@@ -105,7 +129,13 @@ func configure_lod(
 		_set_shape_override(preview_lod_in_editor)
 		if not preview_lod_in_editor:
 			return
-	apply_distance(_editor_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+	apply_distance(_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+
+
+func _set_preview_mode(value: int) -> void:
+	preview_mode = value
+	if Engine.is_editor_hint() and is_inside_tree() and preview_lod_in_editor:
+		apply_distance(_preview_distance())
 
 
 func _connect_graphics_manager() -> void:
@@ -161,6 +191,20 @@ func _editor_preview_distance() -> float:
 	if _is_editing_cloud_scene():
 		return 0.0
 	return _distance_to_camera()
+
+
+func _preview_distance() -> float:
+	match preview_mode:
+		PreviewMode.FULL_VOLUME:
+			return 0.0
+		PreviewMode.CHEAP_VOLUME:
+			return lerpf(cheap_volume_start, transition_start, 0.75)
+		PreviewMode.BILLBOARD:
+			return transition_end + 1.0
+		PreviewMode.TRANSITION:
+			return lerpf(transition_start, transition_end, 0.5)
+		_:
+			return _editor_preview_distance()
 
 
 func _distance_to_camera() -> float:
