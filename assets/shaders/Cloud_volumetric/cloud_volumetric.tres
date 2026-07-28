@@ -1,7 +1,7 @@
-[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bgew5q45iomvr"]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bgew5q45iomvr"]
 
 [ext_resource type="Shader" uid="uid://cimb2ey2iw13o" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.gdshader" id="1_sk7x7"]
-[ext_resource type="Texture3D" path="res://assets/shaders/Cloud_volumetric/cloud_noise.tres" id="2_noise"]
+[ext_resource type="NoiseTexture3D" path="res://assets/shaders/Cloud_volumetric/cloud_noise.tres" id="2_noise"]
 
 [resource]
 render_priority = 0

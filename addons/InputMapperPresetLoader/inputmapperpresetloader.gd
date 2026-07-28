@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const editorAddon = preload("res://addons/inputmapperpresetloader/InputMapperPresets.tscn")
+const editorAddon = preload("res://addons/InputMapperPresetLoader/InputMapperPresets.tscn")
 var InputMapperPresetsScene
 
 

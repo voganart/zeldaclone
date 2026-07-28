@@ -549,7 +549,6 @@ item/5/preview = SubResource("ImageTexture_s8n2r")
 metadata/_editor_source_scene = "res://assets/models/environment/gridmap_meshlib.tscn"
 
 [node name="Level01" type="Node3D" unique_id=219459109 node_paths=PackedStringArray("player_start", "phantom_camera", "hud", "tutorial_manager")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.978054, 3.2579021, -1.0552444)
 script = ExtResource("1_4p2fq")
 player_scene = ExtResource("8_ykjdn")
 player_start = NodePath("PlayerStart")

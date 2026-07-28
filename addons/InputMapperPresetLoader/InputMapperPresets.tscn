@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cpunnqo5npx7a"]
 
-[ext_resource type="Script" path="res://addons/inputmapperpresetloader/InputMapperPresets.gd" id="1_m65gv"]
+[ext_resource type="Script" path="res://addons/InputMapperPresetLoader/InputMapperPresets.gd" id="1_m65gv"]
 
 [node name="InputMapperPresets" type="Control"]
 layout_mode = 3

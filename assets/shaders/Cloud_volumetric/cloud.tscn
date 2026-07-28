@@ -42,6 +42,7 @@ instance_shader_parameters/lod_is_impostor = false
 instance_shader_parameters/shape_override_enabled = 1.0
 instance_shader_parameters/shape_override_offset = Vector3(0.17, 0.33, 0.61)
 instance_shader_parameters/shape_override_scale = Vector3(70, 40, 110)
+instance_shader_parameters/volume_lod_factor = 0.0
 mesh = SubResource("BoxMesh_4pu8x")
 surface_material_override/0 = ExtResource("1_lflr2")
 

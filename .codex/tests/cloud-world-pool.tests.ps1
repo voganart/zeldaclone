@@ -86,6 +86,15 @@ if ($runtimeProcess.Contains('rotate_y(')) {
 if ($runtimeProcess.Contains('global_position.x = player_pos.x')) {
     throw 'Cloud manager still follows the player at runtime'
 }
+foreach ($unsafeInference in @(
+    'var target_cell := _requested_cells.pop_front()',
+    'var released := _released_clouds.pop_back()',
+    'var center := cluster_centers.pick_random()'
+)) {
+    if ($manager.Contains($unsafeInference)) {
+        throw "Variant inference warning remains: $unsafeInference"
+    }
+}
 
 foreach ($shader in @($volumeShader, $impostorShader)) {
     if (-not $shader.Contains('instance uniform float pool_fade')) {

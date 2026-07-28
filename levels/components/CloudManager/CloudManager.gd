@@ -174,7 +174,7 @@ func _process_relocations() -> void:
 	var update_budget := maxi(pool_updates_per_frame, 1)
 	while update_budget > 0:
 		if not _requested_cells.is_empty():
-			var target_cell := _requested_cells.pop_front()
+			var target_cell: Vector3i = _requested_cells.pop_front()
 			if _active_cells.has(target_cell) or _reserved_cells.has(target_cell):
 				continue
 			var cloud: Node3D
@@ -191,7 +191,7 @@ func _process_relocations() -> void:
 			continue
 
 		if not _released_clouds.is_empty():
-			var released := _released_clouds.pop_back()
+			var released: Node3D = _released_clouds.pop_back()
 			_start_fade_out(released, Vector3i.ZERO, false)
 			update_budget -= 1
 			continue
@@ -356,7 +356,7 @@ func spawn_clouds() -> void:
 
 		var direction := Vector3.UP
 		if use_clustering and not cluster_centers.is_empty():
-			var center := cluster_centers.pick_random()
+			var center: Vector3 = cluster_centers.pick_random()
 			var offset := Vector3(
 				randf_range(-1.0, 1.0),
 				randf_range(-1.0, 1.0),
