@@ -33,6 +33,7 @@ const STATE_DEAD = "dead"
 const STATE_COMBAT_STANCE = "combatstance"
 const INPUT_TOGGLE_CAMERA = "toggle_camera" 
 const INPUT_DEBUG_FLIGHT_TOGGLE = "debug_flight_toggle"
+const INPUT_CLOUD_TUNING_TOGGLE = "cloud_tuning_toggle"
 # --- АНИМАЦИИ (Resource Names) ---
 const ANIM_PLAYER_IDLE = "Boy_idle"
 const ANIM_PLAYER_WALK = "Boy_walk"

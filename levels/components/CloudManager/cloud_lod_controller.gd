@@ -40,6 +40,7 @@ var _impostor_mesh: MeshInstance3D
 var _graphics_manager: Node
 var _update_accumulator: float = 0.0
 var _pool_fade: float = 1.0
+var _lod_mode: StringName = &"Billboard"
 
 
 func _ready() -> void:
@@ -87,6 +88,14 @@ func apply_distance(distance: float) -> void:
 	)
 	var fade := float(state["lod_fade"])
 	var volume_lod_factor := float(state["volume_lod_factor"])
+	if fade >= 0.999:
+		_lod_mode = &"Billboard"
+	elif fade > 0.001:
+		_lod_mode = &"Transition"
+	elif volume_lod_factor > 0.001:
+		_lod_mode = &"Cheap"
+	else:
+		_lod_mode = &"Full"
 
 	for volume_mesh in _volume_meshes:
 		if not is_instance_valid(volume_mesh):
@@ -112,6 +121,10 @@ func set_quality_policy(value: int) -> void:
 		LodPolicy.QualityPolicy.HIGH
 	)
 	apply_distance(_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+
+
+func get_lod_mode() -> StringName:
+	return _lod_mode
 
 
 func set_pool_fade(value: float) -> void:

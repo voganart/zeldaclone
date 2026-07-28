@@ -1,0 +1,94 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://levels/components/CloudManager/cloud_tuning_panel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.025, 0.035, 0.055, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.55, 0.85, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+
+[node name="CloudTuningPanel" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 750.0
+offset_bottom = 880.0
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Root/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Cloud Tuning — F10"
+
+[node name="StatsLabel" type="Label" parent="Root/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Active 0 | Full 0 | Cheap 0 | Billboard 0 | Pending 0"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/Panel/VBox"]
+custom_minimum_size = Vector2(0, 690)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Fields" type="VBoxContainer" parent="Root/Panel/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Panel/VBox"]
+layout_mode = 2
+
+[node name="RegenerateButton" type="Button" parent="Root/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Regenerate"
+
+[node name="SaveButton" type="Button" parent="Root/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save Project"
+
+[node name="ReloadButton" type="Button" parent="Root/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reload Saved"
+
+[node name="ResetButton" type="Button" parent="Root/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reset"
+
+[node name="StatusLabel" type="Label" parent="Root/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Unsaved runtime values"

@@ -7,6 +7,11 @@ const CloudCellLayout = preload(
 const CloudExclusionMath = preload(
 	"res://levels/components/CloudManager/cloud_exclusion_math.gd"
 )
+const CloudTuningPanelScene = preload(
+	"res://levels/components/CloudManager/cloud_tuning_panel.tscn"
+)
+
+signal tuning_profile_changed(profile: CloudTuningProfile)
 
 @export_category("Editor Actions")
 @export var generate_clouds: bool = false : set = _on_generate_btn_pressed
@@ -136,6 +141,8 @@ func _initialize_runtime_pool() -> void:
 
 	_pool_initialized = true
 	_refresh_exclusion_volumes()
+	if OS.is_debug_build():
+		_create_tuning_panel()
 
 
 func apply_tuning_profile(profile: CloudTuningProfile) -> void:
@@ -169,6 +176,92 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 	_pool_settings_dirty = true
 	_refresh_exclusion_volumes()
 	_configure_existing_cloud_lods()
+	if _pool_initialized:
+		_ensure_pool_capacity()
+	tuning_profile_changed.emit(tuning_profile)
+
+
+func regenerate_from_profile() -> void:
+	apply_tuning_profile(tuning_profile)
+	_last_player_cell = Vector3i(2147483647, 2147483647, 2147483647)
+	_pool_settings_dirty = true
+
+
+func save_tuning_profile() -> Error:
+	if not OS.is_debug_build() or tuning_profile == null:
+		return ERR_UNAVAILABLE
+	if tuning_profile.resource_path.is_empty():
+		return ERR_FILE_BAD_PATH
+	tuning_profile.sanitize()
+	return ResourceSaver.save(tuning_profile, tuning_profile.resource_path)
+
+
+func reload_tuning_profile() -> Error:
+	if tuning_profile == null or tuning_profile.resource_path.is_empty():
+		return ERR_FILE_BAD_PATH
+	var loaded_resource := ResourceLoader.load(
+		tuning_profile.resource_path,
+		"CloudTuningProfile",
+		ResourceLoader.CACHE_MODE_IGNORE
+	)
+	var loaded_profile := loaded_resource as CloudTuningProfile
+	if loaded_profile == null:
+		return ERR_FILE_CANT_OPEN
+	apply_tuning_profile(loaded_profile)
+	return OK
+
+
+func get_cloud_stats() -> Dictionary:
+	var stats := {
+		"Active": 0,
+		"Full": 0,
+		"Cheap": 0,
+		"Transition": 0,
+		"Billboard": 0,
+		"Pending": _requested_cells.size(),
+		"Capacity": tuning_profile.pool_capacity if tuning_profile != null else cloud_count,
+	}
+	var seen: Dictionary = {}
+	for cloud_variant in _active_cells.values() + _reserved_cells.values():
+		var cloud := cloud_variant as Node3D
+		if not is_instance_valid(cloud) or seen.has(cloud):
+			continue
+		seen[cloud] = true
+		stats["Active"] = int(stats["Active"]) + 1
+		if cloud.has_method("get_lod_mode"):
+			var mode := String(cloud.call("get_lod_mode"))
+			if stats.has(mode):
+				stats[mode] = int(stats[mode]) + 1
+	return stats
+
+
+func _ensure_pool_capacity() -> void:
+	if tuning_profile == null or cloud_scene == null:
+		return
+	var pool_clouds: Array[Node3D] = []
+	for child in get_children():
+		if child is Node3D and child.has_method("configure_lod"):
+			pool_clouds.append(child as Node3D)
+	while pool_clouds.size() < tuning_profile.pool_capacity:
+		var cloud := cloud_scene.instantiate() as Node3D
+		add_child(cloud)
+		cloud.visible = false
+		cloud.call("set_pool_fade", 0.0)
+		_configure_cloud_lod(cloud)
+		_free_clouds.append(cloud)
+		pool_clouds.append(cloud)
+
+
+func _create_tuning_panel() -> void:
+	if not OS.is_debug_build() or not is_inside_tree():
+		return
+	var panel := CloudTuningPanelScene.instantiate()
+	get_tree().root.add_child(panel)
+	panel.call("setup", self)
+	tree_exiting.connect(func():
+		if is_instance_valid(panel):
+			panel.queue_free()
+	)
 
 
 func _refresh_exclusion_volumes() -> void:
