@@ -33,6 +33,7 @@ uniform float lod_noise_end : hint_range(0.0, 1000.0) = 400.0;
 uniform float lod_noise_factor : hint_range(0.1, 1.0) = 0.4;
 instance uniform float lod_fade : hint_range(0.0, 1.0) = 1.0;
 instance uniform bool lod_is_impostor = true;
+instance uniform float pool_fade : hint_range(0.0, 1.0) = 1.0;
 
 varying flat vec3 v_obj_scale;
 varying flat vec3 v_world_center;
@@ -243,6 +244,7 @@ void fragment() {
 	}
 
 	float physical_alpha = 1.0 - transmittance;
+	physical_alpha *= pool_fade;
 	if (physical_alpha < 0.01) {
 		discard;
 	}

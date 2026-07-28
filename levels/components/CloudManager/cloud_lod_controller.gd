@@ -39,6 +39,7 @@ var _volume_meshes: Array[MeshInstance3D] = []
 var _impostor_mesh: MeshInstance3D
 var _graphics_manager: Node
 var _update_accumulator: float = 0.0
+var _pool_fade: float = 1.0
 
 
 func _ready() -> void:
@@ -54,6 +55,7 @@ func _ready() -> void:
 		_set_shape_override(false)
 		_connect_graphics_manager()
 		apply_distance(_distance_to_camera())
+	set_pool_fade(_pool_fade)
 
 
 func _process(delta: float) -> void:
@@ -110,6 +112,16 @@ func set_quality_policy(value: int) -> void:
 		LodPolicy.QualityPolicy.HIGH
 	)
 	apply_distance(_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+
+
+func set_pool_fade(value: float) -> void:
+	_pool_fade = clampf(value, 0.0, 1.0)
+	_resolve_meshes()
+	for volume_mesh in _volume_meshes:
+		if is_instance_valid(volume_mesh):
+			volume_mesh.set_instance_shader_parameter(&"pool_fade", _pool_fade)
+	if is_instance_valid(_impostor_mesh):
+		_impostor_mesh.set_instance_shader_parameter(&"pool_fade", _pool_fade)
 
 
 func configure_lod(

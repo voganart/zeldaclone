@@ -7,6 +7,18 @@ $layoutPath = Join-Path (
 $managerPath = Join-Path (
     $projectRoot
 ) 'levels/components/CloudManager/CloudManager.gd'
+$controllerPath = Join-Path (
+    $projectRoot
+) 'levels/components/CloudManager/cloud_lod_controller.gd'
+$volumeShaderPath = Join-Path (
+    $projectRoot
+) 'assets/shaders/Cloud_volumetric/cloud_volumetric.gdshader'
+$impostorShaderPath = Join-Path (
+    $projectRoot
+) 'assets/shaders/Cloud_impostor/cloud_impostor.gdshader'
+$graphicsPath = Join-Path (
+    $projectRoot
+) 'common/autoload/graphics_manager.gd'
 
 if (-not (Test-Path -LiteralPath $layoutPath)) {
     throw 'Cloud cell layout helper is missing'
@@ -14,6 +26,10 @@ if (-not (Test-Path -LiteralPath $layoutPath)) {
 
 $layout = Get-Content -Raw $layoutPath
 $manager = Get-Content -Raw $managerPath
+$controller = Get-Content -Raw $controllerPath
+$volumeShader = Get-Content -Raw $volumeShaderPath
+$impostorShader = Get-Content -Raw $impostorShaderPath
+$graphics = Get-Content -Raw $graphicsPath
 
 foreach ($token in @(
     'static func world_to_cell(',
@@ -69,4 +85,39 @@ if ($runtimeProcess.Contains('rotate_y(')) {
 }
 if ($runtimeProcess.Contains('global_position.x = player_pos.x')) {
     throw 'Cloud manager still follows the player at runtime'
+}
+
+foreach ($shader in @($volumeShader, $impostorShader)) {
+    if (-not $shader.Contains('instance uniform float pool_fade')) {
+        throw 'Cloud shader is missing per-instance pool fade'
+    }
+    if (-not $shader.Contains('physical_alpha *= pool_fade')) {
+        throw 'Cloud shader does not apply pool fade to final opacity'
+    }
+}
+if (-not $controller.Contains('func set_pool_fade(value: float)')) {
+    throw 'Cloud LOD controller cannot apply pool fade'
+}
+foreach ($token in @(
+    'enum RecyclePhase',
+    'recycle_fade_duration',
+    'RecyclePhase.FADING_OUT',
+    'RecyclePhase.FADING_IN',
+    'set_pool_fade'
+)) {
+    if (-not $manager.Contains($token)) {
+        throw "Cloud recycling fade contract is missing: $token"
+    }
+}
+
+foreach ($token in @(
+    '"cloud_pool_horizontal_radius"',
+    '"cloud_pool_vertical_radius"',
+    '"cloud_pool_density"',
+    '"cloud_pool_updates_per_frame"'
+)) {
+    $matches = [regex]::Matches($graphics, [regex]::Escape($token)).Count
+    if ($matches -ne 3) {
+        throw "Cloud pool quality setting must exist in 3 presets: $token"
+    }
 }
