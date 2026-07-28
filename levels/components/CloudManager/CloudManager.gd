@@ -11,6 +11,9 @@ const CloudCellLayout = preload(
 @export_category("Main Settings")
 @export var cloud_scene: PackedScene
 @export var cloud_count: int = 100
+@export var tuning_profile: CloudTuningProfile = preload(
+	"res://levels/components/CloudManager/cloud_tuning_profile.tres"
+)
 
 @export_category("Legacy Settings")
 @export var rotation_speed: float = 0.5
@@ -58,7 +61,6 @@ var _reserved_cells: Dictionary = {}
 var _last_player_cell := Vector3i(2147483647, 2147483647, 2147483647)
 var _pool_initialized: bool = false
 var _pool_settings_dirty: bool = true
-var _graphics_manager: Node
 
 enum RecyclePhase {
 	FADING_OUT,
@@ -76,6 +78,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		call_deferred("_configure_existing_cloud_lods")
 	else:
+		apply_tuning_profile(tuning_profile)
 		call_deferred("_initialize_runtime_pool")
 
 
@@ -128,7 +131,38 @@ func _initialize_runtime_pool() -> void:
 		existing_clouds[index].visible = false
 
 	_pool_initialized = true
-	_connect_graphics_manager()
+
+
+func apply_tuning_profile(profile: CloudTuningProfile) -> void:
+	if profile == null:
+		push_warning("CloudManager: tuning profile is missing")
+		return
+	tuning_profile = profile
+	tuning_profile.sanitize()
+	cloud_count = tuning_profile.pool_capacity
+	cell_size = tuning_profile.cell_size
+	horizontal_cell_radius = ceili(
+		tuning_profile.coverage_radius / tuning_profile.cell_size
+	)
+	vertical_cell_radius = ceili(
+		tuning_profile.coverage_height / tuning_profile.cell_size
+	)
+	cell_density = clampf(
+		float(tuning_profile.target_cloud_count)
+		/ float(maxi(tuning_profile.pool_capacity * 2, 1)),
+		0.01,
+		1.0
+	)
+	world_seed = tuning_profile.world_seed
+	scale_min = tuning_profile.scale_min
+	scale_max = tuning_profile.scale_max
+	lod_cheap_volume_start = tuning_profile.full_volume_distance
+	lod_transition_start = tuning_profile.billboard_transition_start
+	lod_transition_end = tuning_profile.billboard_transition_end
+	recycle_fade_duration = tuning_profile.recycle_fade_duration
+	pool_updates_per_frame = tuning_profile.updates_per_frame
+	_pool_settings_dirty = true
+	_configure_existing_cloud_lods()
 
 
 func _request_cells(center_cell: Vector3i) -> void:
@@ -270,46 +304,6 @@ func _move_cloud_to_cell(cloud: Node3D, target_cell: Vector3i) -> void:
 		scale_max
 	)
 	cloud.visible = true
-
-
-func _connect_graphics_manager() -> void:
-	_graphics_manager = get_node_or_null("/root/GraphicsManager")
-	if _graphics_manager == null:
-		return
-	_apply_pool_quality(_graphics_manager.presets.get(
-		_graphics_manager.current_quality,
-		{}
-	))
-	if not _graphics_manager.quality_changed.is_connected(
-		_on_graphics_quality_changed
-	):
-		_graphics_manager.quality_changed.connect(_on_graphics_quality_changed)
-
-
-func _on_graphics_quality_changed(settings: Dictionary) -> void:
-	_apply_pool_quality(settings)
-
-
-func _apply_pool_quality(settings: Dictionary) -> void:
-	if settings.is_empty():
-		return
-	horizontal_cell_radius = int(settings.get(
-		"cloud_pool_horizontal_radius",
-		horizontal_cell_radius
-	))
-	vertical_cell_radius = int(settings.get(
-		"cloud_pool_vertical_radius",
-		vertical_cell_radius
-	))
-	cell_density = float(settings.get(
-		"cloud_pool_density",
-		cell_density
-	))
-	pool_updates_per_frame = int(settings.get(
-		"cloud_pool_updates_per_frame",
-		pool_updates_per_frame
-	))
-	_pool_settings_dirty = true
 
 
 func _configure_existing_cloud_lods() -> void:
