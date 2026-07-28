@@ -1,28 +1,14 @@
-[gd_resource type="ShaderMaterial" format=3 uid="uid://bgew5q45iomvr"]
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bgew5q45iomvr"]
 
 [ext_resource type="Shader" uid="uid://cimb2ey2iw13o" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.gdshader" id="1_sk7x7"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_pcms4"]
-noise_type = 2
-frequency = 0.0004
-fractal_type = 2
-fractal_lacunarity = 2.468
-fractal_gain = -0.71
-fractal_weighted_strength = 0.27
-cellular_distance_function = 2
-cellular_return_type = 2
-
-[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_o5y6a"]
-noise = SubResource("FastNoiseLite_pcms4")
-seamless = true
-seamless_blend_skirt = 0.691
+[ext_resource type="Texture3D" path="res://assets/shaders/Cloud_volumetric/cloud_noise.tres" id="2_noise"]
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_sk7x7")
 shader_parameter/steps = 64
 shader_parameter/step_size = 0.02
-shader_parameter/noise_texture = SubResource("NoiseTexture3D_o5y6a")
+shader_parameter/noise_texture = ExtResource("2_noise")
 shader_parameter/cloud_scale = 0.06700000248398
 shader_parameter/density_threshold = 0.0450000021375
 shader_parameter/density_multiplier = 10.946000519935

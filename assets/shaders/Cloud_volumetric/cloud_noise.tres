@@ -1,0 +1,16 @@
+[gd_resource type="NoiseTexture3D" load_steps=2 format=3]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_cloud"]
+noise_type = 2
+frequency = 0.0004
+fractal_type = 2
+fractal_lacunarity = 2.468
+fractal_gain = -0.71
+fractal_weighted_strength = 0.27
+cellular_distance_function = 2
+cellular_return_type = 2
+
+[resource]
+noise = SubResource("FastNoiseLite_cloud")
+seamless = true
+seamless_blend_skirt = 0.691
