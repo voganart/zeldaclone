@@ -40,11 +40,30 @@ Regression-test:
 powershell -NoProfile -ExecutionPolicy Bypass -File .codex/tests/godot-47-compat.tests.ps1
 ```
 
+## Crash при открытии BattleArena
+
+Точное воспроизведение:
+
+```powershell
+& 'C:\Program Files (x86)\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe' `
+  --editor 'C:\GodotProjects\zeldaclone\levels\components\BattleArena\BattleArena.tscn' `
+  --quit-after 600 --verbose
+```
+
+Сцена, её CSG и shader загружались успешно. Crash происходил после загрузки в `res://addons/phantom_camera/scripts/panel/viewfinder/viewfinder.gd`: Viewfinder вызывал `get_phantom_camera_hosts()` у уже освобождённого `PhantomCameraManager`. Backtrace: `_visibility_check()` → `_node_added_to_scene()`, затем `signal 11`.
+
+Исправление: validity guards в `_visibility_check()` и `_assign_manager()`. Проверка:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .codex/tests/battle-arena-editor.tests.ps1
+```
+
 ## Результат
 
 - Editor parse-check вне ограниченной песочницы: exit code `0`.
 - Main scene smoke-check: exit code `0`.
 - GUI editor smoke-check: exit code `0`.
+- BattleArena editor regression-test: exit code `0`.
 - Исходный пользовательский crash после этих проверок больше не воспроизводится.
 
 ## Что было артефактом песочницы

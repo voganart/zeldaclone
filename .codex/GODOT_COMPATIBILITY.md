@@ -17,7 +17,7 @@
 | Addon | Версия | Статус 4.7.1 |
 | --- | --- | --- |
 | Jigglebone | 2.0.1 | Enabled, загружается. |
-| Phantom Camera | 0.9.4.2 | Enabled, загружается; manager подключён autoload через UID. |
+| Phantom Camera | 0.9.4.2 | Enabled; применён локальный 4.7 lifecycle patch для Viewfinder manager. |
 | Proton Scatter | 4.0 | Enabled; применён локальный 4.7 compatibility patch в `src/scatter.gd`. |
 | Script Spliter | 0.4-DEV-3.2 | Enabled, загружается. |
 | SimpleGrassTextured | 2.0.8 | Enabled, загружается; singleton подключён autoload. |
@@ -34,6 +34,18 @@ res://addons/proton_scatter/src/scatter.gd:241
 ```
 
 Причина: `_get(property)` не возвращал `Variant` для неизвестного свойства. Добавлен явный `return null`. После изменения исходная parse error и каскадные compile errors исчезли.
+
+## Phantom Camera patch
+
+При переходе от Main Menu к `res://levels/components/BattleArena/BattleArena.tscn` Viewfinder обращался к уже освобождённому `PhantomCameraManager`. `Engine.has_singleton()` возвращал true, но объект был невалиден. В результате сначала возникали null-instance errors, затем Godot 4.7.1 падал с `signal 11`.
+
+В `scripts/panel/viewfinder/viewfinder.gd` добавлена проверка `is_instance_valid()` перед чтением manager и перед подключением его сигналов. Это точечный backport lifecycle guard из актуальной ветки Phantom Camera.
+
+Regression-test:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .codex/tests/battle-arena-editor.tests.ps1
+```
 
 ## Известный portability-риск
 
