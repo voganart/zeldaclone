@@ -35,6 +35,7 @@ var presets = {
 		"lod_threshold": 5.0,
 		"grass_distance": 20.0, "grass_level": 2.0,
 		"vis_range": 30.0, "vis_margin": 5.0,
+		"cloud_quality": Quality.LOW,
 		
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [5.0*5.0, 10.0*10.0, 15.0*15.0] as Array[float],
@@ -67,6 +68,7 @@ var presets = {
 		"lod_threshold": 1.0,
 		"grass_distance": 60.0, "grass_level": 10.0,
 		"vis_range": 80.0, "vis_margin": 20.0,
+		"cloud_quality": Quality.MEDIUM,
 
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [7.0*7.0, 12.0*12.0, 18.0*18.0] as Array[float],
@@ -99,6 +101,7 @@ var presets = {
 		"lod_threshold": 0.01,
 		"grass_distance": 120.0, "grass_level": 20.0,
 		"vis_range": 500.0, "vis_margin": 50.0,
+		"cloud_quality": Quality.HIGH,
 
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [8.0*8.0, 15.0*15.0, 20.0*20.0] as Array[float],

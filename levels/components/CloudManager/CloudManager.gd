@@ -34,6 +34,12 @@ extends Node3D
 @export var scale_min: Vector3 = Vector3(3.0, 1.5, 3.0)
 @export var scale_max: Vector3 = Vector3(8.0, 3.0, 8.0)
 
+@export_category("Cloud LOD")
+@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_start: float = 50.0
+@export_range(0.0, 1000.0, 1.0, "or_greater") var lod_transition_end: float = 90.0
+@export_range(0.0, 10.0, 0.05, "or_greater") var lod_local_radius: float = 1.5
+@export var preview_lod_in_editor: bool = true
+
 var player: Node3D
 
 func _on_generate_btn_pressed(value):
@@ -42,8 +48,27 @@ func _on_generate_btn_pressed(value):
 		generate_clouds = false
 
 func _ready():
-	if not Engine.is_editor_hint():
+	if Engine.is_editor_hint():
+		call_deferred("_configure_existing_cloud_lods")
+	else:
 		call_deferred("spawn_clouds")
+
+
+func _configure_existing_cloud_lods() -> void:
+	for cloud in get_children():
+		_configure_cloud_lod(cloud)
+
+
+func _configure_cloud_lod(cloud: Node) -> void:
+	if not cloud.has_method("configure_lod"):
+		return
+	cloud.call(
+		"configure_lod",
+		lod_transition_start,
+		lod_transition_end,
+		lod_local_radius,
+		preview_lod_in_editor
+	)
 
 func _process(delta):
 	if Engine.is_editor_hint(): return
@@ -123,10 +148,12 @@ func spawn_clouds():
 		cloud.look_at(Vector3(0, cloud.position.y, 0), Vector3.UP)
 		cloud.rotate_y(deg_to_rad(90.0))
 		
-		var sx = randf_range(scale_min.x, scale_max.x)
-		var sy = randf_range(scale_min.y, scale_max.y)
-		var sz = randf_range(scale_min.z, scale_max.z)
+		var sx := randf_range(scale_min.x, scale_max.x)
+		var sy := randf_range(scale_min.y, scale_max.y)
+		var sz := randf_range(scale_min.z, scale_max.z)
 		cloud.scale = Vector3(sx, sy, sz)
+
+		_configure_cloud_lod(cloud)
 		
 		if Engine.is_editor_hint():
 			cloud.owner = get_tree().edited_scene_root

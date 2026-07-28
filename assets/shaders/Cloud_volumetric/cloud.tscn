@@ -1,7 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://bka6ee6o3ddtw"]
+[gd_scene format=3 uid="uid://bka6ee6o3ddtw"]
 
 [ext_resource type="Material" uid="uid://bgew5q45iomvr" path="res://assets/shaders/Cloud_volumetric/cloud_volumetric.tres" id="1_lflr2"]
 [ext_resource type="Shader" uid="uid://bsl5od8uy2qhb" path="res://assets/shaders/Cloud_volumetric/cloud_billboard.gdshader" id="2_lflr2"]
+[ext_resource type="Script" uid="uid://db32vuuhraipx" path="res://levels/components/CloudManager/cloud_lod_controller.gd" id="3_lod"]
+[ext_resource type="Shader" uid="uid://bnj0b832fat6h" path="res://assets/shaders/Cloud_impostor/cloud_impostor.gdshader" id="4_impostor"]
+[ext_resource type="Texture2D" uid="uid://7su7ftuf2nge" path="res://assets/shaders/Cloud_impostor/generated/cloud_01_albedo.png" id="5_atlas"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_4pu8x"]
 
@@ -27,15 +30,39 @@ shader_parameter/density_multiplier = 2.0
 shader_parameter/fade_distance = 300.00001425
 shader_parameter/fade_margin = 50.0
 
-[node name="Cloud" type="Node3D"]
+[sub_resource type="QuadMesh" id="QuadMesh_impostor"]
+size = Vector2(1.15, 1.15)
 
-[node name="VolumetricMesh" type="MeshInstance3D" parent="."]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_impostor"]
+render_priority = 0
+shader = ExtResource("4_impostor")
+shader_parameter/albedo_atlas = ExtResource("5_atlas")
+shader_parameter/atlas_frames = 8.0
+shader_parameter/color_modulate = Color(1, 1, 1, 1)
+
+[node name="Cloud" type="Node3D" unique_id=1919448125]
+script = ExtResource("3_lod")
+
+[node name="VolumetricMesh" type="MeshInstance3D" parent="." unique_id=655430659]
 cast_shadow = 0
+instance_shader_parameters/lod_fade = 0.0
+instance_shader_parameters/lod_is_impostor = false
+instance_shader_parameters/shape_override_enabled = 1.0
+instance_shader_parameters/shape_override_offset = Vector3(0.17, 0.33, 0.61)
+instance_shader_parameters/shape_override_scale = Vector3(70, 40, 110)
 mesh = SubResource("BoxMesh_4pu8x")
 surface_material_override/0 = ExtResource("1_lflr2")
 
-[node name="BillboardMesh" type="MeshInstance3D" parent="."]
+[node name="BillboardMesh" type="MeshInstance3D" parent="." unique_id=554690136]
 visible = false
 cast_shadow = 0
 mesh = SubResource("QuadMesh_lflr2")
 surface_material_override/0 = SubResource("ShaderMaterial_nmgs7")
+
+[node name="ImpostorMesh" type="MeshInstance3D" parent="." unique_id=1794189865]
+visible = false
+cast_shadow = 0
+instance_shader_parameters/lod_fade = 0.0
+instance_shader_parameters/lod_is_impostor = true
+mesh = SubResource("QuadMesh_impostor")
+surface_material_override/0 = SubResource("ShaderMaterial_impostor")

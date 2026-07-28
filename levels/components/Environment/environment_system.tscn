@@ -6,6 +6,7 @@
 [ext_resource type="Shader" uid="uid://bny7nkedp7v2b" path="res://assets/shaders/sky_gradient.gdshader" id="3_84c8d"]
 [ext_resource type="Script" uid="uid://bkxenrfgp6a4l" path="res://levels/components/CloudManager/CloudManager.gd" id="4_qt6g3"]
 [ext_resource type="PackedScene" uid="uid://bka6ee6o3ddtw" path="res://assets/shaders/Cloud_volumetric/cloud.tscn" id="5_et50k"]
+[ext_resource type="Script" uid="uid://db32vuuhraipx" path="res://levels/components/CloudManager/cloud_lod_controller.gd" id="7_84c8d"]
 
 [sub_resource type="Gradient" id="Gradient_wx41k"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -137,152 +138,202 @@ cluster_spread = 1.0
 scale_min = Vector3(40, 20, 80)
 scale_max = Vector3(100, 80, 150)
 
-[node name="Cloud" parent="CloudManager" unique_id=1575299147 instance=ExtResource("5_et50k")]
-transform = Transform3D(44.535225, 0, -76.980606, 0, 27.06234, 0, 87.260704, 0, 39.288574, -64.68252, 81.39628, -126.736595)
+[node name="Cloud" type="Node3D" parent="CloudManager" unique_id=1919448125 instance=ExtResource("5_et50k")]
+transform = Transform3D(-64.0727, 0, -60.732353, 0, 62.83665, 0, 63.40511, 0, -61.371807, 52.64225, -102.67297, -52.093765)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90137" parent="CloudManager" unique_id=576080608 instance=ExtResource("5_et50k")]
-transform = Transform3D(-55.387074, 0, 84.98629, 0, 41.27292, 0, -49.87687, 0, -94.375244, 114.794014, -63.69401, 103.3737)
+[node name="@Node3D@71337" type="Node3D" parent="CloudManager" unique_id=955167360 instance=ExtResource("5_et50k")]
+transform = Transform3D(71.58557, 0, 35.257107, 0, 71.75185, 0, -21.657902, 0, 116.53485, -144.09666, -30.058783, 43.595814)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90138" parent="CloudManager" unique_id=728183302 instance=ExtResource("5_et50k")]
-transform = Transform3D(-88.07316, 0, 54.4271, 0, 39.233696, 0, -43.989986, 0, -108.96949, 100.275406, 95.29107, 50.084667)
+[node name="@Node3D@71338" type="Node3D" parent="CloudManager" unique_id=65418593 instance=ExtResource("5_et50k")]
+transform = Transform3D(-54.46641, 0, -66.77859, 0, 53.92605, 0, 31.179451, 0, -116.65344, 114.22584, 18.18571, -65.38891)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90139" parent="CloudManager" unique_id=1620426339 instance=ExtResource("5_et50k")]
-transform = Transform3D(-50.077255, 0, -88.359726, 0, 52.37923, 0, 58.879322, 0, -75.15053, 97.51028, -27.972036, -114.64966)
+[node name="@Node3D@71339" type="Node3D" parent="CloudManager" unique_id=1590312316 instance=ExtResource("5_et50k")]
+transform = Transform3D(59.360016, 0, 62.899128, 0, 34.562416, 0, -30.088247, 0, 124.09142, -114.56006, -111.15662, 58.067886)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90140" parent="CloudManager" unique_id=1552881815 instance=ExtResource("5_et50k")]
-transform = Transform3D(-14.408363, 0, 84.61519, 0, 22.11825, 0, -78.58068, 0, -15.514836, 26.478533, 13.644558, 144.4093)
+[node name="@Node3D@71340" type="Node3D" parent="CloudManager" unique_id=127281806 instance=ExtResource("5_et50k")]
+transform = Transform3D(62.552696, 0, 53.8954, 0, 77.052444, 0, -34.488148, 0, 97.7525, -58.053333, 147.94008, 32.00744)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90141" parent="CloudManager" unique_id=610423357 instance=ExtResource("5_et50k")]
-transform = Transform3D(14.018731, 0, -140.36424, 0, 29.548697, 0, 52.083874, 0, 37.78, -28.37025, 110.42317, -105.40412)
+[node name="@Node3D@71341" type="Node3D" parent="CloudManager" unique_id=1276418331 instance=ExtResource("5_et50k")]
+transform = Transform3D(-26.179502, 0, -100.713905, 0, 54.53357, 0, 52.009792, 0, -50.69507, 65.65373, 35.215065, -130.43173)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90142" parent="CloudManager" unique_id=1570246613 instance=ExtResource("5_et50k")]
-transform = Transform3D(-96.22595, 0, 28.482565, 0, 62.817978, 0, -19.253296, 0, -142.35287, 130.51811, -106.990166, 26.114624)
+[node name="@Node3D@71342" type="Node3D" parent="CloudManager" unique_id=1481724954 instance=ExtResource("5_et50k")]
+transform = Transform3D(-81.34585, 0, -78.48399, 0, 21.142988, 0, 57.36089, 0, -111.30139, 112.397095, 6.893956, -79.25662)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90143" parent="CloudManager" unique_id=688640375 instance=ExtResource("5_et50k")]
-transform = Transform3D(8.840576, 0, 111.62348, 0, 41.701717, 0, -79.23499, 0, 12.454294, -14.590339, -4.801, 130.76811)
+[node name="@Node3D@71343" type="Node3D" parent="CloudManager" unique_id=200508950 instance=ExtResource("5_et50k")]
+transform = Transform3D(-8.1532545, 0, -142.20985, 0, 48.320007, 0, 45.729633, 0, -25.354963, 21.693462, 70.38888, -121.673256)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90144" parent="CloudManager" unique_id=1108887721 instance=ExtResource("5_et50k")]
-transform = Transform3D(32.11321, 0, 117.33602, 0, 34.89387, 0, -46.653835, 0, 80.76584, -65.48339, 88.1396, 95.13378)
+[node name="@Node3D@71344" type="Node3D" parent="CloudManager" unique_id=1468007871 instance=ExtResource("5_et50k")]
+transform = Transform3D(53.587334, 0, -87.10224, 0, 71.57302, 0, 41.45767, 0, 112.58658, -117.777306, -39.210888, -91.11804)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90145" parent="CloudManager" unique_id=822175305 instance=ExtResource("5_et50k")]
-transform = Transform3D(-47.594273, 0, 108.96741, 0, 30.968472, 0, -75.17101, 0, -68.99234, 89.429955, -46.94061, 141.24683)
+[node name="@Node3D@71345" type="Node3D" parent="CloudManager" unique_id=1140289227 instance=ExtResource("5_et50k")]
+transform = Transform3D(45.517696, 0, 23.636646, 0, 72.35631, 0, -8.309288, 0, 129.4799, -117.82219, 52.259777, 21.508526)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90146" parent="CloudManager" unique_id=1434444358 instance=ExtResource("5_et50k")]
-transform = Transform3D(-51.00106, 0, -36.589943, 0, 55.61395, 0, 25.17369, 0, -74.13001, 97.79998, -94.36023, -48.273228)
+[node name="@Node3D@71346" type="Node3D" parent="CloudManager" unique_id=1390497317 instance=ExtResource("5_et50k")]
+transform = Transform3D(8.214273, 0, 103.39441, 0, 28.397688, 0, -64.92613, 0, 13.081174, -17.041416, -72.42391, 134.69633)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90147" parent="CloudManager" unique_id=1384418273 instance=ExtResource("5_et50k")]
-transform = Transform3D(-3.9240043, 0, -142.64673, 0, 74.57259, 0, 70.34799, 0, -7.9568205, 8.757656, -22.423874, -157.0038)
+[node name="@Node3D@71347" type="Node3D" parent="CloudManager" unique_id=1588306868 instance=ExtResource("5_et50k")]
+transform = Transform3D(-74.731804, 0, -79.78265, 0, 23.793653, 0, 52.158703, 0, -114.31077, 87.67955, 133.80005, -61.195534)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90148" parent="CloudManager" unique_id=2039454251 instance=ExtResource("5_et50k")]
-transform = Transform3D(71.25002, 0, -71.7984, 0, 40.67467, 0, 67.81071, 0, 75.43997, -94.44177, -49.68972, -89.882996)
+[node name="@Node3D@71348" type="Node3D" parent="CloudManager" unique_id=136028308 instance=ExtResource("5_et50k")]
+transform = Transform3D(-2.5011933, 0, -114.27452, 0, 66.7853, 0, 93.87279, 0, -3.0447872, 1.6801336, -110.24079, -63.057297)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90149" parent="CloudManager" unique_id=1525736827 instance=ExtResource("5_et50k")]
-transform = Transform3D(44.419243, 0, 104.25418, 0, 69.767525, 0, -51.24196, 0, 90.37305, -91.211, -14.662155, 105.220825)
+[node name="@Node3D@71349" type="Node3D" parent="CloudManager" unique_id=1876342675 instance=ExtResource("5_et50k")]
+transform = Transform3D(-38.599747, 0, -104.9945, 0, 74.57373, 0, 59.06512, 0, -68.615135, 84.99717, 68.804504, -130.0622)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90150" parent="CloudManager" unique_id=1507760827 instance=ExtResource("5_et50k")]
-transform = Transform3D(33.35603, 0, 114.68343, 0, 72.63692, 0, -71.49278, 0, 53.507275, -16.716503, -127.18063, 35.828876)
+[node name="@Node3D@71350" type="Node3D" parent="CloudManager" unique_id=703687903 instance=ExtResource("5_et50k")]
+transform = Transform3D(-23.59445, 0, -129.73134, 0, 71.67649, 0, 42.86046, 0, -71.4164, 60.9373, 29.27679, -110.69556)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90151" parent="CloudManager" unique_id=879561326 instance=ExtResource("5_et50k")]
-transform = Transform3D(0.24693128, 0, 112.249344, 0, 62.794453, 0, -75.54174, 0, 0.3669213, -0.3103357, 144.68146, 94.93822)
+[node name="@Node3D@71351" type="Node3D" parent="CloudManager" unique_id=1903284650 instance=ExtResource("5_et50k")]
+transform = Transform3D(68.65195, 0, -18.079445, 0, 65.527985, 0, 9.634861, 0, 128.82274, -87.997505, 91.13229, -12.349892)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90152" parent="CloudManager" unique_id=1680095307 instance=ExtResource("5_et50k")]
-transform = Transform3D(40.086357, 0, -86.485176, 0, 41.247433, 0, 75.25995, 0, 46.065346, -45.751926, 102.41976, -85.89675)
+[node name="@Node3D@71352" type="Node3D" parent="CloudManager" unique_id=1795447566 instance=ExtResource("5_et50k")]
+transform = Transform3D(46.867573, 0, 122.22688, 0, 46.660522, 0, -67.46594, 0, 84.90917, -76.65428, -32.795357, 110.34393)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90153" parent="CloudManager" unique_id=1220421321 instance=ExtResource("5_et50k")]
-transform = Transform3D(-37.170464, 0, 125.36964, 0, 23.53256, 0, -60.56315, 0, -76.94526, 79.452126, 2.0403402, 129.45415)
+[node name="@Node3D@71353" type="Node3D" parent="CloudManager" unique_id=1311561073 instance=ExtResource("5_et50k")]
+transform = Transform3D(-62.5745, 0, -42.509224, 0, 71.637505, 0, 19.182468, 0, -138.66795, 79.03439, 107.05293, -24.228308)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90154" parent="CloudManager" unique_id=1601120297 instance=ExtResource("5_et50k")]
-transform = Transform3D(-41.6261, 0, 44.250137, 0, 75.74609, 0, -16.192429, 0, -113.75445, 121.35645, 42.07924, 47.207302)
+[node name="@Node3D@71354" type="Node3D" parent="CloudManager" unique_id=1930551609 instance=ExtResource("5_et50k")]
+transform = Transform3D(-39.86624, 0, -101.99494, 0, 61.801865, 0, 75.819046, 0, -53.629734, 51.037422, -83.712036, -97.0648)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90155" parent="CloudManager" unique_id=1907684545 instance=ExtResource("5_et50k")]
-transform = Transform3D(-49.383278, 0, 47.747444, 0, 67.46218, 0, -31.703354, 0, -74.37463, 58.503445, 158.92645, 37.558372)
+[node name="@Node3D@71355" type="Node3D" parent="CloudManager" unique_id=208582947 instance=ExtResource("5_et50k")]
+transform = Transform3D(34.463367, 0, 124.58542, 0, 71.27099, 0, -58.32793, 0, 73.61196, -49.391422, -98.811295, 83.59308)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90156" parent="CloudManager" unique_id=535976449 instance=ExtResource("5_et50k")]
-transform = Transform3D(7.8394184, 0, 137.82367, 0, 40.909428, 0, -92.45782, 0, 11.68595, -1.7101811, 153.9506, 20.16981)
+[node name="@Node3D@71356" type="Node3D" parent="CloudManager" unique_id=1486619569 instance=ExtResource("5_et50k")]
+transform = Transform3D(57.196514, 0, -38.346043, 0, 60.96423, 0, 21.684738, 0, 101.14302, -154.57088, 25.696995, -58.60199)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90157" parent="CloudManager" unique_id=1400551715 instance=ExtResource("5_et50k")]
-transform = Transform3D(-70.902954, 0, 58.92346, 0, 21.247053, 0, -68.054504, 0, -61.38973, 66.96385, -87.77199, 64.27365)
+[node name="@Node3D@71357" type="Node3D" parent="CloudManager" unique_id=956997924 instance=ExtResource("5_et50k")]
+transform = Transform3D(-74.976906, 0, 8.022345, 0, 66.86447, 0, -7.2128043, 0, -83.39206, 150.00047, -80.64738, 14.430084)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90158" parent="CloudManager" unique_id=1922699375 instance=ExtResource("5_et50k")]
-transform = Transform3D(44.69374, 0, 10.029021, 0, 31.405912, 0, -3.4522789, 0, 129.83728, -136.27739, -47.435383, 10.526459)
+[node name="@Node3D@71358" type="Node3D" parent="CloudManager" unique_id=873791211 instance=ExtResource("5_et50k")]
+transform = Transform3D(-10.450486, 0, 86.77589, 0, 73.44666, 0, -38.87086, 0, -23.32982, 33.725697, 26.29358, 125.44362)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90159" parent="CloudManager" unique_id=2102786137 instance=ExtResource("5_et50k")]
-transform = Transform3D(71.92959, 0, -72.32517, 0, 26.925583, 0, 64.42047, 0, 80.7557, -93.40829, -88.97668, -83.6569)
+[node name="@Node3D@71359" type="Node3D" parent="CloudManager" unique_id=727409598 instance=ExtResource("5_et50k")]
+transform = Transform3D(58.86612, 0, 48.62882, 0, 61.595753, 0, -40.51952, 0, 70.64719, -121.60164, 91.982635, 83.702446)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90160" parent="CloudManager" unique_id=525726517 instance=ExtResource("5_et50k")]
-transform = Transform3D(4.907679, 0, -149.13931, 0, 34.640835, 0, 48.923847, 0, 14.960554, -13.501337, -83.105064, -134.59283)
+[node name="@Node3D@71360" type="Node3D" parent="CloudManager" unique_id=1635755629 instance=ExtResource("5_et50k")]
+transform = Transform3D(19.565279, 0, -98.85648, 0, 55.321285, 0, 64.02273, 0, 30.21044, -42.64341, -66.507996, -139.54044)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90161" parent="CloudManager" unique_id=1225271523 instance=ExtResource("5_et50k")]
-transform = Transform3D(21.003218, 0, -127.297905, 0, 22.207108, 0, 54.246666, 0, 49.28719, -33.328785, 108.078476, -86.0809)
+[node name="@Node3D@71361" type="Node3D" parent="CloudManager" unique_id=2025048314 instance=ExtResource("5_et50k")]
+transform = Transform3D(-22.018332, 0, -98.11778, 0, 70.850655, 0, 44.978428, 0, -48.03169, 49.032814, -93.29784, -100.16286)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90162" parent="CloudManager" unique_id=1688779908 instance=ExtResource("5_et50k")]
-transform = Transform3D(16.31119, 0, -82.56314, 0, 66.80297, 0, 95.54523, 0, 14.094928, -20.249592, -120.63305, -118.61501)
+[node name="@Node3D@71362" type="Node3D" parent="CloudManager" unique_id=681310115 instance=ExtResource("5_et50k")]
+transform = Transform3D(46.316097, 0, 53.062595, 0, 78.25935, 0, -26.85501, 0, 91.5156, -95.853676, 104.18349, 55.57789)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90163" parent="CloudManager" unique_id=62381093 instance=ExtResource("5_et50k")]
-transform = Transform3D(41.134552, 0, -85.30852, 0, 60.995953, 0, 47.00937, 0, 74.64741, -112.12273, -3.8607197, -128.1361)
+[node name="@Node3D@71363" type="Node3D" parent="CloudManager" unique_id=2051472514 instance=ExtResource("5_et50k")]
+transform = Transform3D(45.69628, 0, 93.427475, 0, 65.45183, 0, -58.7347, 0, 72.68767, -71.75567, -88.01997, 92.22955)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90164" parent="CloudManager" unique_id=695266649 instance=ExtResource("5_et50k")]
-transform = Transform3D(5.266347, 0, 128.80139, 0, 60.840466, 0, -45.417385, 0, 14.935092, -16.372765, 68.36827, 141.1999)
+[node name="@Node3D@71364" type="Node3D" parent="CloudManager" unique_id=1666805748 instance=ExtResource("5_et50k")]
+transform = Transform3D(-16.939878, 0, 91.035225, 0, 74.38008, 0, -49.006126, 0, -31.468018, 41.717884, -39.695107, 120.68753)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90165" parent="CloudManager" unique_id=709444242 instance=ExtResource("5_et50k")]
-transform = Transform3D(51.618744, 0, 79.52599, 0, 40.816982, 0, -79.92472, 0, 51.36123, -69.0859, -37.40388, 106.970245)
+[node name="@Node3D@71365" type="Node3D" parent="CloudManager" unique_id=946411675 instance=ExtResource("5_et50k")]
+transform = Transform3D(39.493263, 0, -76.850204, 0, 39.448704, 0, 65.25168, 0, 46.513218, -48.628075, 98.42897, -80.344406)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90166" parent="CloudManager" unique_id=1585390325 instance=ExtResource("5_et50k")]
-transform = Transform3D(-48.617043, 0, -18.579, 0, 45.42925, 0, 6.6315117, 0, -136.20667, 126.243385, 119.52308, -17.21997)
+[node name="@Node3D@71366" type="Node3D" parent="CloudManager" unique_id=1018166203 instance=ExtResource("5_et50k")]
+transform = Transform3D(-24.595522, 0, 127.251465, 0, 76.239334, 0, -80.31506, 0, -38.96923, 47.354298, 39.66728, 154.63232)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90167" parent="CloudManager" unique_id=84529381 instance=ExtResource("5_et50k")]
-transform = Transform3D(-27.076023, 0, -112.48296, 0, 32.202587, 0, 80.56439, 0, -37.803192, 36.342133, 55.49168, -108.13561)
+[node name="@Node3D@71367" type="Node3D" parent="CloudManager" unique_id=31656926 instance=ExtResource("5_et50k")]
+transform = Transform3D(63.892864, 0, 31.287746, 0, 30.088627, 0, -18.219416, 0, 109.72162, -78.26648, -140.48184, 22.318127)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90168" parent="CloudManager" unique_id=1727185866 instance=ExtResource("5_et50k")]
-transform = Transform3D(93.009705, 0, -32.43352, 0, 39.049973, 0, 21.760101, 0, 138.63135, -150.13728, -22.638084, -35.125404)
+[node name="@Node3D@71368" type="Node3D" parent="CloudManager" unique_id=260223519 instance=ExtResource("5_et50k")]
+transform = Transform3D(-36.716938, 0, -130.52174, 0, 61.36684, 0, 64.84868, 0, -73.90064, 62.74464, -50.082314, -110.81822)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90169" parent="CloudManager" unique_id=1423105413 instance=ExtResource("5_et50k")]
-transform = Transform3D(44.492966, 0, 19.102306, 0, 50.55337, 0, -6.695421, 0, 126.94022, -131.25157, -0.026634121, 19.751085)
+[node name="@Node3D@71369" type="Node3D" parent="CloudManager" unique_id=1891396621 instance=ExtResource("5_et50k")]
+transform = Transform3D(74.98005, 0, 1.1228762, 0, 74.25569, 0, -0.8037556, 0, 104.7499, -94.15602, 133.19984, 1.0093138)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90170" parent="CloudManager" unique_id=1408156384 instance=ExtResource("5_et50k")]
-transform = Transform3D(34.141064, 0, -118.358154, 0, 61.39648, 0, 49.049873, 0, 82.38295, -74.32689, 26.157402, -106.78417)
+[node name="@Node3D@71370" type="Node3D" parent="CloudManager" unique_id=555762385 instance=ExtResource("5_et50k")]
+transform = Transform3D(43.473934, 0, -67.504616, 0, 32.951828, 0, 59.95609, 0, 48.94734, -79.42964, 2.5686753, -109.54361)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90171" parent="CloudManager" unique_id=980574837 instance=ExtResource("5_et50k")]
-transform = Transform3D(-64.59422, 0, -67.03003, 0, 33.825718, 0, 34.086765, 0, -127.02151, 32.040646, -165.98334, -16.908047)
+[node name="@Node3D@71371" type="Node3D" parent="CloudManager" unique_id=1798085432 instance=ExtResource("5_et50k")]
+transform = Transform3D(-62.015533, 0, 93.82744, 0, 62.545742, 0, -69.43002, 0, -83.807526, 57.143818, -115.03509, 63.975872)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90172" parent="CloudManager" unique_id=703694441 instance=ExtResource("5_et50k")]
-transform = Transform3D(58.96363, 0, -108.48114, 0, 37.95121, 0, 73.56392, 0, 86.950806, -83.9571, 97.664185, -104.74615)
+[node name="@Node3D@71372" type="Node3D" parent="CloudManager" unique_id=64806332 instance=ExtResource("5_et50k")]
+transform = Transform3D(-0.562026, 0, 110.34998, 0, 35.22669, 0, -60.978092, 0, -1.0170795, 1.2972997, -90.511, 140.7541)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90173" parent="CloudManager" unique_id=163484251 instance=ExtResource("5_et50k")]
-transform = Transform3D(-16.880215, 0, 102.8702, 0, 71.63722, 0, -49.500042, 0, -35.080196, 13.235776, -132.39825, 38.812984)
+[node name="@Node3D@71373" type="Node3D" parent="CloudManager" unique_id=1842803037 instance=ExtResource("5_et50k")]
+transform = Transform3D(57.20434, 0, 60.099785, 0, 56.789135, 0, -39.655277, 0, 86.696365, -131.8475, 28.618301, 91.399506)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90174" parent="CloudManager" unique_id=63126671 instance=ExtResource("5_et50k")]
-transform = Transform3D(6.130229, 0, 140.49149, 0, 34.288166, 0, -58.215237, 0, 14.79415, -12.965038, -82.830864, 123.121414)
+[node name="@Node3D@71374" type="Node3D" parent="CloudManager" unique_id=2096693776 instance=ExtResource("5_et50k")]
+transform = Transform3D(10.624821, 0, 109.90975, 0, 30.040794, 0, -65.46796, 0, 17.837297, -26.049479, 1.100769, 160.51147)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90175" parent="CloudManager" unique_id=244674935 instance=ExtResource("5_et50k")]
-transform = Transform3D(70.71718, 0, 5.9325123, 0, 75.66472, 0, -3.4856317, 0, 120.35997, -124.5484, 77.785446, 6.138953)
+[node name="@Node3D@71375" type="Node3D" parent="CloudManager" unique_id=420432554 instance=ExtResource("5_et50k")]
+transform = Transform3D(69.12281, 0, 19.471966, 0, 57.74276, 0, -15.6449175, 0, 86.03158, -106.68908, 64.45339, 24.147484)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90176" parent="CloudManager" unique_id=954180567 instance=ExtResource("5_et50k")]
-transform = Transform3D(-30.008236, 0, -86.630356, 0, 71.222244, 0, 57.38331, 0, -45.302795, 73.1205, -37.93494, -139.82484)
+[node name="@Node3D@71376" type="Node3D" parent="CloudManager" unique_id=119365196 instance=ExtResource("5_et50k")]
+transform = Transform3D(-3.3919718, 0, -88.69347, 0, 21.915115, 0, 46.951077, 0, -6.407643, 10.802212, -40.829662, -149.52223)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90177" parent="CloudManager" unique_id=1572037878 instance=ExtResource("5_et50k")]
-transform = Transform3D(11.105331, 0, 116.45121, 0, 53.492443, 0, -58.843082, 0, 21.977592, -16.631844, -135.96782, 88.126045)
+[node name="@Node3D@71377" type="Node3D" parent="CloudManager" unique_id=761969353 instance=ExtResource("5_et50k")]
+transform = Transform3D(-24.937151, 0, 88.231255, 0, 68.18441, 0, -33.467632, 0, -65.74221, 52.41461, 142.40993, 70.344574)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90178" parent="CloudManager" unique_id=100504917 instance=ExtResource("5_et50k")]
-transform = Transform3D(30.780529, 0, -68.73565, 0, 27.16032, 0, 29.991615, 0, 70.54371, -88.9148, 75.58777, -86.63592)
+[node name="@Node3D@71378" type="Node3D" parent="CloudManager" unique_id=2132538601 instance=ExtResource("5_et50k")]
+transform = Transform3D(-70.156654, 0, -47.66673, 0, 44.58369, 0, 25.518938, 0, -131.04536, 57.004868, -137.73877, -20.735077)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90179" parent="CloudManager" unique_id=1914633349 instance=ExtResource("5_et50k")]
-transform = Transform3D(-20.64835, 0, -123.64246, 0, 75.46603, 0, 45.504158, 0, -56.105045, 50.415462, -92.48918, -111.10393)
+[node name="@Node3D@71379" type="Node3D" parent="CloudManager" unique_id=1087798344 instance=ExtResource("5_et50k")]
+transform = Transform3D(-24.02505, 0, 90.071686, 0, 29.950897, 0, -41.48176, 0, -52.166946, 40.243507, 152.67659, 69.48464)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90180" parent="CloudManager" unique_id=280857255 instance=ExtResource("5_et50k")]
-transform = Transform3D(-79.83811, 0, -35.38186, 0, 75.44426, 0, 30.092203, 0, -93.872185, 141.55476, -3.5473588, -53.354126)
+[node name="@Node3D@71380" type="Node3D" parent="CloudManager" unique_id=589687272 instance=ExtResource("5_et50k")]
+transform = Transform3D(-27.745668, 0, -72.32613, 0, 56.553253, 0, 40.099167, 0, -50.04435, 45.554565, 130.26036, -65.83731)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90181" parent="CloudManager" unique_id=1167195244 instance=ExtResource("5_et50k")]
-transform = Transform3D(-81.06014, 0, 26.585363, 0, 70.88711, 0, -18.723333, 0, -115.09774, 110.85395, -126.81767, 25.60513)
+[node name="@Node3D@71381" type="Node3D" parent="CloudManager" unique_id=1941383964 instance=ExtResource("5_et50k")]
+transform = Transform3D(-11.595117, 0, 86.70244, 0, 20.413021, 0, -59.20688, 0, -16.979866, 17.410019, 102.911156, 88.89894)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90182" parent="CloudManager" unique_id=1652062314 instance=ExtResource("5_et50k")]
-transform = Transform3D(40.834824, 0, 48.41697, 0, 35.07095, 0, -25.380491, 0, 77.898346, -98.10479, -81.36644, 60.97608)
+[node name="@Node3D@71382" type="Node3D" parent="CloudManager" unique_id=1050416026 instance=ExtResource("5_et50k")]
+transform = Transform3D(59.960403, 0, -64.7588, 0, 77.784874, 0, 32.755135, 0, 118.54518, -150.17708, -17.385874, -82.03867)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90183" parent="CloudManager" unique_id=634022767 instance=ExtResource("5_et50k")]
-transform = Transform3D(-7.226076, 0, 111.502174, 0, 52.21143, 0, -97.42295, 0, -8.270363, 6.399464, 108.193535, 86.278534)
+[node name="@Node3D@71383" type="Node3D" parent="CloudManager" unique_id=1357221665 instance=ExtResource("5_et50k")]
+transform = Transform3D(14.215346, 0, 143.6801, 0, 41.130154, 0, -58.398476, 0, 34.974586, -19.123127, 148.98834, 78.56026)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90184" parent="CloudManager" unique_id=1722930945 instance=ExtResource("5_et50k")]
-transform = Transform3D(98.09496, 0, -13.730469, 0, 37.59541, 0, 15.293429, 0, 88.06983, -164.98381, 21.893627, -25.72169)
+[node name="@Node3D@71384" type="Node3D" parent="CloudManager" unique_id=1403846198 instance=ExtResource("5_et50k")]
+transform = Transform3D(-23.671684, 0, -92.488014, 0, 33.93234, 0, 91.18779, 0, -24.009214, 35.297314, -28.968693, -135.9719)
+script = ExtResource("7_84c8d")
 
-[node name="@Node3D@90185" parent="CloudManager" unique_id=927744009 instance=ExtResource("5_et50k")]
-transform = Transform3D(31.246265, 0, -92.05727, 0, 74.95826, 0, 27.54252, 0, 104.43655, -114.37696, -2.3019197, -100.81941)
+[node name="@Node3D@71385" type="Node3D" parent="CloudManager" unique_id=298305379 instance=ExtResource("5_et50k")]
+transform = Transform3D(-49.91289, 0, 60.78057, 0, 23.29842, 0, -27.114508, 0, -111.88601, 124.481384, 74.21157, 67.622856)
+script = ExtResource("7_84c8d")

@@ -13,6 +13,9 @@ uniform float cloud_scale : hint_range(0.1, 4.0) = 1.0;
 uniform float density_threshold : hint_range(0.0, 1.0) = 0.2; 
 uniform float density_multiplier : hint_range(0.0, 20.0) = 8.0;
 uniform vec3 move_speed = vec3(0.05, 0.0, 0.05);
+instance uniform float shape_override_enabled : hint_range(0.0, 1.0) = 0.0;
+instance uniform vec3 shape_override_scale = vec3(70.0, 40.0, 110.0);
+instance uniform vec3 shape_override_offset = vec3(0.17, 0.33, 0.61);
 
 group_uniforms Shape_Erosion;
 uniform float erosion_strength : hint_range(0.0, 1.0) = 0.5; 
@@ -36,11 +39,11 @@ uniform float top_highlight_strength : hint_range(0.0, 2.0) = 1.0;
 
 // --- LOD ---
 group_uniforms LOD;
-uniform float fade_distance : hint_range(0.0, 1000.0) = 400.0;
-uniform float fade_margin : hint_range(0.0, 500.0) = 50.0;
 uniform float lod_noise_start : hint_range(0.0, 500.0) = 50.0;
 uniform float lod_noise_end : hint_range(0.0, 1000.0) = 400.0;
 uniform float lod_noise_factor : hint_range(0.1, 1.0) = 0.4;
+instance uniform float lod_fade : hint_range(0.0, 1.0) = 0.0;
+instance uniform bool lod_is_impostor = false;
 
 // --- SOFT COLLISION ---
 group_uniforms Soft_Collision;
@@ -80,22 +83,59 @@ float get_density(vec3 p, float dist_to_cam) {
 
 	float sphere_mask = 1.0 - smoothstep(sphere_radius - softness, sphere_radius, length(p));
 	
-	vec3 erosion_uv = (p * v_obj_scale * erosion_scale) + (v_world_pos_center * 0.1) + (TIME * move_speed * erosion_offset_speed);
+	float use_override = clamp(shape_override_enabled, 0.0, 1.0);
+	vec3 effective_scale = mix(v_obj_scale, shape_override_scale, use_override);
+	vec3 runtime_erosion_offset = (v_world_pos_center * 0.1) + (TIME * move_speed * erosion_offset_speed);
+	vec3 erosion_offset = mix(runtime_erosion_offset, shape_override_offset, use_override);
+	vec3 erosion_uv = (p * effective_scale * erosion_scale) + erosion_offset;
 	float erosion_val = texture(noise_texture, erosion_uv).r;
 	float shape_mask = sphere_mask - (erosion_val * erosion_strength);
 	if (shape_mask <= 0.0) return 0.0;
 	
 	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
 	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
-	vec3 detail_uv = p * v_obj_scale * cloud_scale * current_scale_mod + (TIME * move_speed);
+	vec3 runtime_detail_offset = TIME * move_speed;
+	vec3 detail_offset = mix(runtime_detail_offset, shape_override_offset * 1.7, use_override);
+	vec3 detail_uv = p * effective_scale * cloud_scale * current_scale_mod + detail_offset;
 	float detail_noise = texture(noise_texture, detail_uv).r;
 	
 	float final_density = detail_noise * shape_mask * edge_mask;
 	return smoothstep(density_threshold, density_threshold + 0.1, final_density) * density_multiplier;
 }
 
+float lod_bayer4x4(vec2 pixel_position) {
+	vec2 p = mod(floor(pixel_position), 4.0);
+	float value = 0.0;
+	if (p.y < 1.0) {
+		if (p.x < 1.0) value = 0.0;
+		else if (p.x < 2.0) value = 8.0;
+		else if (p.x < 3.0) value = 2.0;
+		else value = 10.0;
+	} else if (p.y < 2.0) {
+		if (p.x < 1.0) value = 12.0;
+		else if (p.x < 2.0) value = 4.0;
+		else if (p.x < 3.0) value = 14.0;
+		else value = 6.0;
+	} else if (p.y < 3.0) {
+		if (p.x < 1.0) value = 3.0;
+		else if (p.x < 2.0) value = 11.0;
+		else if (p.x < 3.0) value = 1.0;
+		else value = 9.0;
+	} else {
+		if (p.x < 1.0) value = 15.0;
+		else if (p.x < 2.0) value = 7.0;
+		else if (p.x < 3.0) value = 13.0;
+		else value = 5.0;
+	}
+	return (value + 0.5) / 16.0;
+}
+
 void fragment() {
-	if (v_world_dist > fade_distance + fade_margin + 5.0) discard;
+	float lod_threshold = lod_bayer4x4(FRAGCOORD.xy);
+	if ((!lod_is_impostor && lod_threshold < lod_fade)
+			|| (lod_is_impostor && lod_threshold >= lod_fade)) {
+		discard;
+	}
 
 	// Soft collision
 	float depth_tex = texture(depth_texture, SCREEN_UV).r;
@@ -149,9 +189,6 @@ void fragment() {
 	
 	vec3 final_rgb = accum_color / max(physical_alpha, 0.001);
 	
-	float fade_factor = 1.0 - smoothstep(fade_distance, fade_distance + fade_margin, v_world_dist);
-	fade_factor = pow(fade_factor, 2.0);
-	
 	ALBEDO = final_rgb;
-	ALPHA = physical_alpha * fade_factor * depth_fade;
+	ALPHA = physical_alpha * depth_fade;
 }
