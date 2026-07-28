@@ -15,6 +15,9 @@ uniform float erosion_scale : hint_range(0.01, 2.0) = 0.3;
 uniform float erosion_offset_speed : hint_range(0.0, 1.0) = 0.1;
 uniform float sphere_radius : hint_range(0.1, 0.75) = 0.6;
 uniform float softness : hint_range(0.01, 1.0) = 0.2;
+instance uniform float shape_override_enabled : hint_range(0.0, 1.0) = 0.0;
+instance uniform vec3 shape_override_scale = vec3(70.0, 40.0, 110.0);
+instance uniform vec3 shape_override_offset = vec3(0.17, 0.33, 0.61);
 
 group_uniforms Coloring;
 uniform vec3 color_light : source_color = vec3(1.0);
@@ -105,10 +108,23 @@ float get_density(vec3 p, float dist_to_cam) {
 		sphere_radius,
 		length(p)
 	);
-	vec3 erosion_uv =
-		(p * v_obj_scale * erosion_scale)
-		+ (v_world_center * 0.1)
+	float use_override = clamp(shape_override_enabled, 0.0, 1.0);
+	vec3 effective_scale = mix(
+		v_obj_scale,
+		shape_override_scale,
+		use_override
+	);
+	vec3 runtime_erosion_offset =
+		(v_world_center * 0.1)
 		+ (TIME * move_speed * erosion_offset_speed);
+	vec3 erosion_offset = mix(
+		runtime_erosion_offset,
+		shape_override_offset,
+		use_override
+	);
+	vec3 erosion_uv =
+		(p * effective_scale * erosion_scale)
+		+ erosion_offset;
 	float erosion_val = texture(noise_texture, erosion_uv).r;
 	float shape_mask = sphere_mask - erosion_val * erosion_strength;
 	if (shape_mask <= 0.0) {
@@ -117,9 +133,14 @@ float get_density(vec3 p, float dist_to_cam) {
 
 	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
 	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
+	vec3 detail_offset = mix(
+		TIME * move_speed,
+		shape_override_offset * 1.7,
+		use_override
+	);
 	vec3 detail_uv =
-		p * v_obj_scale * cloud_scale * current_scale_mod
-		+ TIME * move_speed;
+		p * effective_scale * cloud_scale * current_scale_mod
+		+ detail_offset;
 	float detail_noise = texture(noise_texture, detail_uv).r;
 	float final_density = detail_noise * shape_mask * edge_mask;
 	return smoothstep(

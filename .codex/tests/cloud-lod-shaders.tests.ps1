@@ -33,7 +33,10 @@ foreach ($requiredToken in @(
     'ray_box_intersection',
     'get_density',
     'color_light',
-    'color_shadow'
+    'color_shadow',
+    'shape_override_enabled',
+    'shape_override_scale',
+    'shape_override_offset'
 )) {
     if (-not $impostorSource.Contains($requiredToken)) {
         throw "Cloud billboard shader is missing procedural token: $requiredToken"

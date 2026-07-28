@@ -237,6 +237,19 @@ func _set_shape_override(enabled: bool) -> void:
 		)
 		volume_mesh.set_instance_shader_parameter(&"shape_override_scale", preview_shape_scale)
 		volume_mesh.set_instance_shader_parameter(&"shape_override_offset", preview_shape_offset)
+	if is_instance_valid(_impostor_mesh):
+		_impostor_mesh.set_instance_shader_parameter(
+			&"shape_override_enabled",
+			1.0 if enabled else 0.0
+		)
+		_impostor_mesh.set_instance_shader_parameter(
+			&"shape_override_scale",
+			preview_shape_scale
+		)
+		_impostor_mesh.set_instance_shader_parameter(
+			&"shape_override_offset",
+			preview_shape_offset
+		)
 
 
 func _is_editing_cloud_scene() -> bool:

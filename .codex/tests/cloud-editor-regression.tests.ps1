@@ -46,6 +46,12 @@ foreach ($requiredToken in @(
         throw "Cloud LOD controller is missing editor-safe behavior: $requiredToken"
     }
 }
+if ($controller -notmatch (
+    '(?s)_impostor_mesh\.set_instance_shader_parameter\(\s*' +
+    '&"shape_override_enabled"'
+)) {
+    throw 'Cloud LOD controller does not pass the editor shape to the billboard'
+}
 
 $manager = Get-Content -LiteralPath (
     Join-Path $projectRoot 'levels/components/CloudManager/CloudManager.gd'
