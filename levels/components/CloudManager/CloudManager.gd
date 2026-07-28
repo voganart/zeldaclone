@@ -4,6 +4,9 @@ extends Node3D
 const CloudCellLayout = preload(
 	"res://levels/components/CloudManager/cloud_cell_layout.gd"
 )
+const CloudExclusionMath = preload(
+	"res://levels/components/CloudManager/cloud_exclusion_math.gd"
+)
 
 @export_category("Editor Actions")
 @export var generate_clouds: bool = false : set = _on_generate_btn_pressed
@@ -61,6 +64,7 @@ var _reserved_cells: Dictionary = {}
 var _last_player_cell := Vector3i(2147483647, 2147483647, 2147483647)
 var _pool_initialized: bool = false
 var _pool_settings_dirty: bool = true
+var _exclusion_volumes: Array[CloudExclusionVolume] = []
 
 enum RecyclePhase {
 	FADING_OUT,
@@ -131,6 +135,7 @@ func _initialize_runtime_pool() -> void:
 		existing_clouds[index].visible = false
 
 	_pool_initialized = true
+	_refresh_exclusion_volumes()
 
 
 func apply_tuning_profile(profile: CloudTuningProfile) -> void:
@@ -162,7 +167,38 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 	recycle_fade_duration = tuning_profile.recycle_fade_duration
 	pool_updates_per_frame = tuning_profile.updates_per_frame
 	_pool_settings_dirty = true
+	_refresh_exclusion_volumes()
 	_configure_existing_cloud_lods()
+
+
+func _refresh_exclusion_volumes() -> void:
+	_exclusion_volumes.clear()
+	if not is_inside_tree():
+		return
+	for node in get_tree().get_nodes_in_group(&"cloud_exclusion"):
+		if node is CloudExclusionVolume:
+			_exclusion_volumes.append(node as CloudExclusionVolume)
+
+
+func _cell_is_excluded(cell: Vector3i) -> bool:
+	if _exclusion_volumes.is_empty() or tuning_profile == null:
+		return false
+	var data := CloudCellLayout.cell_data(cell, tuning_profile)
+	if data.is_empty():
+		return false
+	var cloud_transform: Transform3D = data["transform"]
+	var cloud_radius: float = data["cloud_radius"]
+	for volume in _exclusion_volumes:
+		if (
+			is_instance_valid(volume)
+			and CloudExclusionMath.intersects_cloud(
+				volume,
+				cloud_transform.origin,
+				cloud_radius
+			)
+		):
+			return true
+	return false
 
 
 func _request_cells(center_cell: Vector3i) -> void:
@@ -172,6 +208,11 @@ func _request_cells(center_cell: Vector3i) -> void:
 		center_cell,
 		tuning_profile
 	)
+	var allowed_cells: Array[Vector3i] = []
+	for cell in desired:
+		if not _cell_is_excluded(cell):
+			allowed_cells.append(cell)
+	desired = allowed_cells
 	var desired_lookup: Dictionary = {}
 	for cell in desired:
 		desired_lookup[cell] = true
