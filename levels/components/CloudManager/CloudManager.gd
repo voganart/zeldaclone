@@ -26,7 +26,7 @@ const CloudCellLayout = preload(
 @export_range(0, 6, 1) var vertical_cell_radius: int = 1
 @export_range(0.05, 1.0, 0.05) var cell_density: float = 0.65
 @export_range(1, 16, 1) var pool_updates_per_frame: int = 2
-@export_range(0.05, 2.0, 0.05) var recycle_fade_duration: float = 0.35
+@export_range(0.05, 2.0, 0.05) var recycle_fade_duration: float = 0.8
 
 @export_category("Clustering")
 @export var use_clustering: bool = true

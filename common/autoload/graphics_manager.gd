@@ -42,9 +42,9 @@ var presets = {
 		"cloud_full_steps": 20,
 		"cloud_cheap_steps": 8,
 		"cloud_billboard_steps": 5,
-		"cloud_pool_horizontal_radius": 3,
+		"cloud_pool_horizontal_radius": 4,
 		"cloud_pool_vertical_radius": 1,
-		"cloud_pool_density": 0.45,
+		"cloud_pool_density": 0.3,
 		"cloud_pool_updates_per_frame": 1,
 		
 		# --- AI LOD ---
@@ -85,9 +85,9 @@ var presets = {
 		"cloud_full_steps": 36,
 		"cloud_cheap_steps": 12,
 		"cloud_billboard_steps": 6,
-		"cloud_pool_horizontal_radius": 4,
+		"cloud_pool_horizontal_radius": 5,
 		"cloud_pool_vertical_radius": 1,
-		"cloud_pool_density": 0.65,
+		"cloud_pool_density": 0.35,
 		"cloud_pool_updates_per_frame": 2,
 
 		# --- AI LOD ---
@@ -128,9 +128,9 @@ var presets = {
 		"cloud_full_steps": 64,
 		"cloud_cheap_steps": 16,
 		"cloud_billboard_steps": 8,
-		"cloud_pool_horizontal_radius": 5,
+		"cloud_pool_horizontal_radius": 7,
 		"cloud_pool_vertical_radius": 2,
-		"cloud_pool_density": 0.8,
+		"cloud_pool_density": 0.1,
 		"cloud_pool_updates_per_frame": 3,
 
 		# --- AI LOD ---

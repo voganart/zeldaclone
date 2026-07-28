@@ -130,3 +130,71 @@ foreach ($token in @(
         throw "Cloud pool quality setting must exist in 3 presets: $token"
     }
 }
+
+function Get-CloudPresetValue {
+    param(
+        [string]$PresetName,
+        [string]$SettingName
+    )
+    $start = $graphics.IndexOf("Quality.${PresetName}: {")
+    if ($start -lt 0) {
+        throw "Graphics preset is missing: $PresetName"
+    }
+    $nextPreset = $graphics.IndexOf("`n`tQuality.", $start + 10)
+    $length = if ($nextPreset -gt $start) {
+        $nextPreset - $start
+    } else {
+        $graphics.Length - $start
+    }
+    $block = $graphics.Substring($start, $length)
+    $match = [regex]::Match(
+        $block,
+        '"' + [regex]::Escape($SettingName) + '"\s*:\s*([0-9.]+)'
+    )
+    if (-not $match.Success) {
+        throw "Preset setting is missing: $PresetName/$SettingName"
+    }
+    return [double]$match.Groups[1].Value
+}
+
+$presetRequirements = @{
+    LOW = @{ MinimumRadius = 4; MaximumExpectedClouds = 50 }
+    MEDIUM = @{ MinimumRadius = 5; MaximumExpectedClouds = 50 }
+    HIGH = @{ MinimumRadius = 7; MaximumExpectedClouds = 50 }
+}
+foreach ($presetName in $presetRequirements.Keys) {
+    $radius = [int](Get-CloudPresetValue `
+        $presetName 'cloud_pool_horizontal_radius')
+    $vertical = [int](Get-CloudPresetValue `
+        $presetName 'cloud_pool_vertical_radius')
+    $density = Get-CloudPresetValue $presetName 'cloud_pool_density'
+    if ($radius -lt $presetRequirements[$presetName].MinimumRadius) {
+        throw "Cloud pool radius is too short: $presetName/$radius"
+    }
+
+    $candidateCount = 0
+    for ($y = -$vertical; $y -le $vertical; $y++) {
+        for ($z = -$radius; $z -le $radius; $z++) {
+            for ($x = -$radius; $x -le $radius; $x++) {
+                $nx = $x / $radius
+                $nz = $z / $radius
+                $ny = if ($vertical -gt 0) { $y / $vertical } else { 0 }
+                if (($nx * $nx + $ny * $ny + $nz * $nz) -le 1.000001) {
+                    $candidateCount++
+                }
+            }
+        }
+    }
+    $expectedClouds = $candidateCount * $density
+    if ($expectedClouds -gt $presetRequirements[$presetName].MaximumExpectedClouds) {
+        throw "Cloud preset overfills the 50-cloud pool: $presetName/$expectedClouds"
+    }
+}
+
+$fadeMatch = [regex]::Match(
+    $manager,
+    'recycle_fade_duration:\s*float\s*=\s*([0-9.]+)'
+)
+if (-not $fadeMatch.Success -or [double]$fadeMatch.Groups[1].Value -lt 0.8) {
+    throw 'Cloud recycle fade duration must be at least 0.8 seconds'
+}
