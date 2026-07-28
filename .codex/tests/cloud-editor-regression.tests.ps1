@@ -46,6 +46,9 @@ foreach ($requiredToken in @(
         throw "Cloud LOD controller is missing editor-safe behavior: $requiredToken"
     }
 }
+if (-not $controller.Contains('lod_local_radius: float = 0.5')) {
+    throw 'Cloud LOD surface distance must use the BoxMesh half-extent'
+}
 if ($controller -notmatch (
     '(?s)_impostor_mesh\.set_instance_shader_parameter\(\s*' +
     '&"shape_override_enabled"'
@@ -69,6 +72,9 @@ foreach ($requiredToken in @(
     if (-not $manager.Contains($requiredToken)) {
         throw "CloudManager is missing Level editor LOD propagation: $requiredToken"
     }
+}
+if (-not $manager.Contains('lod_local_radius: float = 0.5')) {
+    throw 'CloudManager must pass the BoxMesh half-extent to cloud LOD'
 }
 
 $environment = Get-Content -LiteralPath (
