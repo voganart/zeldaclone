@@ -18,6 +18,7 @@ uniform float softness : hint_range(0.01, 1.0) = 0.2;
 instance uniform float shape_override_enabled : hint_range(0.0, 1.0) = 0.0;
 instance uniform vec3 shape_override_scale = vec3(70.0, 40.0, 110.0);
 instance uniform vec3 shape_override_offset = vec3(0.17, 0.33, 0.61);
+instance uniform vec3 shape_offset = vec3(0.0);
 
 group_uniforms Coloring;
 uniform vec3 color_light : source_color = vec3(1.0);
@@ -117,6 +118,7 @@ float get_density(vec3 p, float dist_to_cam) {
 	);
 	vec3 runtime_erosion_offset =
 		(v_world_center * 0.1)
+		+ shape_offset
 		+ (TIME * move_speed * erosion_offset_speed);
 	vec3 erosion_offset = mix(
 		runtime_erosion_offset,
@@ -135,7 +137,7 @@ float get_density(vec3 p, float dist_to_cam) {
 	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
 	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
 	vec3 detail_offset = mix(
-		TIME * move_speed,
+		TIME * move_speed + shape_offset * 1.7,
 		shape_override_offset * 1.7,
 		use_override
 	);

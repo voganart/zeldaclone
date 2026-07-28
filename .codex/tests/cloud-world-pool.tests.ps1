@@ -33,12 +33,11 @@ $graphics = Get-Content -Raw $graphicsPath
 
 foreach ($token in @(
     'static func world_to_cell(',
-    'static func desired_cells(',
-    'static func cell_transform(',
-    'horizontal_radius = maxi(horizontal_radius, 1)',
-    'vertical_radius = maxi(vertical_radius, 0)',
-    'density = clampf(density, 0.0, 1.0)',
-    'candidates.resize(limit)'
+    'static func candidate_cells(',
+    'static func occupancy_threshold(',
+    'static func cell_data(',
+    '"shape_offset"',
+    '"cloud_radius"'
 )) {
     if (-not $layout.Contains($token)) {
         throw "Cloud cell layout contract is missing: $token"
@@ -57,12 +56,17 @@ foreach ($token in @(
     '_free_clouds',
     '_requested_cells',
     'CloudCellLayout.world_to_cell(',
-    'CloudCellLayout.desired_cells(',
-    'CloudCellLayout.cell_transform('
+    'CloudCellLayout.candidate_cells(',
+    'CloudCellLayout.cell_data(',
+    '_requested_cells',
+    'set_shape_offset'
 )) {
     if (-not $manager.Contains($token)) {
         throw "Cloud manager pool contract is missing: $token"
     }
+}
+if ($layout.Contains('candidates.resize(limit)')) {
+    throw 'Cloud layout still truncates the nearest cells'
 }
 
 $runtimeProcessStart = $manager.IndexOf('func _process(')
@@ -103,9 +107,20 @@ foreach ($shader in @($volumeShader, $impostorShader)) {
     if (-not $shader.Contains('physical_alpha *= pool_fade')) {
         throw 'Cloud shader does not apply pool fade to final opacity'
     }
+    if (-not $shader.Contains('instance uniform vec3 shape_offset')) {
+        throw 'Cloud shader is missing stable per-instance shape variation'
+    }
 }
 if (-not $controller.Contains('func set_pool_fade(value: float)')) {
     throw 'Cloud LOD controller cannot apply pool fade'
+}
+foreach ($token in @(
+    'func configure_from_profile(profile: CloudTuningProfile)',
+    'func set_shape_offset(offset: Vector3)'
+)) {
+    if (-not $controller.Contains($token)) {
+        throw "Cloud LOD profile contract is missing: $token"
+    }
 }
 foreach ($token in @(
     'enum RecyclePhase',

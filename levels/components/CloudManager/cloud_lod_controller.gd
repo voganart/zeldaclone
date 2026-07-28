@@ -124,6 +124,27 @@ func set_pool_fade(value: float) -> void:
 		_impostor_mesh.set_instance_shader_parameter(&"pool_fade", _pool_fade)
 
 
+func set_shape_offset(offset: Vector3) -> void:
+	_resolve_meshes()
+	for volume_mesh in _volume_meshes:
+		if is_instance_valid(volume_mesh):
+			volume_mesh.set_instance_shader_parameter(&"shape_offset", offset)
+	if is_instance_valid(_impostor_mesh):
+		_impostor_mesh.set_instance_shader_parameter(&"shape_offset", offset)
+
+
+func configure_from_profile(profile: CloudTuningProfile) -> void:
+	if profile == null:
+		return
+	configure_lod(
+		profile.full_volume_distance,
+		profile.billboard_transition_start,
+		profile.billboard_transition_end,
+		lod_local_radius,
+		preview_lod_in_editor
+	)
+
+
 func configure_lod(
 	cheap_start_distance: float,
 	start_distance: float,

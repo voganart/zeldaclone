@@ -66,7 +66,7 @@ func copy_values_from(source: CloudTuningProfile) -> void:
 		return
 	for property_info in get_property_list():
 		var usage := int(property_info.get("usage", 0))
-		if not (usage & PROPERTY_USAGE_STORAGE):
+		if (usage & PROPERTY_USAGE_STORAGE) == 0:
 			continue
 		var property_name := StringName(property_info.get("name", ""))
 		if property_name == &"script" or property_name == &"resource_path":

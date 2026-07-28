@@ -168,13 +168,9 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 func _request_cells(center_cell: Vector3i) -> void:
 	_last_player_cell = center_cell
 	_pool_settings_dirty = false
-	var desired := CloudCellLayout.desired_cells(
+	var desired := CloudCellLayout.candidate_cells(
 		center_cell,
-		horizontal_cell_radius,
-		vertical_cell_radius,
-		cell_density,
-		world_seed,
-		cloud_count
+		tuning_profile
 	)
 	var desired_lookup: Dictionary = {}
 	for cell in desired:
@@ -296,13 +292,13 @@ func _process_recycle_jobs(delta: float) -> void:
 
 
 func _move_cloud_to_cell(cloud: Node3D, target_cell: Vector3i) -> void:
-	cloud.global_transform = CloudCellLayout.cell_transform(
-		target_cell,
-		cell_size,
-		world_seed,
-		scale_min,
-		scale_max
-	)
+	var data := CloudCellLayout.cell_data(target_cell, tuning_profile)
+	if data.is_empty():
+		return
+	var cloud_transform: Transform3D = data["transform"]
+	var shape_offset: Vector3 = data["shape_offset"]
+	cloud.global_transform = cloud_transform
+	cloud.call("set_shape_offset", shape_offset)
 	cloud.visible = true
 
 
@@ -313,6 +309,9 @@ func _configure_existing_cloud_lods() -> void:
 
 func _configure_cloud_lod(cloud: Node) -> void:
 	if not cloud.has_method("configure_lod"):
+		return
+	if tuning_profile != null and cloud.has_method("configure_from_profile"):
+		cloud.call("configure_from_profile", tuning_profile)
 		return
 	cloud.call(
 		"configure_lod",
