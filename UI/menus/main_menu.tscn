@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://3um71gotlboh"]
+[gd_scene format=3 uid="uid://3um71gotlboh"]
 
 [ext_resource type="Texture2D" uid="uid://cf6db6qu2b31q" path="res://assets/ui/menu_bg.jpg" id="1_5oih7"]
 [ext_resource type="Script" uid="uid://dvpvc1soitbva" path="res://ui/menus/main_menu.gd" id="1_qc8qn"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=265553171]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_qc8qn")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1530645199]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,9 +23,9 @@ texture = ExtResource("1_5oih7")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="UI_Layer" type="CanvasLayer" parent="."]
+[node name="UI_Layer" type="CanvasLayer" parent="." unique_id=601885103]
 
-[node name="Margin" type="MarginContainer" parent="UI_Layer"]
+[node name="Margin" type="MarginContainer" parent="UI_Layer" unique_id=1453098025]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -38,17 +38,17 @@ theme_override_constants/margin_top = 50
 theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 50
 
-[node name="VBox" type="VBoxContainer" parent="UI_Layer/Margin"]
+[node name="VBox" type="VBoxContainer" parent="UI_Layer/Margin" unique_id=1057914993]
 custom_minimum_size = Vector2(1200, 600)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="Spacer2" type="Control" parent="UI_Layer/Margin/VBox"]
+[node name="Spacer2" type="Control" parent="UI_Layer/Margin/VBox" unique_id=653314712]
 custom_minimum_size = Vector2(100, 300)
 layout_mode = 2
 
-[node name="Title" type="Label" parent="UI_Layer/Margin/VBox"]
+[node name="Title" type="Label" parent="UI_Layer/Margin/VBox" unique_id=2105151919]
 layout_mode = 2
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.4862745)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -56,37 +56,37 @@ theme_override_font_sizes/font_size = 84
 text = "game_title"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox"]
+[node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox" unique_id=458519051]
 custom_minimum_size = Vector2(100, 300)
 layout_mode = 2
 
-[node name="ButtonsVBox" type="VBoxContainer" parent="UI_Layer/Margin/VBox"]
+[node name="ButtonsVBox" type="VBoxContainer" parent="UI_Layer/Margin/VBox" unique_id=1739416155]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 5
 
-[node name="BtnNewGame" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+[node name="BtnNewGame" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox" unique_id=686027892]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "ui_new_game"
 
-[node name="BtnSettings" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+[node name="BtnSettings" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox" unique_id=1074500772]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "ui_settings"
 
-[node name="BtnExit" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+[node name="BtnExit" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox" unique_id=1204607923]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "ui_exit"
 
-[node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox/ButtonsVBox"]
+[node name="Spacer" type="Control" parent="UI_Layer/Margin/VBox/ButtonsVBox" unique_id=1919689776]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
-[node name="Version" type="Label" parent="UI_Layer/Margin/VBox"]
+[node name="Version" type="Label" parent="UI_Layer/Margin/VBox" unique_id=1745576359]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 10

@@ -570,7 +570,9 @@ script = ExtResource("3_jygyi")
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." unique_id=988376034 instance=ExtResource("6_r6k77")]
-time_of_day = 14.9
+time_of_day = 6.0
+day_duration_seconds = 240.0
+is_playing = true
 sun_color = SubResource("Gradient_c0er0")
 sun_energy = SubResource("Curve_ueypv")
 moon_color = SubResource("Gradient_cktag")

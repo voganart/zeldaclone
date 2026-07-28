@@ -40,7 +40,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="ZeldaClone"
 run/main_scene="uid://3um71gotlboh"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [audio]
