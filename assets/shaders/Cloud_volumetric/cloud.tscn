@@ -34,6 +34,10 @@ size = Vector2(1.5, 1.5)
 
 [node name="Cloud" type="Node3D" unique_id=1919448125]
 script = ExtResource("3_lod")
+cheap_volume_start = 144.0
+transition_start = 1025.0
+transition_end = 998.0
+lod_local_radius = 23.8
 
 [node name="VolumetricMesh" type="MeshInstance3D" parent="." unique_id=655430659]
 cast_shadow = 0
