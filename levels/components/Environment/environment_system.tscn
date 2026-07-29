@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://bkxenrfgp6a4l" path="res://levels/components/CloudManager/CloudManager.gd" id="4_qt6g3"]
 [ext_resource type="PackedScene" uid="uid://bka6ee6o3ddtw" path="res://assets/shaders/Cloud_volumetric/cloud.tscn" id="5_et50k"]
 [ext_resource type="Material" path="res://assets/shaders/Cloud_impostor/cloud_procedural_billboard.tres" id="8_billboard"]
+[ext_resource type="NoiseTexture2D" path="res://common/weather/far_cloud_noise_base.tres" id="9_far_base"]
+[ext_resource type="NoiseTexture2D" path="res://common/weather/far_cloud_noise_detail.tres" id="10_far_detail"]
 
 [sub_resource type="Gradient" id="Gradient_wx41k"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -53,6 +55,12 @@ shader_parameter/horizon_curve = 0.6
 shader_parameter/stars_intensity = 0.0
 shader_parameter/stars_speed = 2.0
 shader_parameter/stars_density = 0.026000001235
+shader_parameter/far_cloud_noise_base = ExtResource("9_far_base")
+shader_parameter/far_cloud_noise_detail = ExtResource("10_far_detail")
+shader_parameter/far_cloud_horizon_coverage = 0.62
+shader_parameter/far_cloud_upper_coverage = 0.18
+shader_parameter/far_cloud_lower_coverage = 0.34
+shader_parameter/far_cloud_opacity = 0.72
 
 [sub_resource type="Sky" id="Sky_eidw4"]
 sky_material = SubResource("ShaderMaterial_0iwge")
