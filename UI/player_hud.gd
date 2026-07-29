@@ -6,14 +6,26 @@ extends Control
 @export var player_path: NodePath
 @onready var tutorial_overlay: TutorialOverlay = $TutorialOverlay 
 @onready var save_feedback: Label = $SaveFeedback
+@onready var vabo_value: Label = \
+	$HealthContainer/HealthRow/VaboContainer/VaboValue
+@onready var hearts_container: HBoxContainer = \
+	$HealthContainer/HealthRow/HeartsLayout
+@onready var roll_container: HBoxContainer = \
+	$ActionsContainer/AbilityStrip/RollContainer
+@onready var double_jump_icon: TextureRect = \
+	$ActionsContainer/AbilityStrip/DoubleJumpIcon
+@onready var slam_bar: TextureProgressBar = \
+	$ActionsContainer/AbilityStrip/SlamIcon
+@onready var air_dash_icon: TextureRect = \
+	$ActionsContainer/AbilityStrip/AirDashIcon
+@onready var combo_icon: TextureRect = \
+	$ActionsContainer/AbilityStrip/ComboIcon
 
-@onready var pips = [
-	$ActionsContainer/VBoxContainer/RollContainer/Pip1,
-	$ActionsContainer/VBoxContainer/RollContainer/Pip2,
-	$ActionsContainer/VBoxContainer/RollContainer/Pip3
+@onready var pips: Array[TextureProgressBar] = [
+	$ActionsContainer/AbilityStrip/RollContainer/Pip1,
+	$ActionsContainer/AbilityStrip/RollContainer/Pip2,
+	$ActionsContainer/AbilityStrip/RollContainer/Pip3,
 ]
-@onready var slam_bar = $ActionsContainer/VBoxContainer/SlamIcon 
-@onready var hearts_container = $HealthContainer/HeartsLayout
 
 @export_category("Visual Settings")
 @export var pip_texture: Texture2D 
@@ -59,6 +71,8 @@ func _ready() -> void:
 		_update_hearts(float(debug_hearts_count))
 		return
 	# ========================
+	_connect_progress_signals()
+	_sync_progress_feedback()
 	if not GameEvents.save_feedback_requested.is_connected(
 		_on_save_feedback_requested
 	):
@@ -73,6 +87,39 @@ func _ready() -> void:
 	if player and player.health_component:
 		_setup_hearts(player.health_component.max_health)
 		_update_hearts(player.health_component.current_health)
+
+
+func _connect_progress_signals() -> void:
+	if not PlayerData.vabo_changed.is_connected(_on_vabo_changed):
+		PlayerData.vabo_changed.connect(_on_vabo_changed)
+	if not PlayerData.ability_unlocked.is_connected(_on_ability_unlocked):
+		PlayerData.ability_unlocked.connect(_on_ability_unlocked)
+
+
+func _sync_progress_feedback() -> void:
+	_on_vabo_changed(PlayerData.current_vabo)
+	var indicators: Dictionary = {
+		&"roll_ability": roll_container,
+		&"double_jump": double_jump_icon,
+		&"ground_slam": slam_bar,
+		&"air_dash": air_dash_icon,
+		&"3_hit_combo": combo_icon,
+	}
+	for ability_name: StringName in indicators:
+		var indicator: Control = indicators[ability_name]
+		if indicator is TextureRect and indicator.texture == null:
+			indicator.visible = false
+			continue
+		indicator.visible = PlayerData.is_ability_unlocked(ability_name)
+
+
+func _on_vabo_changed(new_amount: int) -> void:
+	vabo_value.text = str(maxi(new_amount, 0))
+
+
+func _on_ability_unlocked(_ability_name: StringName) -> void:
+	_sync_progress_feedback()
+
 
 func setup_player(new_player: Player) -> void:
 	player = new_player
@@ -169,16 +216,10 @@ func _update_hearts(current_hp: float) -> void:
 			heart.modulate = color_heart_empty
 
 func _update_roll_pips() -> void:
-	# !!! НОВОЕ: Если способность закрыта, скрываем пипсы !!!
 	if not player.roll_ability or not player.roll_ability.is_unlocked:
-		for pip in pips:
-			pip.visible = false
+		roll_container.visible = false
 		return
-	else:
-		# Если открыта, показываем (если они были скрыты)
-		for pip in pips:
-			if not pip.visible: pip.visible = true
-	# -----------------------------------------------------
+	roll_container.visible = true
 
 	var current_charges = player.current_roll_charges
 	var is_penalty = player.is_roll_recharging
