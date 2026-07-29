@@ -62,6 +62,7 @@ VfxPool="*res://common/autoload/VfxPool.tscn"
 GraphicsManager="*res://common/autoload/graphics_manager.gd"
 SceneManager="*res://common/autoload/scene_manager.gd"
 PlayerData="*res://common/autoload/player_data.gd"
+SaveManager="*res://common/autoload/save_manager.gd"
 InputHelper="*res://common/autoload/input_helper.gd"
 
 [display]

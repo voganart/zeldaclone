@@ -4,7 +4,7 @@ extends Node
 const MAIN_MENU_PATH = "res://ui/menus/main_menu.tscn"
 const LOADING_SCREEN_PATH = "res://ui/menus/loading_screen.tscn"
 const GAME_OVER_PATH = "res://ui/menus/game_over.tscn"
-const LEVEL_1_PATH = "res://levels/level_01.tscn" 
+const LEVEL_1_PATH = "res://levels/Level_01.tscn"
 
 var _target_scene_path: String = ""
 var last_played_level: String = "" 
@@ -42,6 +42,17 @@ func change_scene_with_loading(scene_path: String):
 	ResourceLoader.load_threaded_request(_target_scene_path)
 	_loading = true
 	_fade_out()
+
+
+func continue_or_start_game() -> void:
+	if (
+		SaveManager.has_save()
+		and not PlayerData.current_level_path.is_empty()
+	):
+		change_scene_with_loading(PlayerData.current_level_path)
+		return
+	SaveManager.start_new_game()
+	change_scene_with_loading(LEVEL_1_PATH)
 
 func _process(_delta):
 	if not _loading: return
@@ -99,11 +110,12 @@ func reload_current_scene():
 	_fade_out()
 
 func restart_last_level():
-	if last_played_level != "":
-		change_scene_with_loading(last_played_level)
-	else:
-		print("Error: No last level saved!")
-		open_main_menu()
+	var restart_path := PlayerData.current_level_path
+	if restart_path.is_empty():
+		restart_path = last_played_level
+	if restart_path.is_empty():
+		restart_path = LEVEL_1_PATH
+	change_scene_with_loading(restart_path)
 		
 func open_main_menu():
 	change_scene_simple(MAIN_MENU_PATH)

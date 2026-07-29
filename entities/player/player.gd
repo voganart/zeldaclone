@@ -245,20 +245,37 @@ func _ready() -> void:
 	_apply_unlocks()
 
 func _apply_unlocks() -> void:
+	if health_component:
+		health_component.max_health = PlayerData.max_health
+		health_component.current_health = PlayerData.max_health
 	if movement_component:
-		movement_component.max_jump_count = 2 if debug_unlock_double_jump else 1
+		var has_double_jump := debug_unlock_double_jump \
+			or PlayerData.is_ability_unlocked(&"double_jump")
+		movement_component.max_jump_count = 2 if has_double_jump else 1
 	if air_dash_ability:
-		air_dash_ability.is_unlocked = debug_unlock_air_dash
+		air_dash_ability.is_unlocked = debug_unlock_air_dash \
+			or PlayerData.is_ability_unlocked(&"air_dash")
 	if ground_slam_ability:
-		ground_slam_ability.is_unlocked = debug_unlock_ground_slam
+		ground_slam_ability.is_unlocked = debug_unlock_ground_slam \
+			or PlayerData.is_ability_unlocked(&"ground_slam")
 	if roll_ability:
-		roll_ability.is_unlocked = debug_unlock_roll
+		roll_ability.is_unlocked = debug_unlock_roll \
+			or PlayerData.is_ability_unlocked(&"roll_ability")
 	if combat_component:
-		combat_component.max_combo_hits = 3 if debug_unlock_3_hit_combo else 2
+		var has_finisher := debug_unlock_3_hit_combo \
+			or PlayerData.is_ability_unlocked(&"3_hit_combo")
+		combat_component.max_combo_hits = 3 if has_finisher else 2
 
-func unlock_ability(ability_name: String) -> void:
+
+func unlock_ability(ability_name: String) -> bool:
 	print("Player unlocking: ", ability_name)
-	match ability_name:
+	var normalized_name := ability_name
+	if normalized_name == "combo_finisher":
+		normalized_name = "3_hit_combo"
+	if not PlayerData.unlock_ability(StringName(normalized_name)):
+		return false
+
+	match normalized_name:
 		"roll_ability":
 			if roll_ability: roll_ability.is_unlocked = true
 		
@@ -271,10 +288,15 @@ func unlock_ability(ability_name: String) -> void:
 		"air_dash":
 			if air_dash_ability: air_dash_ability.is_unlocked = true
 			
-		"combo_finisher", "3_hit_combo":
+		"3_hit_combo":
 			if combat_component: 
 				combat_component.max_combo_hits = 3
 				print("3-Hit Combo Unlocked!")
+		_:
+			return false
+
+	SaveManager.save_permanent_event()
+	return true
 
 func _setup_roll_safety_cast() -> void:
 	if not shape_cast:

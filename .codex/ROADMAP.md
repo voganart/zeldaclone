@@ -10,7 +10,7 @@ here until they are implemented or deliberately rejected.
 - Add English and Russian values together; do not hardcode UI copy in scripts
   or scenes.
 
-## Current
+## Completed
 
 ### Memory Save System
 
@@ -21,6 +21,8 @@ here until they are implemented or deliberately rejected.
 - Preserve Vabo during death reloads in the current session.
 - Preserve completed puzzles and permanent routes by unique ID.
 - First integration target: `Level_01`.
+- Dynamic `New Game / Continue` main-menu action.
+- English and Russian save feedback.
 
 Design:
 `docs/superpowers/specs/2026-07-29-memory-save-system-design.md`.
@@ -31,7 +33,6 @@ Design:
 
 - Show current Vabo in the HUD.
 - Clearly show unlocked movement/combat abilities.
-- Add lightweight save confirmation: `Память закреплена`.
 
 ### F10 Debug Panel
 

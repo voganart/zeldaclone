@@ -17,6 +17,7 @@
 | `common/components/` | Переиспользуемые gameplay-компоненты движения, боя, камеры и анимации. |
 | `common/fsm/` | Базовая state machine для игровых сущностей. |
 | `common/interaction/` | Система интеракций, области взаимодействия и readable objects. |
+| `common/persistence/` | Переиспользуемые persistent-ID компоненты для головоломок, наград и постоянных проходов. |
 | `common/utils/` | Editor/runtime utilities для растительности, материалов и occlusion. |
 | `entities/player/` | Игрок, abilities, states, input и character scenes. |
 | `entities/enemies/` | Враги, AI states, компоненты и spawners. |
@@ -34,6 +35,10 @@
 ## Gameplay-навигация
 
 - Смена сцен: `common/autoload/scene_manager.gd`
+- Дисковые сохранения и checkpoints: `common/autoload/save_manager.gd`
+- Runtime-прогресс игрока: `common/autoload/player_data.gd`
+- Расставляемый Узел памяти: `entities/interactive/MemoryNode/MemoryNode.tscn`
+- Persistent-ID контракт: `common/persistence/persistent_state.gd`
 - Глобальное состояние игры: `common/autoload/game_manager.gd`
 - События: `common/autoload/game_events.gd`
 - AI orchestration: `common/autoload/ai_director.gd`

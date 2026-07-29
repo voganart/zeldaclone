@@ -1,6 +1,6 @@
 # Совместимость Godot
 
-Проверено: 2026-07-28.
+Проверено: 2026-07-29.
 
 ## Engine
 
@@ -9,7 +9,9 @@
 - `project.godot` уже мигрирован на feature tag `4.7`.
 - Editor parse-check: проходит.
 - GUI editor smoke-check: проходит.
-- Main scene headless smoke-check: проходит.
+- Runtime save-system test: проходит через `--script`.
+- Steam headless editor process может зависнуть, если тот же проект уже открыт
+  в GUI. Это ограничение CLI-проверки, а не runtime-ошибка проекта.
 - Временный fallback при регрессии: Godot 4.6.
 
 ## Addons
@@ -21,7 +23,7 @@
 | Proton Scatter | 4.0 | Enabled; применён локальный 4.7 compatibility patch в `src/scatter.gd`. |
 | Script Spliter | 0.4-DEV-3.2 | Enabled, загружается. |
 | SimpleGrassTextured | 2.0.8 | Enabled, загружается; singleton подключён autoload. |
-| InputMapperPresetLoader | 1.0.0 | Disabled; внутри addon есть несовпадение регистра пути. |
+| InputMapperPresetLoader | 1.0.0 | Disabled; несовпадение регистра пути исправлено для case-sensitive export. |
 | Zylann HTerrain | локальная копия | Disabled. |
 
 ## Proton Scatter patch
@@ -47,12 +49,20 @@ Regression-test:
 powershell -NoProfile -ExecutionPolicy Bypass -File .codex/tests/battle-arena-editor.tests.ps1
 ```
 
-## Известный portability-риск
+## Save-system verification
 
-`addons/InputMapperPresetLoader/InputMapperPresets.tscn` использует путь с другим регистром:
+Runtime-модель, versioned JSON, восстановление битого сейва и загрузка новых
+сцен проверяются:
 
-```text
-res://addons/inputmapperpresetloader/InputMapperPresets.gd
+```powershell
+& 'C:\Program Files (x86)\Steam\steamapps\common\Godot Engine\godot.windows.opt.tools.64.exe' `
+  --headless --path 'C:\GodotProjects\zeldaclone' `
+  --script res://.codex/tests/save_system_runtime_test.gd
+
+powershell -ExecutionPolicy Bypass `
+  -File .codex/tests/save-system-contract.tests.ps1
 ```
 
-Фактическая папка называется `addons/InputMapperPresetLoader`. На Windows это работает, но на case-sensitive export platform файл не откроется. Addon сейчас выключен, поэтому это не блокирует запуск.
+При `--script` Steam-сборка может вывести сообщения об ObjectDB/resources при
+завершении из-за загруженных autoload-плагинов. Сам тест должен вывести
+`PASS: PlayerData runtime progression`.

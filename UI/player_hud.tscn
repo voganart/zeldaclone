@@ -111,3 +111,17 @@ layout_mode = 2
 
 [node name="TutorialOverlay" parent="." instance=ExtResource("5_7pawb")]
 layout_mode = 1
+
+[node name="SaveFeedback" type="Label" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 64.0
+offset_bottom = 104.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.55, 0.95, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.08, 0.12, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1

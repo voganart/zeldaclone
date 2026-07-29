@@ -5,6 +5,12 @@ extends Control
 @onready var btn_exit = $UI_Layer/Margin/VBox/ButtonsVBox/BtnExit
 
 func _ready():
+	var can_continue := (
+		SaveManager.has_save()
+		and not PlayerData.current_level_path.is_empty()
+	)
+	btn_new_game.text = tr("ui_continue" if can_continue else "ui_new_game")
+
 	# Фокус на первую кнопку для управления с геймпада/клавиатуры
 	btn_new_game.grab_focus()
 	
@@ -15,10 +21,15 @@ func _ready():
 	# Проигрываем музыку меню (если есть)
 	MusicBrain.play_menu_music()
 
+	if SaveManager.invalid_save_recovered:
+		$UI_Layer/Margin/VBox/SaveStatusLabel.text = tr(
+			"save_data_invalid"
+		)
+		$UI_Layer/Margin/VBox/SaveStatusLabel.visible = true
+		SaveManager.invalid_save_recovered = false
+
 func _on_new_game_pressed():
-	# Используем наш новый метод с загрузкой!
-	# Убедись, что в SceneManager.LEVEL_1_PATH стоит правильный путь к уровню
-	SceneManager.change_scene_with_loading(SceneManager.LEVEL_1_PATH)
+	SceneManager.continue_or_start_game()
 
 func _on_settings_pressed():
 	print("Settings not implemented yet")

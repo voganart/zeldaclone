@@ -13,6 +13,7 @@ extends Node3D
 @export var tutorial_manager: TutorialManager 
 
 func _ready() -> void:
+	PlayerData.current_level_path = scene_file_path
 	# ... (Код поиска камеры, как был раньше) ...
 	var main_cam = get_viewport().get_camera_3d()
 	if not main_cam:
@@ -55,10 +56,27 @@ func _ready() -> void:
 func _spawn_player() -> CharacterBody3D:
 	var new_player = player_scene.instantiate()
 	add_child(new_player)
-	if player_start:
-		new_player.global_position = player_start.global_position
-		new_player.rotation.y = player_start.rotation.y
+	new_player.global_transform = resolve_player_spawn_transform()
 	return new_player
+
+
+func resolve_player_spawn_transform() -> Transform3D:
+	var checkpoint_id := PlayerData.active_checkpoint_id
+	if (
+		not checkpoint_id.is_empty()
+		and PlayerData.current_level_path == scene_file_path
+	):
+		for node: Node in get_tree().get_nodes_in_group("memory_nodes"):
+			if (
+				is_ancestor_of(node)
+				and node is MemoryNode
+				and String(node.checkpoint_id) == checkpoint_id
+			):
+				return node.get_spawn_transform()
+	if player_start:
+		return player_start.global_transform
+	return global_transform
+
 
 func _setup_camera(player_node: CharacterBody3D) -> void:
 	if not phantom_camera: return

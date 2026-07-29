@@ -12,6 +12,7 @@ common/autoload/input_helper.gd
 common/autoload/ItemPool.gd
 common/autoload/music_brain.gd
 common/autoload/player_data.gd
+common/autoload/save_manager.gd
 common/autoload/scene_manager.gd
 common/BasePickup/base_pickup.gd
 common/components/animation_controller.gd
@@ -23,6 +24,7 @@ common/fsm/state_machine.gd
 common/interaction/interaction_area.gd
 common/interaction/interaction_manager.gd
 common/interaction/readable_object.gd
+common/persistence/persistent_state.gd
 common/utils/foliage_generator_import.gd
 common/utils/FoliageType.gd
 common/utils/import_trees.gd
@@ -47,6 +49,7 @@ entities/enemies/states/enemy_frustrated.gd
 entities/enemies/states/enemy_idle.gd
 entities/enemies/states/enemy_patrol.gd
 entities/interactive/Chest_1/chest.gd
+entities/interactive/MemoryNode/memory_node.gd
 entities/interactive/WoodenCrate/breakable_object.gd
 entities/PickupItems/HeartPickup/heart.gd
 entities/PickupItems/VaboPickup/vabo.gd
@@ -103,6 +106,7 @@ entities/environment/trees_generated/Bush2.tscn
 entities/environment/trees_generated/Tree1.tscn
 entities/environment/trees_generated/Tree2.tscn
 entities/interactive/Chest_1/Chest_1.tscn
+entities/interactive/MemoryNode/MemoryNode.tscn
 entities/interactive/WoodenCrate/WoodenCrate.tscn
 entities/PickupItems/BasePickup.tscn
 entities/PickupItems/HeartPickup/HeartPickup.tscn

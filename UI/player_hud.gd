@@ -5,6 +5,7 @@ extends Control
 @export_category("References")
 @export var player_path: NodePath
 @onready var tutorial_overlay: TutorialOverlay = $TutorialOverlay 
+@onready var save_feedback: Label = $SaveFeedback
 
 @onready var pips = [
 	$ActionsContainer/VBoxContainer/RollContainer/Pip1,
@@ -42,6 +43,7 @@ extends Control
 
 var player: Player
 var hearts: Array[TextureRect] = []
+var save_feedback_tween: Tween
 
 func _ready() -> void:
 	# Настройка иконок
@@ -57,6 +59,12 @@ func _ready() -> void:
 		_update_hearts(float(debug_hearts_count))
 		return
 	# ========================
+	if not GameEvents.save_feedback_requested.is_connected(
+		_on_save_feedback_requested
+	):
+		GameEvents.save_feedback_requested.connect(
+			_on_save_feedback_requested
+		)
 	await get_tree().process_frame
 	if not player:
 		_find_player()
@@ -213,3 +221,24 @@ func _update_slam_bar() -> void:
 	else:
 		slam_bar.value = 1.0
 		slam_bar.tint_progress = color_ready
+
+
+func _on_save_feedback_requested(text_key: StringName) -> void:
+	save_feedback.text = tr(String(text_key))
+	if save_feedback_tween and save_feedback_tween.is_valid():
+		save_feedback_tween.kill()
+	save_feedback.modulate.a = 0.0
+	save_feedback_tween = create_tween()
+	save_feedback_tween.tween_property(
+		save_feedback,
+		"modulate:a",
+		1.0,
+		0.2
+	)
+	save_feedback_tween.tween_interval(1.2)
+	save_feedback_tween.tween_property(
+		save_feedback,
+		"modulate:a",
+		0.0,
+		0.4
+	)

@@ -8,3 +8,6 @@ signal player_died
 
 @warning_ignore("unused_signal")
 signal camera_shake_requested(strength: float, duration: float)
+
+@warning_ignore("unused_signal")
+signal save_feedback_requested(text_key: StringName)

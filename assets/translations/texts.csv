@@ -25,3 +25,6 @@ tutorial_double_jump_prompt,"Use double jump to jump over the gap","Исполь
 tutorial_attack_prompt,"Break the obstacle","Разбейте препятствие"
 tutorial_roll_prompt,"Roll to pass under","Кувырок чтобы пролезть"
 ui_toggle_camera,"Camera Mode","Режим камеры"
+ui_continue,"Continue","Продолжить"
+save_memory_anchored,"Memory anchored","Память закреплена"
+save_data_invalid,"Save data was reset","Данные сохранения были сброшены"
