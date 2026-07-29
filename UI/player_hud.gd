@@ -7,18 +7,18 @@ extends Control
 @onready var tutorial_overlay: TutorialOverlay = $TutorialOverlay 
 @onready var save_feedback: Label = $SaveFeedback
 @onready var vabo_value: Label = \
-	$HealthContainer/HealthRow/VaboContainer/VaboValue
+	$HealthContainer/HealthStack/VaboOffset/VaboContainer/VaboValue
 @onready var hearts_container: HBoxContainer = \
-	$HealthContainer/HealthRow/HeartsLayout
+	$HealthContainer/HealthStack/HeartsLayout
 @onready var roll_container: HBoxContainer = \
 	$ActionsContainer/AbilityStrip/RollContainer
 @onready var double_jump_icon: TextureRect = \
 	$ActionsContainer/AbilityStrip/DoubleJumpIcon
 @onready var slam_bar: TextureProgressBar = \
 	$ActionsContainer/AbilityStrip/SlamIcon
-@onready var air_dash_icon: TextureRect = \
+@onready var air_dash_bar: TextureProgressBar = \
 	$ActionsContainer/AbilityStrip/AirDashIcon
-@onready var combo_icon: TextureRect = \
+@onready var combo_bar: TextureProgressBar = \
 	$ActionsContainer/AbilityStrip/ComboIcon
 
 @onready var pips: Array[TextureProgressBar] = [
@@ -38,6 +38,7 @@ extends Control
 @export var color_recharging: Color = Color("ffffff80")
 @export var color_background: Color = Color("00000060")
 @export var color_penalty: Color = Color("ff4d4d")
+@export var color_unavailable: Color = Color("777777cc")
 
 @export_group("Health Colors")
 @export var color_heart_full: Color = Color("ff3333")
@@ -102,8 +103,8 @@ func _sync_progress_feedback() -> void:
 		&"roll_ability": roll_container,
 		&"double_jump": double_jump_icon,
 		&"ground_slam": slam_bar,
-		&"air_dash": air_dash_icon,
-		&"3_hit_combo": combo_icon,
+		&"air_dash": air_dash_bar,
+		&"3_hit_combo": combo_bar,
 	}
 	for ability_name: StringName in indicators:
 		var indicator: Control = indicators[ability_name]
@@ -202,7 +203,10 @@ func _process(_delta: float) -> void:
 	if not player: return
 	
 	_update_roll_pips()
+	_update_double_jump_icon()
 	_update_slam_bar()
+	_update_air_dash_bar()
+	_update_combo_bar()
 
 func _on_health_changed(current: float, _max: float) -> void:
 	_update_hearts(current)
@@ -247,21 +251,71 @@ func _update_roll_pips() -> void:
 			pip.value = 0.0
 
 func _update_slam_bar() -> void:
-	# То же самое для Slam (если он закрыт)
 	if not player.ground_slam_ability or not player.ground_slam_ability.is_unlocked:
 		slam_bar.visible = false
 		return
-	else:
-		slam_bar.visible = true
-		
-	var timer = player.ground_slam_ability.cooldown_timer
-	var max_time = player.ground_slam_ability.slam_cooldown
-	if timer > 0:
-		slam_bar.value = 1.0 - (timer / max_time)
-		slam_bar.tint_progress = color_recharging
-	else:
-		slam_bar.value = 1.0
-		slam_bar.tint_progress = color_ready
+	slam_bar.visible = true
+	_update_cooldown_bar(
+		slam_bar,
+		player.ground_slam_ability.cooldown_timer,
+		player.ground_slam_ability.slam_cooldown
+	)
+
+
+func _update_double_jump_icon() -> void:
+	if not PlayerData.is_ability_unlocked(&"double_jump"):
+		double_jump_icon.visible = false
+		return
+	double_jump_icon.visible = true
+	double_jump_icon.modulate = (
+		color_ready if player.current_jump_count < 2 else color_unavailable
+	)
+
+
+func _update_air_dash_bar() -> void:
+	var ability: AirDashAbility = player.air_dash_ability
+	if not ability or not ability.is_unlocked:
+		air_dash_bar.visible = false
+		return
+	air_dash_bar.visible = true
+	_update_cooldown_bar(
+		air_dash_bar,
+		maxf(ability.cooldown_timer, 0.0),
+		ability.air_dash_cooldown
+	)
+	if ability.cooldown_timer <= 0.0 and ability.dash_used_in_air:
+		air_dash_bar.tint_progress = color_unavailable
+
+
+func _update_combo_bar() -> void:
+	if not PlayerData.is_ability_unlocked(&"3_hit_combo"):
+		combo_bar.visible = false
+		return
+	combo_bar.visible = true
+	if not player.combat_component:
+		return
+	var timer: Timer = player.combat_component.combo_cooldown_timer
+	var time_left: float = 0.0
+	if timer and not timer.is_stopped():
+		time_left = timer.time_left
+	_update_cooldown_bar(
+		combo_bar,
+		time_left,
+		player.combat_component.combo_cooldown_after_combo
+	)
+
+
+func _update_cooldown_bar(
+	bar: TextureProgressBar,
+	time_left: float,
+	max_time: float
+) -> void:
+	if max_time <= 0.0 or time_left <= 0.0:
+		bar.value = 1.0
+		bar.tint_progress = color_ready
+		return
+	bar.value = clampf(1.0 - (time_left / max_time), 0.0, 1.0)
+	bar.tint_progress = color_recharging
 
 
 func _on_save_feedback_requested(text_key: StringName) -> void:
