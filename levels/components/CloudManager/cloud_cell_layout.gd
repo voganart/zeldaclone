@@ -11,10 +11,6 @@ static func world_to_cell(position: Vector3, cell_size: float) -> Vector3i:
 	)
 
 
-static func world_to_chunk(position: Vector3, chunk_size: float) -> Vector3i:
-	return world_to_cell(position, chunk_size)
-
-
 static func occupancy_threshold(profile: CloudTuningProfile) -> float:
 	if profile == null:
 		return 0.0
