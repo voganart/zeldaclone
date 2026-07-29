@@ -51,13 +51,13 @@ foreach ($token in @(
     'path="res://assets/textures/ui/DoubleJump.png"',
     'path="res://assets/textures/ui/AirDash.png"',
     'path="res://assets/textures/ui/Combo3Hit.png"',
-    '[node name="HealthRow" type="HBoxContainer" parent="HealthContainer"]',
-    '[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthRow"]',
-    '[node name="VaboValue" type="Label" parent="HealthContainer/HealthRow/VaboContainer"]',
-    '[node name="AbilityStrip" type="HBoxContainer" parent="ActionsContainer"]',
-    '[node name="DoubleJumpIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"]',
-    '[node name="AirDashIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"]',
-    '[node name="ComboIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"]',
+    '[node name="HealthRow" type="HBoxContainer" parent="HealthContainer"',
+    '[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthRow"',
+    '[node name="VaboValue" type="Label" parent="HealthContainer/HealthRow/VaboContainer"',
+    '[node name="AbilityStrip" type="HBoxContainer" parent="ActionsContainer"',
+    '[node name="DoubleJumpIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"',
+    '[node name="AirDashIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"',
+    '[node name="ComboIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"',
     'text = "ui_vabo"'
 )) {
     if (-not $hudScene.Contains($token)) {

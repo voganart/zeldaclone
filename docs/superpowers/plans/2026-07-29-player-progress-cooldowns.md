@@ -218,15 +218,15 @@ Require:
 ```powershell
 foreach ($token in @(
     'path="res://assets/textures/ui/Vabo.png"',
-    '[node name="HealthStack" type="VBoxContainer" parent="HealthContainer"]',
-    '[node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer/HealthStack"]',
-    '[node name="VaboOffset" type="MarginContainer" parent="HealthContainer/HealthStack"]',
+    '[node name="HealthStack" type="VBoxContainer" parent="HealthContainer"',
+    '[node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer/HealthStack"',
+    '[node name="VaboOffset" type="MarginContainer" parent="HealthContainer/HealthStack"',
     'theme_override_constants/margin_left = 20',
-    '[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthStack/VaboOffset"]',
-    '[node name="VaboIcon" type="TextureRect" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"]',
-    '[node name="VaboValue" type="Label" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"]',
-    '[node name="AirDashIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"]',
-    '[node name="ComboIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"]'
+    '[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthStack/VaboOffset"',
+    '[node name="VaboIcon" type="TextureRect" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"',
+    '[node name="VaboValue" type="Label" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"',
+    '[node name="AirDashIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"',
+    '[node name="ComboIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"'
 )) {
     if (-not $hudScene.Contains($token)) {
         throw "Player HUD revised scene contract is missing: $token"
@@ -687,4 +687,3 @@ git log -6 --oneline
 
 Expected: clean `master`, with user-owned scene commits preserved and the new
 HUD commits on top.
-
