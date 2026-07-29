@@ -409,7 +409,6 @@ is_root_motion = true
 
 [node name="Roll" type="Node" parent="StateMachine" unique_id=1511467610]
 script = ExtResource("12_afbqv")
-dive_entry_margin = 0.5
 is_root_motion = true
 
 [node name="Dash" type="Node" parent="StateMachine" unique_id=518102643]

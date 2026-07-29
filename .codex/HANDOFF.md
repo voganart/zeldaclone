@@ -15,7 +15,10 @@
 
 ## Текущее состояние Git
 
-- Рабочая ветка: `master`.
+- Рабочая ветка: `codex/fix-roll-obstacle-motion`, создана по явному запросу
+  пользователя без worktree.
+- Пользовательские удаления ability-chest остаются незакоммиченными в
+  `levels/Level_01.tscn`; не восстанавливать и не включать в Roll-fix commit.
 - После пользовательского коммита `daa66aa` добавлены локальные F10 Debug
   Panel-коммиты;
   перед следующим push проверить актуальный `git status -sb`.
@@ -225,11 +228,20 @@ Vabo и повторных боёв.
 
 Согласованный порядок:
 
-1. Продолжать собирать и довести до конца `Level_01`.
-2. После появления полного игрового цикла настроить баланс Vabo,
+1. Выполнить GUI smoke-test исправленного Roll-препятствия в `Level_01`.
+   Кодовый фикс убрал повторный `move_and_slide()` из Roll-state и скорость
+   выталкивания `12`; passage motion теперь применяется один раз в общем physics
+   loop со скоростью `5`, капсула уменьшается до движения и восстанавливается
+   только после clearance-проверки полной стоячей капсулой.
+   Проверить проход в обе стороны с `Debug > Visible Collision Shapes`.
+   Автотест `.codex/tests/player-roll-obstacle.tests.ps1` проходит.
+   `save-system-contract.tests.ps1` сейчас ожидаемо падает на удалённых
+   пользователем ability-chest; к Roll-фиксу это не относится.
+2. Продолжать собирать и довести до конца `Level_01`.
+3. После появления полного игрового цикла настроить баланс Vabo,
    checkpoint spacing, врагов и повторных секций.
-3. Позже — расширить Debug Panel runtime object inspector/transform controls.
-4. Позже — Keeper of Memory, трата Vabo, health/ability upgrades и hub flow.
+4. Позже — расширить Debug Panel runtime object inspector/transform controls.
+5. Позже — Keeper of Memory, трата Vabo, health/ability upgrades и hub flow.
 
 Подробный backlog находится в `.codex/ROADMAP.md`.
 

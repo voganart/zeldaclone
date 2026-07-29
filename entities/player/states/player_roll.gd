@@ -6,20 +6,13 @@ var elapsed_time: float = 0.0
 
 var is_stuck_under_roof: bool = false
 
-# Увеличим скорость вылета, чтобы проскакивать быстро (было 6-8, ставим 10-12)
-@export var slide_out_speed: float = 12.0 
+@export var passage_speed: float = 5.0
 
 @export_group("Collision Timing")
-@export_range(0.0, 1.0) var shrink_start_ratio: float = 0.15 
-# Восстановление ставим поздно, но реальное восстановление будет зависеть от потолка
 @export_range(0.0, 1.0) var restore_start_ratio: float = 0.85 
-
-@export_group("Virtual Wall")
-@export var dive_entry_margin: float = 1.2 
 
 var default_roll_control: float = 0.0
 var fixed_roll_direction: Vector3 = Vector3.ZERO
-var head_wall_detector: ShapeCast3D 
 
 var is_collider_shrunk: bool = false
 
@@ -36,8 +29,9 @@ func enter() -> void:
 	
 	default_roll_control = player.roll_control
 	player.roll_ability.consume_charge()
-	
-	_ensure_head_wall_detector()
+	player.clear_roll_passage_motion()
+	player.shrink_collider()
+	is_collider_shrunk = true
 	
 	if player.shape_cast:
 		player.shape_cast.enabled = true
@@ -69,74 +63,33 @@ func physics_update(delta: float) -> void:
 	elapsed_time += delta
 	var progress = clamp(elapsed_time / roll_duration, 0.0, 1.0)
 	
-	# === 1. УПРАВЛЕНИЕ КОЛЛАЙДЕРОМ (СЖАТИЕ) ===
-	if not is_collider_shrunk and progress >= shrink_start_ratio:
-		player.shrink_collider()
-		is_collider_shrunk = true
-	
-	# Проверяем потолок ТОЛЬКО если мы уже сжались (иначе shape_cast может врать)
-	var has_roof = false
-	if is_collider_shrunk:
-		has_roof = player.is_roof_above()
-	
-	# === 2. ЛОГИКА "ПРОСКАЛЬЗЫВАНИЯ" (STUCK) ===
+	var has_roof := is_collider_shrunk and not player.can_restore_collider()
+
 	if has_roof:
 		is_stuck_under_roof = true
-		
-		# Отключаем управление
 		player.roll_control = 0.0
-		
-		# ВИЗУАЛ: Принудительно ставим флаг приседания в аниматоре.
-		# Это спасет, если анимация переката закончится, а мы все еще под столом.
-		# Персонаж перейдет в Crouch/Crawl вместо Idle/Stand.
 		player.anim_controller.set_crouch_state(true)
-		
-		# ФИЗИКА: Агрессивное движение вперед
-		# Мы НЕ используем move_toward, мы жестко задаем скорость,
-		# чтобы преодолеть трение и любые попытки физики вытолкнуть нас назад.
-		player.velocity.x = fixed_roll_direction.x * slide_out_speed
-		player.velocity.z = fixed_roll_direction.z * slide_out_speed
-		
-		# Гравитация нужна
-		player.apply_gravity(delta)
-		
-		player.move_and_slide()
-		
-		# !!! КРИТИЧНО: RETURN !!!
-		# Мы НЕ выходим из функции и НЕ проверяем таймер окончания переката.
-		# Мы остаемся в этом состоянии, пока крыша не исчезнет.
-		return 
+		player.set_roll_passage_motion(fixed_roll_direction, passage_speed)
+		return
 
-	# === 3. ВЫХОД ИЗ ЗАСТРЕВАНИЯ ===
-	# Если мы были застрявшими, но крыша кончилась -> ВЫЛЕТАЕМ
+	player.clear_roll_passage_motion()
+
 	if is_stuck_under_roof and not has_roof:
-		# Восстанавливаем коллайдер
 		if is_collider_shrunk:
 			player.restore_collider()
 			is_collider_shrunk = false
 		
-		# Сбрасываем флаг приседания
 		player.anim_controller.set_crouch_state(false)
 		
 		transitioned.emit(self, GameConstants.STATE_MOVE)
 		return
 
-	# === 4. ОБЫЧНОЕ ВОССТАНОВЛЕНИЕ (Если не застревали) ===
 	if is_collider_shrunk and progress >= restore_start_ratio:
-		# Восстанавливаем ТОЛЬКО если нет крыши (дублирующая проверка для безопасности)
-		if not player.is_roof_above():
+		if player.can_restore_collider():
 			player.restore_collider()
 			is_collider_shrunk = false
 	
-	# === 5. ВИРТУАЛЬНАЯ СТЕНА (Перед входом) ===
-	if not is_stuck_under_roof and is_collider_shrunk:
-		if _check_head_collision(delta):
-			player.velocity.x = 0
-			player.velocity.z = 0
-			
-	# === 6. ЗАВЕРШЕНИЕ ПО ТАЙМЕРУ ===
 	if elapsed_time < roll_duration:
-		# Отмены
 		if player.input_handler.check_jump():
 			if progress >= player.roll_jump_cancel_threshold:
 				player.perform_jump()
@@ -152,40 +105,13 @@ func physics_update(delta: float) -> void:
 	else:
 		transitioned.emit(self, GameConstants.STATE_MOVE)
 
-func _ensure_head_wall_detector():
-	if head_wall_detector: return
-	head_wall_detector = ShapeCast3D.new()
-	head_wall_detector.name = "HeadWallDetector"
-	player.add_child(head_wall_detector)
-	var sphere = SphereShape3D.new()
-	sphere.radius = 0.4
-	head_wall_detector.shape = sphere
-	head_wall_detector.position = Vector3(0, 1.5, 0)
-	head_wall_detector.add_exception(player)
-	head_wall_detector.collision_mask = 1 
-	head_wall_detector.enabled = false
-
-func _check_head_collision(_delta: float) -> bool:
-	if not head_wall_detector: return false
-	head_wall_detector.enabled = true
-	var cast_vec = fixed_roll_direction * dive_entry_margin
-	head_wall_detector.target_position = cast_vec
-	head_wall_detector.force_shapecast_update()
-	if head_wall_detector.is_colliding():
-		var hit_point = head_wall_detector.get_collision_point(0)
-		var dist = player.global_position.distance_to(hit_point)
-		if dist > 0.8:
-			return true
-	head_wall_detector.enabled = false
-	return false
-
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false
 	player.root_motion_speed_factor = 1.0
+	player.clear_roll_passage_motion()
 	
-	# Финальная гарантия восстановления
-	if is_collider_shrunk:
+	if is_collider_shrunk and player.can_restore_collider():
 		player.restore_collider()
 		is_collider_shrunk = false
 	
@@ -193,8 +119,6 @@ func exit() -> void:
 	
 	if player.shape_cast:
 		player.shape_cast.enabled = false
-	if head_wall_detector:
-		head_wall_detector.enabled = false
 		
 	player.roll_control = default_roll_control
 	

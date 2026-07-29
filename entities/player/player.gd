@@ -57,9 +57,12 @@ extends CharacterBody3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 var default_col_height: float = 2.0
 var default_col_y: float = 1.0
+var default_capsule_radius: float = 0.5
 
 var roll_col_height: float = 0.9
 var roll_col_y: float = 0.45 
+var roll_passage_motion_active: bool = false
+var roll_passage_velocity: Vector3 = Vector3.ZERO
 
 # Abilities
 @onready var air_dash_ability: AirDashAbility = $Abilities/AirDashAbility
@@ -226,6 +229,7 @@ func _ready() -> void:
 	if collision_shape and collision_shape.shape is CapsuleShape3D:
 		default_col_height = collision_shape.shape.height
 		default_col_y = collision_shape.position.y
+		default_capsule_radius = collision_shape.shape.radius
 		
 		roll_col_height = default_col_height / 2.0
 		roll_col_y = default_col_y / 2.0
@@ -308,16 +312,15 @@ func _setup_roll_safety_cast() -> void:
 		shape_cast.name = "RollSafetyCast"
 		add_child(shape_cast)
 		shape_cast.add_exception(self)
-		shape_cast.collision_mask = 1 
 	
-	shape_cast.position = Vector3(0, 0.5, 0)
-	var check_distance = default_col_height - shape_cast.position.y - 0.1
-	shape_cast.target_position = Vector3(0, check_distance, 0)
+	shape_cast.collision_mask = 256
+	shape_cast.position = Vector3(0, default_col_y + 0.02, 0)
+	shape_cast.target_position = Vector3(0, 0.01, 0)
 	
-	if not shape_cast.shape or not (shape_cast.shape is SphereShape3D):
-		var sphere = SphereShape3D.new()
-		sphere.radius = 0.4 
-		shape_cast.shape = sphere
+	var standing_capsule := CapsuleShape3D.new()
+	standing_capsule.height = default_col_height
+	standing_capsule.radius = default_capsule_radius
+	shape_cast.shape = standing_capsule
 	
 	shape_cast.enabled = false 
 	shape_cast.clear_exceptions()
@@ -413,6 +416,10 @@ func _physics_process(delta: float) -> void:
 		velocity.x = current_rm_velocity.x
 		velocity.z = current_rm_velocity.z
 		
+		if roll_passage_motion_active:
+			velocity.x = roll_passage_velocity.x
+			velocity.z = roll_passage_velocity.z
+
 		if is_on_wall() and current_movement_blend < 0.1 and input_handler.move_vector.length() > 0.1:
 			var manual_push = get_movement_vector() 
 			if manual_push.length_squared() > 0.01:
@@ -887,6 +894,18 @@ func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()
 
+func set_roll_passage_motion(direction: Vector3, speed: float) -> void:
+	var horizontal_direction := Vector3(direction.x, 0.0, direction.z)
+	if horizontal_direction.length_squared() <= 0.001:
+		clear_roll_passage_motion()
+		return
+	roll_passage_motion_active = true
+	roll_passage_velocity = horizontal_direction.normalized() * speed
+
+func clear_roll_passage_motion() -> void:
+	roll_passage_motion_active = false
+	roll_passage_velocity = Vector3.ZERO
+
 func shrink_collider() -> void:
 	if not collision_shape: return
 	if not collision_shape.shape is CapsuleShape3D: return
@@ -901,7 +920,7 @@ func restore_collider() -> void:
 	collision_shape.shape.height = default_col_height
 	collision_shape.position.y = default_col_y
 
-func is_roof_above() -> bool:
-	if not shape_cast: return false
+func can_restore_collider() -> bool:
+	if not shape_cast: return true
 	shape_cast.force_shapecast_update()
-	return shape_cast.is_colliding()
+	return not shape_cast.is_colliding()

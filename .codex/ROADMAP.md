@@ -59,6 +59,8 @@ Design:
 ### Finish Level_01
 
 - Continue building the complete tutorial/gameplay route.
+- GUI-validate the Roll tutorial physics fix in both directions; code now uses
+  one physics move and a standing-capsule clearance check.
 - Validate the ability-gated traversal sequence.
 - Reach a complete playable loop before broad UI or environment polish.
 
