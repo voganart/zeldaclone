@@ -194,19 +194,19 @@ Create `.codex/tests/player-progress-feedback.tests.ps1` with:
 $ErrorActionPreference = 'Stop'
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$hudScript = Get-Content -Raw (
+$hudScript = Get-Content -Raw -Encoding UTF8 (
     Join-Path $projectRoot 'ui\player_hud.gd'
 )
-$hudScene = Get-Content -Raw (
+$hudScene = Get-Content -Raw -Encoding UTF8 (
     Join-Path $projectRoot 'ui\player_hud.tscn'
 )
-$translations = Get-Content -Raw (
+$translations = Get-Content -Raw -Encoding UTF8 (
     Join-Path $projectRoot 'assets\translations\texts.csv'
 )
-$roadmap = Get-Content -Raw (
+$roadmap = Get-Content -Raw -Encoding UTF8 (
     Join-Path $projectRoot '.codex\ROADMAP.md'
 )
-$handoff = Get-Content -Raw (
+$handoff = Get-Content -Raw -Encoding UTF8 (
     Join-Path $projectRoot '.codex\HANDOFF.md'
 )
 
@@ -258,7 +258,7 @@ foreach ($token in @(
     }
 }
 
-$russianVabo = [string]::Concat(
+$russianVabo = -join @(
     [char]0x0412,
     [char]0x0430,
     [char]0x0431,
