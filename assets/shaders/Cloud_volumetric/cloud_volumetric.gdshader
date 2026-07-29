@@ -1,4 +1,5 @@
 shader_type spatial;
+global uniform vec3 weather_cloud_offset;
 render_mode unshaded, cull_front; // Вернули обычный режим
 
 // --- КАЧЕСТВО ---
@@ -61,7 +62,6 @@ varying vec3 v_camera_local;
 varying vec3 v_obj_scale;
 varying float v_world_dist;
 varying vec3 v_local_up_dir;
-varying vec3 v_world_pos_center;
 
 void vertex() {
 	v_local_pos = VERTEX;
@@ -70,7 +70,6 @@ void vertex() {
 	v_obj_scale = vec3(length(MODEL_MATRIX[0]), length(MODEL_MATRIX[1]), length(MODEL_MATRIX[2]));
 	v_world_dist = distance(CAMERA_POSITION_WORLD, (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz);
 	v_local_up_dir = normalize((world_to_local * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
-	v_world_pos_center = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 }
 
 vec2 ray_box_intersection(vec3 ray_origin, vec3 ray_dir, vec3 box_min, vec3 box_max) {
@@ -135,7 +134,7 @@ float get_density(vec3 p, float dist_to_cam) {
 	
 	float use_override = clamp(shape_override_enabled, 0.0, 1.0);
 	vec3 effective_scale = mix(v_obj_scale, shape_override_scale, use_override);
-	vec3 runtime_erosion_offset = (v_world_pos_center * 0.1) + shape_offset + (TIME * move_speed * erosion_offset_speed);
+	vec3 runtime_erosion_offset = shape_offset + weather_cloud_offset;
 	vec3 erosion_offset = mix(runtime_erosion_offset, shape_override_offset, use_override);
 	vec3 erosion_uv = (p * effective_scale * erosion_scale) + erosion_offset;
 	float erosion_val = texture(noise_texture, erosion_uv).r;
@@ -144,7 +143,7 @@ float get_density(vec3 p, float dist_to_cam) {
 	
 	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
 	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
-	vec3 runtime_detail_offset = TIME * move_speed + shape_offset * 1.7;
+	vec3 runtime_detail_offset = shape_offset * 1.7 + weather_cloud_offset;
 	vec3 detail_offset = mix(runtime_detail_offset, shape_override_offset * 1.7, use_override);
 	vec3 detail_uv = p * effective_scale * cloud_scale * current_scale_mod + detail_offset;
 	float detail_noise = texture(noise_texture, detail_uv).r;

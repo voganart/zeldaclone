@@ -1,4 +1,5 @@
 shader_type spatial;
+global uniform vec3 weather_cloud_offset;
 render_mode unshaded, blend_mix, depth_draw_opaque, cull_disabled;
 
 group_uniforms Rendering;
@@ -159,9 +160,7 @@ float get_density(vec3 p, float dist_to_cam) {
 		use_override
 	);
 	vec3 runtime_erosion_offset =
-		(v_world_center * 0.1)
-		+ shape_offset
-		+ (TIME * move_speed * erosion_offset_speed);
+		shape_offset + weather_cloud_offset;
 	vec3 erosion_offset = mix(
 		runtime_erosion_offset,
 		shape_override_offset,
@@ -178,8 +177,10 @@ float get_density(vec3 p, float dist_to_cam) {
 
 	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
 	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
+	vec3 runtime_detail_offset =
+		shape_offset * 1.7 + weather_cloud_offset;
 	vec3 detail_offset = mix(
-		TIME * move_speed + shape_offset * 1.7,
+		runtime_detail_offset,
 		shape_override_offset * 1.7,
 		use_override
 	);
