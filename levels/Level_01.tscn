@@ -583,7 +583,7 @@ cloud_shadow_color = SubResource("Gradient_nl450")
 metadata/_edit_lock_ = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=469480615]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 8, 6)
+transform = Transform3D(1, 0, 0, 0, 0.7071067, 0.7071068, 0, -0.7071068, 0.7071067, 0, 8, 6)
 cull_mask = 983039
 current = true
 fov = 50.0
