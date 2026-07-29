@@ -12,6 +12,10 @@ extends CharacterBody3D
 @export var debug_unlock_ground_slam: bool = false
 @export var debug_unlock_roll: bool = false
 @export var debug_unlock_3_hit_combo: bool = false
+@export var debug_flight_available: bool = true
+@export_range(5.0, 200.0, 5.0) var debug_flight_speed: float = 30.0
+@export_range(1.0, 10.0, 0.5) var debug_flight_boost: float = 3.0
+@export_range(1.0, 25.0, 1.0) var debug_flight_speed_step: float = 5.0
 
 @export_group("Respawn Settings")
 @export var absolute_fall_limit: float = -100.0 
@@ -112,6 +116,7 @@ var current_wall_push_velocity: Vector3 = Vector3.ZERO
 var root_motion_speed_factor: float = 1.0
 
 var cached_camera: Camera3D = null
+var debug_flight_active: bool = false
 
 # Геттеры свойств
 var base_speed: float:
@@ -299,7 +304,33 @@ func _process(delta: float) -> void:
 		var grass_manager = get_node("/root/SimpleGrass")
 		grass_manager.set_player_position(global_position)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if (
+		debug_flight_active
+		and event is InputEventMouseButton
+		and event.pressed
+	):
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_adjust_debug_flight_speed(1.0)
+			get_viewport().set_input_as_handled()
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_adjust_debug_flight_speed(-1.0)
+			get_viewport().set_input_as_handled()
+			return
+
+	if (
+		debug_flight_available
+		and event.is_action_pressed(GameConstants.INPUT_DEBUG_FLIGHT_TOGGLE)
+	):
+		_toggle_debug_flight()
+		get_viewport().set_input_as_handled()
+
 func _physics_process(delta: float) -> void:
+	if debug_flight_active:
+		_debug_flight_physics(delta)
+		return
+
 	if is_respawning: 
 		# === ЛОГИКА "ПРИЛИПАНИЯ" ПРИ РЕСПАВНЕ ===
 		# Если мы висим над движущейся платформой, обновляем позицию, чтобы не отставать
@@ -378,6 +409,58 @@ func _physics_process(delta: float) -> void:
 		safe_pos_timer = 0.0
 
 	_check_fall_logic()
+
+func _toggle_debug_flight() -> void:
+	debug_flight_active = not debug_flight_active
+	velocity = Vector3.ZERO
+	if collision_shape:
+		collision_shape.set_deferred("disabled", debug_flight_active)
+	print("Debug flight: ", "ON" if debug_flight_active else "OFF")
+
+func _adjust_debug_flight_speed(direction: float) -> void:
+	debug_flight_speed = clampf(
+		debug_flight_speed + direction * debug_flight_speed_step,
+		5.0,
+		200.0
+	)
+	print("Debug flight speed: ", debug_flight_speed)
+
+func _debug_flight_physics(delta: float) -> void:
+	if not is_instance_valid(cached_camera):
+		cached_camera = get_viewport().get_camera_3d()
+
+	var input_vector := Input.get_vector(
+		GameConstants.INPUT_MOVE_LEFT,
+		GameConstants.INPUT_MOVE_RIGHT,
+		GameConstants.INPUT_MOVE_UP,
+		GameConstants.INPUT_MOVE_DOWN
+	)
+	var direction := Vector3.ZERO
+	if cached_camera:
+		var camera_basis := cached_camera.global_transform.basis
+		direction = (
+			camera_basis.x * input_vector.x
+			+ -camera_basis.z * -input_vector.y
+		)
+	else:
+		direction = Vector3(input_vector.x, 0.0, input_vector.y)
+
+	if Input.is_action_pressed(GameConstants.INPUT_JUMP):
+		direction += Vector3.UP
+	if Input.is_action_pressed(GameConstants.INPUT_CROUCH):
+		direction += Vector3.DOWN
+	if not direction.is_zero_approx():
+		direction = direction.normalized()
+
+	var speed := debug_flight_speed
+	if Input.is_action_pressed(GameConstants.INPUT_RUN):
+		speed *= debug_flight_boost
+	global_position += direction * speed * delta
+	velocity = Vector3.ZERO
+	RenderingServer.global_shader_parameter_set(
+		GameConstants.SHADER_PARAM_PLAYER_POS,
+		global_transform.origin
+	)
 
 func _check_fall_logic() -> void:
 	if global_position.y < absolute_fall_limit:
