@@ -51,6 +51,7 @@ buses/default_bus_layout="res://assets/audio/default_bus_layout.tres"
 
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
+WeatherManager="*res://common/weather/weather_manager.gd"
 GameEvents="*res://common/autoload/game_events.gd"
 AIDirector="*res://common/autoload/ai_director.gd"
 GameManager="*res://common/autoload/game_manager.gd"
@@ -237,6 +238,30 @@ occlusion_culling/use_occlusion_culling=true
 
 [shader_globals]
 
+weather_wind_direction={
+"type": "vec3",
+"value": Vector3(1, 0, 0.25)
+}
+weather_wind_speed={
+"type": "float",
+"value": 1.0
+}
+weather_wind_strength={
+"type": "float",
+"value": 0.3
+}
+weather_wind_turbulence={
+"type": "float",
+"value": 0.15
+}
+weather_cloud_offset={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+weather_cloud_evolution={
+"type": "float",
+"value": 0.0
+}
 wind_intensity={
 "type": "float",
 "value": 0.0

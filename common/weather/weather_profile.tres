@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeatherProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://common/weather/weather_profile.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+wind_direction = Vector3(1, 0, 0.25)
+wind_speed = 1.0
+wind_strength = 0.3
+wind_turbulence = 0.15
+manual_blend_duration = 3.0
+cloud_drift_multiplier = 1.0
+cloud_noise_advection = 1.0
+cloud_evolution_speed = 0.015
+formation_lifetime_min = 360.0
+formation_lifetime_max = 900.0
+formation_fade_duration = 90.0

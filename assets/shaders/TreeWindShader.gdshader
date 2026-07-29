@@ -36,10 +36,14 @@ uniform float spherical_gradient_strength : hint_range(0.0, 1.0) = 0.0; // Си�
 
 // --- Ветер ---
 group_uniforms Wind;
-uniform float wind_speed = 1.0;
-uniform float wind_strength = 0.3;
+global uniform vec3 weather_wind_direction;
+global uniform float weather_wind_speed;
+global uniform float weather_wind_strength;
+global uniform float weather_wind_turbulence;
+uniform float wind_response : hint_range(0.0, 4.0) = 1.0;
+uniform float speed_response : hint_range(0.0, 4.0) = 1.0;
+uniform float turbulence_response : hint_range(0.0, 4.0) = 1.0;
 uniform float wind_detail = 1.0;
-uniform vec3 wind_direction = vec3(1.0, 0.0, 0.5);
 
 varying float v_leaf_mask;
 varying float v_gradient_mix; // Итоговый коэффициент смешивания для вертикального градиента
@@ -86,11 +90,13 @@ void vertex() {
 
 	// Применяем ветер
 	if (influence > 0.01) {
-		float time = TIME * wind_speed;
+		float time = TIME * weather_wind_speed * speed_response;
 		vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 		float wind_wave = sin(time + world_pos.x * wind_detail + world_pos.z * wind_detail);
-		float flutter = sin(time * 8.0 + world_pos.y * 10.0) * 0.05;
-		vec3 displacement = wind_direction * (wind_wave + flutter) * influence * wind_strength;
+		float flutter = sin(time * 8.0 + world_pos.y * 10.0) * 0.05
+			* (1.0 + weather_wind_turbulence * turbulence_response);
+		vec3 displacement = weather_wind_direction * (wind_wave + flutter)
+			* influence * weather_wind_strength * wind_response;
 		VERTEX += displacement;
 	}
 }
