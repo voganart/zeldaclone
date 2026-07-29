@@ -141,16 +141,6 @@ func update_environment():
 				else:
 					stars_val = (sample_pos - 0.75) / 0.25
 			sky_mat.set_shader_parameter("stars_intensity", stars_val)
-			if cloud_light_color:
-				sky_mat.set_shader_parameter(
-					"far_cloud_light_color",
-					cloud_light_color.sample(sample_pos)
-				)
-			if cloud_shadow_color:
-				sky_mat.set_shader_parameter(
-					"far_cloud_shadow_color",
-					cloud_shadow_color.sample(sample_pos)
-				)
 
 	# 4. Облака
 	_apply_cloud_colors(cloud_material, sample_pos)
