@@ -3,6 +3,13 @@
 This is the persistent backlog for ideas agreed in Codex chats. Keep features
 here until they are implemented or deliberately rejected.
 
+## Project-wide Rules
+
+- All player-facing text must use keys from
+  `assets/translations/texts.csv`.
+- Add English and Russian values together; do not hardcode UI copy in scripts
+  or scenes.
+
 ## Current
 
 ### Memory Save System
@@ -35,6 +42,7 @@ Design:
 - Keep the panel extensible for checkpoint, progression, graphics, cloud, and
   gameplay debug actions.
 - Make all debug tools unavailable in release exports.
+- Use localization keys for visible labels and confirmation dialogs.
 
 The first panel version should prioritize save reset and common gameplay
 controls. Runtime scene editing can be added incrementally instead of building

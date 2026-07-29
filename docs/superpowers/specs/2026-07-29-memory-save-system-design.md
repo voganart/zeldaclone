@@ -20,10 +20,28 @@ When activated, the node:
 - fully restores health;
 - saves current Vabo, abilities, level, and persistent world flags;
 - plays a short Vabo light pulse and a quiet confirmation sound;
-- briefly shows the message `Память закреплена`;
+- briefly shows the localized `save_memory_anchored` message
+  (`Memory anchored` / `Память закреплена`);
 - remains softly lit after activation.
 
 The interaction must be short and must not open a menu.
+
+## Localization
+
+All player-facing save text uses translation keys from
+`assets/translations/texts.csv`. The current English and Russian translations
+must be added together, and generated `.translation` resources continue to be
+registered through the existing Godot localization setup.
+
+The first slice adds:
+
+- `save_memory_anchored`: `Memory anchored` / `Память закреплена`;
+- `save_data_invalid`: `Save data was reset` /
+  `Данные сохранения были сброшены`, shown only when invalid disk data is
+  recovered during a normal UI-capable startup.
+
+Internal checkpoint IDs, persistent IDs, filenames, and debug logging are not
+localized.
 
 ## Save Boundaries
 
@@ -147,6 +165,7 @@ level.
 - one generic persistent-ID integration contract;
 - automated regression tests;
 - minimal activation feedback using existing assets where possible.
+- English and Russian text entries in the existing localization table.
 
 The Vabo HUD, upgrade shop, save-slot menu, and F10 debug panel are separate
 follow-up features.
@@ -166,6 +185,7 @@ Automated checks cover:
 Manual `Level_01` verification covers:
 
 - activation feedback and full heal;
+- confirmation text in both English and Russian locales;
 - death respawn at the latest Memory Node;
 - enemy and crate reset;
 - persistent puzzle/route state;
