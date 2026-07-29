@@ -602,20 +602,30 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/update-project-index.
 Expected: `.codex/project-index.txt` includes
 `.codex/tests/player-progress-feedback.tests.ps1`.
 
-- [ ] **Step 4: Run the complete non-engine test suite**
+- [ ] **Step 4: Run the complete sandbox-safe non-engine test suite**
 
-Run each test without launching Godot:
+Run only the contract tests confirmed as sandbox-safe in `.codex/HANDOFF.md`.
+Do not run `battle-arena-editor.tests.ps1` or
+`godot-47-compat.tests.ps1`; both launch the Steam Godot executable.
 
 ```powershell
-Get-ChildItem '.codex/tests/*.tests.ps1' |
-    Sort-Object Name |
-    ForEach-Object {
-        Write-Output "RUN: $($_.Name)"
-        & powershell -NoProfile -ExecutionPolicy Bypass -File $_.FullName
+$safeTests = @(
+    'cloud-stable-noise.tests.ps1',
+    'godot-47-warning-regressions.tests.ps1',
+    'phantom-camera-lifecycle.tests.ps1',
+    'player-debug-flight.tests.ps1',
+    'player-progress-feedback.tests.ps1',
+    'save-system-contract.tests.ps1',
+    'update-project-index.tests.ps1'
+)
+foreach ($testName in $safeTests) {
+        Write-Output "RUN: $testName"
+        & powershell -NoProfile -ExecutionPolicy Bypass `
+            -File (Join-Path '.codex/tests' $testName)
         if ($LASTEXITCODE -ne 0) {
-            throw "FAILED: $($_.Name)"
+            throw "FAILED: $testName"
         }
-    }
+}
 ```
 
 Expected: every test prints its `PASS` result and the wrapper exits with code
