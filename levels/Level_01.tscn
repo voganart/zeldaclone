@@ -41,7 +41,7 @@
 [ext_resource type="PackedScene" uid="uid://bpblln46bvwd8" path="res://levels/components/MovingPlatform/MovingPlatform.tscn" id="40_c0er0"]
 [ext_resource type="PackedScene" uid="uid://d0uiwhqnc58mf" path="res://levels/test_level/enemy_spawner.tscn" id="41_ueypv"]
 [ext_resource type="Script" uid="uid://ch65agniubjdx" path="res://common/utils/occlusion_fader.gd" id="41_w7r3u"]
-[ext_resource type="PackedScene" path="res://entities/interactive/MemoryNode/MemoryNode.tscn" id="42_memory"]
+[ext_resource type="PackedScene" uid="uid://bcpkvmg35y63h" path="res://entities/interactive/MemoryNode/MemoryNode.tscn" id="42_memory"]
 
 [sub_resource type="Gradient" id="Gradient_c0er0"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -591,7 +591,7 @@ cloud_shadow_color = SubResource("Gradient_nl450")
 metadata/_edit_lock_ = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=469480615]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 8, 6)
+transform = Transform3D(1, 0, 0, 0, 0.7071067, 0.7071068, 0, -0.7071068, 0.7071067, 0, 8, 6)
 cull_mask = 983039
 current = true
 fov = 50.0
@@ -759,6 +759,16 @@ launch_force_max = 8.0
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.34, 1.9073486e-06, -2.389)
 ability_to_unlock = "ground_slam"
 persistent_id = &"level_01_ground_slam_chest"
+up_velocity_min = 5.0
+up_velocity_max = 8.0
+spread_velocity = 3.0
+launch_force_min = 4.0
+launch_force_max = 8.0
+
+[node name="Chest6" parent="Chests" unique_id=2106712434 instance=ExtResource("36_r6k77")]
+transform = Transform3D(-0.97238153, 0, 0.2333968, 0, 1, 0, -0.2333968, 0, -0.97238153, 6.6674356, 1.9073486e-06, -0.7356353)
+ability_to_unlock = "3_hit_combo"
+persistent_id = &"level_01_3_hit_combo"
 up_velocity_min = 5.0
 up_velocity_max = 8.0
 spread_velocity = 3.0

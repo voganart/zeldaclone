@@ -1,15 +1,15 @@
-[gd_scene load_steps=9 format=3 uid="uid://bu1lpanm3apd7"]
+[gd_scene format=3 uid="uid://bu1lpanm3apd7"]
 
 [ext_resource type="Script" uid="uid://374j6hiru2t7" path="res://ui/player_hud.gd" id="1_vctn3"]
 [ext_resource type="Texture2D" uid="uid://7fwdfjmywn81" path="res://assets/textures/ui/GroundSlam.png" id="2_mk51h"]
 [ext_resource type="Texture2D" uid="uid://crh0lxy4hljro" path="res://assets/textures/ui/Roll.png" id="3_0y4xh"]
 [ext_resource type="Texture2D" uid="uid://cn7nq1ds3kfix" path="res://assets/textures/ui/Heart.png" id="4_ry604"]
 [ext_resource type="PackedScene" uid="uid://d2l2i5saam18b" path="res://ui/tutorial/tutorial_overlay.tscn" id="5_7pawb"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/DoubleJump.png" id="6_double_jump"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/AirDash.png" id="7_air_dash"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/Combo3Hit.png" id="8_combo"]
+[ext_resource type="Texture2D" uid="uid://dr671shhrvnr7" path="res://assets/textures/ui/DoubleJump.png" id="6_double_jump"]
+[ext_resource type="Texture2D" uid="uid://cwws5ducxtl1q" path="res://assets/textures/ui/AirDash.png" id="7_air_dash"]
+[ext_resource type="Texture2D" uid="uid://cl3wexmx3oydq" path="res://assets/textures/ui/Combo3Hit.png" id="8_combo"]
 
-[node name="PlayerHUD" type="Control" groups=["hud"]]
+[node name="PlayerHUD" type="Control" unique_id=1859927311 groups=["hud"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,7 +24,7 @@ color_recharging = Color(0.8659084, 1, 0.773583, 0.89411765)
 color_background = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
 debug_hearts_count = 9
 
-[node name="ActionsContainer" type="MarginContainer" parent="."]
+[node name="ActionsContainer" type="MarginContainer" parent="." unique_id=1163889829]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -38,20 +38,20 @@ grow_vertical = 0
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="AbilityStrip" type="HBoxContainer" parent="ActionsContainer"]
+[node name="AbilityStrip" type="HBoxContainer" parent="ActionsContainer" unique_id=262214182]
 custom_minimum_size = Vector2(472, 64)
 layout_mode = 2
 theme_override_constants/separation = 4
 alignment = 2
 
-[node name="RollContainer" type="HBoxContainer" parent="ActionsContainer/AbilityStrip"]
+[node name="RollContainer" type="HBoxContainer" parent="ActionsContainer/AbilityStrip" unique_id=1256819236]
 visible = false
 custom_minimum_size = Vector2(192, 64)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 6
 
-[node name="Pip3" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip/RollContainer"]
+[node name="Pip3" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip/RollContainer" unique_id=2052380895]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -64,7 +64,7 @@ texture_under = ExtResource("3_0y4xh")
 texture_progress = ExtResource("3_0y4xh")
 tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
 
-[node name="Pip2" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip/RollContainer"]
+[node name="Pip2" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip/RollContainer" unique_id=1781062474]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -77,7 +77,7 @@ texture_under = ExtResource("3_0y4xh")
 texture_progress = ExtResource("3_0y4xh")
 tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
 
-[node name="Pip1" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip/RollContainer"]
+[node name="Pip1" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip/RollContainer" unique_id=936387377]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -90,7 +90,7 @@ texture_under = ExtResource("3_0y4xh")
 texture_progress = ExtResource("3_0y4xh")
 tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
 
-[node name="DoubleJumpIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"]
+[node name="DoubleJumpIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip" unique_id=865689938]
 visible = false
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -98,7 +98,7 @@ texture = ExtResource("6_double_jump")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SlamIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"]
+[node name="SlamIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip" unique_id=195360492]
 visible = false
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -112,7 +112,7 @@ texture_under = ExtResource("2_mk51h")
 texture_progress = ExtResource("2_mk51h")
 tint_under = Color(0.5488783, 0.5488783, 0.5488783, 0.46666667)
 
-[node name="AirDashIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"]
+[node name="AirDashIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip" unique_id=1489623538]
 visible = false
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -120,7 +120,7 @@ texture = ExtResource("7_air_dash")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ComboIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"]
+[node name="ComboIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip" unique_id=1042705201]
 visible = false
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -128,7 +128,7 @@ texture = ExtResource("8_combo")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="HealthContainer" type="MarginContainer" parent="."]
+[node name="HealthContainer" type="MarginContainer" parent="." unique_id=1624648982]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 1
 offset_right = 480.0
@@ -136,29 +136,28 @@ offset_bottom = 128.0
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = -50
 
-[node name="HealthRow" type="HBoxContainer" parent="HealthContainer"]
+[node name="HealthRow" type="HBoxContainer" parent="HealthContainer" unique_id=1878973612]
 custom_minimum_size = Vector2(440, 128)
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer/HealthRow"]
+[node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer/HealthRow" unique_id=1026709918]
 custom_minimum_size = Vector2(128, 128)
 layout_mode = 2
 
-[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthRow"]
+[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthRow" unique_id=707187448]
 layout_mode = 2
 theme_override_constants/separation = 8
-alignment = 1
 
-[node name="VaboLabel" type="Label" parent="HealthContainer/HealthRow/VaboContainer"]
+[node name="VaboLabel" type="Label" parent="HealthContainer/HealthRow/VaboContainer" unique_id=24985698]
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0.02, 0.08, 0.12, 1)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 24
 text = "ui_vabo"
 
-[node name="VaboValue" type="Label" parent="HealthContainer/HealthRow/VaboContainer"]
+[node name="VaboValue" type="Label" parent="HealthContainer/HealthRow/VaboContainer" unique_id=1820359366]
 custom_minimum_size = Vector2(64, 0)
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0.02, 0.08, 0.12, 1)
@@ -167,10 +166,10 @@ theme_override_font_sizes/font_size = 24
 text = "0"
 horizontal_alignment = 2
 
-[node name="TutorialOverlay" parent="." instance=ExtResource("5_7pawb")]
+[node name="TutorialOverlay" parent="." unique_id=1885695637 instance=ExtResource("5_7pawb")]
 layout_mode = 1
 
-[node name="SaveFeedback" type="Label" parent="."]
+[node name="SaveFeedback" type="Label" parent="." unique_id=2141038688]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 10

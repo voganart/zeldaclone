@@ -93,7 +93,7 @@ size_flags_vertical = 10
 theme_override_constants/outline_size = 1
 text = "ver 0.1 demo"
 
-[node name="SaveStatusLabel" type="Label" parent="UI_Layer/Margin/VBox"]
+[node name="SaveStatusLabel" type="Label" parent="UI_Layer/Margin/VBox" unique_id=342823546]
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.95, 1, 1)
