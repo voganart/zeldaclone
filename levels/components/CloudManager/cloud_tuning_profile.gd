@@ -10,6 +10,19 @@ extends Resource
 @export_range(25.0, 500.0, 5.0) var cell_size: float = 120.0
 @export var world_seed: int = 1337
 
+@export_group("Weather Chunks")
+@export_range(250.0, 4000.0, 50.0) var chunk_size: float = 1000.0
+@export_range(1, 6, 1) var horizontal_chunk_radius: int = 2
+@export_range(0, 4, 1) var vertical_chunk_radius: int = 1
+@export_range(0, 3, 1) var horizontal_prewarm_chunks: int = 1
+@export_range(0, 3, 1) var vertical_prewarm_chunks: int = 1
+@export_range(250.0, 12000.0, 50.0) var weather_scale: float = 3600.0
+@export_range(0.0, 1.0, 0.01) var weather_threshold: float = 0.48
+@export_range(1, 16, 1) var formation_min_members: int = 4
+@export_range(1, 24, 1) var formation_max_members: int = 9
+@export_range(25.0, 2000.0, 10.0) var formation_spread: float = 420.0
+@export_range(10.0, 1000.0, 10.0) var formation_thickness: float = 120.0
+
 @export_group("Size & Shape")
 @export var scale_min: Vector3 = Vector3(100.0, 50.0, 140.0)
 @export var scale_max: Vector3 = Vector3(320.0, 180.0, 480.0)
@@ -41,6 +54,20 @@ func sanitize() -> void:
 	target_cloud_count = maxi(target_cloud_count, 1)
 	pool_capacity = maxi(pool_capacity, target_cloud_count)
 	cell_size = maxf(cell_size, 25.0)
+	chunk_size = maxf(chunk_size, 250.0)
+	horizontal_chunk_radius = maxi(horizontal_chunk_radius, 1)
+	vertical_chunk_radius = maxi(vertical_chunk_radius, 0)
+	horizontal_prewarm_chunks = maxi(horizontal_prewarm_chunks, 0)
+	vertical_prewarm_chunks = maxi(vertical_prewarm_chunks, 0)
+	weather_scale = maxf(weather_scale, chunk_size)
+	weather_threshold = clampf(weather_threshold, 0.0, 0.95)
+	formation_min_members = maxi(formation_min_members, 1)
+	formation_max_members = maxi(
+		formation_max_members,
+		formation_min_members
+	)
+	formation_spread = maxf(formation_spread, 25.0)
+	formation_thickness = maxf(formation_thickness, 10.0)
 	scale_min = Vector3(
 		maxf(scale_min.x, 0.01),
 		maxf(scale_min.y, 0.01),
