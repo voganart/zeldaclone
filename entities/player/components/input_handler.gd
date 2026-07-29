@@ -15,7 +15,10 @@ var _roll_buffer_timer: float = 0.0
 var input_enabled: bool = true
 
 func _physics_process(delta: float) -> void:
-	if not input_enabled:
+	if (
+		not input_enabled
+		or DebugTools.is_gameplay_input_blocked()
+	):
 		_clear_input()
 		return
 		

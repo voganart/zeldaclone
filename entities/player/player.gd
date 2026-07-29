@@ -331,6 +331,8 @@ func _process(delta: float) -> void:
 		grass_manager.set_player_position(global_position)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if DebugTools.is_gameplay_input_blocked():
+		return
 	if (
 		debug_flight_active
 		and event is InputEventMouseButton

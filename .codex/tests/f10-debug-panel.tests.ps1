@@ -9,6 +9,13 @@ function Read-ProjectFile([string]$relativePath) {
 $playerData = Read-ProjectFile 'common\autoload\player_data.gd'
 $player = Read-ProjectFile 'entities\player\player.gd'
 $hud = Read-ProjectFile 'ui\player_hud.gd'
+$debugToolsPath = Join-Path $projectRoot 'common\autoload\debug_tools.gd'
+if (-not (Test-Path $debugToolsPath)) {
+    throw 'DebugTools autoload script is missing'
+}
+$debugTools = Get-Content -Raw -Encoding UTF8 $debugToolsPath
+$inputHandler = Read-ProjectFile 'entities\player\components\input_handler.gd'
+$project = Read-ProjectFile 'project.godot'
 
 foreach ($token in @(
     'signal ability_state_changed(',
@@ -33,4 +40,34 @@ if (-not $hud.Contains(
     throw 'HUD does not observe ability lock/unlock changes'
 }
 
-Write-Output 'PASS: F10 debug panel progression API is configured'
+foreach ($token in @(
+    'DebugTools="*res://common/autoload/debug_tools.gd"',
+    'debug_panel_toggle={',
+    'physical_keycode":4194341'
+)) {
+    if (-not $project.Contains($token)) {
+        throw "Project debug-panel contract is missing: $token"
+    }
+}
+
+foreach ($token in @(
+    'if not OS.is_debug_build():',
+    'func is_gameplay_input_blocked() -> bool:',
+    'func reset_save_and_reload()',
+    'func restore_health() -> bool:',
+    'func set_all_abilities(unlocked: bool) -> void:',
+    'func teleport_to_checkpoint() -> bool:',
+    'func reload_level()'
+)) {
+    if (-not $debugTools.Contains($token)) {
+        throw "DebugTools contract is missing: $token"
+    }
+}
+
+if (-not $inputHandler.Contains(
+    'DebugTools.is_gameplay_input_blocked()'
+)) {
+    throw 'Player input is not blocked by the debug panel'
+}
+
+Write-Output 'PASS: F10 debug panel controller is configured'
