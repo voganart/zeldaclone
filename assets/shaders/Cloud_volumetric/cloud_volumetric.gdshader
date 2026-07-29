@@ -52,7 +52,6 @@ varying vec3 v_camera_local;
 varying vec3 v_obj_scale;
 varying float v_world_dist;
 varying vec3 v_local_up_dir;
-varying vec3 v_world_pos_center;
 
 void vertex() {
 	v_local_pos = VERTEX;
@@ -61,7 +60,6 @@ void vertex() {
 	v_obj_scale = vec3(length(MODEL_MATRIX[0]), length(MODEL_MATRIX[1]), length(MODEL_MATRIX[2]));
 	v_world_dist = distance(CAMERA_POSITION_WORLD, (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz);
 	v_local_up_dir = normalize((world_to_local * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
-	v_world_pos_center = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 }
 
 vec2 ray_box_intersection(vec3 ray_origin, vec3 ray_dir, vec3 box_min, vec3 box_max) {
@@ -80,7 +78,8 @@ float get_density(vec3 p, float dist_to_cam) {
 
 	float sphere_mask = 1.0 - smoothstep(sphere_radius - softness, sphere_radius, length(p));
 	
-	vec3 erosion_uv = (p * v_obj_scale * erosion_scale) + (v_world_pos_center * 0.1) + (TIME * move_speed * erosion_offset_speed);
+	vec3 erosion_uv = (p * v_obj_scale * erosion_scale)
+		+ (TIME * move_speed * erosion_offset_speed);
 	float erosion_val = texture(noise_texture, erosion_uv).r;
 	float shape_mask = sphere_mask - (erosion_val * erosion_strength);
 	if (shape_mask <= 0.0) return 0.0;
