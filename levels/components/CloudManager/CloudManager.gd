@@ -245,43 +245,6 @@ func reload_tuning_profile() -> Error:
 	return OK
 
 
-func save_weather_profile() -> Error:
-	if not OS.is_debug_build():
-		return ERR_UNAVAILABLE
-	if not is_instance_valid(_weather_manager):
-		_weather_manager = get_node_or_null("/root/WeatherManager")
-	if not is_instance_valid(_weather_manager):
-		return ERR_UNCONFIGURED
-	var weather_profile := _weather_manager.get("profile") as WeatherProfile
-	if weather_profile == null or weather_profile.resource_path.is_empty():
-		return ERR_FILE_BAD_PATH
-	weather_profile.sanitize()
-	return ResourceSaver.save(
-		weather_profile,
-		weather_profile.resource_path
-	)
-
-
-func reload_weather_profile() -> Error:
-	if not is_instance_valid(_weather_manager):
-		_weather_manager = get_node_or_null("/root/WeatherManager")
-	if not is_instance_valid(_weather_manager):
-		return ERR_UNCONFIGURED
-	var weather_profile := _weather_manager.get("profile") as WeatherProfile
-	if weather_profile == null or weather_profile.resource_path.is_empty():
-		return ERR_FILE_BAD_PATH
-	var loaded_resource := ResourceLoader.load(
-		weather_profile.resource_path,
-		"WeatherProfile",
-		ResourceLoader.CACHE_MODE_IGNORE
-	)
-	var loaded_profile := loaded_resource as WeatherProfile
-	if loaded_profile == null:
-		return ERR_FILE_CANT_OPEN
-	_weather_manager.call("apply_profile", loaded_profile, 0.0)
-	return OK
-
-
 func get_cloud_stats() -> Dictionary:
 	var stats := {
 		"Active": 0,

@@ -61,16 +61,8 @@ foreach ($token in @(
     'Input.set_mouse_mode(',
     'add_to_group(&"cloud_tuning_panel")',
     'func is_open() -> bool',
-    'allowed_categories.has(',
+    'PROFILE_SECTIONS.has(',
     'PROPERTY_HINT_RANGE'
-    'Weather'
-    '/root/WeatherManager'
-    'WeatherProfile'
-    '_add_resource_fields('
-    'apply_callback: Callable'
-    '"apply_profile"'
-    '"save_weather_profile"'
-    '"reload_weather_profile"'
 )) {
     if (-not $panel.Contains($token)) {
         throw "Cloud tuning panel contract is missing: $token"
@@ -105,8 +97,6 @@ foreach ($token in @(
     'func regenerate_from_profile() -> void',
     'func save_tuning_profile() -> Error',
     'func reload_tuning_profile() -> Error',
-    'func save_weather_profile() -> Error',
-    'func reload_weather_profile() -> Error',
     'OS.is_debug_build()'
 )) {
     if (-not $manager.Contains($token)) {
