@@ -83,6 +83,20 @@
 Полный дизайн:
 `docs/superpowers/specs/2026-07-29-memory-save-system-design.md`.
 
+### Player Progress Feedback
+
+- HUD показывает текущие Vabo рядом со здоровьем и обновляется через
+  `PlayerData.vabo_changed`.
+- Справа снизу показываются только открытые способности; закрытые способности
+  не оставляют пустых слотов.
+- Roll сохраняет отображение зарядов, Ground Slam — cooldown.
+- Для Double Jump, Air Dash и 3-hit combo добавлены временные белые PNG-иконки
+  `128x128`; существующие Roll и Ground Slam не заменялись.
+- Источник прогресса остаётся в `PlayerData`; HUD не хранит копию состояния.
+
+Полный дизайн:
+`docs/superpowers/specs/2026-07-29-player-progress-feedback-design.md`.
+
 ### Debug flight
 
 - `F7` — включить/выключить режим;
@@ -159,18 +173,15 @@ Vabo и повторных боёв.
 
 Согласованный порядок:
 
-1. Player Progress Feedback:
-   - вывести текущие Vabo в HUD;
-   - понятно показывать открытые способности.
-2. Первая версия F10 Debug Panel:
+1. Первая версия F10 Debug Panel:
    - открыть/закрыть панель слева;
    - удалить сохранение;
    - базовые gameplay/checkpoint controls;
    - инструменты недоступны в release export.
-3. Продолжать собирать и довести до конца `Level_01`.
-4. После появления полного игрового цикла настроить баланс Vabo,
+2. Продолжать собирать и довести до конца `Level_01`.
+3. После появления полного игрового цикла настроить баланс Vabo,
    checkpoint spacing, врагов и повторных секций.
-5. Позже — Keeper of Memory, трата Vabo, health/ability upgrades и hub flow.
+4. Позже — Keeper of Memory, трата Vabo, health/ability upgrades и hub flow.
 
 Подробный backlog находится в `.codex/ROADMAP.md`.
 
@@ -185,4 +196,3 @@ Vabo и повторных боёв.
   плагина.
 - Перед новыми облачными изменениями учитывать GPU-нагрузку и обязательно
   оставлять простой способ отключения.
-

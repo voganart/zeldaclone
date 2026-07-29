@@ -27,12 +27,15 @@ here until they are implemented or deliberately rejected.
 Design:
 `docs/superpowers/specs/2026-07-29-memory-save-system-design.md`.
 
-## Next
-
 ### Player Progress Feedback
 
 - Show current Vabo in the HUD.
 - Clearly show unlocked movement/combat abilities.
+
+Design:
+`docs/superpowers/specs/2026-07-29-player-progress-feedback-design.md`.
+
+## Next
 
 ### F10 Debug Panel
 

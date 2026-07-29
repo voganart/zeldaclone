@@ -607,7 +607,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/update-project-index.
 ```
 
 Expected: `.codex/project-index.txt` includes
-`.codex/tests/player-progress-feedback.tests.ps1`.
+the tracked HUD paths with their canonical `UI/` casing. The compact index
+does not list PNG assets or `.ps1` tests by design.
 
 - [ ] **Step 4: Run the complete sandbox-safe non-engine test suite**
 
