@@ -9,7 +9,10 @@
 - `project.godot` уже мигрирован на feature tag `4.7`.
 - Editor parse-check: проходит.
 - GUI editor smoke-check: проходит.
-- Runtime save-system test: проходит через `--script`.
+- Runtime save-system test ранее проходил через `--script`, но Steam-сборка Godot
+  нестабильна внутри Codex sandbox из-за доступа к `user://`.
+- Для автоматической проверки агентом использовать PowerShell contract-тесты.
+  Не запускать Godot headless повторно; runtime проверять вручную в обычном редакторе.
 - Steam headless editor process может зависнуть, если тот же проект уже открыт
   в GUI. Это ограничение CLI-проверки, а не runtime-ошибка проекта.
 - Временный fallback при регрессии: Godot 4.6.
@@ -51,6 +54,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/tests/battle-arena-ed
 
 ## Save-system verification
 
+Основная автоматическая проверка для Codex:
+
+```powershell
+powershell -ExecutionPolicy Bypass `
+  -File .codex/tests/save-system-contract.tests.ps1
+```
+
+Она не запускает Steam Godot и не зависит от sandbox-доступа к `user://`.
+
+Runtime-проверка ниже предназначена только для ручного запуска вне Codex sandbox,
+когда закрыт GUI-редактор:
+
 Runtime-модель, versioned JSON, восстановление битого сейва и загрузка новых
 сцен проверяются:
 
@@ -59,8 +74,6 @@ Runtime-модель, versioned JSON, восстановление битого 
   --headless --path 'C:\GodotProjects\zeldaclone' `
   --script res://.codex/tests/save_system_runtime_test.gd
 
-powershell -ExecutionPolicy Bypass `
-  -File .codex/tests/save-system-contract.tests.ps1
 ```
 
 При `--script` Steam-сборка может вывести сообщения об ObjectDB/resources при

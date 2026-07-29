@@ -70,6 +70,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/tests/battle-arena-ed
 
 При запрете доступа к Godot `user://` тестовый процесс падал с `signal 11` и не мог читать certificate store или сохранять editor settings. В обычном пользовательском окружении тот же запуск проходит. Это не ошибка gameplay-кода.
 
+Для автоматических проверок Codex не повторять headless-запуск Steam Godot.
+Использовать `.codex/tests/*.tests.ps1`, не вызывающие движок. Runtime smoke-test
+выполняется пользователем в обычном GUI-редакторе.
+
 ## Если crash вернётся
 
 1. Закрыть все процессы Godot.
