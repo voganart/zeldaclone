@@ -18,6 +18,7 @@ $handoff = Get-Content -Raw -Encoding UTF8 (
 )
 
 foreach ($relativePath in @(
+    'assets\textures\ui\Vabo.png',
     'assets\textures\ui\DoubleJump.png',
     'assets\textures\ui\AirDash.png',
     'assets\textures\ui\Combo3Hit.png'
@@ -31,8 +32,9 @@ foreach ($token in @(
     '@onready var vabo_value: Label',
     '@onready var roll_container: HBoxContainer',
     '@onready var double_jump_icon: TextureRect',
-    '@onready var air_dash_icon: TextureRect',
-    '@onready var combo_icon: TextureRect',
+    '@onready var air_dash_bar: TextureProgressBar',
+    '@onready var combo_bar: TextureProgressBar',
+    '@export var color_unavailable: Color',
     'func _connect_progress_signals() -> void',
     'PlayerData.vabo_changed.connect(_on_vabo_changed)',
     'PlayerData.ability_unlocked.connect(_on_ability_unlocked)',
@@ -40,7 +42,16 @@ foreach ($token in @(
     'func _on_vabo_changed(new_amount: int) -> void',
     'func _on_ability_unlocked(_ability_name: StringName) -> void',
     'PlayerData.is_ability_unlocked(ability_name)',
-    'if indicator is TextureRect and indicator.texture == null'
+    'if indicator is TextureRect and indicator.texture == null',
+    'func _update_double_jump_icon() -> void',
+    'player.current_jump_count < 2',
+    'func _update_air_dash_bar() -> void',
+    'ability.cooldown_timer',
+    'ability.dash_used_in_air',
+    'func _update_combo_bar() -> void',
+    'combo_cooldown_timer',
+    'combo_cooldown_after_combo',
+    'func _update_cooldown_bar('
 )) {
     if (-not $hudScript.Contains($token)) {
         throw "Player HUD progress contract is missing: $token"
@@ -48,17 +59,20 @@ foreach ($token in @(
 }
 
 foreach ($token in @(
+    'path="res://assets/textures/ui/Vabo.png"',
     'path="res://assets/textures/ui/DoubleJump.png"',
     'path="res://assets/textures/ui/AirDash.png"',
     'path="res://assets/textures/ui/Combo3Hit.png"',
-    '[node name="HealthRow" type="HBoxContainer" parent="HealthContainer"',
-    '[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthRow"',
-    '[node name="VaboValue" type="Label" parent="HealthContainer/HealthRow/VaboContainer"',
+    '[node name="HealthStack" type="VBoxContainer" parent="HealthContainer"',
+    '[node name="HeartsLayout" type="HBoxContainer" parent="HealthContainer/HealthStack"',
+    '[node name="VaboOffset" type="MarginContainer" parent="HealthContainer/HealthStack"',
+    '[node name="VaboContainer" type="HBoxContainer" parent="HealthContainer/HealthStack/VaboOffset"',
+    '[node name="VaboIcon" type="TextureRect" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"',
+    '[node name="VaboValue" type="Label" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"',
     '[node name="AbilityStrip" type="HBoxContainer" parent="ActionsContainer"',
     '[node name="DoubleJumpIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"',
-    '[node name="AirDashIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"',
-    '[node name="ComboIcon" type="TextureRect" parent="ActionsContainer/AbilityStrip"',
-    'text = "ui_vabo"'
+    '[node name="AirDashIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"',
+    '[node name="ComboIcon" type="TextureProgressBar" parent="ActionsContainer/AbilityStrip"'
 )) {
     if (-not $hudScene.Contains($token)) {
         throw "Player HUD scene contract is missing: $token"
