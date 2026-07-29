@@ -267,6 +267,10 @@ func _apply_unlocks() -> void:
 		combat_component.max_combo_hits = 3 if has_finisher else 2
 
 
+func refresh_progression_from_player_data() -> void:
+	_apply_unlocks()
+
+
 func unlock_ability(ability_name: String) -> bool:
 	print("Player unlocking: ", ability_name)
 	var normalized_name := ability_name

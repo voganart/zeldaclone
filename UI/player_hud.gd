@@ -95,6 +95,10 @@ func _connect_progress_signals() -> void:
 		PlayerData.vabo_changed.connect(_on_vabo_changed)
 	if not PlayerData.ability_unlocked.is_connected(_on_ability_unlocked):
 		PlayerData.ability_unlocked.connect(_on_ability_unlocked)
+	if not PlayerData.ability_state_changed.is_connected(
+		_on_ability_state_changed
+	):
+		PlayerData.ability_state_changed.connect(_on_ability_state_changed)
 
 
 func _sync_progress_feedback() -> void:
@@ -119,6 +123,13 @@ func _on_vabo_changed(new_amount: int) -> void:
 
 
 func _on_ability_unlocked(_ability_name: StringName) -> void:
+	_sync_progress_feedback()
+
+
+func _on_ability_state_changed(
+	_ability_name: StringName,
+	_unlocked: bool
+) -> void:
 	_sync_progress_feedback()
 
 

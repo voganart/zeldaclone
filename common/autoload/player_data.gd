@@ -18,14 +18,26 @@ var active_checkpoint_id: String = ""
 
 signal vabo_changed(new_amount: int)
 signal ability_unlocked(ability_name: StringName)
+signal ability_state_changed(
+	ability_name: StringName,
+	unlocked: bool
+)
 signal persistent_id_completed(id: StringName)
 
 
 func add_vabo(amount: int) -> void:
 	if amount <= 0:
 		return
-	current_vabo += amount
+	set_vabo(current_vabo + amount)
+
+
+func set_vabo(amount: int) -> bool:
+	var normalized_amount := maxi(amount, 0)
+	if normalized_amount == current_vabo:
+		return false
+	current_vabo = normalized_amount
 	vabo_changed.emit(current_vabo)
+	return true
 
 
 func reset_progress() -> void:
@@ -39,11 +51,20 @@ func reset_progress() -> void:
 
 
 func unlock_ability(ability_name: StringName) -> bool:
+	return set_ability_unlocked(ability_name, true)
+
+
+func set_ability_unlocked(
+	ability_name: StringName,
+	unlocked: bool
+) -> bool:
 	var key := String(ability_name)
-	if not abilities.has(key) or bool(abilities[key]):
+	if not abilities.has(key) or bool(abilities[key]) == unlocked:
 		return false
-	abilities[key] = true
-	ability_unlocked.emit(ability_name)
+	abilities[key] = unlocked
+	if unlocked:
+		ability_unlocked.emit(ability_name)
+	ability_state_changed.emit(ability_name, unlocked)
 	return true
 
 
