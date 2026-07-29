@@ -1,0 +1,163 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/debug_panel/debug_panel.gd" id="1_debug_panel"]
+
+[node name="DebugPanel" type="CanvasLayer"]
+visible = false
+layer = 200
+script = ExtResource("1_debug_panel")
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 6
+anchor_bottom = 1.0
+offset_right = 320.0
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Sections" type="VBoxContainer" parent="Panel/Margin/Scroll"]
+custom_minimum_size = Vector2(296, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Panel/Margin/Scroll/Sections"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "debug_panel_title"
+
+[node name="SaveHeader" type="Button" parent="Panel/Margin/Scroll/Sections"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+toggle_mode = true
+text = "debug_category_save"
+alignment = 0
+
+[node name="SaveContent" type="VBoxContainer" parent="Panel/Margin/Scroll/Sections"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ResetSaveButton" type="Button" parent="Panel/Margin/Scroll/Sections/SaveContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "debug_reset_save"
+
+[node name="ResetConfirmLabel" type="Label" parent="Panel/Margin/Scroll/Sections/SaveContent"]
+visible = false
+layout_mode = 2
+text = "debug_reset_confirm"
+autowrap_mode = 2
+
+[node name="ResetConfirmRow" type="HBoxContainer" parent="Panel/Margin/Scroll/Sections/SaveContent"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ResetConfirmButton" type="Button" parent="Panel/Margin/Scroll/Sections/SaveContent/ResetConfirmRow"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "debug_confirm"
+
+[node name="ResetCancelButton" type="Button" parent="Panel/Margin/Scroll/Sections/SaveContent/ResetConfirmRow"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "debug_cancel"
+
+[node name="PlayerHeader" type="Button" parent="Panel/Margin/Scroll/Sections"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+toggle_mode = true
+text = "debug_category_player"
+alignment = 0
+
+[node name="PlayerContent" type="VBoxContainer" parent="Panel/Margin/Scroll/Sections"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RestoreHealthButton" type="Button" parent="Panel/Margin/Scroll/Sections/PlayerContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "debug_restore_health"
+
+[node name="ReloadLevelButton" type="Button" parent="Panel/Margin/Scroll/Sections/PlayerContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "debug_reload_level"
+
+[node name="ProgressionHeader" type="Button" parent="Panel/Margin/Scroll/Sections"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+toggle_mode = true
+text = "debug_category_progression"
+alignment = 0
+
+[node name="ProgressionContent" type="VBoxContainer" parent="Panel/Margin/Scroll/Sections"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="VaboRow" type="HBoxContainer" parent="Panel/Margin/Scroll/Sections/ProgressionContent"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="VaboLabel" type="Label" parent="Panel/Margin/Scroll/Sections/ProgressionContent/VaboRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ui_vabo"
+vertical_alignment = 1
+
+[node name="VaboSpinBox" type="SpinBox" parent="Panel/Margin/Scroll/Sections/ProgressionContent/VaboRow"]
+custom_minimum_size = Vector2(116, 30)
+layout_mode = 2
+max_value = 999999.0
+update_on_text_changed = true
+
+[node name="VaboApplyButton" type="Button" parent="Panel/Margin/Scroll/Sections/ProgressionContent/VaboRow"]
+custom_minimum_size = Vector2(72, 30)
+layout_mode = 2
+text = "debug_apply"
+
+[node name="UnlockAllButton" type="Button" parent="Panel/Margin/Scroll/Sections/ProgressionContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "debug_unlock_all"
+
+[node name="LockAllButton" type="Button" parent="Panel/Margin/Scroll/Sections/ProgressionContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "debug_lock_all"
+
+[node name="CheckpointHeader" type="Button" parent="Panel/Margin/Scroll/Sections"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+toggle_mode = true
+text = "debug_category_checkpoint"
+alignment = 0
+
+[node name="CheckpointContent" type="VBoxContainer" parent="Panel/Margin/Scroll/Sections"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TeleportCheckpointButton" type="Button" parent="Panel/Margin/Scroll/Sections/CheckpointContent"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "debug_teleport_checkpoint"
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Scroll/Sections"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = ""
+autowrap_mode = 2
