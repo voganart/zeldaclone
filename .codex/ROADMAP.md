@@ -59,8 +59,11 @@ Design:
 ### Finish Level_01
 
 - Continue building the complete tutorial/gameplay route.
-- GUI-validate the Roll tutorial physics fix in both directions; code now uses
-  one physics move and a standing-capsule clearance check.
+- Redesign the rejected Roll tutorial fix: require real free collision volume
+  under the obstacle, keep the reduced capsule in a low-passage state for
+  arbitrarily long tunnels, and restore standing only after a clearance check.
+  Design approved in conversation and documented in
+  `docs/superpowers/specs/2026-07-29-roll-low-passage-design.md`.
 - Validate the ability-gated traversal sequence.
 - Reach a complete playable loop before broad UI or environment polish.
 
