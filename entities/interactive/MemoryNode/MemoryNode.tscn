@@ -1,9 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://bcpkvmg35y63h"]
 
-[ext_resource type="Script" path="res://entities/interactive/MemoryNode/memory_node.gd" id="1_memory"]
-[ext_resource type="ArrayMesh" path="res://assets/models/interactive/items_Vabo.res" id="2_crystal"]
-[ext_resource type="PackedScene" path="res://common/interaction/InteractionArea.tscn" id="3_interact"]
-[ext_resource type="PackedScene" path="res://vfx/PickupItemVfx/Vabo_vfx.tscn" id="4_vfx"]
+[ext_resource type="Script" uid="uid://cc1x68vjpuuxr" path="res://entities/interactive/MemoryNode/memory_node.gd" id="1_memory"]
+[ext_resource type="ArrayMesh" uid="uid://yc6m1p18btn2" path="res://assets/models/interactive/items_Vabo.res" id="2_crystal"]
+[ext_resource type="PackedScene" uid="uid://bewqr6llcw7gv" path="res://common/interaction/InteractionArea.tscn" id="3_interact"]
+[ext_resource type="PackedScene" uid="uid://ck8or4s38s7a3" path="res://vfx/PickupItemVfx/Vabo_vfx.tscn" id="4_vfx"]
 
 [sub_resource type="StandardMaterial3D" id="Material_memory"]
 transparency = 1
@@ -12,29 +12,27 @@ emission_enabled = true
 emission = Color(0.08, 0.7, 1, 1)
 emission_energy_multiplier = 2.0
 
-[node name="MemoryNode" type="Node3D" groups=["memory_nodes"]]
+[node name="MemoryNode" type="Node3D" unique_id=843727666 groups=["memory_nodes"]]
 script = ExtResource("1_memory")
 
-[node name="Crystal" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0, 0.9, 0)
+[node name="Crystal" type="MeshInstance3D" parent="." unique_id=76746471]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0, 0, 0)
 material_override = SubResource("Material_memory")
 mesh = ExtResource("2_crystal")
 
-[node name="OmniLight3D" type="OmniLight3D" parent="."]
-position = Vector3(0, 1, 0)
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=253088246]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 light_color = Color(0.15, 0.85, 1, 1)
 light_energy = 0.35
-omni_range = 4.0
 distance_fade_enabled = true
+omni_range = 4.0
 
-[node name="InteractionArea" parent="." instance=ExtResource("3_interact")]
-action_label_key = "ui_interact"
+[node name="InteractionArea" parent="." unique_id=1274743021 instance=ExtResource("3_interact")]
 hint_offset = Vector3(0, 2.2, 0)
 prompt_scale = 0.65
 
-[node name="SpawnPoint" type="Marker3D" parent="."]
-position = Vector3(0, 0.25, 1.5)
+[node name="SpawnPoint" type="Marker3D" parent="." unique_id=1605883180]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
 
-[node name="ActivationVfx" parent="." instance=ExtResource("4_vfx")]
-position = Vector3(0, 1, 0)
-emitting = false
+[node name="ActivationVfx" parent="." unique_id=1610938586 instance=ExtResource("4_vfx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.29450858, 0)
