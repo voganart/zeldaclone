@@ -568,6 +568,10 @@ script = ExtResource("3_jygyi")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.238995, -2.75, 2.8384361)
 checkpoint_id = &"level_01_after_crates"
 
+[node name="Obstacles" parent="MemoryNodes" unique_id=843727666 instance=ExtResource("42_memory")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59.60236, -2.75, -20.41361)
+checkpoint_id = &"level_01_obstacles"
+
 [node name="DebugOverlay" parent="." unique_id=438052665 instance=ExtResource("1_ueypv")]
 
 [node name="PlayerHUD" parent="." unique_id=1334867485 instance=ExtResource("38_b6d53")]
@@ -576,9 +580,7 @@ checkpoint_id = &"level_01_after_crates"
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." unique_id=988376034 instance=ExtResource("6_r6k77")]
-time_of_day = 6.0
 day_duration_seconds = 240.0
-is_playing = true
 sun_color = SubResource("Gradient_c0er0")
 sun_energy = SubResource("Curve_ueypv")
 moon_color = SubResource("Gradient_cktag")
@@ -591,7 +593,7 @@ cloud_shadow_color = SubResource("Gradient_nl450")
 metadata/_edit_lock_ = true
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=469480615]
-transform = Transform3D(1, 0, 0, 0, 0.7071067, 0.7071068, 0, -0.7071068, 0.7071067, 0, 8, 6)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 8, 6)
 cull_mask = 983039
 current = true
 fov = 50.0
@@ -715,16 +717,6 @@ hint_offset = Vector3(0, 2.5, 0)
 
 [node name="Chests" type="Node3D" parent="." unique_id=1393766150]
 
-[node name="Chest1" parent="Chests" unique_id=267668521 instance=ExtResource("36_r6k77")]
-transform = Transform3D(-1.0000001, 0, -8.742278e-08, 0, 1.0000002, 0, 8.7422784e-08, 0, -1, 1.3500497, 0, -2.3252182)
-ability_to_unlock = "air_dash"
-persistent_id = &"level_01_air_dash_chest"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
-
 [node name="Chest3" parent="Chests" unique_id=253966559 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-0.70710695, 0, 0.7071067, 0, 1.0000002, 0, -0.70710677, 0, -0.7071069, 94.85767, -5, -26.931147)
 ability_to_unlock = "double_jump"
@@ -735,40 +727,10 @@ spread_velocity = 3.0
 launch_force_min = 4.0
 launch_force_max = 8.0
 
-[node name="Chest5" parent="Chests" unique_id=566739628 instance=ExtResource("36_r6k77")]
-transform = Transform3D(-0.2588192, 0, 0.9659258, 0, 1.0000002, 0, -0.96592593, 0, -0.25881916, -0.58017683, 2.3841858e-06, 1.1147366)
-ability_to_unlock = "double_jump"
-persistent_id = &"level_01_double_jump_chest_b"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
-
 [node name="Chest4" parent="Chests" unique_id=814478403 instance=ExtResource("36_r6k77")]
 transform = Transform3D(-4.3711392e-08, 0, 1, 0, 1.0000002, 0, -1.0000001, 0, -4.371139e-08, 66.090034, -3, -11.180361)
 ability_to_unlock = "roll_ability"
 persistent_id = &"level_01_roll_chest"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
-
-[node name="Chest2" parent="Chests" unique_id=2115274845 instance=ExtResource("36_r6k77")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.34, 1.9073486e-06, -2.389)
-ability_to_unlock = "ground_slam"
-persistent_id = &"level_01_ground_slam_chest"
-up_velocity_min = 5.0
-up_velocity_max = 8.0
-spread_velocity = 3.0
-launch_force_min = 4.0
-launch_force_max = 8.0
-
-[node name="Chest6" parent="Chests" unique_id=2106712434 instance=ExtResource("36_r6k77")]
-transform = Transform3D(-0.97238153, 0, 0.2333968, 0, 1, 0, -0.2333968, 0, -0.97238153, 6.6674356, 1.9073486e-06, -0.7356353)
-ability_to_unlock = "3_hit_combo"
-persistent_id = &"level_01_3_hit_combo"
 up_velocity_min = 5.0
 up_velocity_max = 8.0
 spread_velocity = 3.0
