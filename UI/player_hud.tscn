@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://dr671shhrvnr7" path="res://assets/textures/ui/DoubleJump.png" id="6_double_jump"]
 [ext_resource type="Texture2D" uid="uid://cwws5ducxtl1q" path="res://assets/textures/ui/AirDash.png" id="7_air_dash"]
 [ext_resource type="Texture2D" uid="uid://cl3wexmx3oydq" path="res://assets/textures/ui/Combo3Hit.png" id="8_combo"]
-[ext_resource type="Texture2D" path="res://assets/textures/ui/Vabo.png" id="9_vabo"]
+[ext_resource type="Texture2D" uid="uid://bqb37blsa5siy" path="res://assets/textures/ui/Vabo.png" id="9_vabo"]
 
 [node name="PlayerHUD" type="Control" unique_id=1859927311 groups=["hud"]]
 layout_mode = 3
@@ -120,8 +120,8 @@ layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
 max_value = 1.0
-value = 1.0
 step = 0.0
+value = 1.0
 fill_mode = 4
 nine_patch_stretch = true
 texture_under = ExtResource("7_air_dash")
@@ -135,8 +135,8 @@ layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
 max_value = 1.0
-value = 1.0
 step = 0.0
+value = 1.0
 fill_mode = 4
 nine_patch_stretch = true
 texture_under = ExtResource("8_combo")
@@ -149,7 +149,7 @@ layout_mode = 1
 offset_right = 480.0
 offset_bottom = 128.0
 theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = -50
+theme_override_constants/margin_top = 20
 
 [node name="HealthStack" type="VBoxContainer" parent="HealthContainer" unique_id=1878973612]
 custom_minimum_size = Vector2(440, 144)
@@ -160,7 +160,7 @@ theme_override_constants/separation = -20
 custom_minimum_size = Vector2(128, 96)
 layout_mode = 2
 
-[node name="VaboOffset" type="MarginContainer" parent="HealthContainer/HealthStack"]
+[node name="VaboOffset" type="MarginContainer" parent="HealthContainer/HealthStack" unique_id=332838640]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 
@@ -168,7 +168,7 @@ theme_override_constants/margin_left = 20
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="VaboIcon" type="TextureRect" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer"]
+[node name="VaboIcon" type="TextureRect" parent="HealthContainer/HealthStack/VaboOffset/VaboContainer" unique_id=678172000]
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("9_vabo")
