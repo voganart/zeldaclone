@@ -28,6 +28,9 @@ extends CanvasLayer
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	$Panel/Margin/Scroll/Sections/TitleRow/CloseButton.pressed.connect(
+		_on_close_pressed
+	)
 	_connect_section(
 		save_header,
 		save_content,
@@ -88,6 +91,10 @@ func set_open(value: bool) -> void:
 		status_label.text = ""
 	else:
 		_hide_reset_confirmation()
+
+
+func _on_close_pressed() -> void:
+	DebugTools.set_panel_open(false)
 
 
 func _connect_section(

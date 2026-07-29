@@ -30,10 +30,22 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="Panel/Margin/Scroll/Sections"]
+[node name="TitleRow" type="HBoxContainer" parent="Panel/Margin/Scroll/Sections"]
 layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Panel/Margin/Scroll/Sections/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "debug_panel_title"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/Scroll/Sections/TitleRow"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+tooltip_text = "debug_close"
+text = "×"
 
 [node name="SaveHeader" type="Button" parent="Panel/Margin/Scroll/Sections"]
 custom_minimum_size = Vector2(0, 30)

@@ -15,6 +15,7 @@ if (-not (Test-Path $debugToolsPath)) {
 }
 $debugTools = Get-Content -Raw -Encoding UTF8 $debugToolsPath
 $inputHandler = Read-ProjectFile 'entities\player\components\input_handler.gd'
+$cameraInput = Read-ProjectFile 'common\components\camera_input.gd'
 $project = Read-ProjectFile 'project.godot'
 $panelScenePath = Join-Path $projectRoot 'ui\debug_panel\debug_panel.tscn'
 $panelScriptPath = Join-Path $projectRoot 'ui\debug_panel\debug_panel.gd'
@@ -81,8 +82,25 @@ if (-not $inputHandler.Contains(
     throw 'Player input is not blocked by the debug panel'
 }
 
+if (-not $cameraInput.Contains(
+    'if DebugTools.is_gameplay_input_blocked():'
+)) {
+    throw 'Camera mouse capture is not blocked by the debug panel'
+}
+
+foreach ($token in @(
+    'var _mouse_mode_before_open: int',
+    'Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)',
+    'Input.set_mouse_mode(_mouse_mode_before_open)'
+)) {
+    if (-not $debugTools.Contains($token)) {
+        throw "Debug panel mouse-mode contract is missing: $token"
+    }
+}
+
 foreach ($token in @(
     'offset_right = 320.0',
+    'name="CloseButton"',
     'name="SaveHeader"',
     'name="SaveContent"',
     'name="PlayerHeader"',
@@ -103,6 +121,7 @@ foreach ($token in @(
 foreach ($token in @(
     'func set_open(value: bool) -> void:',
     'func _set_section_expanded(',
+    'DebugTools.set_panel_open(false)',
     'DebugTools.reset_save_and_reload()',
     'DebugTools.restore_health()',
     'DebugTools.set_all_abilities(true)',
@@ -117,6 +136,7 @@ foreach ($token in @(
 
 foreach ($key in @(
     'debug_panel_title',
+    'debug_close',
     'debug_category_save',
     'debug_category_player',
     'debug_category_progression',

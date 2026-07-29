@@ -38,6 +38,8 @@ func _ready() -> void:
 	set_camera_mode(true) 
 
 func _input(event: InputEvent) -> void:
+	if DebugTools.is_gameplay_input_blocked():
+		return
 	if event.is_action_pressed(GameConstants.INPUT_TOGGLE_CAMERA):
 		set_camera_mode(!is_camera_locked)
 		return

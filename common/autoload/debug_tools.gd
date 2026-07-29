@@ -11,6 +11,7 @@ const ABILITY_NAMES: Array[StringName] = [
 
 var _panel: CanvasLayer
 var _debug_enabled := false
+var _mouse_mode_before_open: int = Input.MOUSE_MODE_VISIBLE
 
 
 func _ready() -> void:
@@ -38,7 +39,14 @@ func set_panel_open(value: bool) -> void:
 		return
 	if not _ensure_panel():
 		return
+	if value == is_gameplay_input_blocked():
+		return
+	if value:
+		_mouse_mode_before_open = Input.get_mouse_mode()
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_panel.call("set_open", value)
+	if not value:
+		Input.set_mouse_mode(_mouse_mode_before_open)
 
 
 func is_gameplay_input_blocked() -> bool:

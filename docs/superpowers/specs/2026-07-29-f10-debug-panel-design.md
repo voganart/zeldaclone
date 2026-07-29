@@ -59,6 +59,9 @@ Each category header is a button with a `▶` or `▼` prefix. Category content 
 be independently expanded or collapsed. The layout uses compact rows and
 short controls instead of large cards or wide spacing.
 
+The title row includes a compact close button. Closing through this button and
+closing through F10 use the same panel lifecycle.
+
 The initial content is:
 
 - Save: destructive reset button and confirmation row;
@@ -77,6 +80,9 @@ While the panel is open:
   blocked;
 - UI mouse and keyboard interaction remains active;
 - closing with `F10` restores gameplay input immediately.
+- opening stores the previous mouse mode and makes the cursor visible;
+- gameplay camera input cannot recapture the mouse while the panel is open;
+- closing restores the stored mouse mode.
 
 The existing player input layer queries
 `DebugTools.is_gameplay_input_blocked()` and clears its current input state

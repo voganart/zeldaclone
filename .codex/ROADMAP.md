@@ -46,6 +46,8 @@ Design:
 - Reset save, restore health, reload level, set Vabo, lock/unlock abilities,
   and teleport to the active checkpoint.
 - Gameplay continues while player input is blocked.
+- Mouse capture stays disabled while open; F10 and the title close button both
+  restore the previous mouse mode.
 - Debug tools do not initialize in release exports.
 - English and Russian UI copy.
 
