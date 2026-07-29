@@ -62,8 +62,7 @@ foreach ($token in @(
     '_exclusion_volumes',
     '_refresh_exclusion_volumes()',
     '_member_is_excluded(',
-    'CloudWeatherField.member_data(',
-    'cloud_transform.origin += _current_cloud_offset',
+    'CloudCellLayout.member_data(',
     'CloudExclusionMath.intersects_cloud('
 )) {
     if (-not $manager.Contains($token)) {

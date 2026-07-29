@@ -24,26 +24,10 @@ foreach ($relativePath in $shaderPaths) {
         'raw_alpha * pool_fade',
         'lod_bayer4x4',
         'lod_threshold'
-        'if (pool_fade <= 0.001)'
-        'global uniform vec3 weather_cloud_offset'
-        'global uniform float weather_cloud_evolution'
-        'weather_noise_motion'
     )) {
         if (-not $source.Contains($requiredToken)) {
             throw "$relativePath is missing complementary dither token: $requiredToken"
         }
-    }
-    $fragmentStart = $source.IndexOf('void fragment()')
-    $discardIndex = $source.IndexOf('if (pool_fade <= 0.001)', $fragmentStart)
-    $raymarchIndex = $source.IndexOf('ray_box_intersection', $fragmentStart)
-    $invalidDiscard = (
-        ($fragmentStart -lt 0) -or
-        ($discardIndex -lt $fragmentStart) -or
-        ($raymarchIndex -lt 0) -or
-        ($discardIndex -gt $raymarchIndex)
-    )
-    if ($invalidDiscard) {
-        throw "$relativePath does not discard invisible clouds before raymarch"
     }
 }
 

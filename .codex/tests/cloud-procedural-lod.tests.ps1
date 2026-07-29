@@ -70,8 +70,8 @@ $manager = Get-Content -Raw (
 )
 foreach ($token in @(
     'Array[Vector4i]',
-    'CloudWeatherField.candidate_members(',
-    'CloudWeatherField.member_data(',
+    'CloudCellLayout.candidate_members(',
+    'CloudCellLayout.member_data(',
     'func _member_is_excluded(key: Vector4i) -> bool',
     'func _move_cloud_to_member(cloud: Node3D, target_key: Vector4i) -> void'
 )) {

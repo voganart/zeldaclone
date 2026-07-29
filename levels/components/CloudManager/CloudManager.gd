@@ -4,9 +4,6 @@ extends Node3D
 const CloudCellLayout = preload(
 	"res://levels/components/CloudManager/cloud_cell_layout.gd"
 )
-const CloudWeatherField = preload(
-	"res://levels/components/CloudManager/cloud_weather_field.gd"
-)
 const CloudExclusionMath = preload(
 	"res://levels/components/CloudManager/cloud_exclusion_math.gd"
 )
@@ -41,8 +38,6 @@ signal tuning_profile_changed(profile: CloudTuningProfile)
 @export_range(0.05, 1.0, 0.05) var cell_density: float = 0.65
 @export_range(1, 16, 1) var pool_updates_per_frame: int = 2
 @export_range(0.05, 2.0, 0.05) var recycle_fade_duration: float = 0.8
-@export_range(0.0, 0.49, 0.01) var vertical_hysteresis: float = 0.2
-@export_range(0.25, 5.0, 0.25) var lifecycle_update_interval: float = 1.0
 
 @export_category("Clustering")
 @export var use_clustering: bool = true
@@ -72,17 +67,9 @@ var _released_clouds: Array[Node3D] = []
 var _recycle_jobs: Dictionary = {}
 var _reserved_cells: Dictionary = {}
 var _last_player_cell := Vector3i(2147483647, 2147483647, 2147483647)
-var _vertical_center_chunk: int = 2147483647
 var _pool_initialized: bool = false
 var _pool_settings_dirty: bool = true
 var _exclusion_volumes: Array[CloudExclusionVolume] = []
-var _weather_manager: Node
-var _drift_root: Node3D
-var _drift_rebase: Vector3 = Vector3.ZERO
-var _current_cloud_offset: Vector3 = Vector3.ZERO
-var _member_data_cache: Dictionary = {}
-var _boundary_update_accumulator: float = 0.0
-var _lifecycle_update_accumulator: float = 0.0
 
 enum RecyclePhase {
 	FADING_OUT,
@@ -114,31 +101,14 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(player):
 			return
 
-	_current_cloud_offset = _get_cloud_offset()
-	_update_drift_root(_current_cloud_offset)
-	var virtual_player_position := (
-		player.global_position - _current_cloud_offset
-	)
-	var player_cell := CloudCellLayout.world_to_chunk(
-		virtual_player_position,
-		tuning_profile.chunk_size
-	)
-	player_cell.y = _apply_vertical_chunk_hysteresis(
-		virtual_player_position.y,
-		player_cell.y
+	var player_cell := CloudCellLayout.world_to_cell(
+		player.global_position,
+		cell_size
 	)
 	if player_cell != _last_player_cell or _pool_settings_dirty:
 		_request_cells(player_cell)
 	_process_relocations()
 	_process_recycle_jobs(delta)
-	_boundary_update_accumulator += delta
-	_lifecycle_update_accumulator += delta
-	if _boundary_update_accumulator >= 0.2:
-		_boundary_update_accumulator = 0.0
-		_update_boundary_fades(virtual_player_position)
-	if _lifecycle_update_accumulator >= lifecycle_update_interval:
-		_lifecycle_update_accumulator = 0.0
-		_update_lifecycle_fades()
 
 
 func _initialize_runtime_pool() -> void:
@@ -148,16 +118,10 @@ func _initialize_runtime_pool() -> void:
 		push_warning("CloudManager: Cloud Scene not assigned")
 		return
 
-	_weather_manager = get_node_or_null("/root/WeatherManager")
-	_ensure_drift_root()
 	var existing_clouds: Array[Node3D] = []
 	for child in get_children():
-		if child == _drift_root:
-			continue
 		if child is Node3D and child.has_method("configure_lod"):
-			var existing_cloud := child as Node3D
-			existing_cloud.reparent(_drift_root, true)
-			existing_clouds.append(existing_cloud)
+			existing_clouds.append(child as Node3D)
 
 	var pool_size := maxi(cloud_count, 0)
 	for index in range(pool_size):
@@ -166,7 +130,7 @@ func _initialize_runtime_pool() -> void:
 			cloud = existing_clouds[index]
 		else:
 			cloud = cloud_scene.instantiate() as Node3D
-			_drift_root.add_child(cloud)
+			add_child(cloud)
 		cloud.visible = false
 		cloud.call("set_pool_fade", 0.0)
 		_configure_cloud_lod(cloud)
@@ -188,9 +152,15 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 	tuning_profile = profile
 	tuning_profile.sanitize()
 	cloud_count = tuning_profile.pool_capacity
-	cell_size = tuning_profile.chunk_size
-	horizontal_cell_radius = tuning_profile.horizontal_chunk_radius
-	vertical_cell_radius = tuning_profile.vertical_chunk_radius
+	cell_size = tuning_profile.cell_size
+	horizontal_cell_radius = ceili(
+		(
+			tuning_profile.coverage_radius + tuning_profile.prewarm_margin
+		) / tuning_profile.cell_size
+	)
+	vertical_cell_radius = ceili(
+		tuning_profile.coverage_height / tuning_profile.cell_size
+	)
 	cell_density = clampf(
 		float(tuning_profile.target_cloud_count)
 		/ float(maxi(tuning_profile.pool_capacity * 2, 1)),
@@ -205,7 +175,6 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 	lod_transition_end = tuning_profile.billboard_transition_end
 	recycle_fade_duration = tuning_profile.recycle_fade_duration
 	pool_updates_per_frame = tuning_profile.updates_per_frame
-	vertical_hysteresis = tuning_profile.vertical_hysteresis_ratio
 	_pool_settings_dirty = true
 	_refresh_exclusion_volumes()
 	_configure_existing_cloud_lods()
@@ -217,7 +186,6 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 func regenerate_from_profile() -> void:
 	apply_tuning_profile(tuning_profile)
 	_last_player_cell = Vector3i(2147483647, 2147483647, 2147483647)
-	_vertical_center_chunk = 2147483647
 	_pool_settings_dirty = true
 
 
@@ -272,14 +240,13 @@ func get_cloud_stats() -> Dictionary:
 func _ensure_pool_capacity() -> void:
 	if tuning_profile == null or cloud_scene == null:
 		return
-	_ensure_drift_root()
 	var pool_clouds: Array[Node3D] = []
-	for child in _drift_root.get_children():
+	for child in get_children():
 		if child is Node3D and child.has_method("configure_lod"):
 			pool_clouds.append(child as Node3D)
 	while pool_clouds.size() < tuning_profile.pool_capacity:
 		var cloud := cloud_scene.instantiate() as Node3D
-		_drift_root.add_child(cloud)
+		add_child(cloud)
 		cloud.visible = false
 		cloud.call("set_pool_fade", 0.0)
 		_configure_cloud_lod(cloud)
@@ -311,17 +278,10 @@ func _refresh_exclusion_volumes() -> void:
 func _member_is_excluded(key: Vector4i) -> bool:
 	if _exclusion_volumes.is_empty() or tuning_profile == null:
 		return false
-	var data: Dictionary = _member_data_cache.get(key, {})
-	if data.is_empty():
-		data = CloudWeatherField.member_data(
-			key,
-			tuning_profile,
-			_get_wind_direction()
-		)
+	var data := CloudCellLayout.member_data(key, tuning_profile)
 	if data.is_empty():
 		return false
 	var cloud_transform: Transform3D = data["transform"]
-	cloud_transform.origin += _current_cloud_offset
 	var cloud_radius: float = data["cloud_radius"]
 	for volume in _exclusion_volumes:
 		if (
@@ -339,31 +299,15 @@ func _member_is_excluded(key: Vector4i) -> bool:
 func _request_cells(center_cell: Vector3i) -> void:
 	_last_player_cell = center_cell
 	_pool_settings_dirty = false
-	var wind_direction := _get_wind_direction()
-	var desired := CloudWeatherField.candidate_members(
+	var desired := CloudCellLayout.candidate_members(
 		center_cell,
-		tuning_profile,
-		wind_direction
+		tuning_profile
 	)
-	var previous_member_data := _member_data_cache
-	_member_data_cache = {}
 	var allowed_members: Array[Vector4i] = []
 	for key in desired:
-		var data: Dictionary = previous_member_data.get(key, {})
-		if data.is_empty():
-			data = CloudWeatherField.member_data(
-				key,
-				tuning_profile,
-				wind_direction
-			)
-		_member_data_cache[key] = data
 		if not _member_is_excluded(key):
 			allowed_members.append(key)
 	desired = allowed_members
-	var allowed_data: Dictionary = {}
-	for key in desired:
-		allowed_data[key] = _member_data_cache[key]
-	_member_data_cache = allowed_data
 	var desired_lookup: Dictionary = {}
 	for key in desired:
 		desired_lookup[key] = true
@@ -484,227 +428,19 @@ func _process_recycle_jobs(delta: float) -> void:
 
 
 func _move_cloud_to_member(cloud: Node3D, target_key: Vector4i) -> void:
-	var data: Dictionary = _member_data_cache.get(target_key, {})
-	if data.is_empty():
-		data = CloudWeatherField.member_data(
-			target_key,
-			tuning_profile,
-			_get_wind_direction()
-		)
+	var data := CloudCellLayout.member_data(target_key, tuning_profile)
 	if data.is_empty():
 		return
 	var cloud_transform: Transform3D = data["transform"]
 	var shape_offset: Vector3 = data["shape_offset"]
-	cloud_transform.origin += _drift_rebase
-	cloud.transform = cloud_transform
+	cloud.global_transform = cloud_transform
 	cloud.call("set_shape_offset", shape_offset)
 	cloud.visible = true
-
-
-func _ensure_drift_root() -> void:
-	if is_instance_valid(_drift_root):
-		return
-	_drift_root = get_node_or_null("CloudDriftRoot") as Node3D
-	if _drift_root == null:
-		_drift_root = Node3D.new()
-		_drift_root.name = "CloudDriftRoot"
-		add_child(_drift_root)
-	_drift_root.top_level = true
-
-
-func _get_cloud_offset() -> Vector3:
-	if not is_instance_valid(_weather_manager):
-		_weather_manager = get_node_or_null("/root/WeatherManager")
-	if (
-		is_instance_valid(_weather_manager)
-		and _weather_manager.has_method("get_cloud_offset")
-	):
-		var offset_value: Variant = _weather_manager.call("get_cloud_offset")
-		if offset_value is Vector3:
-			return offset_value
-	return Vector3.ZERO
-
-
-func _get_wind_direction() -> Vector3:
-	if not is_instance_valid(_weather_manager):
-		_weather_manager = get_node_or_null("/root/WeatherManager")
-	if is_instance_valid(_weather_manager):
-		var weather_profile := _weather_manager.get("profile") as WeatherProfile
-		if weather_profile != null:
-			return weather_profile.wind_direction
-	return Vector3.RIGHT
-
-
-func _update_drift_root(offset: Vector3) -> void:
-	_ensure_drift_root()
-	var safe_chunk_size := maxf(tuning_profile.chunk_size, 1.0)
-	var next_rebase := Vector3(
-		floorf(offset.x / safe_chunk_size) * safe_chunk_size,
-		0.0,
-		floorf(offset.z / safe_chunk_size) * safe_chunk_size
-	)
-	if not next_rebase.is_equal_approx(_drift_rebase):
-		var rebase_delta := next_rebase - _drift_rebase
-		for child in _drift_root.get_children():
-			if child is Node3D:
-				var cloud := child as Node3D
-				cloud.position += rebase_delta
-		_drift_rebase = next_rebase
-	_drift_root.global_transform = Transform3D(
-		Basis.IDENTITY,
-		offset - _drift_rebase
-	)
-
-
-func _apply_vertical_chunk_hysteresis(
-	virtual_height: float,
-	proposed_chunk: int
-) -> int:
-	if _vertical_center_chunk == 2147483647:
-		_vertical_center_chunk = proposed_chunk
-		return _vertical_center_chunk
-	if abs(proposed_chunk - _vertical_center_chunk) > 1:
-		_vertical_center_chunk = proposed_chunk
-		return _vertical_center_chunk
-	var safe_chunk_size := maxf(tuning_profile.chunk_size, 1.0)
-	var hysteresis_margin := safe_chunk_size * vertical_hysteresis
-	var lower_boundary := float(_vertical_center_chunk) * safe_chunk_size
-	var upper_boundary := lower_boundary + safe_chunk_size
-	if (
-		proposed_chunk > _vertical_center_chunk
-		and virtual_height >= upper_boundary + hysteresis_margin
-	):
-		_vertical_center_chunk = proposed_chunk
-	elif (
-		proposed_chunk < _vertical_center_chunk
-		and virtual_height <= lower_boundary - hysteresis_margin
-	):
-		_vertical_center_chunk = proposed_chunk
-	return _vertical_center_chunk
-
-
-func _update_boundary_fades(virtual_player_position: Vector3) -> void:
-	if tuning_profile == null:
-		return
-	var chunk_extent := tuning_profile.chunk_size
-	var horizontal_inner := (
-		float(tuning_profile.horizontal_chunk_radius) * chunk_extent
-	)
-	var horizontal_outer := float(
-		tuning_profile.horizontal_chunk_radius
-		+ tuning_profile.horizontal_prewarm_chunks
-	) * chunk_extent
-	var vertical_inner := (
-		float(tuning_profile.vertical_chunk_radius) * chunk_extent
-	)
-	var vertical_outer := float(
-		tuning_profile.vertical_chunk_radius
-		+ tuning_profile.vertical_prewarm_chunks
-	) * chunk_extent
-	var seen: Dictionary = {}
-	for key_variant in _active_cells.keys() + _reserved_cells.keys():
-		var key: Vector4i = key_variant
-		var cloud := (
-			_active_cells.get(key, _reserved_cells.get(key))
-			as Node3D
-		)
-		if not is_instance_valid(cloud) or seen.has(cloud):
-			continue
-		seen[cloud] = true
-		var data: Dictionary = _member_data_cache.get(key, {})
-		if data.is_empty():
-			continue
-		var cloud_transform: Transform3D = data["transform"]
-		var horizontal_distance := Vector2(
-			cloud_transform.origin.x - virtual_player_position.x,
-			cloud_transform.origin.z - virtual_player_position.z
-		).length()
-		var vertical_distance := absf(
-			cloud_transform.origin.y - virtual_player_position.y
-		)
-		cloud.call(
-			"set_boundary_fade",
-			_boundary_fade(
-				horizontal_distance,
-				horizontal_inner,
-				horizontal_outer
-			),
-			_boundary_fade(
-				vertical_distance,
-				vertical_inner,
-				vertical_outer
-			)
-		)
-
-
-func _boundary_fade(
-	distance: float,
-	inner_distance: float,
-	outer_distance: float
-) -> float:
-	if outer_distance <= inner_distance:
-		return 1.0 if distance <= inner_distance else 0.0
-	return 1.0 - smoothstep(inner_distance, outer_distance, distance)
-
-
-func _update_lifecycle_fades() -> void:
-	if tuning_profile == null:
-		return
-	var weather_profile: WeatherProfile
-	if is_instance_valid(_weather_manager):
-		weather_profile = _weather_manager.get("profile") as WeatherProfile
-	var lifetime_min := 360.0
-	var lifetime_max := 900.0
-	var fade_duration := 90.0
-	if weather_profile != null:
-		lifetime_min = weather_profile.formation_lifetime_min
-		lifetime_max = weather_profile.formation_lifetime_max
-		fade_duration = weather_profile.formation_fade_duration
-	var world_time := float(Time.get_ticks_msec()) * 0.001
-	var seen: Dictionary = {}
-	for key_variant in _active_cells.keys() + _reserved_cells.keys():
-		var key: Vector4i = key_variant
-		var cloud := (
-			_active_cells.get(key, _reserved_cells.get(key))
-			as Node3D
-		)
-		if not is_instance_valid(cloud) or seen.has(cloud):
-			continue
-		seen[cloud] = true
-		var data: Dictionary = _member_data_cache.get(key, {})
-		if data.is_empty():
-			continue
-		var base_lifetime := float(data.get(
-			"formation_lifetime",
-			CloudWeatherField.DEFAULT_FORMATION_LIFETIME_MIN
-		))
-		var lifetime_factor := clampf(inverse_lerp(
-			CloudWeatherField.DEFAULT_FORMATION_LIFETIME_MIN,
-			CloudWeatherField.DEFAULT_FORMATION_LIFETIME_MAX,
-			base_lifetime
-		), 0.0, 1.0)
-		var lifetime := lerpf(lifetime_min, lifetime_max, lifetime_factor)
-		var safe_fade := minf(fade_duration, lifetime * 0.45)
-		var phase := float(data.get("formation_phase", 0.0))
-		var cycle_time := fposmod(
-			world_time + phase * lifetime,
-			lifetime
-		)
-		var fade_in := smoothstep(0.0, safe_fade, cycle_time)
-		var fade_out := 1.0 - smoothstep(
-			lifetime - safe_fade,
-			lifetime,
-			cycle_time
-		)
-		cloud.call("set_lifecycle_fade", minf(fade_in, fade_out))
 
 
 func _configure_existing_cloud_lods() -> void:
 	for cloud in get_children():
 		_configure_cloud_lod(cloud)
-	if is_instance_valid(_drift_root):
-		for cloud in _drift_root.get_children():
-			_configure_cloud_lod(cloud)
 
 
 func _configure_cloud_lod(cloud: Node) -> void:

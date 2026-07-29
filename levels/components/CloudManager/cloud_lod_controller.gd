@@ -42,14 +42,10 @@ var _update_accumulator: float = 0.0
 var _recycle_fade: float = 1.0
 var _edge_fade: float = 1.0
 var _edge_fade_target: float = 1.0
-var _horizontal_fade_target: float = 1.0
-var _vertical_fade_target: float = 1.0
-var _lifecycle_fade: float = 1.0
 var _applied_combined_fade: float = -1.0
 var _stream_coverage_radius: float = 0.0
 var _stream_prewarm_margin: float = 0.0
 var _stream_edge_fade_width: float = 0.0
-var _external_boundary_fade: bool = false
 var _lod_mode: StringName = &"Billboard"
 
 
@@ -94,7 +90,7 @@ func _process(delta: float) -> void:
 		_preview_distance() if Engine.is_editor_hint() else _distance_to_camera()
 	)
 	apply_distance(current_distance)
-	if not Engine.is_editor_hint() and not _external_boundary_fade:
+	if not Engine.is_editor_hint():
 		_update_edge_fade_target(current_distance)
 
 
@@ -156,31 +152,11 @@ func set_pool_fade(value: float) -> void:
 func set_edge_fade(value: float) -> void:
 	_edge_fade = clampf(value, 0.0, 1.0)
 	_edge_fade_target = _edge_fade
-	_horizontal_fade_target = _edge_fade
-	_vertical_fade_target = _edge_fade
-	_apply_combined_fade()
-
-
-func set_boundary_fade(
-	horizontal_fade: float,
-	vertical_fade: float
-) -> void:
-	_external_boundary_fade = true
-	_horizontal_fade_target = clampf(horizontal_fade, 0.0, 1.0)
-	_vertical_fade_target = clampf(vertical_fade, 0.0, 1.0)
-	_edge_fade_target = minf(
-		_horizontal_fade_target,
-		_vertical_fade_target
-	)
-
-
-func set_lifecycle_fade(value: float) -> void:
-	_lifecycle_fade = clampf(value, 0.0, 1.0)
 	_apply_combined_fade()
 
 
 func _apply_combined_fade() -> void:
-	var combined_fade := _recycle_fade * _edge_fade * _lifecycle_fade
+	var combined_fade := _recycle_fade * _edge_fade
 	if is_equal_approx(combined_fade, _applied_combined_fade):
 		return
 	_applied_combined_fade = combined_fade
