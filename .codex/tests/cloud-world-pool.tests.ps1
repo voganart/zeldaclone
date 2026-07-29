@@ -64,8 +64,8 @@ foreach ($token in @(
     '_free_clouds',
     '_requested_cells',
     'CloudCellLayout.world_to_cell(',
-    'CloudCellLayout.candidate_cells(',
-    'CloudCellLayout.cell_data(',
+    'CloudCellLayout.candidate_members(',
+    'CloudCellLayout.member_data(',
     '_requested_cells',
     'set_shape_offset'
 )) {

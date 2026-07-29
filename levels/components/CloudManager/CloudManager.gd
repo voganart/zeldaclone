@@ -62,7 +62,7 @@ var lod_local_radius: float = 0.5
 var player: Node3D
 var _active_cells: Dictionary = {}
 var _free_clouds: Array[Node3D] = []
-var _requested_cells: Array[Vector3i] = []
+var _requested_cells: Array[Vector4i] = []
 var _released_clouds: Array[Node3D] = []
 var _recycle_jobs: Dictionary = {}
 var _reserved_cells: Dictionary = {}
@@ -154,7 +154,9 @@ func apply_tuning_profile(profile: CloudTuningProfile) -> void:
 	cloud_count = tuning_profile.pool_capacity
 	cell_size = tuning_profile.cell_size
 	horizontal_cell_radius = ceili(
-		tuning_profile.coverage_radius / tuning_profile.cell_size
+		(
+			tuning_profile.coverage_radius + tuning_profile.prewarm_margin
+		) / tuning_profile.cell_size
 	)
 	vertical_cell_radius = ceili(
 		tuning_profile.coverage_height / tuning_profile.cell_size
@@ -273,10 +275,10 @@ func _refresh_exclusion_volumes() -> void:
 			_exclusion_volumes.append(node as CloudExclusionVolume)
 
 
-func _cell_is_excluded(cell: Vector3i) -> bool:
+func _member_is_excluded(key: Vector4i) -> bool:
 	if _exclusion_volumes.is_empty() or tuning_profile == null:
 		return false
-	var data := CloudCellLayout.cell_data(cell, tuning_profile)
+	var data := CloudCellLayout.member_data(key, tuning_profile)
 	if data.is_empty():
 		return false
 	var cloud_transform: Transform3D = data["transform"]
@@ -297,31 +299,31 @@ func _cell_is_excluded(cell: Vector3i) -> bool:
 func _request_cells(center_cell: Vector3i) -> void:
 	_last_player_cell = center_cell
 	_pool_settings_dirty = false
-	var desired := CloudCellLayout.candidate_cells(
+	var desired := CloudCellLayout.candidate_members(
 		center_cell,
 		tuning_profile
 	)
-	var allowed_cells: Array[Vector3i] = []
-	for cell in desired:
-		if not _cell_is_excluded(cell):
-			allowed_cells.append(cell)
-	desired = allowed_cells
+	var allowed_members: Array[Vector4i] = []
+	for key in desired:
+		if not _member_is_excluded(key):
+			allowed_members.append(key)
+	desired = allowed_members
 	var desired_lookup: Dictionary = {}
-	for cell in desired:
-		desired_lookup[cell] = true
+	for key in desired:
+		desired_lookup[key] = true
 
-	for active_cell in _active_cells.keys():
-		if desired_lookup.has(active_cell):
+	for active_key in _active_cells.keys():
+		if desired_lookup.has(active_key):
 			continue
-		var released := _active_cells[active_cell] as Node3D
-		_active_cells.erase(active_cell)
+		var released := _active_cells[active_key] as Node3D
+		_active_cells.erase(active_key)
 		_released_clouds.append(released)
 
-	for reserved_cell in _reserved_cells.keys():
-		if desired_lookup.has(reserved_cell):
+	for reserved_key in _reserved_cells.keys():
+		if desired_lookup.has(reserved_key):
 			continue
-		var reserved_cloud := _reserved_cells[reserved_cell] as Node3D
-		_reserved_cells.erase(reserved_cell)
+		var reserved_cloud := _reserved_cells[reserved_key] as Node3D
+		_reserved_cells.erase(reserved_key)
 		if _recycle_jobs.has(reserved_cloud):
 			var stale_job: Dictionary = _recycle_jobs[reserved_cloud]
 			stale_job["has_target"] = false
@@ -329,26 +331,26 @@ func _request_cells(center_cell: Vector3i) -> void:
 			_recycle_jobs[reserved_cloud] = stale_job
 
 	_requested_cells.clear()
-	for cell in desired:
-		if not _active_cells.has(cell) and not _reserved_cells.has(cell):
-			_requested_cells.append(cell)
+	for key in desired:
+		if not _active_cells.has(key) and not _reserved_cells.has(key):
+			_requested_cells.append(key)
 
 
 func _process_relocations() -> void:
 	var update_budget := maxi(pool_updates_per_frame, 1)
 	while update_budget > 0:
 		if not _requested_cells.is_empty():
-			var target_cell: Vector3i = _requested_cells.pop_front()
-			if _active_cells.has(target_cell) or _reserved_cells.has(target_cell):
+			var target_key: Vector4i = _requested_cells.pop_front()
+			if _active_cells.has(target_key) or _reserved_cells.has(target_key):
 				continue
 			var cloud: Node3D
 			if not _released_clouds.is_empty():
 				cloud = _released_clouds.pop_back()
-				_start_fade_out(cloud, target_cell, true)
+				_start_fade_out(cloud, target_key, true)
 			elif not _free_clouds.is_empty():
 				cloud = _free_clouds.pop_back()
-				_move_cloud_to_cell(cloud, target_cell)
-				_start_fade_in(cloud, target_cell)
+				_move_cloud_to_member(cloud, target_key)
+				_start_fade_in(cloud, target_key)
 			else:
 				break
 			update_budget -= 1
@@ -356,7 +358,7 @@ func _process_relocations() -> void:
 
 		if not _released_clouds.is_empty():
 			var released: Node3D = _released_clouds.pop_back()
-			_start_fade_out(released, Vector3i.ZERO, false)
+			_start_fade_out(released, Vector4i.ZERO, false)
 			update_budget -= 1
 			continue
 		break
@@ -364,27 +366,27 @@ func _process_relocations() -> void:
 
 func _start_fade_out(
 	cloud: Node3D,
-	target_cell: Vector3i,
+	target_key: Vector4i,
 	has_target: bool
 ) -> void:
 	if has_target:
-		_reserved_cells[target_cell] = cloud
+		_reserved_cells[target_key] = cloud
 	_recycle_jobs[cloud] = {
 		"phase": RecyclePhase.FADING_OUT,
 		"fade": 1.0,
-		"target_cell": target_cell,
+		"target_key": target_key,
 		"has_target": has_target,
 	}
 
 
-func _start_fade_in(cloud: Node3D, target_cell: Vector3i) -> void:
-	_reserved_cells[target_cell] = cloud
+func _start_fade_in(cloud: Node3D, target_key: Vector4i) -> void:
+	_reserved_cells[target_key] = cloud
 	cloud.visible = true
 	cloud.call("set_pool_fade", 0.0)
 	_recycle_jobs[cloud] = {
 		"phase": RecyclePhase.FADING_IN,
 		"fade": 0.0,
-		"target_cell": target_cell,
+		"target_key": target_key,
 		"has_target": true,
 	}
 
@@ -404,8 +406,8 @@ func _process_recycle_jobs(delta: float) -> void:
 			cloud.call("set_pool_fade", fade)
 			if fade <= 0.0:
 				if bool(job["has_target"]):
-					var target_cell: Vector3i = job["target_cell"]
-					_move_cloud_to_cell(cloud, target_cell)
+					var target_key: Vector4i = job["target_key"]
+					_move_cloud_to_member(cloud, target_key)
 					job["phase"] = RecyclePhase.FADING_IN
 				else:
 					cloud.visible = false
@@ -416,17 +418,17 @@ func _process_recycle_jobs(delta: float) -> void:
 			fade = minf(fade + fade_step, 1.0)
 			cloud.call("set_pool_fade", fade)
 			if fade >= 1.0:
-				var target_cell: Vector3i = job["target_cell"]
-				_reserved_cells.erase(target_cell)
-				_active_cells[target_cell] = cloud
+				var target_key: Vector4i = job["target_key"]
+				_reserved_cells.erase(target_key)
+				_active_cells[target_key] = cloud
 				_recycle_jobs.erase(cloud)
 				continue
 		job["fade"] = fade
 		_recycle_jobs[cloud] = job
 
 
-func _move_cloud_to_cell(cloud: Node3D, target_cell: Vector3i) -> void:
-	var data := CloudCellLayout.cell_data(target_cell, tuning_profile)
+func _move_cloud_to_member(cloud: Node3D, target_key: Vector4i) -> void:
+	var data := CloudCellLayout.member_data(target_key, tuning_profile)
 	if data.is_empty():
 		return
 	var cloud_transform: Transform3D = data["transform"]

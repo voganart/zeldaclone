@@ -64,3 +64,18 @@ foreach ($token in @(
         throw "Cloud quality preset is missing: $token"
     }
 }
+
+$manager = Get-Content -Raw (
+    Join-Path $projectRoot 'levels/components/CloudManager/CloudManager.gd'
+)
+foreach ($token in @(
+    'Array[Vector4i]',
+    'CloudCellLayout.candidate_members(',
+    'CloudCellLayout.member_data(',
+    'func _member_is_excluded(key: Vector4i) -> bool',
+    'func _move_cloud_to_member(cloud: Node3D, target_key: Vector4i) -> void'
+)) {
+    if (-not $manager.Contains($token)) {
+        throw "Cloud member streaming contract is missing: $token"
+    }
+}

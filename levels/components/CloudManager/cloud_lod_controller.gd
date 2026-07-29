@@ -39,7 +39,13 @@ var _volume_meshes: Array[MeshInstance3D] = []
 var _impostor_mesh: MeshInstance3D
 var _graphics_manager: Node
 var _update_accumulator: float = 0.0
-var _pool_fade: float = 1.0
+var _recycle_fade: float = 1.0
+var _edge_fade: float = 1.0
+var _edge_fade_target: float = 1.0
+var _applied_combined_fade: float = -1.0
+var _stream_coverage_radius: float = 0.0
+var _stream_prewarm_margin: float = 0.0
+var _stream_edge_fade_width: float = 0.0
 var _lod_mode: StringName = &"Billboard"
 
 
@@ -56,10 +62,16 @@ func _ready() -> void:
 		_set_shape_override(false)
 		_connect_graphics_manager()
 		apply_distance(_distance_to_camera())
-	set_pool_fade(_pool_fade)
+	set_pool_fade(_recycle_fade)
 
 
 func _process(delta: float) -> void:
+	_edge_fade = move_toward(
+		_edge_fade,
+		_edge_fade_target,
+		delta * 2.5
+	)
+	_apply_combined_fade()
 	if not auto_update_from_camera:
 		return
 	if Engine.is_editor_hint() and not preview_lod_in_editor:
@@ -74,7 +86,12 @@ func _process(delta: float) -> void:
 	if _update_accumulator < update_interval:
 		return
 	_update_accumulator = 0.0
-	apply_distance(_preview_distance() if Engine.is_editor_hint() else _distance_to_camera())
+	var current_distance := (
+		_preview_distance() if Engine.is_editor_hint() else _distance_to_camera()
+	)
+	apply_distance(current_distance)
+	if not Engine.is_editor_hint():
+		_update_edge_fade_target(current_distance)
 
 
 func apply_distance(distance: float) -> void:
@@ -128,13 +145,61 @@ func get_lod_mode() -> StringName:
 
 
 func set_pool_fade(value: float) -> void:
-	_pool_fade = clampf(value, 0.0, 1.0)
+	_recycle_fade = clampf(value, 0.0, 1.0)
+	_apply_combined_fade()
+
+
+func set_edge_fade(value: float) -> void:
+	_edge_fade = clampf(value, 0.0, 1.0)
+	_edge_fade_target = _edge_fade
+	_apply_combined_fade()
+
+
+func _apply_combined_fade() -> void:
+	var combined_fade := _recycle_fade * _edge_fade
+	if is_equal_approx(combined_fade, _applied_combined_fade):
+		return
+	_applied_combined_fade = combined_fade
 	_resolve_meshes()
 	for volume_mesh in _volume_meshes:
 		if is_instance_valid(volume_mesh):
-			volume_mesh.set_instance_shader_parameter(&"pool_fade", _pool_fade)
+			volume_mesh.set_instance_shader_parameter(&"pool_fade", combined_fade)
 	if is_instance_valid(_impostor_mesh):
-		_impostor_mesh.set_instance_shader_parameter(&"pool_fade", _pool_fade)
+		_impostor_mesh.set_instance_shader_parameter(&"pool_fade", combined_fade)
+
+
+func configure_stream_fade(
+	coverage_radius: float,
+	prewarm_margin: float,
+	edge_fade_width: float
+) -> void:
+	_stream_coverage_radius = maxf(coverage_radius, 0.0)
+	_stream_prewarm_margin = maxf(prewarm_margin, 0.0)
+	_stream_edge_fade_width = clampf(
+		edge_fade_width,
+		0.0,
+		_stream_prewarm_margin
+	)
+	_update_edge_fade_target(_distance_to_camera())
+	set_edge_fade(_edge_fade_target)
+
+
+func _update_edge_fade_target(distance: float) -> void:
+	if _stream_prewarm_margin <= 0.0:
+		_edge_fade_target = 1.0
+		return
+	var outer_radius := (
+		_stream_coverage_radius + _stream_prewarm_margin
+	)
+	var fade_start := outer_radius - _stream_edge_fade_width
+	if _stream_edge_fade_width <= 0.0:
+		_edge_fade_target = 1.0 if distance < outer_radius else 0.0
+		return
+	_edge_fade_target = 1.0 - smoothstep(
+		fade_start,
+		outer_radius,
+		distance
+	)
 
 
 func set_shape_offset(offset: Vector3) -> void:
@@ -180,6 +245,11 @@ func configure_from_profile(profile: CloudTuningProfile) -> void:
 		preview_lod_in_editor
 	)
 	set_lobe_shape(profile.lobe_spread, profile.lobe_variation)
+	configure_stream_fade(
+		profile.coverage_radius,
+		profile.prewarm_margin,
+		profile.edge_fade_width
+	)
 
 
 func configure_lod(
