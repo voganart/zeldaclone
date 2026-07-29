@@ -39,6 +39,8 @@ foreach ($token in @(
     'large_cloud_chance',
     'large_cloud_multiplier',
     'shape_variation',
+    'lobe_spread',
+    'lobe_variation',
     'full_volume_distance',
     'cheap_volume_distance',
     'billboard_transition_start',
@@ -54,9 +56,15 @@ foreach ($token in @(
 }
 
 foreach ($token in @(
-    'coverage_radius = 1400.0',
-    'target_cloud_count = 80',
-    'pool_capacity = 96'
+    'coverage_radius = 1800.0',
+    'target_cloud_count = 100',
+    'pool_capacity = 120',
+    'scale_min = Vector3(100, 50, 140)',
+    'scale_max = Vector3(320, 180, 480)',
+    'large_cloud_chance = 0.3',
+    'large_cloud_multiplier = 2.0',
+    'lobe_spread = 0.45',
+    'lobe_variation = 0.65'
 )) {
     if (-not $resource.Contains($token)) {
         throw "Cloud tuning default is missing: $token"

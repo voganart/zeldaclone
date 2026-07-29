@@ -19,6 +19,8 @@ instance uniform float shape_override_enabled : hint_range(0.0, 1.0) = 0.0;
 instance uniform vec3 shape_override_scale = vec3(70.0, 40.0, 110.0);
 instance uniform vec3 shape_override_offset = vec3(0.17, 0.33, 0.61);
 instance uniform vec3 shape_offset = vec3(0.0);
+instance uniform float lobe_spread : hint_range(0.0, 1.0) = 0.45;
+instance uniform float lobe_variation : hint_range(0.0, 1.0) = 0.65;
 
 group_uniforms Shape_Erosion;
 uniform float erosion_strength : hint_range(0.0, 1.0) = 0.5; 
@@ -79,13 +81,46 @@ vec2 ray_box_intersection(vec3 ray_origin, vec3 ray_dir, vec3 box_min, vec3 box_
 	return vec2(max(max(t1.x, t1.y), t1.z), min(min(t2.x, t2.y), t2.z));
 }
 
+float lobe_hash(vec3 seed, float salt) {
+	return fract(sin(dot(seed + vec3(salt), vec3(17.17, 31.73, 47.91))) * 43758.5453);
+}
+
+float lobe_sphere(vec3 p, vec3 center, float radius, float edge) {
+	return 1.0 - smoothstep(radius - edge, radius, length(p - center));
+}
+
+float multi_lobe_mask(vec3 p, vec3 seed) {
+	float variation = clamp(lobe_variation, 0.0, 1.0);
+	float spread = 0.04 + clamp(lobe_spread, 0.0, 1.0) * 0.16;
+	float edge = max(softness * 0.55, 0.015);
+	float r0 = sphere_radius * mix(0.72, 0.92, lobe_hash(seed, 1.0));
+	float mask = lobe_sphere(p, vec3(0.0), r0, edge);
+	for (int i = 0; i < 4; i++) {
+		float fi = float(i);
+		float angle = fi * 1.5707963 + lobe_hash(seed, 10.0 + fi) * variation;
+		float distance_scale = mix(0.75, 1.2, lobe_hash(seed, 20.0 + fi));
+		vec3 center = vec3(
+			cos(angle) * spread * distance_scale,
+			(lobe_hash(seed, 30.0 + fi) - 0.5) * spread * variation,
+			sin(angle) * spread * distance_scale
+		);
+		float radius = sphere_radius * mix(
+			0.46,
+			0.72,
+			mix(0.5, lobe_hash(seed, 40.0 + fi), variation)
+		);
+		mask = max(mask, lobe_sphere(p, center, radius, edge));
+	}
+	return mask;
+}
+
 float get_density(vec3 p, float dist_to_cam) {
 	float dist_to_edge = max(abs(p.x), max(abs(p.y), abs(p.z)));
 	float edge_mask = 1.0 - smoothstep(0.35, 0.5, dist_to_edge); // Мягкие края контейнера
 	
 	if (edge_mask <= 0.0) return 0.0;
 
-	float sphere_mask = 1.0 - smoothstep(sphere_radius - softness, sphere_radius, length(p));
+	float sphere_mask = multi_lobe_mask(p, shape_offset);
 	
 	float use_override = clamp(shape_override_enabled, 0.0, 1.0);
 	vec3 effective_scale = mix(v_obj_scale, shape_override_scale, use_override);

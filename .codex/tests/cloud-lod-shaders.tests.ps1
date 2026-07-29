@@ -15,12 +15,31 @@ foreach ($relativePath in $shaderPaths) {
     foreach ($requiredToken in @(
         'instance uniform float lod_fade',
         'instance uniform bool lod_is_impostor',
+        'instance uniform float lobe_spread',
+        'instance uniform float lobe_variation',
+        'float multi_lobe_mask(vec3 p, vec3 seed)',
+        'multi_lobe_mask(p, shape_offset)',
         'lod_bayer4x4',
         'lod_threshold'
     )) {
         if (-not $source.Contains($requiredToken)) {
             throw "$relativePath is missing complementary dither token: $requiredToken"
         }
+    }
+}
+
+$controllerSource = Get-Content -LiteralPath (
+    Join-Path $projectRoot 'levels/components/CloudManager/cloud_lod_controller.gd'
+) -Raw
+foreach ($requiredToken in @(
+    'func set_lobe_shape(spread: float, variation: float) -> void',
+    '&"lobe_spread"',
+    '&"lobe_variation"',
+    'profile.lobe_spread',
+    'profile.lobe_variation'
+)) {
+    if (-not $controllerSource.Contains($requiredToken)) {
+        throw "Cloud LOD controller is missing lobe shape token: $requiredToken"
     }
 }
 

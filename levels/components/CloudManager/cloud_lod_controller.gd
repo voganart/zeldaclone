@@ -146,6 +146,29 @@ func set_shape_offset(offset: Vector3) -> void:
 		_impostor_mesh.set_instance_shader_parameter(&"shape_offset", offset)
 
 
+func set_lobe_shape(spread: float, variation: float) -> void:
+	_resolve_meshes()
+	var safe_spread := clampf(spread, 0.0, 1.0)
+	var safe_variation := clampf(variation, 0.0, 1.0)
+	for volume_mesh in _volume_meshes:
+		if not is_instance_valid(volume_mesh):
+			continue
+		volume_mesh.set_instance_shader_parameter(&"lobe_spread", safe_spread)
+		volume_mesh.set_instance_shader_parameter(
+			&"lobe_variation",
+			safe_variation
+		)
+	if is_instance_valid(_impostor_mesh):
+		_impostor_mesh.set_instance_shader_parameter(
+			&"lobe_spread",
+			safe_spread
+		)
+		_impostor_mesh.set_instance_shader_parameter(
+			&"lobe_variation",
+			safe_variation
+		)
+
+
 func configure_from_profile(profile: CloudTuningProfile) -> void:
 	if profile == null:
 		return
@@ -156,6 +179,7 @@ func configure_from_profile(profile: CloudTuningProfile) -> void:
 		lod_local_radius,
 		preview_lod_in_editor
 	)
+	set_lobe_shape(profile.lobe_spread, profile.lobe_variation)
 
 
 func configure_lod(
