@@ -17,6 +17,8 @@
 
 - Рабочая ветка: `master`.
 - `master` синхронизирован с `origin/master`.
+- По умолчанию работать напрямую в `master`; отдельную ветку или worktree
+  создавать только по явному запросу пользователя.
 - Облачные эксперименты сохранены отдельно в `codex/cloud-lod`.
 - Не переносить из `codex/cloud-lod` distant-cloud streaming, impostor LOD,
   weather manager или cloud tuning без нового явного решения пользователя.

@@ -20,6 +20,3 @@ data_*/
 mono_crash.*.json
 
 .idea
-
-# Local Codex feature worktrees
-.worktrees/

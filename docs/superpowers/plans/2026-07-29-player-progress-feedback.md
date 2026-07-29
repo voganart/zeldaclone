@@ -607,8 +607,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/update-project-index.
 ```
 
 Expected: `.codex/project-index.txt` includes
-the tracked HUD paths with their canonical `UI/` casing. The compact index
-does not list PNG assets or `.ps1` tests by design.
+the tracked HUD script and scene using the current checkout's filesystem
+casing. The compact index does not list PNG assets or `.ps1` tests by design.
 
 - [ ] **Step 4: Run the complete sandbox-safe non-engine test suite**
 
