@@ -41,6 +41,12 @@ foreach ($token in @(
     'shape_variation',
     'lobe_spread',
     'lobe_variation',
+    'cluster_min_members',
+    'cluster_max_members',
+    'cluster_spread',
+    'cluster_scale_variation',
+    'prewarm_margin',
+    'edge_fade_width',
     'full_volume_distance',
     'cheap_volume_distance',
     'billboard_transition_start',
@@ -56,17 +62,26 @@ foreach ($token in @(
 }
 
 foreach ($token in @(
-    'coverage_radius = 1800.0',
-    'target_cloud_count = 100',
-    'pool_capacity = 120',
-    'scale_min = Vector3(100, 50, 140)',
-    'scale_max = Vector3(320, 180, 480)',
-    'large_cloud_chance = 0.3',
-    'large_cloud_multiplier = 2.0',
-    'lobe_spread = 0.45',
-    'lobe_variation = 0.65'
+    'coverage_radius: float = 2200.0',
+    'target_cloud_count: int = 120',
+    'pool_capacity: int = 144',
+    'scale_min: Vector3 = Vector3(100.0, 50.0, 140.0)',
+    'scale_max: Vector3 = Vector3(320.0, 180.0, 480.0)',
+    'large_cloud_chance: float = 0.3',
+    'large_cloud_multiplier: float = 2.0',
+    'lobe_spread: float = 0.45',
+    'lobe_variation: float = 0.65',
+    'cluster_min_members: int = 3',
+    'cluster_max_members: int = 6',
+    'cluster_spread: float = 220.0',
+    'cluster_scale_variation: float = 0.45',
+    'prewarm_margin: float = 800.0',
+    'edge_fade_width: float = 650.0',
+    'cluster_min_members = maxi(cluster_min_members, 1)',
+    'cluster_max_members = maxi(cluster_max_members, cluster_min_members)',
+    'edge_fade_width = clampf(edge_fade_width, 0.0, prewarm_margin)'
 )) {
-    if (-not $resource.Contains($token)) {
+    if (-not $script.Contains($token)) {
         throw "Cloud tuning default is missing: $token"
     }
 }

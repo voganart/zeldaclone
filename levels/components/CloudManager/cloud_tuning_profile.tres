@@ -1,26 +1,6 @@
-[gd_resource type="Resource" script_class="CloudTuningProfile" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="CloudTuningProfile" format=3]
 
 [ext_resource type="Script" path="res://levels/components/CloudManager/cloud_tuning_profile.gd" id="1_profile"]
 
 [resource]
 script = ExtResource("1_profile")
-coverage_radius = 1800.0
-coverage_height = 350.0
-target_cloud_count = 100
-pool_capacity = 120
-cell_size = 120.0
-world_seed = 1337
-scale_min = Vector3(100, 50, 140)
-scale_max = Vector3(320, 180, 480)
-aspect_variation = 0.35
-large_cloud_chance = 0.3
-large_cloud_multiplier = 2.0
-shape_variation = 2.0
-lobe_spread = 0.45
-lobe_variation = 0.65
-full_volume_distance = 120.0
-cheap_volume_distance = 250.0
-billboard_transition_start = 280.0
-billboard_transition_end = 420.0
-recycle_fade_duration = 1.0
-updates_per_frame = 3

@@ -3,10 +3,10 @@ class_name CloudTuningProfile
 extends Resource
 
 @export_group("Distribution")
-@export_range(100.0, 5000.0, 10.0) var coverage_radius: float = 1800.0
+@export_range(100.0, 5000.0, 10.0) var coverage_radius: float = 2200.0
 @export_range(50.0, 2000.0, 10.0) var coverage_height: float = 350.0
-@export_range(1, 500, 1) var target_cloud_count: int = 100
-@export_range(1, 500, 1) var pool_capacity: int = 120
+@export_range(1, 500, 1) var target_cloud_count: int = 120
+@export_range(1, 500, 1) var pool_capacity: int = 144
 @export_range(25.0, 500.0, 5.0) var cell_size: float = 120.0
 @export var world_seed: int = 1337
 
@@ -19,8 +19,14 @@ extends Resource
 @export_range(0.0, 10.0, 0.05) var shape_variation: float = 2.0
 @export_range(0.0, 1.0, 0.01) var lobe_spread: float = 0.45
 @export_range(0.0, 1.0, 0.01) var lobe_variation: float = 0.65
+@export_range(1, 12, 1) var cluster_min_members: int = 3
+@export_range(1, 12, 1) var cluster_max_members: int = 6
+@export_range(0.0, 1000.0, 5.0) var cluster_spread: float = 220.0
+@export_range(0.0, 1.0, 0.01) var cluster_scale_variation: float = 0.45
 
 @export_group("LOD & Recycling")
+@export_range(0.0, 3000.0, 10.0) var prewarm_margin: float = 800.0
+@export_range(0.0, 3000.0, 10.0) var edge_fade_width: float = 650.0
 @export_range(0.0, 1000.0, 5.0) var full_volume_distance: float = 120.0
 @export_range(0.0, 2000.0, 5.0) var cheap_volume_distance: float = 250.0
 @export_range(0.0, 3000.0, 5.0) var billboard_transition_start: float = 280.0
@@ -51,6 +57,12 @@ func sanitize() -> void:
 	shape_variation = maxf(shape_variation, 0.0)
 	lobe_spread = clampf(lobe_spread, 0.0, 1.0)
 	lobe_variation = clampf(lobe_variation, 0.0, 1.0)
+	cluster_min_members = maxi(cluster_min_members, 1)
+	cluster_max_members = maxi(cluster_max_members, cluster_min_members)
+	cluster_spread = maxf(cluster_spread, 0.0)
+	cluster_scale_variation = clampf(cluster_scale_variation, 0.0, 1.0)
+	prewarm_margin = maxf(prewarm_margin, 0.0)
+	edge_fade_width = clampf(edge_fade_width, 0.0, prewarm_margin)
 	full_volume_distance = maxf(full_volume_distance, 0.0)
 	cheap_volume_distance = maxf(cheap_volume_distance, full_volume_distance)
 	billboard_transition_start = maxf(

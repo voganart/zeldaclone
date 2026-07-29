@@ -36,6 +36,14 @@ foreach ($token in @(
     'static func candidate_cells(',
     'static func occupancy_threshold(',
     'static func cell_data(',
+    'static func candidate_members(',
+    'static func member_data(',
+    'Array[Vector4i]',
+    'Vector4i(',
+    'member_index',
+    'profile.coverage_radius + profile.prewarm_margin',
+    'profile.cluster_spread',
+    'profile.cluster_scale_variation',
     '"shape_offset"',
     '"cloud_radius"'
 )) {

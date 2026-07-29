@@ -15,8 +15,12 @@ static func occupancy_threshold(profile: CloudTuningProfile) -> float:
 	if profile == null:
 		return 0.0
 	var slot_count := _candidate_slot_count(profile)
+	var average_members := (
+		float(profile.cluster_min_members + profile.cluster_max_members) * 0.5
+	)
 	return clampf(
-		float(profile.target_cloud_count) / float(maxi(slot_count, 1)),
+		float(profile.target_cloud_count)
+		/ (float(maxi(slot_count, 1)) * maxf(average_members, 1.0)),
 		0.0,
 		1.0
 	)
@@ -60,6 +64,145 @@ static func candidate_cells(
 		)
 	)
 	return candidates
+
+
+static func candidate_members(
+	center: Vector3i,
+	profile: CloudTuningProfile
+) -> Array[Vector4i]:
+	var members: Array[Vector4i] = []
+	if profile == null:
+		return members
+	for anchor in candidate_cells(center, profile):
+		var count := _member_count(anchor, profile)
+		for member_index in range(count):
+			members.append(Vector4i(
+				anchor.x,
+				anchor.y,
+				anchor.z,
+				member_index
+			))
+	members.sort_custom(func(a: Vector4i, b: Vector4i) -> bool:
+		var anchor_a := Vector3i(a.x, a.y, a.z)
+		var anchor_b := Vector3i(b.x, b.y, b.z)
+		var distance_a := Vector3(anchor_a - center).length_squared()
+		var distance_b := Vector3(anchor_b - center).length_squared()
+		if not is_equal_approx(distance_a, distance_b):
+			return distance_a > distance_b
+		return _member_hash(anchor_a, a.w, profile.world_seed, 100) < (
+			_member_hash(anchor_b, b.w, profile.world_seed, 100)
+		)
+	)
+	return members
+
+
+static func member_data(
+	key: Vector4i,
+	profile: CloudTuningProfile
+) -> Dictionary:
+	if profile == null:
+		return {}
+	var anchor := Vector3i(key.x, key.y, key.z)
+	var member_index := key.w
+	if member_index < 0 or member_index >= _member_count(anchor, profile):
+		return {}
+	var anchor_data := cell_data(anchor, profile)
+	if anchor_data.is_empty():
+		return {}
+	var anchor_transform: Transform3D = anchor_data["transform"]
+	var base_scale := anchor_transform.basis.get_scale()
+	var angle := TAU * _member_unit_hash(
+		anchor,
+		member_index,
+		profile.world_seed,
+		1
+	)
+	var radial_factor := sqrt(_member_unit_hash(
+		anchor,
+		member_index,
+		profile.world_seed,
+		2
+	))
+	var local_offset := Vector3(
+		cos(angle) * radial_factor * profile.cluster_spread,
+		lerpf(
+			-profile.cluster_spread * 0.3,
+			profile.cluster_spread * 0.3,
+			_member_unit_hash(
+				anchor,
+				member_index,
+				profile.world_seed,
+				3
+			)
+		),
+		sin(angle) * radial_factor * profile.cluster_spread
+	)
+	var variation := profile.cluster_scale_variation
+	var scale_multiplier := lerpf(
+		1.0 - variation,
+		1.0 + variation,
+		_member_unit_hash(anchor, member_index, profile.world_seed, 4)
+	)
+	var member_scale := base_scale * scale_multiplier
+	member_scale *= Vector3(
+		lerpf(
+			1.0 - variation * 0.5,
+			1.0 + variation * 0.5,
+			_member_unit_hash(anchor, member_index, profile.world_seed, 5)
+		),
+		lerpf(
+			1.0 - variation * 0.35,
+			1.0 + variation * 0.35,
+			_member_unit_hash(anchor, member_index, profile.world_seed, 6)
+		),
+		lerpf(
+			1.0 - variation * 0.5,
+			1.0 + variation * 0.5,
+			_member_unit_hash(anchor, member_index, profile.world_seed, 7)
+		)
+	)
+	var yaw := TAU * _member_unit_hash(
+		anchor,
+		member_index,
+		profile.world_seed,
+		8
+	)
+	var basis := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(member_scale)
+	var shape_range := maxf(profile.shape_variation, 0.0)
+	var shape_offset := Vector3(
+		lerpf(
+			-shape_range,
+			shape_range,
+			_member_unit_hash(anchor, member_index, profile.world_seed, 9)
+		),
+		lerpf(
+			-shape_range,
+			shape_range,
+			_member_unit_hash(anchor, member_index, profile.world_seed, 10)
+		),
+		lerpf(
+			-shape_range,
+			shape_range,
+			_member_unit_hash(anchor, member_index, profile.world_seed, 11)
+		)
+	)
+	return {
+		"transform": Transform3D(
+			basis,
+			anchor_transform.origin + local_offset
+		),
+		"shape_offset": shape_offset,
+		"cloud_radius": 0.5 * maxf(
+			member_scale.x,
+			maxf(member_scale.y, member_scale.z)
+		),
+		"priority": _member_unit_hash(
+			anchor,
+			member_index,
+			profile.world_seed,
+			12
+		),
+	}
 
 
 static func cell_data(
@@ -137,7 +280,11 @@ static func _candidate_slot_count(profile: CloudTuningProfile) -> int:
 
 static func _cell_radii(profile: CloudTuningProfile) -> Vector2i:
 	return Vector2i(
-		maxi(ceili(profile.coverage_radius / profile.cell_size), 1),
+		maxi(ceili(
+			(
+				profile.coverage_radius + profile.prewarm_margin
+			) / profile.cell_size
+		), 1),
 		maxi(ceili(profile.coverage_height / profile.cell_size), 1)
 	)
 
@@ -159,6 +306,47 @@ static func _inside_ellipsoid(
 
 static func _unit_hash(cell: Vector3i, world_seed: int, salt: int) -> float:
 	return float(posmod(_cell_hash(cell, world_seed, salt), 1000003)) / 1000003.0
+
+
+static func _member_count(
+	anchor: Vector3i,
+	profile: CloudTuningProfile
+) -> int:
+	var member_range := profile.cluster_max_members - profile.cluster_min_members
+	if member_range <= 0:
+		return profile.cluster_min_members
+	return profile.cluster_min_members + int(floor(
+		_member_unit_hash(anchor, 0, profile.world_seed, 0)
+		* float(member_range + 1)
+	))
+
+
+static func _member_unit_hash(
+	anchor: Vector3i,
+	member_index: int,
+	world_seed: int,
+	salt: int
+) -> float:
+	return float(posmod(
+		_member_hash(anchor, member_index, world_seed, salt),
+		1000003
+	)) / 1000003.0
+
+
+static func _member_hash(
+	anchor: Vector3i,
+	member_index: int,
+	world_seed: int,
+	salt: int
+) -> int:
+	return hash("%d:%d:%d:%d:%d:%d" % [
+		anchor.x,
+		anchor.y,
+		anchor.z,
+		member_index,
+		world_seed,
+		salt,
+	])
 
 
 static func _cell_hash(cell: Vector3i, world_seed: int, salt: int) -> int:
