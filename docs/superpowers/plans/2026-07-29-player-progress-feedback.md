@@ -258,7 +258,14 @@ foreach ($token in @(
     }
 }
 
-if (-not $translations.Contains('ui_vabo,"Vabo","Вабо"')) {
+$russianVabo = [string]::Concat(
+    [char]0x0412,
+    [char]0x0430,
+    [char]0x0431,
+    [char]0x043E
+)
+$vaboTranslationRow = 'ui_vabo,"Vabo","' + $russianVabo + '"'
+if (-not $translations.Contains($vaboTranslationRow)) {
     throw 'Vabo localization is missing English and Russian values'
 }
 
