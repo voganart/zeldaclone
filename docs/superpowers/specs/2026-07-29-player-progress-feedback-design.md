@@ -4,7 +4,7 @@
 
 Add a minimal readable progression layer to the existing gameplay HUD:
 
-- show the current Vabo amount next to health;
+- show the current Vabo amount directly below health;
 - show every unlocked player ability in one consistent HUD area;
 - keep locked abilities completely hidden;
 - preserve the existing Roll and Ground Slam cooldown presentation.
@@ -16,7 +16,7 @@ without turning the task into final HUD polish.
 
 The first slice covers:
 
-- a live Vabo counter in the top-left health area;
+- a live Vabo counter below the top-left heart row;
 - an ability strip in the existing bottom-right actions area;
 - the five saved abilities from `PlayerData`;
 - three temporary icons for Double Jump, Air Dash, and 3-hit combo;
@@ -31,10 +31,15 @@ and progression menus remain outside this task.
 
 ### Vabo
 
-The Vabo counter sits beside the existing heart display in the top-left HUD
-area. It consists of a compact visual marker and the current numeric amount.
-The value must remain readable as the number grows and must not shift or
-overlap the heart row.
+The Vabo counter sits on its own row below the existing heart display in the
+top-left HUD area. A vertical `HealthStack` owns the heart row and a
+`VaboOffset` margin wrapper. Designers adjust `VaboOffset` left and top
+margins without changing script node paths or fighting container alignment.
+
+The visible `Vabo` word is replaced by a compact white diamond icon matching
+the temporary ability-icon style. The numeric amount sits to its right. The
+value must remain readable as the number grows and must not shift or overlap
+the heart row.
 
 ### Abilities
 
@@ -42,9 +47,16 @@ All unlocked abilities appear in a single bottom-right actions block.
 
 - Locked abilities have no placeholder, silhouette, or empty slot.
 - An ability becomes visible immediately after it is unlocked.
-- Roll and Ground Slam retain their existing cooldown and charge behavior.
-- Double Jump, Air Dash, and 3-hit combo are persistent unlocked-state
-  indicators; no artificial cooldown display is added.
+- Roll retains its existing charge presentation.
+- Double Jump is white while the second jump is available, becomes gray after
+  the second jump is consumed, and returns to white on landing. It does not
+  gain a new timer.
+- Ground Slam retains its existing radial cooldown.
+- Air Dash uses its existing `cooldown_timer` and `air_dash_cooldown` for a
+  radial cooldown display.
+- 3-hit combo uses the existing `combo_cooldown_timer` and
+  `combo_cooldown_after_combo` for a radial cooldown display after the third
+  attack.
 - The strip uses a stable authored order:
   `roll_ability`, `double_jump`, `ground_slam`, `air_dash`, `3_hit_combo`.
 
@@ -55,11 +67,12 @@ gaps for locked abilities.
 
 Keep the existing `Roll.png` and `GroundSlam.png`.
 
-Create three missing icons:
+The temporary set contains:
 
 - Double Jump: two readable upward impulses;
 - Air Dash: a directional airborne burst;
 - 3-hit combo: three sequential attack marks.
+- Vabo: a simple readable diamond marker.
 
 Requirements:
 
@@ -88,10 +101,16 @@ During play:
 
 - `PlayerData.vabo_changed` refreshes the counter;
 - `PlayerData.ability_unlocked` reveals the corresponding ability icon;
+- player runtime state drives ability readiness and cooldown fill;
+- Double Jump availability is derived from `current_jump_count`;
+- Air Dash fill is derived from its existing float cooldown values;
+- combo fill is derived from the existing `Timer`, only after the three-hit
+  finisher starts its cooldown;
 - scene reload or save load performs a complete initial HUD sync;
 - duplicate signal connections must be avoided.
 
-No new progression state is stored in the HUD or individual icon controls.
+No new gameplay timers or progression state are stored in the HUD or
+individual icon controls.
 
 ## Localization
 
@@ -116,17 +135,22 @@ Automated PowerShell contract tests, without launching Godot, verify:
 - Vabo UI nodes and `PlayerData.vabo_changed` integration;
 - all five ability keys are mapped to HUD indicators;
 - locked abilities are hidden rather than rendered as empty slots;
-- the three new icon resources are referenced;
+- the four temporary icon resources are referenced;
+- Double Jump uses availability tint rather than a fake timer;
+- Air Dash and 3-hit combo read their existing cooldown sources;
 - release-independent HUD behavior does not introduce debug-only state;
 - handoff and roadmap documentation record the completed feature.
 
 Manual GUI Godot verification covers:
 
-- Vabo appears beside hearts and updates after pickups;
+- Vabo appears below hearts and updates after pickups;
+- `VaboOffset` margins move the Vabo row without breaking script paths;
 - Vabo survives a death reload according to the existing session rules;
 - each unlocked ability appears immediately and remains visible after reload;
 - locked abilities leave no empty slots;
 - Roll charges and Ground Slam cooldown still render correctly;
+- Double Jump turns gray after the second jump and white on landing;
+- Air Dash and 3-hit combo show radial cooldown recovery;
 - all five icons are readable at gameplay scale and do not overlap at the
   target viewport.
 
