@@ -16,6 +16,7 @@
 [ext_resource type="Script" uid="uid://l6b4unm22n1x" path="res://entities/player/states/player_attack.gd" id="10_7thud"]
 [ext_resource type="Script" uid="uid://xxmseurx6lft" path="res://entities/player/states/player_air.gd" id="11_7thud"]
 [ext_resource type="Script" uid="uid://cq3kpeg122vhm" path="res://entities/player/states/player_roll.gd" id="12_afbqv"]
+[ext_resource type="Script" path="res://entities/player/states/player_low_passage.gd" id="12_low_passage"]
 [ext_resource type="Script" uid="uid://dsxx25vrqcqm0" path="res://entities/player/states/player_dash.gd" id="13_gx6sm"]
 [ext_resource type="Script" uid="uid://cdkxtoy2v76of" path="res://entities/player/states/player_slam.gd" id="14_yqrof"]
 [ext_resource type="Script" uid="uid://cdk33whhiwihf" path="res://entities/player/states/player_dead.gd" id="15_gx6sm"]
@@ -72,6 +73,8 @@ input_1/break_loop_at_end = false
 input_1/reset = true
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_gt4e4"]
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_low_passage"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_np63p"]
 animation = &"Boy_roll_crouch"
@@ -290,9 +293,11 @@ nodes/dance_oneshot/node = SubResource("AnimationNodeOneShot_np63p")
 nodes/dance_oneshot/position = Vector2(1520, -224)
 nodes/CrouchState/node = SubResource("AnimationNodeTransition_2soq1")
 nodes/CrouchState/position = Vector2(-288, -240)
+nodes/CrouchSpeed/node = SubResource("AnimationNodeTimeScale_low_passage")
+nodes/CrouchSpeed/position = Vector2(-400, -112)
 nodes/Roll_crouch_loop/node = SubResource("AnimationNodeAnimation_np63p")
-nodes/Roll_crouch_loop/position = Vector2(-496, -112)
-node_connections = [&"output", 0, &"dance_oneshot", &"jump_state", 0, &"start", &"jump_state", 1, &"mid", &"jump_state", 2, &"end", &"dash_oneshot", 0, &"roll_oneshot", &"dash_oneshot", 1, &"Animation 2", &"roll_oneshot", 0, &"attack_oneshot", &"roll_oneshot", 1, &"roll", &"state", 0, &"hit_oneshot", &"state", 1, &"death", &"hit_oneshot", 0, &"dash_oneshot", &"hit_oneshot", 1, &"hit", &"air_transition", 0, &"stopping_oneshot", &"air_transition", 1, &"jump_state", &"slam_state", 0, &"Animation 5", &"slam_state", 1, &"Animation 6", &"slam_state", 2, &"Animation 7", &"slam_state", 3, &"air_transition", &"attack_oneshot", 0, &"slam_state", &"attack_oneshot", 1, &"AttackSpeed", &"LocomotionSpeed", 0, &"CrouchState", &"attack_idx", 0, &"atk1", &"attack_idx", 1, &"atk2", &"attack_idx", 2, &"atk3", &"AttackSpeed", 0, &"attack_idx", &"stopping_oneshot", 0, &"LocomotionSpeed", &"stopping_oneshot", 1, &"stopping", &"dance_oneshot", 0, &"state", &"dance_oneshot", 1, &"Animation", &"CrouchState", 0, &"locomotion_blend", &"CrouchState", 1, &"Roll_crouch_loop"]
+nodes/Roll_crouch_loop/position = Vector2(-560, -112)
+node_connections = [&"output", 0, &"dance_oneshot", &"jump_state", 0, &"start", &"jump_state", 1, &"mid", &"jump_state", 2, &"end", &"dash_oneshot", 0, &"roll_oneshot", &"dash_oneshot", 1, &"Animation 2", &"roll_oneshot", 0, &"attack_oneshot", &"roll_oneshot", 1, &"roll", &"state", 0, &"hit_oneshot", &"state", 1, &"death", &"hit_oneshot", 0, &"dash_oneshot", &"hit_oneshot", 1, &"hit", &"air_transition", 0, &"stopping_oneshot", &"air_transition", 1, &"jump_state", &"slam_state", 0, &"Animation 5", &"slam_state", 1, &"Animation 6", &"slam_state", 2, &"Animation 7", &"slam_state", 3, &"air_transition", &"attack_oneshot", 0, &"slam_state", &"attack_oneshot", 1, &"AttackSpeed", &"LocomotionSpeed", 0, &"CrouchState", &"attack_idx", 0, &"atk1", &"attack_idx", 1, &"atk2", &"attack_idx", 2, &"atk3", &"AttackSpeed", 0, &"attack_idx", &"stopping_oneshot", 0, &"LocomotionSpeed", &"stopping_oneshot", 1, &"stopping", &"dance_oneshot", 0, &"state", &"dance_oneshot", 1, &"Animation", &"CrouchState", 0, &"locomotion_blend", &"CrouchState", 1, &"CrouchSpeed", &"CrouchSpeed", 0, &"Roll_crouch_loop"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yel1f"]
 margin = 0.01
@@ -410,6 +415,9 @@ is_root_motion = true
 [node name="Roll" type="Node" parent="StateMachine" unique_id=1511467610]
 script = ExtResource("12_afbqv")
 is_root_motion = true
+
+[node name="LowPassage" type="Node" parent="StateMachine"]
+script = ExtResource("12_low_passage")
 
 [node name="Dash" type="Node" parent="StateMachine" unique_id=518102643]
 script = ExtResource("13_gx6sm")
@@ -530,6 +538,7 @@ parameters/dance_oneshot/request = 0
 parameters/CrouchState/current_state = "stand"
 parameters/CrouchState/transition_request = ""
 parameters/CrouchState/current_index = 0
+parameters/CrouchSpeed/scale = 1.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1840366211]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

@@ -61,8 +61,6 @@ var default_capsule_radius: float = 0.5
 
 var roll_col_height: float = 0.9
 var roll_col_y: float = 0.45 
-var roll_passage_motion_active: bool = false
-var roll_passage_velocity: Vector3 = Vector3.ZERO
 
 # Abilities
 @onready var air_dash_ability: AirDashAbility = $Abilities/AirDashAbility
@@ -415,10 +413,6 @@ func _physics_process(delta: float) -> void:
 	if is_root_motion:
 		velocity.x = current_rm_velocity.x
 		velocity.z = current_rm_velocity.z
-		
-		if roll_passage_motion_active:
-			velocity.x = roll_passage_velocity.x
-			velocity.z = roll_passage_velocity.z
 
 		if is_on_wall() and current_movement_blend < 0.1 and input_handler.move_vector.length() > 0.1:
 			var manual_push = get_movement_vector() 
@@ -893,18 +887,6 @@ func get_closest_nav_point() -> Vector3:
 func apply_safety_nudge(direction: Vector3, force: float = 5.0):
 	velocity = direction * force
 	move_and_slide()
-
-func set_roll_passage_motion(direction: Vector3, speed: float) -> void:
-	var horizontal_direction := Vector3(direction.x, 0.0, direction.z)
-	if horizontal_direction.length_squared() <= 0.001:
-		clear_roll_passage_motion()
-		return
-	roll_passage_motion_active = true
-	roll_passage_velocity = horizontal_direction.normalized() * speed
-
-func clear_roll_passage_motion() -> void:
-	roll_passage_motion_active = false
-	roll_passage_velocity = Vector3.ZERO
 
 func shrink_collider() -> void:
 	if not collision_shape: return

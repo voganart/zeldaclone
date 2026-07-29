@@ -4,16 +4,7 @@ var player: Player
 var roll_duration: float = 0.0
 var elapsed_time: float = 0.0
 
-var is_stuck_under_roof: bool = false
-
-@export var passage_speed: float = 5.0
-
-@export_group("Collision Timing")
-@export_range(0.0, 1.0) var restore_start_ratio: float = 0.85 
-
 var default_roll_control: float = 0.0
-var fixed_roll_direction: Vector3 = Vector3.ZERO
-
 var is_collider_shrunk: bool = false
 
 func enter() -> void:
@@ -21,7 +12,6 @@ func enter() -> void:
 	player.is_rolling = true
 	player.is_invincible = true
 	elapsed_time = 0.0
-	is_stuck_under_roof = false
 	is_collider_shrunk = false
 	
 	# Гарантируем, что визуально мы не приседаем на старте
@@ -29,22 +19,12 @@ func enter() -> void:
 	
 	default_roll_control = player.roll_control
 	player.roll_ability.consume_charge()
-	player.clear_roll_passage_motion()
 	player.shrink_collider()
 	is_collider_shrunk = true
 	
 	if player.shape_cast:
 		player.shape_cast.enabled = true
 		player.shape_cast.force_shapecast_update()
-
-	# 1. ОПРЕДЕЛЯЕМ НАПРАВЛЕНИЕ РЫВКА
-	var input_vec = player.get_movement_vector()
-	if input_vec.length_squared() > 0.01:
-		fixed_roll_direction = Vector3(input_vec.x, 0, input_vec.y).normalized()
-	else:
-		# Если ввода нет - катимся туда, куда смотрит модель
-		fixed_roll_direction = -player.global_transform.basis.z.normalized()
-		fixed_roll_direction.y = 0
 
 	player.trigger_roll()
 	
@@ -63,53 +43,33 @@ func physics_update(delta: float) -> void:
 	elapsed_time += delta
 	var progress = clamp(elapsed_time / roll_duration, 0.0, 1.0)
 	
-	var has_roof := is_collider_shrunk and not player.can_restore_collider()
-
-	if has_roof:
-		is_stuck_under_roof = true
-		player.roll_control = 0.0
-		player.anim_controller.set_crouch_state(true)
-		player.set_roll_passage_motion(fixed_roll_direction, passage_speed)
-		return
-
-	player.clear_roll_passage_motion()
-
-	if is_stuck_under_roof and not has_roof:
-		if is_collider_shrunk:
-			player.restore_collider()
-			is_collider_shrunk = false
-		
-		player.anim_controller.set_crouch_state(false)
-		
-		transitioned.emit(self, GameConstants.STATE_MOVE)
-		return
-
-	if is_collider_shrunk and progress >= restore_start_ratio:
-		if player.can_restore_collider():
-			player.restore_collider()
-			is_collider_shrunk = false
-	
 	if elapsed_time < roll_duration:
-		if player.input_handler.check_jump():
+		var can_leave_roll := player.can_restore_collider()
+
+		if can_leave_roll and player.input_handler.check_jump():
 			if progress >= player.roll_jump_cancel_threshold:
 				player.perform_jump()
 				transitioned.emit(self, GameConstants.STATE_AIR)
 				return
 		
-		if player.input_handler.is_attack_pressed:
+		if can_leave_roll and player.input_handler.is_attack_pressed:
 			var can_cancel_attack = progress >= (1.0 - player.attack_roll_cancel_threshold)
 			if can_cancel_attack and player.can_attack:
 				player.input_handler.check_attack()
 				transitioned.emit(self, GameConstants.STATE_ATTACK)
 				return
 	else:
-		transitioned.emit(self, GameConstants.STATE_MOVE)
+		if player.can_restore_collider():
+			player.restore_collider()
+			is_collider_shrunk = false
+			transitioned.emit(self, GameConstants.STATE_MOVE)
+		else:
+			transitioned.emit(self, GameConstants.STATE_LOW_PASSAGE)
 
 func exit() -> void:
 	player.is_rolling = false
 	player.is_invincible = false
 	player.root_motion_speed_factor = 1.0
-	player.clear_roll_passage_motion()
 	
 	if is_collider_shrunk and player.can_restore_collider():
 		player.restore_collider()
