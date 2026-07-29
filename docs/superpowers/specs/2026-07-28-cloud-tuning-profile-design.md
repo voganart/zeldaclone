@@ -43,10 +43,18 @@ The resource exposes:
 - `large_cloud_chance`: deterministic probability of a large variant;
 - `large_cloud_multiplier`: additional scale for large variants;
 - `shape_variation`: deterministic per-instance procedural noise offset range.
+- `lobe_spread`: distance between procedural silhouette lobes;
+- `lobe_variation`: deterministic variation of lobe positions and radii.
 
 Every world cell derives its transform and shape values from its coordinate and
 `world_seed`. A cloud does not change scale, proportions, or noise offset while
 the player moves.
+
+Both the volumetric and billboard shaders use the same fixed-cost multi-lobe
+shape function. Four to five overlapping ellipsoidal lobes replace the current
+single sphere mask. Per-instance `shape_offset`, `lobe_spread`, and
+`lobe_variation` change the silhouette while preserving the same identity
+through Billboard -> Cheap Volume -> Full Volume transitions.
 
 ### LOD and recycling
 
@@ -90,10 +98,12 @@ stable world occupancy, not camera direction.
 
 Recommended initial High values:
 
-- coverage radius: 1400 m;
+- coverage radius: 1800 m;
 - coverage height: 350 m;
-- target count: 80;
-- pool capacity: 96;
+- target count: 100;
+- pool capacity: 120;
+- scale minimum: `(100, 50, 140)`;
+- scale maximum: `(320, 180, 480)`;
 - full-volume region: approximately 250–350 m;
 - recycle fade: 0.8–1.2 seconds.
 
@@ -107,10 +117,18 @@ Behavior:
 
 - the game continues running;
 - the mouse cursor is released while the panel is open;
+- camera input ignores all mouse buttons and mouse motion while the panel is
+  open;
 - closing the panel restores the previous mouse mode;
 - controls are grouped into Distribution, Size & Shape, LOD, and Performance;
 - every control applies immediately to the active `CloudManager`;
 - values show numeric entry as well as sliders where appropriate.
+
+The panel width is approximately 620 pixels and uses scrolling for overflow.
+Only the three profile export groups are displayed; inherited Resource,
+RefCounted, script, and other engine properties are hidden. Numeric properties
+without an explicit range, including `world_seed`, use a numeric field without
+a slider.
 
 The panel displays:
 
@@ -196,12 +214,14 @@ Manual Godot verification:
 
 1. Open the panel with F10 during debug flight.
 2. Change radius, count, size, aspect, seed, and LOD values live.
-3. Fly more than one coverage radius and rotate the camera 360 degrees.
-4. Confirm distant clouds appear as billboards and retain their identity while
+3. Click and drag multiple sliders; confirm the cursor stays visible and the
+   camera does not rotate.
+4. Fly more than one coverage radius and rotate the camera 360 degrees.
+5. Confirm distant clouds appear as billboards and retain their identity while
    approaching.
-5. Confirm nearby clouds vary in size, proportions, and shape.
-6. Place box and sphere exclusion volumes around an island and confirm clouds
+6. Confirm nearby clouds vary in size, proportions, and multi-lobe silhouette.
+7. Place box and sphere exclusion volumes around an island and confirm clouds
    avoid padded terrain but remain possible above it.
-7. Save, restart the project, and confirm the saved values reload.
-8. Confirm Low/Medium/High graphics switching does not overwrite the tuned
+8. Save, restart the project, and confirm the saved values reload.
+9. Confirm Low/Medium/High graphics switching does not overwrite the tuned
    profile during this implementation phase.
