@@ -114,6 +114,17 @@ float multi_lobe_mask(vec3 p, vec3 seed) {
 	return mask;
 }
 
+vec3 reference_lighting(float local_height) {
+	float height_factor = clamp(local_height + 0.5, 0.0, 1.0);
+	float light_energy = 0.35 + height_factor * top_highlight_strength;
+	float light_mix = smoothstep(
+		shadow_threshold - shadow_softness,
+		shadow_threshold + shadow_softness,
+		light_energy
+	);
+	return mix(color_shadow, color_light, light_mix);
+}
+
 float get_density(vec3 p, float dist_to_cam) {
 	float dist_to_edge = max(abs(p.x), max(abs(p.y), abs(p.z)));
 	float edge_mask = 1.0 - smoothstep(0.35, 0.5, dist_to_edge); // Мягкие края контейнера
@@ -229,12 +240,16 @@ void fragment() {
 		dist += active_step_size;
 	}
 	
-	float physical_alpha = 1.0 - transmittance;
-	physical_alpha *= pool_fade;
-	if (physical_alpha < 0.01) discard;
+	float raw_alpha = 1.0 - transmittance;
+	if (raw_alpha < 0.01) discard;
 	
-	vec3 final_rgb = accum_color / max(physical_alpha, 0.001);
+	vec3 final_rgb = accum_color / max(raw_alpha, 0.001);
+	vec3 reference_position = ray_origin + ray_dir * ((t_start + t_end) * 0.5);
+	vec3 reference_color = reference_lighting(
+		dot(reference_position, v_local_up_dir)
+	);
+	final_rgb = mix(final_rgb, reference_color, clamp(volume_lod_factor, 0.0, 1.0));
 	
 	ALBEDO = final_rgb;
-	ALPHA = physical_alpha * depth_fade;
+	ALPHA = raw_alpha * pool_fade * depth_fade;
 }

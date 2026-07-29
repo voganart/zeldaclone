@@ -112,7 +112,7 @@ foreach ($shader in @($volumeShader, $impostorShader)) {
     if (-not $shader.Contains('instance uniform float pool_fade')) {
         throw 'Cloud shader is missing per-instance pool fade'
     }
-    if (-not $shader.Contains('physical_alpha *= pool_fade')) {
+    if (-not $shader.Contains('raw_alpha * pool_fade')) {
         throw 'Cloud shader does not apply pool fade to final opacity'
     }
     if (-not $shader.Contains('instance uniform vec3 shape_offset')) {

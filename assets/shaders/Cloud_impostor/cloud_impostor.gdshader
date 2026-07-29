@@ -132,6 +132,17 @@ float multi_lobe_mask(vec3 p, vec3 seed) {
 	return mask;
 }
 
+vec3 reference_lighting(float local_height) {
+	float height_factor = clamp(local_height + 0.5, 0.0, 1.0);
+	float light_energy = 0.35 + height_factor * top_highlight_strength;
+	float light_mix = smoothstep(
+		shadow_threshold - shadow_softness,
+		shadow_threshold + shadow_softness,
+		light_energy
+	);
+	return mix(color_shadow, color_light, light_mix);
+}
+
 
 float get_density(vec3 p, float dist_to_cam) {
 	float dist_to_edge = max(abs(p.x), max(abs(p.y), abs(p.z)));
@@ -243,7 +254,6 @@ void fragment() {
 		* active_step_size;
 	dist += jitter;
 
-	vec3 accum_color = vec3(0.0);
 	float transmittance = 1.0;
 	for (int i = 0; i < 16; i++) {
 		if (
@@ -259,28 +269,15 @@ void fragment() {
 		if (density > 0.001) {
 			float step_dens = density * active_step_size;
 			float alpha = 1.0 - exp(-step_dens);
-			float height_factor = clamp(pos.y + 0.5, 0.0, 1.0);
-			float density_factor = exp(-density * density_shadow_power);
-			float light_energy =
-				density_factor * 0.5
-				+ height_factor * top_highlight_strength;
-			float light_mix = smoothstep(
-				shadow_threshold - shadow_softness,
-				shadow_threshold + shadow_softness,
-				light_energy
-			);
-			vec3 step_color = mix(color_shadow, color_light, light_mix);
-			accum_color += step_color * alpha * transmittance;
 			transmittance *= 1.0 - alpha;
 		}
 		dist += active_step_size;
 	}
 
-	float physical_alpha = 1.0 - transmittance;
-	physical_alpha *= pool_fade;
-	if (physical_alpha < 0.01) {
+	float raw_alpha = 1.0 - transmittance;
+	if (raw_alpha < 0.01) {
 		discard;
 	}
-	ALBEDO = accum_color / max(physical_alpha, 0.001);
-	ALPHA = physical_alpha;
+	ALBEDO = reference_lighting(plane_position.y);
+	ALPHA = raw_alpha * pool_fade;
 }

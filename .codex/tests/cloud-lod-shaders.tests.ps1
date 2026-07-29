@@ -19,12 +19,24 @@ foreach ($relativePath in $shaderPaths) {
         'instance uniform float lobe_variation',
         'float multi_lobe_mask(vec3 p, vec3 seed)',
         'multi_lobe_mask(p, shape_offset)',
+        'vec3 reference_lighting(float local_height)',
+        'float raw_alpha = 1.0 - transmittance',
+        'raw_alpha * pool_fade',
         'lod_bayer4x4',
         'lod_threshold'
     )) {
         if (-not $source.Contains($requiredToken)) {
             throw "$relativePath is missing complementary dither token: $requiredToken"
         }
+    }
+}
+
+foreach ($relativePath in $shaderPaths) {
+    $source = Get-Content -LiteralPath (
+        Join-Path $projectRoot $relativePath
+    ) -Raw
+    if ($source.Contains('physical_alpha *= pool_fade')) {
+        throw "$relativePath normalizes RGB with faded alpha and can flash"
     }
 }
 
@@ -56,9 +68,24 @@ foreach ($requiredToken in @(
     'shape_override_enabled',
     'shape_override_scale',
     'shape_override_offset'
+    'reference_lighting(plane_position.y)'
 )) {
     if (-not $impostorSource.Contains($requiredToken)) {
         throw "Cloud billboard shader is missing procedural token: $requiredToken"
+    }
+}
+$billboardFragmentStart = $impostorSource.IndexOf('void fragment()')
+if ($billboardFragmentStart -lt 0) {
+    throw 'Cloud billboard fragment function is missing'
+}
+$billboardFragment = $impostorSource.Substring($billboardFragmentStart)
+foreach ($wastedToken in @(
+    'vec3 accum_color',
+    'float density_factor',
+    'accum_color +='
+)) {
+    if ($billboardFragment.Contains($wastedToken)) {
+        throw "Cloud billboard still calculates unused lighting: $wastedToken"
     }
 }
 foreach ($forbiddenToken in @('albedo_atlas', 'atlas_frames', 'sample_atlas_frame')) {
@@ -77,6 +104,7 @@ foreach ($requiredToken in @(
     'instance uniform float volume_lod_factor',
     'uniform int cheap_steps',
     'active_steps'
+    'mix(final_rgb, reference_color, clamp(volume_lod_factor'
 )) {
     if (-not $volumeSource.Contains($requiredToken)) {
         throw "Cloud volume shader is missing preview/bake override token: $requiredToken"
