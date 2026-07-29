@@ -25,9 +25,6 @@ uniform float far_cloud_softness : hint_range(0.01, 0.4) = 0.11;
 global uniform vec3 weather_cloud_offset;
 global uniform float weather_cloud_evolution;
 
-const float TAU = 6.28318530718;
-
-
 float hash12(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
 	p3 += dot(p3, p3.yzx + 33.33);

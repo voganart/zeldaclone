@@ -29,6 +29,12 @@ $shader = Get-Content -Raw $shaderPath
 $scene = Get-Content -Raw $scenePath
 $cycle = Get-Content -Raw $cyclePath
 
+foreach ($builtInConstant in @('PI', 'TAU', 'E')) {
+    if ($shader.Contains("const float $builtInConstant")) {
+        throw "Sky shader redeclares Godot built-in constant: $builtInConstant"
+    }
+}
+
 foreach ($token in @(
     'render_mode use_half_res_pass',
     'AT_HALF_RES_PASS',
