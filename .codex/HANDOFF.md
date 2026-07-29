@@ -16,7 +16,8 @@
 ## Текущее состояние Git
 
 - Рабочая ветка: `master`.
-- `master` синхронизирован с `origin/master`.
+- После пользовательского push в `master` добавлены локальные HUD-коммиты;
+  перед следующим push проверить актуальный `git status -sb`.
 - По умолчанию работать напрямую в `master`; отдельную ветку или worktree
   создавать только по явному запросу пользователя.
 - Облачные эксперименты сохранены отдельно в `codex/cloud-lod`.
@@ -25,6 +26,10 @@
 
 Последние основные коммиты:
 
+- `ca9f944` — live-состояния Double Jump, Air Dash и 3-hit combo в HUD;
+- `861d01a` — контрактный тест новых состояний HUD;
+- `5512d73` — временная белая иконка-ромб Vabo;
+- `b6e0db7` — scene-контракт учитывает Godot `unique_id`;
 - `e4ab2d2` — запрет нестабильных автоматических headless-проверок Godot;
 - `cbfaed3` — модульная система сохранений через Memory Node;
 - `44c3a41` — корневой transform `Level_01` возвращён в ноль, сохранена
@@ -87,14 +92,26 @@
 
 ### Player Progress Feedback
 
-- HUD показывает текущие Vabo рядом со здоровьем и обновляется через
+- HUD показывает текущие Vabo под сердцами и обновляется через
   `PlayerData.vabo_changed`.
+- Вместо текста `Vabo` используется временная белая иконка-ромб
+  `assets/textures/ui/Vabo.png`.
+- Положение счётчика настраивается в `UI/player_hud.tscn`:
+  `HealthContainer/HealthStack/VaboOffset` → `margin_left`/`margin_top`;
+  расстояние от сердец — `HealthStack` → `separation`.
 - Справа снизу показываются только открытые способности; закрытые способности
   не оставляют пустых слотов.
-- Roll сохраняет отображение зарядов, Ground Slam — cooldown.
+- Roll сохраняет отображение зарядов; Ground Slam, Air Dash и 3-hit combo
+  показывают круговую перезарядку.
+- Double Jump становится серым после второго прыжка и снова белым после
+  приземления.
+- Air Dash после использования остаётся серым до приземления, даже если его
+  короткий cooldown уже закончился.
 - Для Double Jump, Air Dash и 3-hit combo добавлены временные белые PNG-иконки
-  `128x128`; существующие Roll и Ground Slam не заменялись.
+  `128x128`; существующие Roll и Ground Slam не заменялись. Vabo также
+  использует временную белую PNG-иконку `128x128`.
 - Источник прогресса остаётся в `PlayerData`; HUD не хранит копию состояния.
+- Gameplay cooldown и balance-параметры не менялись.
 
 Полный дизайн:
 `docs/superpowers/specs/2026-07-29-player-progress-feedback-design.md`.
@@ -139,6 +156,7 @@
 - `godot-47-warning-regressions.tests.ps1`;
 - `phantom-camera-lifecycle.tests.ps1`;
 - `player-debug-flight.tests.ps1`;
+- `player-progress-feedback.tests.ps1`;
 - `save-system-contract.tests.ps1`;
 - `update-project-index.tests.ps1`.
 

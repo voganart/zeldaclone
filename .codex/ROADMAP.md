@@ -29,8 +29,12 @@ Design:
 
 ### Player Progress Feedback
 
-- Show current Vabo in the HUD.
-- Clearly show unlocked movement/combat abilities.
+- Show current Vabo below the hearts with a temporary diamond icon.
+- Hide locked abilities without reserving empty slots.
+- Show Roll charges and radial cooldowns for Ground Slam, Air Dash, and
+  3-hit combo.
+- Desaturate Double Jump after the second jump until landing.
+- Keep Air Dash unavailable feedback visible until landing.
 
 Design:
 `docs/superpowers/specs/2026-07-29-player-progress-feedback-design.md`.
