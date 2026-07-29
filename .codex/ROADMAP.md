@@ -39,22 +39,26 @@ Design:
 Design:
 `docs/superpowers/specs/2026-07-29-player-progress-feedback-design.md`.
 
-## Next
-
 ### F10 Debug Panel
 
-- Toggle a left-side debug panel with `F10`.
-- Delete/reset the current save from the panel.
-- Inspect the selected scene object.
-- Move, rotate, and scale the selected object with numeric controls.
-- Keep the panel extensible for checkpoint, progression, graphics, cloud, and
-  gameplay debug actions.
-- Make all debug tools unavailable in release exports.
-- Use localization keys for visible labels and confirmation dialogs.
+- Compact `320 px` left-side panel toggled with `F10`.
+- Collapsible Save, Player, Progression, and Checkpoint categories.
+- Reset save, restore health, reload level, set Vabo, lock/unlock abilities,
+  and teleport to the active checkpoint.
+- Gameplay continues while player input is blocked.
+- Debug tools do not initialize in release exports.
+- English and Russian UI copy.
 
-The first panel version should prioritize save reset and common gameplay
-controls. Runtime scene editing can be added incrementally instead of building
-a full editor replacement.
+Design:
+`docs/superpowers/specs/2026-07-29-f10-debug-panel-design.md`.
+
+## Next
+
+### Finish Level_01
+
+- Continue building the complete tutorial/gameplay route.
+- Validate the ability-gated traversal sequence.
+- Reach a complete playable loop before broad UI or environment polish.
 
 ### Progression and Hub
 
@@ -65,6 +69,7 @@ a full editor replacement.
 
 ## Later Polish
 
+- Add runtime object inspection and numeric transform editing to the F10 panel.
 - Balance Vabo farming from respawned enemies and crates.
 - Tune checkpoint spacing after `Level_01` is fully playable.
 - Add unique Memory Node VFX, audio, and activation animation.

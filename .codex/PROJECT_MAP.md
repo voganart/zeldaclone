@@ -37,6 +37,8 @@
 
 - Смена сцен: `common/autoload/scene_manager.gd`
 - Дисковые сохранения и checkpoints: `common/autoload/save_manager.gd`
+- F10 runtime debug tools: `common/autoload/debug_tools.gd`
+- Компактная debug-панель: `ui/debug_panel/debug_panel.tscn`
 - Runtime-прогресс игрока: `common/autoload/player_data.gd`
 - Расставляемый Узел памяти: `entities/interactive/MemoryNode/MemoryNode.tscn`
 - Persistent-ID контракт: `common/persistence/persistent_state.gd`

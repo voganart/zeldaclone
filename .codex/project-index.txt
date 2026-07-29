@@ -4,6 +4,7 @@ project.godot
 [SCRIPTS]
 common/autoload/ai_director.gd
 common/autoload/audio_manager.gd
+common/autoload/debug_tools.gd
 common/autoload/game_constants.gd
 common/autoload/game_events.gd
 common/autoload/game_manager.gd
@@ -74,6 +75,7 @@ levels/level_01.gd
 levels/test_level/enemy_spawner.gd
 ui/3d_prompts/interaction_hint_3d.gd
 ui/debug_overlay/DebugOverlay.gd
+ui/debug_panel/debug_panel.gd
 ui/health_component/health_component.gd
 ui/HealthBar3D/enemy_health_bar.gd
 ui/menus/game_over.gd
@@ -124,6 +126,7 @@ levels/test_level/level.tscn
 levels/test_level/level-test-lag.tscn
 ui/3d_prompts/InteractionHint3D.tscn
 ui/debug_overlay/DebugOverlay.tscn
+ui/debug_panel/debug_panel.tscn
 ui/health_component/HealthComponent.tscn
 ui/HealthBar3D/health_bar_3d.tscn
 ui/menus/game_over.tscn

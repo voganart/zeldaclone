@@ -26,6 +26,8 @@
 | `GraphicsManager` | `res://common/autoload/graphics_manager.gd` | Графические настройки. |
 | `SceneManager` | `res://common/autoload/scene_manager.gd` | Загрузка и переходы между сценами. |
 | `PlayerData` | `res://common/autoload/player_data.gd` | Данные игрока. |
+| `SaveManager` | `res://common/autoload/save_manager.gd` | Дисковые сохранения и checkpoints. |
+| `DebugTools` | `res://common/autoload/debug_tools.gd` | Debug-only F10-панель и runtime test actions. |
 | `InputHelper` | `res://common/autoload/input_helper.gd` | Input abstraction и device handling. |
 
 ## Enabled editor plugins
@@ -41,6 +43,7 @@
 - Player: `res://entities/player/player.tscn`
 - Player character: `res://entities/player/character.tscn`
 - HUD: `res://ui/player_hud.tscn`
+- F10 Debug Panel: `res://ui/debug_panel/debug_panel.tscn`
 - Loading: `res://ui/menus/loading_screen.tscn`
 - Game over: `res://ui/menus/game_over.tscn`
 - Interaction area: `res://common/interaction/InteractionArea.tscn`

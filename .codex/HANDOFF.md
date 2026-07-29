@@ -16,7 +16,8 @@
 ## Текущее состояние Git
 
 - Рабочая ветка: `master`.
-- После пользовательского push в `master` добавлены локальные HUD-коммиты;
+- После пользовательского коммита `daa66aa` добавлены локальные F10 Debug
+  Panel-коммиты;
   перед следующим push проверить актуальный `git status -sb`.
 - По умолчанию работать напрямую в `master`; отдельную ветку или worktree
   создавать только по явному запросу пользователя.
@@ -26,6 +27,11 @@
 
 Последние основные коммиты:
 
+- `0a1c0c7` — компактная collapsible F10-панель и локализация;
+- `1f6ab91` — debug-only controller, F10 action и gameplay input gate;
+- `8a68c6e` — runtime progression API для debug controls;
+- `24e3a88` — implementation plan F10 Debug Panel;
+- `0fff94f` — design F10 Debug Panel;
 - `ca9f944` — live-состояния Double Jump, Air Dash и 3-hit combo в HUD;
 - `861d01a` — контрактный тест новых состояний HUD;
 - `5512d73` — временная белая иконка-ромб Vabo;
@@ -116,6 +122,26 @@
 Полный дизайн:
 `docs/superpowers/specs/2026-07-29-player-progress-feedback-design.md`.
 
+### F10 Debug Panel
+
+- `F10` открывает компактную левую панель шириной `320 px`; fullscreen
+  затемнения нет.
+- Панель доступна только в debug/editor build и не создаётся в release export.
+- Игра не ставится на паузу, но управление персонажем и debug flight
+  блокируются, пока панель открыта.
+- Категории `Save`, `Player`, `Progression`, `Checkpoint` независимо
+  сворачиваются стрелками.
+- Реализованы: полный reset сейва с перезапуском уровня, лечение, reload уровня,
+  точная установка Vabo, unlock/lock всех способностей и телепорт к активному
+  Memory Node.
+- Debug-изменения Vabo/способностей сами не вызывают autosave. Последующий
+  обычный save event может записать текущее debug-состояние.
+- Runtime object inspector и редактирование transform отложены на следующую
+  итерацию панели.
+
+Полный дизайн:
+`docs/superpowers/specs/2026-07-29-f10-debug-panel-design.md`.
+
 ### Debug flight
 
 - `F7` — включить/выключить режим;
@@ -154,6 +180,7 @@
 
 - `cloud-stable-noise.tests.ps1`;
 - `godot-47-warning-regressions.tests.ps1`;
+- `f10-debug-panel.tests.ps1`;
 - `phantom-camera-lifecycle.tests.ps1`;
 - `player-debug-flight.tests.ps1`;
 - `player-progress-feedback.tests.ps1`;
@@ -193,14 +220,10 @@ Vabo и повторных боёв.
 
 Согласованный порядок:
 
-1. Первая версия F10 Debug Panel:
-   - открыть/закрыть панель слева;
-   - удалить сохранение;
-   - базовые gameplay/checkpoint controls;
-   - инструменты недоступны в release export.
-2. Продолжать собирать и довести до конца `Level_01`.
-3. После появления полного игрового цикла настроить баланс Vabo,
+1. Продолжать собирать и довести до конца `Level_01`.
+2. После появления полного игрового цикла настроить баланс Vabo,
    checkpoint spacing, врагов и повторных секций.
+3. Позже — расширить Debug Panel runtime object inspector/transform controls.
 4. Позже — Keeper of Memory, трата Vabo, health/ability upgrades и hub flow.
 
 Подробный backlog находится в `.codex/ROADMAP.md`.
