@@ -4,3 +4,9 @@
 
 [resource]
 script = ExtResource("1_profile")
+coverage_radius = 100.0
+coverage_height = 100.0
+lobe_spread = 0.46
+lobe_variation = 0.64
+prewarm_margin = 1860.0
+billboard_transition_end = 610.0
