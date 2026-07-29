@@ -107,10 +107,13 @@ In `AnimationController`, retain the default playback speed and expose:
 func set_playback_speed(speed: float) -> void:
 	if not anim_tree:
 		return
-	var player := anim_tree.get_node_or_null(anim_tree.anim_player) as AnimationPlayer
-	if player:
-		player.speed_scale = maxf(speed, 0.0)
+	anim_tree.set(P_CROUCH_SPEED, maxf(speed, 0.0))
 ```
+
+Add an `AnimationNodeTimeScale` named `CrouchSpeed` between
+`Roll_crouch_loop` and the crouched input of `CrouchState`. This keeps the
+speed change local to the low-passage loop instead of changing the linked
+`AnimationPlayer` globally.
 
 - [ ] **Step 2: Create `PlayerLowPassage`**
 

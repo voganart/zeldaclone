@@ -59,11 +59,10 @@ Design:
 ### Finish Level_01
 
 - Continue building the complete tutorial/gameplay route.
-- Redesign the rejected Roll tutorial fix: require real free collision volume
-  under the obstacle, keep the reduced capsule in a low-passage state for
-  arbitrarily long tunnels, and restore standing only after a clearance check.
-  Design approved in conversation and documented in
-  `docs/superpowers/specs/2026-07-29-roll-low-passage-design.md`.
+- GUI-validate the implemented `PlayerLowPassage` flow in both directions,
+  while idle under the ceiling, when reversing, and with an extended obstacle.
+  The state now keeps the reduced capsule, provides slow manual movement, and
+  restores standing only after a clearance check.
 - Validate the ability-gated traversal sequence.
 - Reach a complete playable loop before broad UI or environment polish.
 
