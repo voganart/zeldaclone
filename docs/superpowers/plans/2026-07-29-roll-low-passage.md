@@ -275,3 +275,23 @@ Commit:
 ```powershell
 git commit -m "docs: record roll low passage verification"
 ```
+
+---
+
+### Task 4: Phase-Gated Standing Exit
+
+**Files:**
+- Modify: `entities/player/states/player_low_passage.gd`
+- Modify: `common/autoload/game_constants.gd`
+- Modify: `.codex/tests/player-roll-obstacle.tests.ps1`
+
+**Interfaces:**
+- Consumes: `Boy_roll_crouch` animation length and standing clearance query.
+- Produces: stable-clearance and safe-phase gating before standing.
+
+- [x] Add a failing contract for clearance hold and safe loop phase.
+- [x] Track loop time using the configured low-passage animation speed.
+- [x] Require `0.1` seconds of continuous clearance.
+- [x] Exit only within `0.12` normalized phase of the loop boundary.
+- [x] Recheck standing clearance immediately before restoring the collider.
+- [x] Run focused Roll and Godot 4.7 compatibility contracts.

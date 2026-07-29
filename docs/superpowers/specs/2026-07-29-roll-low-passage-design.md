@@ -21,8 +21,11 @@ real physical opening that fits the reduced player capsule.
 3. `PlayerLowPassage` plays the existing looping `Roll_crouch_loop` animation
    at reduced playback speed and accepts normal horizontal movement input at a
    reduced movement speed.
-4. As soon as the standing capsule fits, restore it and transition to
-   `PlayerMove`.
+4. When the standing capsule fits continuously for `0.1` seconds, request an
+   exit but keep the reduced capsule.
+5. Restore the standing capsule and transition to `PlayerMove` only inside the
+   safe phase window around the start/end of `Roll_crouch_loop`, after one
+   final clearance check.
 
 The low-passage state has no fixed duration, so the same behavior supports
 short and arbitrarily long obstacles and allows the player to move back out.
@@ -37,6 +40,7 @@ short and arbitrarily long obstacles and allows the player to move back out.
 - Jump, attack, and another Roll are unavailable in `PlayerLowPassage`.
 - The reduced capsule must never be restored while the standing capsule
   overlaps the ceiling.
+- The loop must not transition to standing from an arbitrary rotational pose.
 
 ## Components
 
@@ -84,4 +88,3 @@ GUI smoke test in `Level_01`:
 - traverse fully through the exit side;
 - verify short and extended obstacle lengths with visible collision shapes;
 - confirm there is no snap, penetration, or forced ejection.
-

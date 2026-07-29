@@ -62,7 +62,7 @@ Design:
 - GUI-validate the implemented `PlayerLowPassage` flow in both directions,
   while idle under the ceiling, when reversing, and with an extended obstacle.
   The state now keeps the reduced capsule, provides slow manual movement, and
-  restores standing only after a clearance check.
+  restores standing only after stable clearance and a safe crouch-loop phase.
 - Validate the ability-gated traversal sequence.
 - Reach a complete playable loop before broad UI or environment polish.
 

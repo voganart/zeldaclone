@@ -87,6 +87,21 @@ foreach ($token in @(
 }
 
 foreach ($token in @(
+    '@export var clearance_hold_time: float = 0.1',
+    '@export_range(0.01, 0.49) var exit_phase_window: float = 0.12',
+    'clearance_elapsed += delta',
+    'exit_requested = clearance_elapsed >= clearance_hold_time',
+    'if exit_requested and _is_safe_exit_phase():',
+    'if not player.can_restore_collider():',
+    'func _is_safe_exit_phase() -> bool:'
+)) {
+    Assert-Contains `
+        $lowPassage `
+        $token `
+        'LowPassage exit must wait for stable clearance and a safe loop phase.'
+}
+
+foreach ($token in @(
     'check_jump(',
     'check_attack(',
     'STATE_ROLL',
