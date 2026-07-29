@@ -20,7 +20,11 @@ foreach ($requiredToken in @(
     '_stream_coverage_radius + _stream_prewarm_margin',
     'outer_radius - _stream_edge_fade_width',
     '1.0 - smoothstep(',
-    '_recycle_fade * _edge_fade',
+    '_recycle_fade * _edge_fade * _lifecycle_fade',
+    'func set_lifecycle_fade(value: float) -> void',
+    'func set_boundary_fade(',
+    'horizontal_fade',
+    'vertical_fade',
     'lod_local_radius',
     'preview_lod_in_editor'
 )) {

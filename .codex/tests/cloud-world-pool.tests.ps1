@@ -54,6 +54,7 @@ foreach ($token in @(
 
 foreach ($token in @(
     'const CloudCellLayout = preload(',
+    'const CloudWeatherField = preload(',
     'world_seed',
     'cell_size',
     'horizontal_cell_radius',
@@ -63,9 +64,18 @@ foreach ($token in @(
     '_active_cells',
     '_free_clouds',
     '_requested_cells',
-    'CloudCellLayout.world_to_cell(',
-    'CloudCellLayout.candidate_members(',
-    'CloudCellLayout.member_data(',
+    'CloudCellLayout.world_to_chunk(',
+    'CloudWeatherField.candidate_members(',
+    'CloudWeatherField.member_data(',
+    'CloudDriftRoot',
+    'virtual_player_position',
+    'get_cloud_offset',
+    '_vertical_center_chunk',
+    'vertical_hysteresis',
+    '_drift_rebase',
+    'lifecycle_update_interval',
+    'set_lifecycle_fade',
+    'set_boundary_fade',
     '_requested_cells',
     'set_shape_offset'
 )) {

@@ -38,7 +38,7 @@ static func candidate_chunks(
 		var distance_a := Vector3(a - center).length_squared()
 		var distance_b := Vector3(b - center).length_squared()
 		if not is_equal_approx(distance_a, distance_b):
-			return distance_a > distance_b
+			return distance_a < distance_b
 		return _chunk_hash(a, profile.world_seed, 91) < _chunk_hash(
 			b,
 			profile.world_seed,
@@ -71,7 +71,7 @@ static func candidate_members(
 		var distance_a := Vector3(chunk_a - center).length_squared()
 		var distance_b := Vector3(chunk_b - center).length_squared()
 		if not is_equal_approx(distance_a, distance_b):
-			return distance_a > distance_b
+			return distance_a < distance_b
 		return _member_hash(chunk_a, a.w, profile.world_seed, 92) < (
 			_member_hash(chunk_b, b.w, profile.world_seed, 92)
 		)

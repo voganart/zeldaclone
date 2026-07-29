@@ -16,6 +16,7 @@ extends Resource
 @export_range(0, 4, 1) var vertical_chunk_radius: int = 1
 @export_range(0, 3, 1) var horizontal_prewarm_chunks: int = 1
 @export_range(0, 3, 1) var vertical_prewarm_chunks: int = 1
+@export_range(0.0, 0.49, 0.01) var vertical_hysteresis_ratio: float = 0.2
 @export_range(250.0, 12000.0, 50.0) var weather_scale: float = 3600.0
 @export_range(0.0, 1.0, 0.01) var weather_threshold: float = 0.48
 @export_range(1, 16, 1) var formation_min_members: int = 4
@@ -59,6 +60,11 @@ func sanitize() -> void:
 	vertical_chunk_radius = maxi(vertical_chunk_radius, 0)
 	horizontal_prewarm_chunks = maxi(horizontal_prewarm_chunks, 0)
 	vertical_prewarm_chunks = maxi(vertical_prewarm_chunks, 0)
+	vertical_hysteresis_ratio = clampf(
+		vertical_hysteresis_ratio,
+		0.0,
+		0.49
+	)
 	weather_scale = maxf(weather_scale, chunk_size)
 	weather_threshold = clampf(weather_threshold, 0.0, 0.95)
 	formation_min_members = maxi(formation_min_members, 1)

@@ -26,6 +26,8 @@ group_uniforms Shape_Erosion;
 uniform float erosion_strength : hint_range(0.0, 1.0) = 0.5; 
 uniform float erosion_scale : hint_range(0.1, 2.0) = 0.3; 
 uniform float erosion_offset_speed : hint_range(0.0, 1.0) = 0.1;
+global uniform vec3 weather_cloud_offset;
+global uniform float weather_cloud_evolution;
 
 uniform float sphere_radius : hint_range(0.1, 0.6) = 0.45; 
 uniform float softness : hint_range(0.01, 1.0) = 0.2;
@@ -135,7 +137,15 @@ float get_density(vec3 p, float dist_to_cam) {
 	
 	float use_override = clamp(shape_override_enabled, 0.0, 1.0);
 	vec3 effective_scale = mix(v_obj_scale, shape_override_scale, use_override);
-	vec3 runtime_erosion_offset = (v_world_pos_center * 0.1) + shape_offset + (TIME * move_speed * erosion_offset_speed);
+	vec3 weather_noise_motion = weather_cloud_offset * 0.05
+		+ vec3(
+			weather_cloud_evolution * 0.7,
+			weather_cloud_evolution,
+			-weather_cloud_evolution * 0.45
+		);
+	vec3 runtime_erosion_offset = (v_world_pos_center * 0.1)
+		+ shape_offset
+		+ weather_noise_motion * erosion_offset_speed;
 	vec3 erosion_offset = mix(runtime_erosion_offset, shape_override_offset, use_override);
 	vec3 erosion_uv = (p * effective_scale * erosion_scale) + erosion_offset;
 	float erosion_val = texture(noise_texture, erosion_uv).r;
@@ -144,7 +154,7 @@ float get_density(vec3 p, float dist_to_cam) {
 	
 	float lod_mix = smoothstep(lod_noise_start, lod_noise_end, dist_to_cam);
 	float current_scale_mod = mix(1.0, lod_noise_factor, lod_mix);
-	vec3 runtime_detail_offset = TIME * move_speed + shape_offset * 1.7;
+	vec3 runtime_detail_offset = weather_noise_motion + shape_offset * 1.7;
 	vec3 detail_offset = mix(runtime_detail_offset, shape_override_offset * 1.7, use_override);
 	vec3 detail_uv = p * effective_scale * cloud_scale * current_scale_mod + detail_offset;
 	float detail_noise = texture(noise_texture, detail_uv).r;
@@ -181,6 +191,9 @@ float lod_bayer4x4(vec2 pixel_position) {
 }
 
 void fragment() {
+	if (pool_fade <= 0.001) {
+		discard;
+	}
 	float lod_threshold = lod_bayer4x4(FRAGCOORD.xy);
 	if ((!lod_is_impostor && lod_threshold < lod_fade)
 			|| (lod_is_impostor && lod_threshold >= lod_fade)) {
