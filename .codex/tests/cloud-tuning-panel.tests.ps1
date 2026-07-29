@@ -27,6 +27,9 @@ $constants = Get-Content -Raw (
 $controller = Get-Content -Raw (
     Join-Path $projectRoot 'levels/components/CloudManager/cloud_lod_controller.gd'
 )
+$camera = Get-Content -Raw (
+    Join-Path $projectRoot 'common/components/camera_input.gd'
+)
 
 if (-not $project.Contains('cloud_tuning_toggle={')) {
     throw 'cloud_tuning_toggle input action is missing'
@@ -55,11 +58,26 @@ foreach ($token in @(
     '"reload_tuning_profile"',
     '"regenerate_from_profile"',
     'Input.get_mouse_mode()',
-    'Input.set_mouse_mode('
+    'Input.set_mouse_mode(',
+    'add_to_group(&"cloud_tuning_panel")',
+    'func is_open() -> bool',
+    'PROFILE_SECTIONS.has(',
+    'PROPERTY_HINT_RANGE'
 )) {
     if (-not $panel.Contains($token)) {
         throw "Cloud tuning panel contract is missing: $token"
     }
+}
+foreach ($token in @(
+    'get_nodes_in_group(&"cloud_tuning_panel")',
+    'panel.call("is_open")'
+)) {
+    if (-not $camera.Contains($token)) {
+        throw "Camera tuning-panel guard is missing: $token"
+    }
+}
+if (-not $scene.Contains('offset_right = 640.0')) {
+    throw 'Cloud tuning panel is wider than the compact design'
 }
 foreach ($token in @(
     'Distribution',

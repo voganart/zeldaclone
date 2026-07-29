@@ -38,6 +38,8 @@ func _ready() -> void:
 	set_camera_mode(true) 
 
 func _input(event: InputEvent) -> void:
+	if _is_cloud_tuning_open():
+		return
 	if event.is_action_pressed(GameConstants.INPUT_TOGGLE_CAMERA):
 		set_camera_mode(!is_camera_locked)
 		return
@@ -55,6 +57,8 @@ func _input(event: InputEvent) -> void:
 		_apply_rotation(event.relative.x, event.relative.y, mouse_sensitivity)
 
 func _process(delta: float) -> void:
+	if _is_cloud_tuning_open():
+		return
 	if is_camera_locked: return
 	
 	var joystick_vec = Input.get_vector(
@@ -66,6 +70,16 @@ func _process(delta: float) -> void:
 		var amount_x = joystick_vec.x * gamepad_sensitivity * delta
 		var amount_y = joystick_vec.y * gamepad_sensitivity * delta
 		_apply_rotation(amount_x, amount_y, 1.0)
+
+func _is_cloud_tuning_open() -> bool:
+	for panel in get_tree().get_nodes_in_group(&"cloud_tuning_panel"):
+		if (
+			is_instance_valid(panel)
+			and panel.has_method("is_open")
+			and bool(panel.call("is_open"))
+		):
+			return true
+	return false
 
 func _apply_rotation(yaw_input: float, pitch_input: float, sensitivity: float) -> void:
 	if not pcam: return

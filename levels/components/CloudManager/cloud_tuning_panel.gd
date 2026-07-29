@@ -15,6 +15,7 @@ var _rebuilding: bool = false
 
 
 func _ready() -> void:
+	add_to_group(&"cloud_tuning_panel")
 	_root.visible = false
 	%RegenerateButton.pressed.connect(_on_regenerate_pressed)
 	%SaveButton.pressed.connect(_on_save_pressed)
@@ -25,6 +26,10 @@ func _ready() -> void:
 func setup(manager: Node) -> void:
 	_manager = manager
 	_build_fields()
+
+
+func is_open() -> bool:
+	return is_instance_valid(_root) and _root.visible
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -81,7 +86,8 @@ func _build_fields() -> void:
 		var usage := int(property_info.get("usage", 0))
 		var property_name := StringName(property_info.get("name", ""))
 		if (usage & PROPERTY_USAGE_CATEGORY) != 0:
-			_add_category(String(property_name))
+			if PROFILE_SECTIONS.has(property_name):
+				_add_category(String(property_name))
 			continue
 		if (usage & PROPERTY_USAGE_EDITOR) == 0:
 			continue
@@ -110,32 +116,38 @@ func _add_scalar_field(
 	var row := HBoxContainer.new()
 	var label := Label.new()
 	label.text = _pretty_name(property_name)
-	label.custom_minimum_size.x = 190.0
+	label.custom_minimum_size.x = 150.0
 	row.add_child(label)
 
 	var spin := SpinBox.new()
-	spin.custom_minimum_size.x = 110.0
+	spin.custom_minimum_size.x = 90.0
 	spin.allow_greater = true
 	spin.allow_lesser = true
 	_apply_range_hint(spin, String(property_info.get("hint_string", "")))
 	spin.value = float(profile.get(property_name))
 	row.add_child(spin)
 
-	var slider := HSlider.new()
-	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	slider.min_value = spin.min_value
-	slider.max_value = spin.max_value
-	slider.step = spin.step
-	slider.value = spin.value
-	row.add_child(slider)
 	_fields.add_child(row)
 
-	spin.value_changed.connect(
-		_on_spin_changed.bind(property_name, slider)
-	)
-	slider.value_changed.connect(
-		_on_slider_changed.bind(property_name, spin)
-	)
+	var property_hint := int(property_info.get("hint", PROPERTY_HINT_NONE))
+	if property_hint == PROPERTY_HINT_RANGE:
+		var slider := HSlider.new()
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.min_value = spin.min_value
+		slider.max_value = spin.max_value
+		slider.step = spin.step
+		slider.value = spin.value
+		row.add_child(slider)
+		spin.value_changed.connect(
+			_on_spin_changed.bind(property_name, slider)
+		)
+		slider.value_changed.connect(
+			_on_slider_changed.bind(property_name, spin)
+		)
+	else:
+		spin.value_changed.connect(
+			_on_scalar_without_slider_changed.bind(property_name)
+		)
 
 
 func _add_vector_field(
@@ -147,11 +159,11 @@ func _add_vector_field(
 	var row := HBoxContainer.new()
 	var label := Label.new()
 	label.text = _pretty_name(property_name)
-	label.custom_minimum_size.x = 190.0
+	label.custom_minimum_size.x = 150.0
 	row.add_child(label)
 	for axis in range(3):
 		var spin := SpinBox.new()
-		spin.custom_minimum_size.x = 100.0
+		spin.custom_minimum_size.x = 80.0
 		spin.allow_greater = true
 		spin.allow_lesser = false
 		spin.min_value = 0.01
@@ -199,6 +211,14 @@ func _on_slider_changed(
 		return
 	spin.set_value_no_signal(value)
 	_set_profile_value(property_name, value)
+
+
+func _on_scalar_without_slider_changed(
+	value: float,
+	property_name: StringName
+) -> void:
+	if not _rebuilding:
+		_set_profile_value(property_name, value)
 
 
 func _on_vector_changed(
