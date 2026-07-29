@@ -1,8 +1,8 @@
 @tool
 extends Node3D
 
-const CloudCellLayout = preload(
-	"res://levels/components/CloudManager/cloud_cell_layout.gd"
+const CloudClusterLayout = preload(
+	"res://levels/components/CloudManager/cloud_cluster_layout.gd"
 )
 const CloudExclusionMath = preload(
 	"res://levels/components/CloudManager/cloud_exclusion_math.gd"
@@ -18,46 +18,39 @@ signal tuning_profile_changed(profile: CloudTuningProfile)
 
 @export_category("Main Settings")
 @export var cloud_scene: PackedScene
-@export var cloud_count: int = 100
+@export_storage var cloud_count: int = 100
 @export var tuning_profile: CloudTuningProfile = preload(
 	"res://levels/components/CloudManager/cloud_tuning_profile.tres"
 )
+@export var weather_profile: WeatherProfile = preload(
+	"res://common/weather/weather_profile.tres"
+)
 
-@export_category("Legacy Settings")
-@export var rotation_speed: float = 0.5
-@export_enum("Skybox (Legacy)", "World Pool") var mode: int = 1
-@export var spawn_radius: float = 150.0
-@export var shell_thickness: float = 50.0
-@export var recycle_radius: float = 200.0
+@export_category("Debug")
+@export var enable_runtime_tuning: bool = false
 
-@export_category("World Pool")
-@export var world_seed: int = 1337
-@export_range(10.0, 500.0, 1.0) var cell_size: float = 90.0
-@export_range(1, 12, 1) var horizontal_cell_radius: int = 4
-@export_range(0, 6, 1) var vertical_cell_radius: int = 1
-@export_range(0.05, 1.0, 0.05) var cell_density: float = 0.65
-@export_range(1, 16, 1) var pool_updates_per_frame: int = 2
-@export_range(0.05, 2.0, 0.05) var recycle_fade_duration: float = 0.8
-
-@export_category("Clustering")
-@export var use_clustering: bool = true
-@export var cluster_count: int = 8
-@export var cluster_spread: float = 0.3
-
-@export_category("Random Scale")
-@export var scale_min: Vector3 = Vector3(3.0, 1.5, 3.0)
-@export var scale_max: Vector3 = Vector3(8.0, 3.0, 8.0)
-
-@export_category("Cloud LOD")
-@export_range(0.0, 1000.0, 1.0, "or_greater")
-var lod_cheap_volume_start: float = 30.0
-@export_range(0.0, 1000.0, 1.0, "or_greater")
-var lod_transition_start: float = 70.0
-@export_range(0.0, 1000.0, 1.0, "or_greater")
-var lod_transition_end: float = 110.0
-@export_range(0.0, 10.0, 0.05, "or_greater")
-var lod_local_radius: float = 0.5
-@export var preview_lod_in_editor: bool = true
+@export_storage var rotation_speed: float = 0.5
+@export_storage var mode: int = 1
+@export_storage var spawn_radius: float = 150.0
+@export_storage var shell_thickness: float = 50.0
+@export_storage var recycle_radius: float = 200.0
+@export_storage var world_seed: int = 1337
+@export_storage var cell_size: float = 90.0
+@export_storage var horizontal_cell_radius: int = 4
+@export_storage var vertical_cell_radius: int = 1
+@export_storage var cell_density: float = 0.65
+@export_storage var pool_updates_per_frame: int = 2
+@export_storage var recycle_fade_duration: float = 0.8
+@export_storage var use_clustering: bool = true
+@export_storage var cluster_count: int = 8
+@export_storage var cluster_spread: float = 0.3
+@export_storage var scale_min: Vector3 = Vector3(3.0, 1.5, 3.0)
+@export_storage var scale_max: Vector3 = Vector3(8.0, 3.0, 8.0)
+@export_storage var lod_cheap_volume_start: float = 30.0
+@export_storage var lod_transition_start: float = 70.0
+@export_storage var lod_transition_end: float = 110.0
+@export_storage var lod_local_radius: float = 0.5
+@export_storage var preview_lod_in_editor: bool = true
 
 var player: Node3D
 var _active_cells: Dictionary = {}
@@ -70,6 +63,8 @@ var _last_player_cell := Vector3i(2147483647, 2147483647, 2147483647)
 var _pool_initialized: bool = false
 var _pool_settings_dirty: bool = true
 var _exclusion_volumes: Array[CloudExclusionVolume] = []
+var _preview_clouds: Array[Node3D] = []
+var _base_transforms: Dictionary = {}
 
 enum RecyclePhase {
 	FADING_OUT,
@@ -87,6 +82,10 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		call_deferred("_configure_existing_cloud_lods")
 	else:
+		_apply_weather_profile()
+		if tuning_profile == null:
+			call_deferred("_preserve_preview_without_streaming")
+			return
 		apply_tuning_profile(tuning_profile)
 		call_deferred("_initialize_runtime_pool")
 
@@ -101,8 +100,14 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(player):
 			return
 
-	var player_cell := CloudCellLayout.world_to_cell(
-		player.global_position,
+	var weather_offset := _get_weather_offset()
+	_apply_weather_drift(weather_offset)
+	_process_preview_clouds()
+	var local_player_position := to_local(
+		player.global_position - weather_offset
+	)
+	var player_cell := CloudClusterLayout.world_to_sector(
+		local_player_position,
 		cell_size
 	)
 	if player_cell != _last_player_cell or _pool_settings_dirty:
@@ -114,6 +119,9 @@ func _process(delta: float) -> void:
 func _initialize_runtime_pool() -> void:
 	if _pool_initialized:
 		return
+	if tuning_profile == null:
+		_preserve_preview_without_streaming()
+		return
 	if cloud_scene == null:
 		push_warning("CloudManager: Cloud Scene not assigned")
 		return
@@ -123,26 +131,90 @@ func _initialize_runtime_pool() -> void:
 		if child is Node3D and child.has_method("configure_lod"):
 			existing_clouds.append(child as Node3D)
 
-	var pool_size := maxi(cloud_count, 0)
-	for index in range(pool_size):
-		var cloud: Node3D
-		if index < existing_clouds.size():
-			cloud = existing_clouds[index]
-		else:
-			cloud = cloud_scene.instantiate() as Node3D
-			add_child(cloud)
+	var pool_size := maxi(cloud_count, existing_clouds.size())
+	for index in range(existing_clouds.size()):
+		var cloud: Node3D = existing_clouds[index]
+		_preview_clouds.append(cloud)
+		_base_transforms[cloud] = cloud.global_transform
+		_configure_cloud_lod(cloud)
+		cloud.call(
+			"set_shape_offset",
+			CloudClusterLayout.preview_shape_offset(
+				cloud.transform,
+				world_seed,
+				index,
+				tuning_profile.shape_variation
+			)
+		)
+		cloud.visible = true
+		cloud.call("set_pool_fade", 1.0)
+
+	for _index in range(existing_clouds.size(), pool_size):
+		var cloud := cloud_scene.instantiate() as Node3D
+		add_child(cloud)
 		cloud.visible = false
 		cloud.call("set_pool_fade", 0.0)
 		_configure_cloud_lod(cloud)
 		_free_clouds.append(cloud)
 
-	for index in range(pool_size, existing_clouds.size()):
-		existing_clouds[index].visible = false
-
 	_pool_initialized = true
 	_refresh_exclusion_volumes()
-	if OS.is_debug_build():
+	if enable_runtime_tuning and OS.is_debug_build():
 		_create_tuning_panel()
+
+
+func _preserve_preview_without_streaming() -> void:
+	push_warning(
+		"CloudManager: tuning profile is missing; "
+		+ "saved preview clouds remain unchanged"
+	)
+	for child in get_children():
+		if not child is Node3D or not child.has_method("configure_lod"):
+			continue
+		var cloud := child as Node3D
+		_preview_clouds.append(cloud)
+		_base_transforms[cloud] = cloud.global_transform
+		_configure_cloud_lod(cloud)
+		cloud.visible = true
+		cloud.call("set_pool_fade", 1.0)
+	set_process(false)
+
+
+func _apply_weather_profile() -> void:
+	if weather_profile == null:
+		return
+	var weather_manager := get_node_or_null("/root/WeatherManager")
+	if (
+		weather_manager != null
+		and weather_manager.has_method("apply_profile")
+	):
+		weather_manager.call("apply_profile", weather_profile, 0.0)
+
+
+func _get_weather_offset() -> Vector3:
+	var weather_manager := get_node_or_null("/root/WeatherManager")
+	if (
+		weather_manager == null
+		or not weather_manager.has_method("get_cloud_offset")
+	):
+		return Vector3.ZERO
+	var value: Variant = weather_manager.call("get_cloud_offset")
+	if not value is Vector3:
+		return Vector3.ZERO
+	var weather_offset: Vector3 = value
+	return weather_offset
+
+
+func _apply_weather_drift(weather_offset: Vector3) -> void:
+	for cloud_variant in _base_transforms.keys():
+		var cloud := cloud_variant as Node3D
+		if not is_instance_valid(cloud):
+			_base_transforms.erase(cloud_variant)
+			continue
+		if not cloud.visible:
+			continue
+		var base_transform: Transform3D = _base_transforms[cloud_variant]
+		cloud.global_transform = base_transform.translated(weather_offset)
 
 
 func apply_tuning_profile(profile: CloudTuningProfile) -> void:
@@ -278,17 +350,21 @@ func _refresh_exclusion_volumes() -> void:
 func _member_is_excluded(key: Vector4i) -> bool:
 	if _exclusion_volumes.is_empty() or tuning_profile == null:
 		return false
-	var data := CloudCellLayout.member_data(key, tuning_profile)
+	var data := CloudClusterLayout.member_data(key, tuning_profile)
 	if data.is_empty():
 		return false
 	var cloud_transform: Transform3D = data["transform"]
 	var cloud_radius: float = data["cloud_radius"]
+	var cloud_world_position := (
+		to_global(cloud_transform.origin)
+		+ _get_weather_offset()
+	)
 	for volume in _exclusion_volumes:
 		if (
 			is_instance_valid(volume)
 			and CloudExclusionMath.intersects_cloud(
 				volume,
-				cloud_transform.origin,
+				cloud_world_position,
 				cloud_radius
 			)
 		):
@@ -296,31 +372,104 @@ func _member_is_excluded(key: Vector4i) -> bool:
 	return false
 
 
+func _member_overlaps_preview(key: Vector4i) -> bool:
+	if _preview_clouds.is_empty():
+		return false
+	var data := CloudClusterLayout.member_data(key, tuning_profile)
+	if data.is_empty():
+		return false
+	var transform: Transform3D = data["transform"]
+	var radius: float = float(data["cloud_radius"]) + cell_size * 0.35
+	var world_origin := (
+		to_global(transform.origin)
+		+ _get_weather_offset()
+	)
+	for cloud in _preview_clouds:
+		if (
+			is_instance_valid(cloud)
+			and cloud.global_position.distance_to(world_origin) < radius
+		):
+			return true
+	return false
+
+
+func _process_preview_clouds() -> void:
+	if not is_instance_valid(player) or tuning_profile == null:
+		return
+	var keep_distance := (
+		tuning_profile.coverage_radius
+		+ tuning_profile.retention_margin
+	)
+	var preview_copy: Array[Node3D] = _preview_clouds.duplicate()
+	for cloud in preview_copy:
+		if not is_instance_valid(cloud):
+			_preview_clouds.erase(cloud)
+			continue
+		if cloud.global_position.distance_to(player.global_position) <= keep_distance:
+			continue
+		_preview_clouds.erase(cloud)
+		_start_fade_out(cloud, Vector4i.ZERO, false)
+		_pool_settings_dirty = true
+
+
 func _request_cells(center_cell: Vector3i) -> void:
 	_last_player_cell = center_cell
 	_pool_settings_dirty = false
-	var desired := CloudCellLayout.candidate_members(
+	var visible_members := CloudClusterLayout.candidate_members(
 		center_cell,
 		tuning_profile
 	)
-	var allowed_members: Array[Vector4i] = []
-	for key in desired:
-		if not _member_is_excluded(key):
-			allowed_members.append(key)
-	desired = allowed_members
+	visible_members.reverse()
+	var prewarm_members := CloudClusterLayout.candidate_members(
+		center_cell,
+		tuning_profile,
+		tuning_profile.prewarm_margin
+	)
+	var retained := CloudClusterLayout.candidate_members(
+		center_cell,
+		tuning_profile,
+		tuning_profile.retention_margin
+	)
+	var desired: Array[Vector4i] = []
 	var desired_lookup: Dictionary = {}
-	for key in desired:
+	var visible_lookup: Dictionary = {}
+	for key in visible_members:
+		if (
+			not _member_is_excluded(key)
+			and not _member_overlaps_preview(key)
+		):
+			visible_lookup[key] = true
+	for key in visible_members + prewarm_members:
+		if (
+			desired_lookup.has(key)
+			or _member_is_excluded(key)
+			or _member_overlaps_preview(key)
+		):
+			continue
+		desired.append(key)
 		desired_lookup[key] = true
+	var request_limit := maxi(
+		tuning_profile.pool_capacity - _preview_clouds.size(),
+		0
+	)
+	if desired.size() > request_limit:
+		desired.resize(request_limit)
+		desired_lookup.clear()
+		for key in desired:
+			desired_lookup[key] = true
+	var retained_lookup: Dictionary = {}
+	for key in retained:
+		retained_lookup[key] = true
 
 	for active_key in _active_cells.keys():
-		if desired_lookup.has(active_key):
+		if retained_lookup.has(active_key):
 			continue
 		var released := _active_cells[active_key] as Node3D
 		_active_cells.erase(active_key)
 		_released_clouds.append(released)
 
 	for reserved_key in _reserved_cells.keys():
-		if desired_lookup.has(reserved_key):
+		if retained_lookup.has(reserved_key):
 			continue
 		var reserved_cloud := _reserved_cells[reserved_key] as Node3D
 		_reserved_cells.erase(reserved_key)
@@ -330,29 +479,68 @@ func _request_cells(center_cell: Vector3i) -> void:
 			stale_job["phase"] = RecyclePhase.FADING_OUT
 			_recycle_jobs[reserved_cloud] = stale_job
 
+	_release_for_visible_members(visible_lookup, desired_lookup)
 	_requested_cells.clear()
 	for key in desired:
-		if not _active_cells.has(key) and not _reserved_cells.has(key):
+		if (
+			desired_lookup.has(key)
+			and not _active_cells.has(key)
+			and not _reserved_cells.has(key)
+		):
 			_requested_cells.append(key)
+
+
+func _release_for_visible_members(
+	visible_lookup: Dictionary,
+	desired_lookup: Dictionary
+) -> void:
+	var missing_visible := 0
+	for key in visible_lookup:
+		if (
+			desired_lookup.has(key)
+			and not _active_cells.has(key)
+			and not _reserved_cells.has(key)
+		):
+			missing_visible += 1
+	var available_capacity := _free_clouds.size() + _released_clouds.size()
+	missing_visible = maxi(missing_visible - available_capacity, 0)
+	if missing_visible <= 0:
+		return
+	for active_key in _active_cells.keys():
+		if missing_visible <= 0:
+			break
+		if visible_lookup.has(active_key):
+			continue
+		var released := _active_cells[active_key] as Node3D
+		_active_cells.erase(active_key)
+		desired_lookup.erase(active_key)
+		_released_clouds.append(released)
+		missing_visible -= 1
 
 
 func _process_relocations() -> void:
 	var update_budget := maxi(pool_updates_per_frame, 1)
 	while update_budget > 0:
 		if not _requested_cells.is_empty():
-			var target_key: Vector4i = _requested_cells.pop_front()
+			var target_key: Vector4i = _requested_cells.front()
 			if _active_cells.has(target_key) or _reserved_cells.has(target_key):
+				_requested_cells.pop_front()
 				continue
 			var cloud: Node3D
+			var recycle_existing := false
 			if not _released_clouds.is_empty():
 				cloud = _released_clouds.pop_back()
-				_start_fade_out(cloud, target_key, true)
+				recycle_existing = true
 			elif not _free_clouds.is_empty():
 				cloud = _free_clouds.pop_back()
-				_move_cloud_to_member(cloud, target_key)
-				_start_fade_in(cloud, target_key)
 			else:
 				break
+			_requested_cells.pop_front()
+			if recycle_existing:
+				_start_fade_out(cloud, target_key, true)
+			else:
+				_move_cloud_to_member(cloud, target_key)
+				_start_fade_in(cloud, target_key)
 			update_budget -= 1
 			continue
 
@@ -413,6 +601,8 @@ func _process_recycle_jobs(delta: float) -> void:
 					cloud.visible = false
 					_free_clouds.append(cloud)
 					_recycle_jobs.erase(cloud)
+					if not _requested_cells.is_empty():
+						_pool_settings_dirty = true
 					continue
 		else:
 			fade = minf(fade + fade_step, 1.0)
@@ -422,25 +612,46 @@ func _process_recycle_jobs(delta: float) -> void:
 				_reserved_cells.erase(target_key)
 				_active_cells[target_key] = cloud
 				_recycle_jobs.erase(cloud)
+				if not _requested_cells.is_empty():
+					_pool_settings_dirty = true
 				continue
 		job["fade"] = fade
 		_recycle_jobs[cloud] = job
 
 
 func _move_cloud_to_member(cloud: Node3D, target_key: Vector4i) -> void:
-	var data := CloudCellLayout.member_data(target_key, tuning_profile)
+	var data := CloudClusterLayout.member_data(target_key, tuning_profile)
 	if data.is_empty():
 		return
 	var cloud_transform: Transform3D = data["transform"]
 	var shape_offset: Vector3 = data["shape_offset"]
-	cloud.global_transform = cloud_transform
+	var base_transform := global_transform * cloud_transform
+	var weather_offset := _get_weather_offset()
+	_base_transforms[cloud] = base_transform
+	cloud.global_transform = base_transform.translated(weather_offset)
 	cloud.call("set_shape_offset", shape_offset)
 	cloud.visible = true
 
 
 func _configure_existing_cloud_lods() -> void:
+	var preview_index := 0
 	for cloud in get_children():
 		_configure_cloud_lod(cloud)
+		if (
+			cloud is Node3D
+			and cloud.has_method("set_shape_offset")
+			and tuning_profile != null
+		):
+			cloud.call(
+				"set_shape_offset",
+				CloudClusterLayout.preview_shape_offset(
+					(cloud as Node3D).transform,
+					tuning_profile.world_seed,
+					preview_index,
+					tuning_profile.shape_variation
+				)
+			)
+			preview_index += 1
 
 
 func _configure_cloud_lod(cloud: Node) -> void:
@@ -463,54 +674,31 @@ func spawn_clouds() -> void:
 	if cloud_scene == null:
 		push_warning("CloudManager: Cloud Scene not assigned")
 		return
+	if tuning_profile == null:
+		push_warning("CloudManager: tuning profile is missing")
+		return
 
 	for child in get_children():
+		if not child.has_method("configure_lod"):
+			continue
 		if Engine.is_editor_hint():
 			child.free()
 		else:
 			child.queue_free()
 
-	var cluster_centers: Array[Vector3] = []
-	if use_clustering:
-		for _index in range(cluster_count):
-			cluster_centers.append(Vector3(
-				randf_range(-1.0, 1.0),
-				randf_range(-1.0, 1.0),
-				randf_range(-1.0, 1.0)
-			).normalized())
-
-	for _index in range(cloud_count):
+	tuning_profile.sanitize()
+	var preview_keys := CloudClusterLayout.preview_members(tuning_profile)
+	var preview_count := mini(cloud_count, preview_keys.size())
+	for index in range(preview_count):
+		var key: Vector4i = preview_keys[index]
+		var data := CloudClusterLayout.member_data(key, tuning_profile)
+		if data.is_empty() or _member_is_excluded(key):
+			continue
 		var cloud := cloud_scene.instantiate() as Node3D
 		add_child(cloud)
-
-		var direction := Vector3.UP
-		if use_clustering and not cluster_centers.is_empty():
-			var center: Vector3 = cluster_centers.pick_random()
-			var offset := Vector3(
-				randf_range(-1.0, 1.0),
-				randf_range(-1.0, 1.0),
-				randf_range(-1.0, 1.0)
-			) * cluster_spread
-			direction = (center + offset).normalized()
-		else:
-			direction = Vector3(
-				randf_range(-1.0, 1.0),
-				randf_range(-1.0, 1.0),
-				randf_range(-1.0, 1.0)
-			).normalized()
-
-		var distance := spawn_radius + randf_range(
-			-shell_thickness * 0.5,
-			shell_thickness * 0.5
-		)
-		cloud.position = direction * distance
-		cloud.look_at(Vector3(0.0, cloud.position.y, 0.0), Vector3.UP)
-		cloud.rotate_y(deg_to_rad(90.0))
-		cloud.scale = Vector3(
-			randf_range(scale_min.x, scale_max.x),
-			randf_range(scale_min.y, scale_max.y),
-			randf_range(scale_min.z, scale_max.z)
-		)
+		var cloud_transform: Transform3D = data["transform"]
+		cloud.transform = cloud_transform
+		cloud.call("set_shape_offset", data["shape_offset"])
 		_configure_cloud_lod(cloud)
 
 		if Engine.is_editor_hint():

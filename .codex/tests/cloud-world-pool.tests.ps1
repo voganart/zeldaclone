@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $layoutPath = Join-Path (
     $projectRoot
-) 'levels/components/CloudManager/cloud_cell_layout.gd'
+) 'levels/components/CloudManager/cloud_cluster_layout.gd'
 $managerPath = Join-Path (
     $projectRoot
 ) 'levels/components/CloudManager/CloudManager.gd'
@@ -32,28 +32,52 @@ $impostorShader = Get-Content -Raw $impostorShaderPath
 $graphics = Get-Content -Raw $graphicsPath
 
 foreach ($token in @(
-    'static func world_to_cell(',
-    'static func candidate_cells(',
+    '@export var enable_runtime_tuning: bool = false',
+    '@export_storage var cloud_count',
+    '@export_storage var spawn_radius',
+    '@export_storage var cell_size',
+    '@export_storage var lod_transition_start',
+    'var _preview_clouds: Array[Node3D] = []',
+    '_preview_clouds.append(cloud)',
+    'CloudClusterLayout.preview_shape_offset(',
+    'cloud.call("set_pool_fade", 1.0)',
+    'if enable_runtime_tuning and OS.is_debug_build():'
+)) {
+    if (-not $manager.Contains($token)) {
+        throw "Saved EnvironmentSystem cloud contract is missing: $token"
+    }
+}
+if ($manager.Contains('existing_clouds[index].visible = false')) {
+    throw 'Runtime initialization still hides saved EnvironmentSystem clouds'
+}
+if ($manager.Contains('@export_category("Legacy Settings")')) {
+    throw 'Legacy cloud distribution is still exposed as a second settings source'
+}
+
+foreach ($token in @(
+    'static func world_to_sector(',
+    'static func candidate_sectors(',
     'static func occupancy_threshold(',
     'static func cell_data(',
     'static func candidate_members(',
+    'static func preview_members(',
     'static func member_data(',
     'Array[Vector4i]',
     'Vector4i(',
     'member_index',
-    'profile.coverage_radius + profile.prewarm_margin',
+    'profile.coverage_radius + safe_margin',
     'profile.cluster_spread',
     'profile.cluster_scale_variation',
     '"shape_offset"',
     '"cloud_radius"'
 )) {
     if (-not $layout.Contains($token)) {
-        throw "Cloud cell layout contract is missing: $token"
+        throw "Cloud cluster layout contract is missing: $token"
     }
 }
 
 foreach ($token in @(
-    'const CloudCellLayout = preload(',
+    'const CloudClusterLayout = preload(',
     'world_seed',
     'cell_size',
     'horizontal_cell_radius',
@@ -63,9 +87,24 @@ foreach ($token in @(
     '_active_cells',
     '_free_clouds',
     '_requested_cells',
-    'CloudCellLayout.world_to_cell(',
-    'CloudCellLayout.candidate_members(',
-    'CloudCellLayout.member_data(',
+    'CloudClusterLayout.world_to_sector(',
+    'CloudClusterLayout.candidate_members(',
+    'CloudClusterLayout.member_data(',
+    'tuning_profile.prewarm_margin',
+    'tuning_profile.retention_margin',
+    'visible_members.reverse()',
+    'tuning_profile.pool_capacity - _preview_clouds.size()',
+    'desired.resize(request_limit)',
+    'var target_key: Vector4i = _requested_cells.front()',
+    'var visible_lookup: Dictionary = {}',
+    'func _release_for_visible_members(',
+    'var available_capacity := _free_clouds.size() + _released_clouds.size()',
+    'missing_visible = maxi(missing_visible - available_capacity, 0)',
+    'if not _requested_cells.is_empty():',
+    '_pool_settings_dirty = true',
+    'var local_player_position := to_local(',
+    'player.global_position - weather_offset',
+    'func _preserve_preview_without_streaming() -> void',
     '_requested_cells',
     'set_shape_offset'
 )) {
@@ -74,7 +113,36 @@ foreach ($token in @(
     }
 }
 if ($layout.Contains('candidates.resize(limit)')) {
-    throw 'Cloud layout still truncates the nearest cells'
+    throw 'Cloud layout still truncates the nearest sectors'
+}
+
+$peekIndex = $manager.IndexOf(
+    'var target_key: Vector4i = _requested_cells.front()'
+)
+$capacityIndex = $manager.IndexOf(
+    'elif not _free_clouds.is_empty():',
+    $peekIndex
+)
+$popIndex = $manager.IndexOf(
+    '_requested_cells.pop_front()',
+    $capacityIndex
+)
+if (
+    $peekIndex -lt 0 -or
+    $capacityIndex -lt 0 -or
+    $popIndex -lt $capacityIndex
+) {
+    throw 'Requested member is removed before pool capacity is secured'
+}
+
+$previewStart = $manager.IndexOf('func _process_preview_clouds()')
+$previewEnd = $manager.IndexOf('func _request_cells(', $previewStart)
+$previewProcess = $manager.Substring(
+    $previewStart,
+    $previewEnd - $previewStart
+)
+if (-not $previewProcess.Contains('_pool_settings_dirty = true')) {
+    throw 'Preview retirement does not request newly available capacity'
 }
 
 $runtimeProcessStart = $manager.IndexOf('func _process(')

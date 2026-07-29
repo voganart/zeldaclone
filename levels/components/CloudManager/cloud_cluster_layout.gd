@@ -1,5 +1,9 @@
-class_name CloudCellLayout
+class_name CloudClusterLayout
 extends RefCounted
+
+
+static func world_to_sector(position: Vector3, sector_size: float) -> Vector3i:
+	return world_to_cell(position, sector_size)
 
 
 static func world_to_cell(position: Vector3, cell_size: float) -> Vector3i:
@@ -28,12 +32,13 @@ static func occupancy_threshold(profile: CloudTuningProfile) -> float:
 
 static func candidate_cells(
 	center: Vector3i,
-	profile: CloudTuningProfile
+	profile: CloudTuningProfile,
+	margin: float = 0.0
 ) -> Array[Vector3i]:
 	var candidates: Array[Vector3i] = []
 	if profile == null:
 		return candidates
-	var radii := _cell_radii(profile)
+	var radii := _cell_radii(profile, margin)
 	var horizontal_radius := radii.x
 	var vertical_radius := radii.y
 	var threshold := occupancy_threshold(profile)
@@ -66,14 +71,23 @@ static func candidate_cells(
 	return candidates
 
 
+static func candidate_sectors(
+	center: Vector3i,
+	profile: CloudTuningProfile,
+	margin: float = 0.0
+) -> Array[Vector3i]:
+	return candidate_cells(center, profile, margin)
+
+
 static func candidate_members(
 	center: Vector3i,
-	profile: CloudTuningProfile
+	profile: CloudTuningProfile,
+	margin: float = 0.0
 ) -> Array[Vector4i]:
 	var members: Array[Vector4i] = []
 	if profile == null:
 		return members
-	for anchor in candidate_cells(center, profile):
+	for anchor in candidate_sectors(center, profile, margin):
 		var count := _member_count(anchor, profile)
 		for member_index in range(count):
 			members.append(Vector4i(
@@ -94,6 +108,43 @@ static func candidate_members(
 		)
 	)
 	return members
+
+
+static func preview_members(
+	profile: CloudTuningProfile
+) -> Array[Vector4i]:
+	return candidate_members(Vector3i.ZERO, profile)
+
+
+static func preview_shape_offset(
+	transform: Transform3D,
+	world_seed: int,
+	preview_index: int,
+	shape_range: float
+) -> Vector3:
+	var origin_key := Vector3i(
+		roundi(transform.origin.x * 10.0),
+		roundi(transform.origin.y * 10.0),
+		roundi(transform.origin.z * 10.0)
+	)
+	var safe_range := maxf(shape_range, 0.0)
+	return Vector3(
+		lerpf(
+			-safe_range,
+			safe_range,
+			_member_unit_hash(origin_key, preview_index, world_seed, 201)
+		),
+		lerpf(
+			-safe_range,
+			safe_range,
+			_member_unit_hash(origin_key, preview_index, world_seed, 202)
+		),
+		lerpf(
+			-safe_range,
+			safe_range,
+			_member_unit_hash(origin_key, preview_index, world_seed, 203)
+		)
+	)
 
 
 static func member_data(
@@ -278,14 +329,20 @@ static func _candidate_slot_count(profile: CloudTuningProfile) -> int:
 	return count
 
 
-static func _cell_radii(profile: CloudTuningProfile) -> Vector2i:
+static func _cell_radii(
+	profile: CloudTuningProfile,
+	margin: float = 0.0
+) -> Vector2i:
+	var safe_margin := maxf(margin, 0.0)
 	return Vector2i(
 		maxi(ceili(
 			(
-				profile.coverage_radius + profile.prewarm_margin
+				profile.coverage_radius + safe_margin
 			) / profile.cell_size
 		), 1),
-		maxi(ceili(profile.coverage_height / profile.cell_size), 1)
+		maxi(ceili(
+			(profile.coverage_height + safe_margin) / profile.cell_size
+		), 1)
 	)
 
 
@@ -334,15 +391,15 @@ static func _member_unit_hash(
 
 
 static func _member_hash(
-	anchor: Vector3i,
+	sector: Vector3i,
 	member_index: int,
 	world_seed: int,
 	salt: int
 ) -> int:
 	return hash("%d:%d:%d:%d:%d:%d" % [
-		anchor.x,
-		anchor.y,
-		anchor.z,
+		sector.x,
+		sector.y,
+		sector.z,
 		member_index,
 		world_seed,
 		salt,

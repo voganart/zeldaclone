@@ -59,9 +59,15 @@ if ($controller -notmatch (
 $manager = Get-Content -LiteralPath (
     Join-Path $projectRoot 'levels/components/CloudManager/CloudManager.gd'
 ) -Raw
+$layout = Get-Content -LiteralPath (
+    Join-Path $projectRoot 'levels/components/CloudManager/cloud_cluster_layout.gd'
+) -Raw
 foreach ($axis in @('x', 'y', 'z')) {
-    if (-not $manager.Contains("randf_range(scale_min.$axis, scale_max.$axis)")) {
-        throw "CloudManager must randomize scale.$axis independently"
+    if (
+        -not $layout.Contains("profile.scale_min.$axis") -or
+        -not $layout.Contains("profile.scale_max.$axis")
+    ) {
+        throw "CloudClusterLayout must vary scale.$axis independently"
     }
 }
 foreach ($requiredToken in @(

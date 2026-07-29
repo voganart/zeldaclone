@@ -62,7 +62,7 @@ foreach ($token in @(
     '_exclusion_volumes',
     '_refresh_exclusion_volumes()',
     '_member_is_excluded(',
-    'CloudCellLayout.member_data(',
+    'CloudClusterLayout.member_data(',
     'CloudExclusionMath.intersects_cloud('
 )) {
     if (-not $manager.Contains($token)) {

@@ -6,6 +6,9 @@ $resourcePath = Join-Path $projectRoot 'common/weather/weather_profile.tres'
 $managerPath = Join-Path $projectRoot 'common/weather/weather_manager.gd'
 $projectPath = Join-Path $projectRoot 'project.godot'
 $treeShaderPath = Join-Path $projectRoot 'assets/shaders/TreeWindShader.gdshader'
+$cloudManagerPath = Join-Path (
+    $projectRoot
+) 'levels/components/CloudManager/CloudManager.gd'
 
 foreach ($path in @($profilePath, $resourcePath, $managerPath)) {
     if (-not (Test-Path -LiteralPath $path)) {
@@ -17,6 +20,21 @@ $profile = Get-Content -Raw $profilePath
 $manager = Get-Content -Raw $managerPath
 $project = Get-Content -Raw $projectPath
 $treeShader = Get-Content -Raw $treeShaderPath
+$cloudManager = Get-Content -Raw $cloudManagerPath
+
+foreach ($token in @(
+    '@export var weather_profile: WeatherProfile',
+    'var _base_transforms: Dictionary = {}',
+    'func _apply_weather_profile() -> void',
+    'weather_manager.call("apply_profile", weather_profile, 0.0)',
+    'func _get_weather_offset() -> Vector3',
+    'player.global_position - weather_offset',
+    'base_transform.translated(weather_offset)'
+)) {
+    if (-not $cloudManager.Contains($token)) {
+        throw "CloudManager weather integration is missing: $token"
+    }
+}
 
 foreach ($token in @(
     'class_name WeatherProfile',

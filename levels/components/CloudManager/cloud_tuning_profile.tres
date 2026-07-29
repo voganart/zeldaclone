@@ -4,3 +4,30 @@
 
 [resource]
 script = ExtResource("1_profile")
+coverage_radius = 1200.0
+coverage_height = 1200.0
+target_cloud_count = 80
+pool_capacity = 120
+cell_size = 300.0
+world_seed = 1337
+scale_min = Vector3(40, 20, 80)
+scale_max = Vector3(100, 80, 150)
+aspect_variation = 0.35
+large_cloud_chance = 0.2
+large_cloud_multiplier = 1.5
+shape_variation = 2.0
+lobe_spread = 0.45
+lobe_variation = 0.65
+cluster_min_members = 1
+cluster_max_members = 3
+cluster_spread = 70.0
+cluster_scale_variation = 0.35
+prewarm_margin = 500.0
+retention_margin = 800.0
+edge_fade_width = 400.0
+full_volume_distance = 120.0
+cheap_volume_distance = 250.0
+billboard_transition_start = 280.0
+billboard_transition_end = 420.0
+recycle_fade_duration = 1.0
+updates_per_frame = 3

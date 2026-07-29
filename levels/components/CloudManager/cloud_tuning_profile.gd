@@ -26,6 +26,7 @@ extends Resource
 
 @export_group("LOD & Recycling")
 @export_range(0.0, 3000.0, 10.0) var prewarm_margin: float = 800.0
+@export_range(0.0, 5000.0, 10.0) var retention_margin: float = 1200.0
 @export_range(0.0, 3000.0, 10.0) var edge_fade_width: float = 650.0
 @export_range(0.0, 1000.0, 5.0) var full_volume_distance: float = 120.0
 @export_range(0.0, 2000.0, 5.0) var cheap_volume_distance: float = 250.0
@@ -62,6 +63,7 @@ func sanitize() -> void:
 	cluster_spread = maxf(cluster_spread, 0.0)
 	cluster_scale_variation = clampf(cluster_scale_variation, 0.0, 1.0)
 	prewarm_margin = maxf(prewarm_margin, 0.0)
+	retention_margin = maxf(retention_margin, prewarm_margin)
 	edge_fade_width = clampf(edge_fade_width, 0.0, prewarm_margin)
 	full_volume_distance = maxf(full_volume_distance, 0.0)
 	cheap_volume_distance = maxf(cheap_volume_distance, full_volume_distance)
