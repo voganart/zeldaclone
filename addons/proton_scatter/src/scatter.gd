@@ -158,8 +158,8 @@ func _exit_tree():
 	_clear_collision_data()
 
 
-func _get_property_list() -> Array:
-	var list := []
+func _get_property_list() -> Array[Dictionary]:
+	var list: Array[Dictionary] = []
 	list.push_back({
 		name = "modifier_stack",
 		type = TYPE_OBJECT,

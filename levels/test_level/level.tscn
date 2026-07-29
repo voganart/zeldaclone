@@ -583,10 +583,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.590206, 1.9073486e-06, 14
 
 [node name="MovingPlatformRoot2" parent="NavigationRegion3D" instance=ExtResource("11_eonaa")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -28.590206, 1.9073486e-06, 14.171644)
+move_offset = Vector3(-8, 0, -4.000001)
 is_fragile = true
-
-[node name="EndPoint" parent="NavigationRegion3D/MovingPlatformRoot2" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -4.000001)
 
 [node name="Chests" type="Node3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.003982544, -0.013222218, 0.0002708435)

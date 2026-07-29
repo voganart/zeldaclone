@@ -97,8 +97,8 @@ var path: String:
 		ScatterUtil.request_parent_to_rebuild(self)
 
 
-func _get_property_list() -> Array:
-	var list := []
+func _get_property_list() -> Array[Dictionary]:
+	var list: Array[Dictionary] = []
 
 	if source == 0:
 		list.push_back({
