@@ -1,5 +1,18 @@
 extends Node
 
+const MAX_3D_SOUND_DB: float = -3.0
+
+
+func _ready() -> void:
+	get_tree().node_added.connect(_on_node_added)
+
+
+func _on_node_added(node: Node) -> void:
+	var player_3d := node as AudioStreamPlayer3D
+	if player_3d:
+		player_3d.max_db = minf(player_3d.max_db, MAX_3D_SOUND_DB)
+
+
 # Для 2D звуков (UI, подбор предметов)
 # Добавили аргумент volume_db с дефолтным значением 0.0
 func play_ui_sound(stream: AudioStream, volume_db: float = 0.0):

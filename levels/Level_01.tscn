@@ -44,6 +44,8 @@
 [ext_resource type="Script" uid="uid://ch65agniubjdx" path="res://common/utils/occlusion_fader.gd" id="41_w7r3u"]
 [ext_resource type="PackedScene" uid="uid://bcpkvmg35y63h" path="res://entities/interactive/MemoryNode/MemoryNode.tscn" id="42_memory"]
 [ext_resource type="PackedScene" uid="uid://vklbwyebk8e6" path="res://levels/components/BattleArena/BattleArena.tscn" id="43_2fo6c"]
+[ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemies/enemy.tscn" id="43_r8j8t"]
+[ext_resource type="PackedScene" uid="uid://cj4x4r8m3w7u0" path="res://entities/enemies/spawners/EnemyPortal.tscn" id="44_ykjdn"]
 
 [sub_resource type="Gradient" id="Gradient_c0er0"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -1482,6 +1484,8 @@ transform = Transform3D(0.7858715, 0, 0.14968559, 0, 0.8000001, 0, -0.14968559, 
 
 [node name="BattleArena" parent="Zone06/Environment/island" unique_id=1608580133 instance=ExtResource("43_2fo6c")]
 transform = Transform3D(0.95930237, 0, 0.2823823, 0, 1, 0, -0.2823823, 0, 0.95930237, 0.5958023, 3.8146973e-06, 0.64356995)
+enemy_scene_to_spawn = ExtResource("43_r8j8t")
+portal_scene = ExtResource("44_ykjdn")
 
 [node name="breakable_object" type="Node3D" parent="Zone06" unique_id=425989736]
 
