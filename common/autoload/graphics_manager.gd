@@ -12,29 +12,29 @@ const GROUP_DETAIL_OBJECTS = "level_detail_objects"
 var presets = {
 	Quality.LOW: {
 		# --- ОБЩИЕ ---
-		"scale_3d": 0.75,
+		"scale_3d": 0.85,
 		"msaa": Viewport.MSAA_DISABLED,
-		"fxaa": false,
+		"fxaa": true,
 		"vsync": DisplayServer.VSYNC_DISABLED,
 		
 		# --- ТЕНИ ---
 		"shadow_size": 2048,
-		"shadow_filter": RenderingServer.SHADOW_QUALITY_HARD,
-		"shadow_16_bits": false,
+		"shadow_filter": RenderingServer.SHADOW_QUALITY_SOFT_LOW,
+		"shadow_16_bits": true,
 		"pos_shadow_size": 2048,
 		
 		# --- НАСТРОЙКИ СОЛНЦА (DirectionalLight3D) ---
-		# Orthogonal - самый быстрый режим (один проход), но тени могут быть мыльными
-		"sun_shadow_mode": DirectionalLight3D.SHADOW_ORTHOGONAL,
-		"sun_max_dist": 50.0, 
+		# 2 сплита сохраняют читаемые ближние тени при ограниченной дальности
+		"sun_shadow_mode": DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS,
+		"sun_max_dist": 100.0,
 		
 		# --- ЭФФЕКТЫ ---
-		"ssao": false, "ssil": false, "sdfgi": false, "ssr": false, "glow": false, "volumetric_fog": false,
+		"ssao": true, "ssil": false, "sdfgi": false, "ssr": false, "glow": false, "volumetric_fog": false,
 		
 		# --- LOD ---
-		"lod_threshold": 5.0,
-		"grass_distance": 20.0, "grass_level": 2.0,
-		"vis_range": 30.0, "vis_margin": 5.0,
+		"lod_threshold": 3.0,
+		"grass_distance": 40.0, "grass_level": 4.0,
+		"vis_range": 80.0, "vis_margin": 20.0,
 		
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [5.0*5.0, 10.0*10.0, 15.0*15.0] as Array[float],
@@ -52,21 +52,21 @@ var presets = {
 		# --- ТЕНИ ---
 		"shadow_size": 4096,
 		"shadow_filter": RenderingServer.SHADOW_QUALITY_SOFT_LOW,
-		"shadow_16_bits": false,
+		"shadow_16_bits": true,
 		"pos_shadow_size": 4096,
 		
 		# --- НАСТРОЙКИ СОЛНЦА ---
 		# 2 сплита - золотая середина производительности
 		"sun_shadow_mode": DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS,
-		"sun_max_dist": 100.0, 
+		"sun_max_dist": 150.0,
 		
 		# --- ЭФФЕКТЫ ---
 		"ssao": true, "ssil": false, "sdfgi": false, "ssr": false, "glow": true, "volumetric_fog": false,
 		
 		# --- LOD ---
 		"lod_threshold": 1.0,
-		"grass_distance": 60.0, "grass_level": 10.0,
-		"vis_range": 80.0, "vis_margin": 20.0,
+		"grass_distance": 80.0, "grass_level": 12.0,
+		"vis_range": 150.0, "vis_margin": 30.0,
 
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [7.0*7.0, 12.0*12.0, 18.0*18.0] as Array[float],
@@ -96,9 +96,9 @@ var presets = {
 		"ssao": true, "ssil": true, "sdfgi": true, "ssr": true, "glow": true, "volumetric_fog": true,
 		
 		# --- LOD ---
-		"lod_threshold": 0.01,
+		"lod_threshold": 0.5,
 		"grass_distance": 120.0, "grass_level": 20.0,
-		"vis_range": 500.0, "vis_margin": 50.0,
+		"vis_range": 300.0, "vis_margin": 50.0,
 
 		# --- AI LOD ---
 		"ai_anim_lod_dists_sq": [8.0*8.0, 15.0*15.0, 20.0*20.0] as Array[float],
@@ -137,7 +137,7 @@ func apply_preset(quality: Quality) -> void:
 	viewport.mesh_lod_threshold = p["lod_threshold"]
 	
 	# 2. RenderingServer (Тени)
-	RenderingServer.directional_shadow_atlas_set_size(p["shadow_size"], true)
+	RenderingServer.directional_shadow_atlas_set_size(p["shadow_size"], p["shadow_16_bits"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(p["shadow_filter"])
 	viewport.positional_shadow_atlas_size = p["pos_shadow_size"]
 	
@@ -167,18 +167,10 @@ func _apply_environment_settings(p: Dictionary) -> void:
 	env.volumetric_fog_enabled = p["volumetric_fog"]
 
 func _apply_sun_settings(p: Dictionary) -> void:
-	var sun = get_viewport().find_child("DirectionalLight3D", true, false)
-	if not sun: return
-	
-	sun.directional_shadow_mode = p["sun_shadow_mode"]
-	sun.directional_shadow_max_distance = p["sun_max_dist"]
-	
-	if p["shadow_16_bits"]:
-		sun.shadow_bias = 0.02 
-		sun.shadow_normal_bias = 1.0
-	else:
-		sun.shadow_bias = 0.05 
-		sun.shadow_normal_bias = 2.0
+	var directional_lights = get_viewport().find_children("*", "DirectionalLight3D", true, false)
+	for light in directional_lights:
+		light.directional_shadow_mode = p["sun_shadow_mode"]
+		light.directional_shadow_max_distance = p["sun_max_dist"]
 
 func _update_detail_objects(p: Dictionary) -> void:
 	var nodes = get_tree().get_nodes_in_group(GROUP_DETAIL_OBJECTS)

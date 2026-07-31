@@ -60,6 +60,10 @@ func _ready():
 	# Ищем материал обводки при старте
 	_find_outline_material()
 
+	if not Engine.is_editor_hint() and has_node("/root/GraphicsManager"):
+		var graphics_manager = get_node("/root/GraphicsManager")
+		graphics_manager.call_deferred("apply_preset", graphics_manager.current_quality)
+
 func _process(delta):
 	if not Engine.is_editor_hint():
 		if is_playing:
