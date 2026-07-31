@@ -581,7 +581,6 @@ checkpoint_id = &"level_01_obstacles"
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." unique_id=988376034 instance=ExtResource("6_r6k77")]
-time_of_day = 2.77
 day_duration_seconds = 240.0
 sun_color = SubResource("Gradient_c0er0")
 sun_energy = SubResource("Curve_ueypv")
