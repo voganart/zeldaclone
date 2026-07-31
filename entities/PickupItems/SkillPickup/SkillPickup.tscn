@@ -9,7 +9,7 @@
 script = ExtResource("2_gqfab")
 skill_id = &""
 immunity_time = 0.3
-collect_vfx_index = 3
+collect_vfx_index = 4
 sound_streams = Array[AudioStream]([ExtResource("3_w1e1n")])
 randomize_pitch = false
 attraction_start_speed = 1.0

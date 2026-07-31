@@ -2,13 +2,14 @@ extends Node3D
 
 @export_group("Settings")
 @export var is_opened: bool = false
-@export var ability_to_unlock: String = "" # Например: "air_dash" или "ground_slam"
 @export var persistent_id: StringName
 
 @export_group("Loot Pool")
-# Здесь мы пишем индексы предметов из ItemPool. 
-# Например: [0, 0, 0, 1] означает 3 предмета с индексом 0 (монеты) и 1 предмет с индексом 1 (сердце)
-@export var loot_indices: Array[int] = [0, 0, 0] 
+@export var loot_entries: Array[ChestLootEntry] = [
+	ChestLootEntry.new(),
+	ChestLootEntry.new(),
+	ChestLootEntry.new(),
+]
 
 @export_group("Fountain Settings")
 @export var up_velocity_min: float = 5.0  # Минимальная высота подлета
@@ -54,15 +55,20 @@ func open_chest() -> void:
 func spawn_loot() -> void:
 	if _restoring_persistent_state:
 		return
-	if ability_to_unlock != "":
-		_unlock_ability_logic()
-		persistent_state.mark_completed()
 	
-	if loot_indices.is_empty(): return
+	if loot_entries.is_empty(): return
 	
-	for index in loot_indices:
-		var item = ItemPool.spawn_item(index, spawn_point.global_position)
+	for loot_entry in loot_entries:
+		if not loot_entry:
+			continue
+
+		var item = ItemPool.spawn_item(loot_entry.item_index, spawn_point.global_position)
 		if not item: continue
+
+		if item is SkillPickup:
+			item.set_ability_id(loot_entry.ability_id)
+			if not loot_entry.ability_id.is_empty():
+				persistent_state.mark_completed()
 		
 		# === КИНЕМАТОГРАФИЧНЫЙ ВЫЛЕТ ===
 		
@@ -89,12 +95,6 @@ func spawn_loot() -> void:
 			item.gravity_scale = 2.5 # Тяжелое падение
 			
 		await get_tree().create_timer(spawn_interval).timeout
-
-func _unlock_ability_logic() -> void:
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		print("Ability UNLOCKED: ", ability_to_unlock)
-		player.unlock_ability(ability_to_unlock)
 
 
 func _apply_persistent_open_state() -> void:

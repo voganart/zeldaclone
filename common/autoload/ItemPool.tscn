@@ -1,9 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://c6y3552hoxdre"]
+[gd_scene format=3 uid="uid://c6y3552hoxdre"]
 
 [ext_resource type="Script" uid="uid://k8xh1bwsr08e" path="res://common/autoload/ItemPool.gd" id="1_pb3oc"]
 [ext_resource type="PackedScene" uid="uid://c7bvbtr2h28fh" path="res://entities/PickupItems/HeartPickup/HeartPickup.tscn" id="2_pb3oc"]
 [ext_resource type="PackedScene" uid="uid://djfbluhws0fbk" path="res://entities/PickupItems/VaboPickup/VaboPickup.tscn" id="3_kmc2t"]
+[ext_resource type="PackedScene" uid="uid://5oscyln5ltcr" path="res://entities/PickupItems/SkillPickup/SkillPickup.tscn" id="4_5tjad"]
 
-[node name="ItemPool" type="Node"]
+[node name="ItemPool" type="Node" unique_id=2079553787]
 script = ExtResource("1_pb3oc")
-item_scenes = Array[PackedScene]([ExtResource("2_pb3oc"), ExtResource("3_kmc2t")])
+item_scenes = Array[PackedScene]([ExtResource("2_pb3oc"), ExtResource("3_kmc2t"), ExtResource("4_5tjad")])
