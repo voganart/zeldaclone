@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://5oscyln5ltcr"]
+
+[ext_resource type="PackedScene" uid="uid://cnq1ulipv30y2" path="res://entities/PickupItems/BasePickup.tscn" id="1_trwwm"]
+[ext_resource type="Script" uid="uid://crbymeg1ltqej" path="res://entities/PickupItems/SkillPickup/skill_pickup.gd" id="2_gqfab"]
+[ext_resource type="ArrayMesh" uid="uid://topjm3qmmiaj" path="res://assets/models/interactive/items_SkillPickup.res" id="3_o4un6"]
+[ext_resource type="AudioStream" uid="uid://dvhiulcehn70w" path="res://assets/audio/sfx/SFX_Item_Pickup_Heart.wav" id="3_w1e1n"]
+
+[node name="SkillPickup" unique_id=2084096803 instance=ExtResource("1_trwwm")]
+script = ExtResource("2_gqfab")
+skill_id = &""
+immunity_time = 0.3
+collect_vfx_index = 3
+sound_streams = Array[AudioStream]([ExtResource("3_w1e1n")])
+randomize_pitch = false
+attraction_start_speed = 1.0
+attraction_acceleration = 10.0
+attraction_radius = 2.0
+
+[node name="OmniLight3D" parent="." index="0"]
+light_color = Color(0, 0.8427992, 1, 1)
+
+[node name="Items" parent="Visuals" index="0"]
+mesh = ExtResource("3_o4un6")
+
+[node name="AnimationPlayer" parent="." index="4"]
+autoplay = &"Idle"

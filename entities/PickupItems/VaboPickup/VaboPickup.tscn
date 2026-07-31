@@ -1,11 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://djfbluhws0fbk"]
+[gd_scene format=3 uid="uid://djfbluhws0fbk"]
 
 [ext_resource type="PackedScene" uid="uid://cnq1ulipv30y2" path="res://entities/PickupItems/BasePickup.tscn" id="1_331c8"]
 [ext_resource type="Script" uid="uid://on4f4ixyxx7m" path="res://entities/PickupItems/VaboPickup/vabo.gd" id="2_p7dtb"]
 [ext_resource type="AudioStream" uid="uid://0hbllkeac768" path="res://assets/audio/sfx/SFX_Item_Pickup_Vabo.wav" id="3_6jgw3"]
 [ext_resource type="ArrayMesh" uid="uid://yc6m1p18btn2" path="res://assets/models/interactive/items_Vabo.res" id="3_p7dtb"]
 
-[node name="VaboPickup" instance=ExtResource("1_331c8")]
+[node name="VaboPickup" unique_id=749417966 instance=ExtResource("1_331c8")]
 script = ExtResource("2_p7dtb")
 amount = 1
 pool_index = 1
@@ -31,3 +31,6 @@ mesh = ExtResource("3_p7dtb")
 
 [node name="CollisionShape3D" parent="InteractionArea" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.39646122, 0)
+
+[node name="AnimationPlayer" parent="." index="4"]
+autoplay = &"Idle"

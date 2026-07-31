@@ -12,6 +12,7 @@ fill_from = Vector2(1, 0.89102566)
 [resource]
 next_pass = ExtResource("1_x2y8n")
 transparency = 1
+cull_mode = 1
 diffuse_mode = 3
 specular_mode = 1
 albedo_texture = ExtResource("3_7yjgy")
