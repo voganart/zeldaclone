@@ -630,6 +630,7 @@ checkpoint_id = &"level_01_obstacles"
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." unique_id=988376034 instance=ExtResource("6_r6k77")]
+time_of_day = 12.66
 day_duration_seconds = 240.0
 sun_color = SubResource("Gradient_c0er0")
 sun_energy = SubResource("Curve_ueypv")
@@ -935,6 +936,11 @@ transform = Transform3D(-0.9999995, 0, 8.742273e-08, 0, 1, 0, -8.742273e-08, 0, 
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Zone01/Environment" unique_id=165344964]
 navigation_mesh = SubResource("NavigationMesh_yf5fn")
+
+[node name="Enemy" parent="Zone01/Environment/NavigationRegion3D" unique_id=403743242 instance=ExtResource("43_r8j8t")]
+
+[node name="Enemy2" parent="Zone01/Environment/NavigationRegion3D" unique_id=1210285533 instance=ExtResource("43_r8j8t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7022111, 0, -2.2312803)
 
 [node name="island" parent="Zone01/Environment/NavigationRegion3D" unique_id=2133351653 instance=ExtResource("1_uw0fs")]
 

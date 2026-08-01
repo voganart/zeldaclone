@@ -17,7 +17,7 @@ attraction_acceleration = 10.0
 attraction_radius = 2.0
 
 [node name="OmniLight3D" parent="." index="0"]
-light_color = Color(0, 0.8427992, 1, 1)
+light_color = Color(0.68922776, 0.3158576, 1, 1)
 
 [node name="Items" parent="Visuals" index="0"]
 mesh = ExtResource("3_o4un6")

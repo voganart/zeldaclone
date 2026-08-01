@@ -1,7 +1,7 @@
 [gd_resource type="StandardMaterial3D" format=3 uid="uid://cdu2wcsgrmhpa"]
 
+[ext_resource type="Texture2D" uid="uid://d2nmp0qurf82i" path="res://assets/_master/MasterTexture_v2.png" id="1_s5k2s"]
 [ext_resource type="Material" uid="uid://dmrecklaxbldq" path="res://assets/_master/x-ray_mat.tres" id="1_x2y8n"]
-[ext_resource type="Texture2D" uid="uid://dkt643nhk50oo" path="res://assets/_master/MasterTexture.png" id="3_7yjgy"]
 
 [sub_resource type="Gradient" id="Gradient_7uyla"]
 
@@ -15,13 +15,13 @@ transparency = 1
 cull_mode = 1
 diffuse_mode = 3
 specular_mode = 1
-albedo_texture = ExtResource("3_7yjgy")
+albedo_texture = ExtResource("1_s5k2s")
 albedo_texture_force_srgb = true
 metallic_specular = 1.0
 roughness = 0.72
 emission_enabled = true
 emission_energy_multiplier = 0.5
-emission_texture = ExtResource("3_7yjgy")
+emission_texture = ExtResource("1_s5k2s")
 rim_enabled = true
 clearcoat_enabled = true
 anisotropy = 0.21
