@@ -164,6 +164,9 @@ func _exit_tree() -> void:
 	AIDirector.unregister_enemy(self)
 
 func _physics_process(delta: float) -> void:
+	if not is_instance_valid(player):
+		player = get_tree().get_first_node_in_group(GameConstants.GROUP_PLAYER)
+
 	if hurt_lock_timer > 0:
 		hurt_lock_timer = max(hurt_lock_timer - delta, 0.0)
 
