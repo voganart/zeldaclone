@@ -38,7 +38,8 @@ extends CharacterBody3D
 @export var knockback_duration: float = 0.5
 
 @export_group("Animation Blending")
-@export var walk_run_blend_smoothing: float = 8.0
+@export var walk_run_blend_smoothing: float = 4.0
+@export_range(0.0, 1.0) var idle_turn_blend: float = 0.2
 
 # ============================================================================
 # COMPONENT PROXIES (GETTERS)
@@ -346,9 +347,10 @@ func trigger_knockdown_oneshot():
 func trigger_angry_seek(time: float):
 	anim_tree.set(GameConstants.TREE_ANGRY_SEEK, time)
 
-func update_movement_animation(delta: float) -> void:
+func update_movement_animation(delta: float, is_turning_in_place: bool = false) -> void:
 	var current_state_name = state_machine.current_state.name.to_lower()
-	var speed_length = velocity.length()
+	var horizontal_velocity = Vector3(velocity.x, 0, velocity.z)
+	var speed_length = horizontal_velocity.length()
 
 	var should_force_idle = is_knocked_back or current_state_name == "hit"
 	if current_state_name == "attack" and speed_length < 0.5:
@@ -359,7 +361,7 @@ func update_movement_animation(delta: float) -> void:
 		set_locomotion_blend(current_movement_blend)
 		return
 
-	var local_velocity = global_transform.basis.inverse() * velocity
+	var local_velocity = global_transform.basis.inverse() * horizontal_velocity
 	
 	if current_state_name == "combatstance":
 		var strafe_val = clamp(local_velocity.x / walk_speed, -1.0, 1.0)
@@ -369,7 +371,7 @@ func update_movement_animation(delta: float) -> void:
 		var is_moving_backwards = local_velocity.z < -0.1
 		
 		if speed_length < 0.1:
-			target_val = 0.0
+			target_val = idle_turn_blend if is_turning_in_place else 0.0
 		else:
 			if is_moving_backwards:
 				var back_intensity = clamp(speed_length / walk_speed, 0.0, 1.0)

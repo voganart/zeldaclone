@@ -18,8 +18,6 @@ func enter() -> void:
 	# Переключаем дерево в состояние Alive -> Normal Movement
 	enemy.set_tree_state("alive")
 	enemy.set_move_mode("normal")
-	# Устанавливаем BlendSpace в 0 (Idle)
-	enemy.set_locomotion_blend(0.0)
 	# ----------------------
 	
 	timer = randf_range(idle_duration_min, idle_duration_max)
@@ -33,13 +31,14 @@ func physics_update(delta: float) -> void:
 		transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 	
-	_handle_looking_around(delta)
+	var is_turning_in_place = _handle_looking_around(delta)
+	enemy.update_movement_animation(delta, is_turning_in_place)
 	
 	if timer <= 0:
 		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 
-func _handle_looking_around(delta: float) -> void:
+func _handle_looking_around(delta: float) -> bool:
 	idle_look_timer -= delta
 	if idle_look_timer <= 0:
 		is_looking_around = !is_looking_around
@@ -49,4 +48,9 @@ func _handle_looking_around(delta: float) -> void:
 			target_angle = enemy.rotation.y + randf_range(-PI / 3, PI / 3)
 	
 	if is_looking_around:
-		enemy.rotation.y = lerp_angle(enemy.rotation.y, target_angle, delta * 2.0)
+		var remaining_angle = abs(wrapf(target_angle - enemy.rotation.y, -PI, PI))
+		if remaining_angle > deg_to_rad(1.0):
+			enemy.rotation.y = lerp_angle(enemy.rotation.y, target_angle, delta * 2.0)
+			return true
+
+	return false

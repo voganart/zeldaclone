@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=4 uid="uid://de632nim831v7"]
+[gd_scene format=4 uid="uid://de632nim831v7"]
 
 [ext_resource type="Script" uid="uid://bqm5baonyye2y" path="res://common/utils/tree_generator.gd" id="1_mgwxe"]
 [ext_resource type="QuadMesh" uid="uid://dmhox60kobeu2" path="res://assets/models/environment/LeafBasePlane.tres" id="2_ml6bh"]
@@ -32,24 +32,24 @@ buffer = PackedFloat32Array(-0.6215265, 0.62813526, 0.85250795, 0.43875813, 1.04
 [sub_resource type="SphereShape3D" id="SphereShape3D_5ibhy"]
 radius = 1.9808306
 
-[node name="Bush2" type="StaticBody3D" groups=["level_detail_objects"]]
-collision_layer = 128
+[node name="Bush2" type="StaticBody3D" unique_id=1271010035 groups=["level_detail_objects"]]
+collision_layer = 4096
 collision_mask = 63
 script = ExtResource("1_mgwxe")
 leaf_mesh = ExtResource("2_ml6bh")
 leaf_count = 400
 
-[node name="Crown" type="MeshInstance3D" parent="."]
+[node name="Crown" type="MeshInstance3D" parent="." unique_id=927821991]
 cast_shadow = 3
 mesh = SubResource("ArrayMesh_y1w0q")
 
-[node name="LeavesMultiMesh" type="MultiMeshInstance3D" parent="Crown"]
+[node name="LeavesMultiMesh" type="MultiMeshInstance3D" parent="Crown" unique_id=1654724395]
 multimesh = SubResource("MultiMesh_f1tt8")
 
-[node name="OcclusionVolume" type="Area3D" parent="."]
+[node name="OcclusionVolume" type="Area3D" parent="." unique_id=1095714034]
 collision_layer = 2147483648
 collision_mask = 0
 
-[node name="@CollisionShape3D@30521" type="CollisionShape3D" parent="OcclusionVolume"]
+[node name="@CollisionShape3D@30521" type="CollisionShape3D" parent="OcclusionVolume" unique_id=528981357]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1978644, 0)
 shape = SubResource("SphereShape3D_5ibhy")
