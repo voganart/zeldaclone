@@ -43,7 +43,7 @@ func physics_update(delta: float) -> void:
 		attack_delay_timer -= delta
 	else:
 		# Атакуем только если таймер истек
-		if enemy.attack_component.is_attack_ready():
+		if dist <= enemy.attack_component.attack_range and enemy.attack_component.is_attack_ready():
 			if AIDirector.request_attack_token(enemy):
 				transitioned.emit(self, GameConstants.STATE_ATTACK)
 				return

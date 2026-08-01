@@ -3,8 +3,10 @@ extends Node
 const MAX_ATTACKERS = 2
 const SLOT_COUNT = 6
 const SLOT_DISTANCE = 2.5
+const ATTACK_HANDOFF_DELAY = 0.3
 
 var current_attackers: Array[Enemy] = []
+var next_attack_time_msec: int = 0
 # Словарь: { slot_index: Enemy_ref }
 var occupied_slots: Dictionary = {}
 
@@ -123,9 +125,14 @@ func get_slot_world_pos(index: int, player: Node3D) -> Vector3:
 func request_attack_token(enemy: Enemy) -> bool:
 	if enemy in current_attackers:
 		return true
+
+	var time_now = Time.get_ticks_msec()
+	if time_now < next_attack_time_msec:
+		return false
 		
 	if current_attackers.size() < MAX_ATTACKERS:
 		current_attackers.append(enemy)
+		next_attack_time_msec = time_now + int(ATTACK_HANDOFF_DELAY * 1000.0)
 		print("[AI] Token GRANTED: ", enemy.name)
 		return true
 		
@@ -134,4 +141,5 @@ func request_attack_token(enemy: Enemy) -> bool:
 func return_attack_token(enemy: Enemy) -> void:
 	if enemy in current_attackers:
 		current_attackers.erase(enemy)
+		next_attack_time_msec = Time.get_ticks_msec() + int(ATTACK_HANDOFF_DELAY * 1000.0)
 		print("[AI] Token RETURNED: ", enemy.name)

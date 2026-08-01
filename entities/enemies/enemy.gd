@@ -93,6 +93,7 @@ var current_movement_blend: float = 0.0
 var is_knocked_back: bool = false
 var pending_death: bool = false
 var knockback_timer: float = 0.0
+var is_ai_locked: bool = false
 
 var physics_update_counter: int = 0
 var physics_lod_distance_sq: float = 30.0 * 30.0 
@@ -159,6 +160,9 @@ func _exit_tree() -> void:
 	AIDirector.unregister_enemy(self)
 
 func _physics_process(delta: float) -> void:
+	if hurt_lock_timer > 0:
+		hurt_lock_timer = max(hurt_lock_timer - delta, 0.0)
+
 	if is_instance_valid(player):
 		var dist_sq = global_position.distance_squared_to(player.global_position)
 		if dist_sq > physics_lod_distance_sq: 
@@ -195,7 +199,20 @@ func _physics_process(delta: float) -> void:
 			velocity = Vector3.ZERO
 			if pending_death:
 				_finalize_death()
+				return
+			if hurt_lock_timer <= 0:
+				_set_ai_locked(false)
 		return
+
+	if hurt_lock_timer > 0:
+		if movement_component:
+			movement_component.apply_gravity(delta)
+		velocity.x = move_toward(velocity.x, 0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0, friction * delta)
+		move_and_slide()
+		return
+	elif is_ai_locked:
+		_set_ai_locked(false)
 
 	if frustrated_cooldown > 0:
 		frustrated_cooldown -= delta
@@ -285,6 +302,15 @@ func handle_rotation(delta: float, target_override: Vector3 = Vector3.ZERO, spee
 
 func receive_push(push: Vector3) -> void:
 	velocity += push
+
+func _set_ai_locked(locked: bool) -> void:
+	if is_ai_locked == locked:
+		return
+	is_ai_locked = locked
+	state_machine.set_process(not locked)
+	state_machine.set_physics_process(not locked)
+	if locked:
+		nav_agent.set_velocity(Vector3.ZERO)
 
 # ============================================================================
 # ANIMATION & STATE WRAPPERS
@@ -423,6 +449,9 @@ func take_damage(amount: float, knockback_force: Vector3, is_heavy_attack: bool 
 		velocity = final_force
 		is_knocked_back = true
 		knockback_timer = 0.2 
+
+	if hurt_lock_timer > 0 or is_knocked_back:
+		_set_ai_locked(true)
 
 func _cry_for_help() -> void:
 	var enemies = get_tree().get_nodes_in_group(GameConstants.GROUP_ENEMIES)

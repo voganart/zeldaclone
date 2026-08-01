@@ -1,19 +1,32 @@
 extends State
 
+enum AttackPhase { WINDUP, ACTIVE, RECOVERY, RETREAT }
+
 var enemy: Enemy
 var is_performing_attack_anim: bool = false
 var attack_timer: float = 0.0
+var attack_elapsed: float = 0.0
+var hit_time: float = 0.0
+var active_end_time: float = 0.0
+var direction_lock_time: float = 0.0
+var recovery_timer: float = 0.0
+var attack_phase: AttackPhase = AttackPhase.WINDUP
 
 # НАСТРОЙКА: За сколько секунд до удара показать "!"
 # 0.4 - оптимально для реакции.
 # Если поставить 0.0, знак появится ровно в момент удара.
 # Если поставить отрицательное число (не надо), логика сломается.
 @export var warning_lead_time: float = 0.4 
+@export var direction_lock_lead_time: float = 0.15
+@export var recovery_duration: float = 0.5
 
 func enter() -> void:
 	enemy = entity as Enemy
 	is_performing_attack_anim = false
 	attack_timer = 0.0
+	attack_elapsed = 0.0
+	recovery_timer = recovery_duration
+	attack_phase = AttackPhase.WINDUP
 	
 	# Полная остановка и подготовка
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
@@ -28,22 +41,29 @@ func enter() -> void:
 
 func physics_update(delta: float) -> void:
 	enemy.update_movement_animation(delta) 
-	
-	if is_performing_attack_anim:
-		attack_timer -= delta
-		
-		# Враг доворачивается за игроком во время удара (чуть медленнее, чем обычно)
-		if is_instance_valid(enemy.player):
-			enemy.handle_rotation(delta, enemy.player.global_position, enemy.attack_rotation_speed)
 
-		if attack_timer <= 0:
-			_finish_attack()
-		return
-	
-	# Если атака закончилась, но мы не вышли из стейта (например, пауза), 
-	# обрабатываем тактическое отступление
-	if enemy.attack_component.should_tactical_retreat:
+	if attack_phase == AttackPhase.RETREAT:
 		_handle_retreat(delta)
+		return
+
+	attack_elapsed += delta
+	attack_timer = max(attack_timer - delta, 0.0)
+
+	if attack_phase == AttackPhase.WINDUP:
+		if is_instance_valid(enemy.player) and attack_elapsed < direction_lock_time:
+			enemy.handle_rotation(delta, enemy.player.global_position, enemy.attack_rotation_speed)
+		if attack_elapsed >= hit_time:
+			attack_phase = AttackPhase.ACTIVE
+
+	if attack_phase == AttackPhase.ACTIVE and attack_elapsed >= active_end_time:
+		attack_phase = AttackPhase.RECOVERY
+
+	if attack_phase == AttackPhase.RECOVERY and attack_timer <= 0:
+		is_performing_attack_anim = false
+		enemy.nav_agent.set_velocity(Vector3.ZERO)
+		recovery_timer -= delta
+		if recovery_timer <= 0:
+			_finish_attack()
 
 func _perform_attack() -> void:
 	is_performing_attack_anim = true
@@ -53,7 +73,10 @@ func _perform_attack() -> void:
 	
 	# 2. === АВТО-РАСЧЕТ ТАЙМИНГА ===
 	# Ищем, на какой секунде стоит вызов _check_attack_hit
-	var hit_time = _get_hit_time_from_animation(anim_name_full)
+	var attack_speed = max(enemy.attack_component.attack_speed, 0.01)
+	hit_time = _get_hit_time_from_animation(anim_name_full) / attack_speed
+	active_end_time = hit_time + 0.1
+	direction_lock_time = max(hit_time - direction_lock_lead_time, 0.0)
 	
 	# Считаем задержку: (Время удара) - (Время на реакцию)
 	# Пример: Удар на 0.8с, предупредить за 0.4с -> ждем 0.4с и показываем знак.
@@ -81,7 +104,7 @@ func _perform_attack() -> void:
 	if enemy.anim_player.has_animation(anim_name_full):
 		anim_length = enemy.anim_player.get_animation(anim_name_full).length
 	
-	attack_timer = anim_length / enemy.attack_component.attack_speed
+	attack_timer = anim_length / attack_speed
 
 ## Функция-ищейка: находит время удара внутри анимации
 func _get_hit_time_from_animation(anim_name: String) -> float:
@@ -126,6 +149,7 @@ func _finish_attack() -> void:
 	
 	if enemy.attack_component.should_tactical_retreat:
 		enemy.attack_component.calculate_retreat_target(enemy.player)
+		attack_phase = AttackPhase.RETREAT
 	else:
 		transitioned.emit(self, GameConstants.STATE_CHASE)
 
@@ -176,6 +200,7 @@ func on_damage_taken(is_heavy: bool = false) -> void:
 
 func exit() -> void:
 	is_performing_attack_anim = false
+	attack_phase = AttackPhase.RECOVERY
 	AIDirector.return_attack_token(enemy)
 	if enemy.combat_component:
 		enemy.combat_component._stop_hitbox_monitoring()
