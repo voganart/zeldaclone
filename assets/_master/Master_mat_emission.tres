@@ -1,0 +1,45 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://4b71obidsk3p"]
+
+[ext_resource type="Texture2D" uid="uid://d2nmp0qurf82i" path="res://assets/_master/MasterTexture_v2.png" id="1_ctttv"]
+[ext_resource type="Texture2D" uid="uid://dfk05x11w2el" path="res://assets/textures/environment/metal_01_1k/Packed_ORM.png" id="2_l7nts"]
+[ext_resource type="Texture2D" uid="uid://bomvlyfon8tgr" path="res://assets/textures/environment/Stylized Rock2nm.png" id="3_vmoxw"]
+[ext_resource type="Texture2D" uid="uid://cmgw13qhad00q" path="res://assets/textures/environment/metal_01_1k/metal_01_normal_gl_1k.png" id="4_eao8d"]
+
+[sub_resource type="Gradient" id="Gradient_01adi"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0.88235295, 0.98039216, 1, 0.28235295)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ua6c6"]
+gradient = SubResource("Gradient_01adi")
+
+[sub_resource type="Gradient" id="Gradient_14vba"]
+colors = PackedColorArray(0, 0, 0, 1, 2.478988, 2.478988, 2.478988, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_qdf5j"]
+gradient = SubResource("Gradient_14vba")
+use_hdr = true
+fill_from = Vector2(1, 1)
+
+[resource]
+transparency = 1
+vertex_color_is_srgb = true
+albedo_color = Color(4.415934, 4.415934, 4.415934, 0.5058824)
+albedo_texture = ExtResource("1_ctttv")
+metallic_specular = 0.18
+roughness = 0.1
+emission_enabled = true
+emission_energy_multiplier = 2.91
+emission_texture = ExtResource("1_ctttv")
+normal_texture = ExtResource("4_eao8d")
+rim = 0.37
+rim_tint = 0.6
+rim_texture = SubResource("GradientTexture2D_qdf5j")
+ao_light_affect = 1.0
+ao_texture = ExtResource("2_l7nts")
+detail_albedo = SubResource("GradientTexture1D_ua6c6")
+detail_normal = ExtResource("3_vmoxw")
+uv2_scale = Vector3(10, 10, 10)
+uv2_triplanar_sharpness = 1.3461335
+grow_amount = 0.006
+distance_fade_min_distance = 200.0
+distance_fade_max_distance = 20.0

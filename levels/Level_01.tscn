@@ -46,6 +46,7 @@
 [ext_resource type="PackedScene" uid="uid://vklbwyebk8e6" path="res://levels/components/BattleArena/BattleArena.tscn" id="43_2fo6c"]
 [ext_resource type="PackedScene" uid="uid://d8g64g8viihh" path="res://entities/enemies/enemy.tscn" id="43_r8j8t"]
 [ext_resource type="PackedScene" uid="uid://cj4x4r8m3w7u0" path="res://entities/enemies/spawners/EnemyPortal.tscn" id="44_ykjdn"]
+[ext_resource type="PackedScene" uid="uid://5oscyln5ltcr" path="res://entities/PickupItems/SkillPickup/SkillPickup.tscn" id="47_ykjdn"]
 
 [sub_resource type="Gradient" id="Gradient_c0er0"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -107,27 +108,27 @@ colors = PackedColorArray(0.10147208, 0.5, 0.05007395, 1, 0.87282026, 0.9670598,
 gradient = SubResource("Gradient_mnooe")
 fill_from = Vector2(1, 1)
 
-[sub_resource type="Resource" id="Resource_r8j8t"]
+[sub_resource type="Resource" id="Resource_ykjdn"]
 script = ExtResource("19_fbdqi")
 amount = 500
 custom_seed = 4
 restrict_height = true
 reference_frame = 1
 
-[sub_resource type="Resource" id="Resource_ykjdn"]
+[sub_resource type="Resource" id="Resource_wd8iv"]
 script = ExtResource("20_j8a35")
 position = Vector3(0.15, 0.15, 0.15)
 rotation = Vector3(20, 360, 20)
 scale = Vector3(1, 1, 1)
 reference_frame = 2
 
-[sub_resource type="Resource" id="Resource_wd8iv"]
+[sub_resource type="Resource" id="Resource_s8n2r"]
 script = ExtResource("21_st04i")
 offset_step = 0.2
 consecutive_step_multiplier = 0.75
 restrict_height = true
 
-[sub_resource type="Resource" id="Resource_s8n2r"]
+[sub_resource type="Resource" id="Resource_iijgv"]
 script = ExtResource("22_ccvsj")
 ray_length = 5.0
 ray_offset = 5.0
@@ -136,9 +137,9 @@ max_slope = 30.0
 collision_mask = 8
 exclude_mask = 247
 
-[sub_resource type="Resource" id="Resource_iijgv"]
+[sub_resource type="Resource" id="Resource_fbdqi"]
 script = ExtResource("17_s8n2r")
-stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_r8j8t"), SubResource("Resource_ykjdn"), SubResource("Resource_wd8iv"), SubResource("Resource_s8n2r")])
+stack = Array[ExtResource("18_iijgv")]([SubResource("Resource_ykjdn"), SubResource("Resource_wd8iv"), SubResource("Resource_s8n2r"), SubResource("Resource_iijgv")])
 
 [sub_resource type="Resource" id="Resource_aow8p"]
 script = ExtResource("25_diasq")
@@ -630,8 +631,6 @@ checkpoint_id = &"level_01_obstacles"
 script = ExtResource("41_w7r3u")
 
 [node name="EnvironmentSystem" parent="." unique_id=988376034 instance=ExtResource("6_r6k77")]
-time_of_day = 12.66
-day_duration_seconds = 240.0
 sun_color = SubResource("Gradient_c0er0")
 sun_energy = SubResource("Curve_ueypv")
 moon_color = SubResource("Gradient_cktag")
@@ -718,7 +717,7 @@ metadata/SimpleGrassTextured = "2.0.5"
 [node name="ProtonScatter" type="Node3D" parent="." unique_id=642895029]
 script = ExtResource("16_wd8iv")
 keep_static_colliders = true
-modifier_stack = SubResource("Resource_iijgv")
+modifier_stack = SubResource("Resource_fbdqi")
 Performance/use_chunks = true
 Performance/chunk_dimensions = Vector3(15, 15, 15)
 metadata/_custom_type_script = "uid://bn8ms3g1y108p"
@@ -1573,3 +1572,6 @@ move_offset = Vector3(-10, 2.5, 0)
 preview_progress = 0.735
 
 [node name="EnemySpawner" parent="." unique_id=1164548512 instance=ExtResource("41_ueypv")]
+
+[node name="SkillPickup" parent="." unique_id=2084096803 instance=ExtResource("47_ykjdn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.283, 0, 0.43)
