@@ -57,21 +57,34 @@ func physics_update(delta: float) -> void:
 	enemy.update_movement_animation(delta)
 
 func _set_random_patrol_target() -> void:
-	if not enemy.patrol_zone: return
-	var shape_node = enemy.patrol_zone.get_node_or_null("CollisionShape3D")
-	if not shape_node: return
-	
-	var extents = shape_node.shape.extents
-	var box_center = shape_node.global_transform.origin
+	var box_center = enemy.patrol_origin
+	var extents = Vector3(enemy.fallback_patrol_radius, 0, enemy.fallback_patrol_radius)
+	var use_box_area = false
+
+	if enemy.patrol_zone:
+		var shape_node = enemy.patrol_zone.get_node_or_null("CollisionShape3D")
+		if shape_node and shape_node.shape is BoxShape3D:
+			var box_shape = shape_node.shape as BoxShape3D
+			box_center = shape_node.global_transform.origin
+			extents = box_shape.size * 0.5
+			use_box_area = true
 
 	for i in range(10):
-		var random_offset = Vector3(
-			randf_range(-extents.x, extents.x),
-			0,
-			randf_range(-extents.z, extents.z)
-		)
+		var random_offset: Vector3
+		if use_box_area:
+			random_offset = Vector3(
+				randf_range(-extents.x, extents.x),
+				0,
+				randf_range(-extents.z, extents.z)
+			)
+		else:
+			var angle = randf() * TAU
+			var distance = sqrt(randf()) * enemy.fallback_patrol_radius
+			random_offset = Vector3(cos(angle), 0, sin(angle)) * distance
+
 		var candidate = box_center + random_offset
 		var nav_map = enemy.nav_agent.get_navigation_map()
 		var valid_point = NavigationServer3D.map_get_closest_point(nav_map, candidate)
-		enemy.nav_agent.target_position = valid_point
-		return
+		if valid_point.distance_squared_to(enemy.global_position) > 0.25:
+			enemy.nav_agent.target_position = valid_point
+			return

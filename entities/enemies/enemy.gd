@@ -16,6 +16,7 @@ extends CharacterBody3D
 @export_range(0.0, 1.0) var flee_health_threshold: float = 0.25
 @export_range(0.0, 1.0) var flee_chance: float = 0.3
 @export var help_radius: float = 15.0 
+@export var fallback_patrol_radius: float = 5.0
 
 @export_group("Navigation Avoidance")
 @export var enable_avoidance: bool = true 
@@ -86,6 +87,7 @@ var vfx_pull: Node3D
 # SHARED DATA
 # ============================================================================
 var last_known_player_pos: Vector3 = Vector3.ZERO
+var patrol_origin: Vector3 = Vector3.ZERO
 var frustrated_cooldown: float = 0.0
 var hurt_lock_timer: float = 0.0
 
@@ -131,6 +133,7 @@ func _ready() -> void:
 	GraphicsManager.quality_changed.connect(_on_quality_changed)
 	
 	await get_tree().process_frame
+	patrol_origin = global_position
 	nav_agent.set_navigation_map(get_world_3d().navigation_map)
 	GameEvents.player_died.connect(_on_player_died)
 	
