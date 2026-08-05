@@ -6,6 +6,8 @@ enum Device { KEYBOARD, XBOX, PLAYSTATION, SWITCH, GENERIC }
 
 var current_device: Device = Device.KEYBOARD
 var current_joy_id: int = 0
+var _icon_cache: Dictionary[String, Texture2D] = {}
+var _icons_prewarmed: bool = false
 
 # Пути к папкам согласно твоей структуре
 const PATH_KEYBOARD = "res://assets/ui/input_prompts/keyboard/"
@@ -15,6 +17,20 @@ const PATH_PS = "res://assets/ui/input_prompts/playstation/"
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process_input(true)
+
+func prewarm_icons() -> void:
+	if _icons_prewarmed:
+		return
+
+	var previous_device = current_device
+	for device in [Device.KEYBOARD, Device.XBOX, Device.PLAYSTATION]:
+		current_device = device
+		for action in InputMap.get_actions():
+			get_icon(action)
+		await get_tree().process_frame
+
+	current_device = previous_device
+	_icons_prewarmed = true
 
 func _input(event: InputEvent) -> void:
 	var new_device = current_device
@@ -59,19 +75,19 @@ func get_icon(action_name: String) -> Texture2D:
 # --- СПЕЦИАЛЬНЫЕ ИКОНКИ ДЛЯ ОСЕЙ ---
 func _get_move_icon() -> Texture2D:
 	if current_device == Device.KEYBOARD:
-		return load(PATH_KEYBOARD + "keyboard_arrows.png") # Или keyboard_w.png, если хочешь
+		return _load_texture(PATH_KEYBOARD + "keyboard_arrows.png") # Или keyboard_w.png, если хочешь
 	elif current_device == Device.PLAYSTATION:
-		return load(PATH_PS + "playstation_stick_l.png")
+		return _load_texture(PATH_PS + "playstation_stick_l.png")
 	else:
-		return load(PATH_XBOX + "xbox_stick_l.png")
+		return _load_texture(PATH_XBOX + "xbox_stick_l.png")
 
 func _get_camera_icon() -> Texture2D:
 	if current_device == Device.KEYBOARD:
-		return load(PATH_KEYBOARD + "mouse_move.png")
+		return _load_texture(PATH_KEYBOARD + "mouse_move.png")
 	elif current_device == Device.PLAYSTATION:
-		return load(PATH_PS + "playstation_stick_r.png")
+		return _load_texture(PATH_PS + "playstation_stick_r.png")
 	else:
-		return load(PATH_XBOX + "xbox_stick_r.png")
+		return _load_texture(PATH_XBOX + "xbox_stick_r.png")
 
 # --- ЗАГРУЗЧИКИ ТЕКСТУР ---
 
@@ -83,15 +99,15 @@ func _get_key_texture(keycode: int) -> Texture2D:
 	if key_str == "shift": key_str = "shift"   # keyboard_shift.png
 	
 	var path = PATH_KEYBOARD + "keyboard_" + key_str + ".png"
-	if ResourceLoader.exists(path): return load(path)
-	return load(PATH_KEYBOARD + "keyboard_any.png") # Фолбек
+	if ResourceLoader.exists(path): return _load_texture(path)
+	return _load_texture(PATH_KEYBOARD + "keyboard_any.png") # Фолбек
 
 func _get_mouse_texture(btn_idx: int) -> Texture2D:
 	match btn_idx:
-		MOUSE_BUTTON_LEFT: return load(PATH_KEYBOARD + "mouse_left.png")
-		MOUSE_BUTTON_RIGHT: return load(PATH_KEYBOARD + "mouse_right.png")
-		MOUSE_BUTTON_MIDDLE: return load(PATH_KEYBOARD + "mouse_scroll.png")
-	return load(PATH_KEYBOARD + "mouse.png")
+		MOUSE_BUTTON_LEFT: return _load_texture(PATH_KEYBOARD + "mouse_left.png")
+		MOUSE_BUTTON_RIGHT: return _load_texture(PATH_KEYBOARD + "mouse_right.png")
+		MOUSE_BUTTON_MIDDLE: return _load_texture(PATH_KEYBOARD + "mouse_scroll.png")
+	return _load_texture(PATH_KEYBOARD + "mouse.png")
 
 func _get_joy_btn_texture(btn_idx: int) -> Texture2D:
 	var file = ""
@@ -105,7 +121,7 @@ func _get_joy_btn_texture(btn_idx: int) -> Texture2D:
 			JOY_BUTTON_RIGHT_SHOULDER: file = "playstation_trigger_r1.png"
 			JOY_BUTTON_START: file = "playstation3_button_start.png" # Или options для PS4/5
 			JOY_BUTTON_BACK: file = "playstation3_button_select.png"
-		if file != "": return load(PATH_PS + file)
+		if file != "": return _load_texture(PATH_PS + file)
 	else: # XBOX / GENERIC
 		match btn_idx:
 			JOY_BUTTON_A: file = "xbox_button_a.png"
@@ -116,19 +132,30 @@ func _get_joy_btn_texture(btn_idx: int) -> Texture2D:
 			JOY_BUTTON_RIGHT_SHOULDER: file = "xbox_rb.png"
 			JOY_BUTTON_START: file = "xbox_button_start.png" # Или menu
 			JOY_BUTTON_BACK: file = "xbox_button_back.png" # Или view
-		if file != "": return load(PATH_XBOX + file)
+		if file != "": return _load_texture(PATH_XBOX + file)
 	
 	return null
 
 func _get_joy_axis_texture(axis: int) -> Texture2D:
 	# Обработка курков (LT/RT, L2/R2)
 	if axis == JOY_AXIS_TRIGGER_LEFT:
-		if current_device == Device.PLAYSTATION: return load(PATH_PS + "playstation_trigger_l2.png")
-		return load(PATH_XBOX + "xbox_lt.png")
+		if current_device == Device.PLAYSTATION: return _load_texture(PATH_PS + "playstation_trigger_l2.png")
+		return _load_texture(PATH_XBOX + "xbox_lt.png")
 	if axis == JOY_AXIS_TRIGGER_RIGHT:
-		if current_device == Device.PLAYSTATION: return load(PATH_PS + "playstation_trigger_r2.png")
-		return load(PATH_XBOX + "xbox_rt.png")
+		if current_device == Device.PLAYSTATION: return _load_texture(PATH_PS + "playstation_trigger_r2.png")
+		return _load_texture(PATH_XBOX + "xbox_rt.png")
 	return null
+
+func _load_texture(path: String) -> Texture2D:
+	if _icon_cache.has(path):
+		return _icon_cache[path]
+	if not ResourceLoader.exists(path):
+		return null
+
+	var texture = load(path) as Texture2D
+	if texture:
+		_icon_cache[path] = texture
+	return texture
 
 func _get_device_type(joy_name: String) -> Device:
 	joy_name = joy_name.to_lower()

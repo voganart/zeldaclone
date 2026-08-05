@@ -6,8 +6,53 @@ extends Node
 # @export var auto_expand: bool = true 
 @export var effect_lifetime: float = 2.5 
 
+signal prewarm_finished
+
+var _prewarm_completed: bool = false
+var _prewarm_in_progress: bool = false
+
 func _ready():
 	add_to_group("vfx_pool")
+
+func prewarm_all_effects() -> void:
+	if _prewarm_completed:
+		return
+	if _prewarm_in_progress:
+		await prewarm_finished
+		return
+
+	var target_scene = get_tree().current_scene
+	if not is_instance_valid(target_scene):
+		return
+
+	_prewarm_in_progress = true
+	var camera = get_viewport().get_camera_3d()
+
+	for effect_scene in effect_scenes:
+		if not effect_scene:
+			continue
+
+		var effect = effect_scene.instantiate()
+		target_scene.add_child(effect)
+
+		if effect is Node3D:
+			if camera:
+				effect.global_position = camera.global_position - camera.global_transform.basis.z * 3.0
+			else:
+				effect.global_position = Vector3.ZERO
+
+		_enable_particles(effect)
+		_restart_animation(effect)
+
+		await RenderingServer.frame_post_draw
+
+		if is_instance_valid(effect):
+			effect.queue_free()
+		await get_tree().process_frame
+
+	_prewarm_completed = true
+	_prewarm_in_progress = false
+	prewarm_finished.emit()
 
 # Эта функция вызывается извне. Она НЕ асинхронная.
 func spawn_effect(effect_idx: int, position: Vector3, rotation: Vector3 = Vector3.ZERO):

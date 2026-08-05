@@ -5,6 +5,7 @@ const MAIN_MENU_PATH = "res://ui/menus/main_menu.tscn"
 const LOADING_SCREEN_PATH = "res://ui/menus/loading_screen.tscn"
 const GAME_OVER_PATH = "res://ui/menus/game_over.tscn"
 const LEVEL_1_PATH = "res://levels/Level_01.tscn"
+const INTERACTION_HINT_SCENE = preload("res://ui/3d_prompts/InteractionHint3D.tscn")
 
 var _target_scene_path: String = ""
 var last_played_level: String = "" 
@@ -69,6 +70,9 @@ func _process(_delta):
 		get_tree().paused = false
 		
 		await get_tree().process_frame
+		await InputHelper.prewarm_icons()
+		await _prewarm_interaction_hint()
+		await VfxPool.prewarm_all_effects()
 		await get_tree().create_timer(0.8).timeout 
 		
 		_fade_out()
@@ -76,6 +80,22 @@ func _process(_delta):
 	elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		printerr("SceneManager: Ошибка загрузки сцены ", _target_scene_path)
 		_loading = false
+
+func _prewarm_interaction_hint() -> void:
+	var target_scene = get_tree().current_scene
+	if not is_instance_valid(target_scene):
+		return
+
+	var hint = INTERACTION_HINT_SCENE.instantiate()
+	target_scene.add_child(hint)
+
+	var camera = get_viewport().get_camera_3d()
+	if camera:
+		hint.global_position = camera.global_position - camera.global_transform.basis.z * 3.0
+
+	await hint.prewarm("jump", tr("tutorial_jump_prompt"))
+	hint.queue_free()
+	await get_tree().process_frame
 
 func _fade_in():
 	var tween = create_tween()

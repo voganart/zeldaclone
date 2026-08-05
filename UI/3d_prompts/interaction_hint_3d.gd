@@ -23,6 +23,11 @@ func setup(action: String, text: String):
 	label.text = text 
 	_update_icon()
 
+func prewarm(action: String, text: String) -> void:
+	setup(action, text)
+	scale = Vector3.ONE
+	await RenderingServer.frame_post_draw
+
 func _on_device_changed(_device, _id):
 	_update_icon()
 
