@@ -35,7 +35,8 @@ func change_scene_simple(scene_path: String):
 	_fade_out()
 
 func change_scene_with_loading(scene_path: String):
-	last_played_level = scene_path 
+	last_played_level = scene_path
+	PlayerData.begin_level_visit(scene_path)
 	await _fade_in()
 	_target_scene_path = scene_path
 	get_tree().change_scene_to_file(LOADING_SCREEN_PATH)

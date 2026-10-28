@@ -5,6 +5,8 @@ extends BasePickup
 # Ссылка на файл
 const DEFAULT_VABO_SOUND = preload("res://assets/audio/sfx/SFX_Item_Pickup_Vabo.wav")
 
+var _placed_id: String = ""
+
 func _ready():
 	# АВТО-ФИКС:
 	# Если массив звуков пуст, добавляем дефолтный звук.
@@ -15,5 +17,12 @@ func _ready():
 	# Теперь вызываем родителя, который создаст плеер и настроит его
 	super._ready()
 
+	# Расставленные на уровне Вабо (не из пула) подбираются один раз за заход
+	if owner:
+		_placed_id = str(get_path())
+		if PlayerData.is_pickup_collected(_placed_id):
+			queue_free()
+
 func _apply_effect(_player):
 	PlayerData.add_vabo(amount)
+	PlayerData.mark_pickup_collected(_placed_id)

@@ -11,6 +11,8 @@ func enter() -> void:
 	player = entity as Player
 	player.is_rolling = true
 	player.is_invincible = true
+	player.roll_start_msec = Time.get_ticks_msec()
+	player.perfect_dodge_used = false
 	elapsed_time = 0.0
 	is_collider_shrunk = false
 	

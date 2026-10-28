@@ -4,6 +4,7 @@ extends Control
 @onready var btn_menu = $CenterContainer/VBox/BtnMenu
 
 func _ready():
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	btn_retry.grab_focus() # Чтобы сразу можно было нажать пробел/Enter
 	
 	btn_retry.pressed.connect(_on_retry_pressed)

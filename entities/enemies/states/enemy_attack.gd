@@ -19,6 +19,7 @@ var attack_phase: AttackPhase = AttackPhase.WINDUP
 @export var warning_lead_time: float = 0.4 
 @export var direction_lock_lead_time: float = 0.15
 @export var recovery_duration: float = 0.5
+@export var lunge_lead_time: float = 0.2 ## Рывок за столько секунд до удара
 
 func enter() -> void:
 	enemy = entity as Enemy
@@ -91,8 +92,7 @@ func _perform_attack() -> void:
 	
 	# 3. Применяем рывок (импульс)
 	var impulse = enemy.attack_component.register_attack()
-	var forward = enemy.global_transform.basis.z.normalized()
-	enemy.receive_push(forward * impulse)
+	_delayed_lunge(max(hit_time - lunge_lead_time, 0.0), impulse)
 	
 	# 4. Запускаем анимацию в дереве
 	var tree_attack_idx = "Attack1"
@@ -204,3 +204,11 @@ func exit() -> void:
 	AIDirector.return_attack_token(enemy)
 	if enemy.combat_component:
 		enemy.combat_component._stop_hitbox_monitoring()
+
+func _delayed_lunge(delay: float, impulse: float) -> void:
+	if delay > 0.0:
+		await get_tree().create_timer(delay).timeout
+	if state_machine.current_state != self or not is_instance_valid(enemy):
+		return
+	var forward = enemy.global_transform.basis.z.normalized()
+	enemy.receive_push(forward * impulse)

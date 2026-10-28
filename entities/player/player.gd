@@ -46,6 +46,14 @@ extends CharacterBody3D
 @export var soft_lock_range: float = 4.0 
 @export var soft_lock_angle: float = 90.0 
 @export var wall_pushback_force: float = 5.0
+
+@export_group("Perfect Dodge")
+@export var perfect_dodge_window: float = 0.3 # Секунды с начала Roll
+@export var perfect_dodge_slowmo_scale: float = 0.25
+@export var perfect_dodge_slowmo_time: float = 0.35
+@export var perfect_charge_damage_multiplier: float = 2.0
+@export var perfect_charge_lifetime: float = 5.0
+@export var perfect_charge_color: Color = Color(1.0, 0.25, 0.08)
  
 # --- COMPONENTS ---
 @onready var anim_controller: AnimationController = $Components/AnimationController 
@@ -101,6 +109,11 @@ var shift_pressed_time: float = 0.0
 var is_rolling: bool = false 
 var is_invincible: bool = false
 var roll_threshold: float = 0.18 
+var roll_start_msec: int = 0
+var perfect_dodge_used: bool = false
+var has_perfect_charge: bool = false
+var _charge_lights: Array[OmniLight3D] = []
+var _charge_expire_timer: SceneTreeTimer
 
 var current_knockback_timer: float = 0.0
 var is_knockbacked: bool = false
@@ -836,6 +849,8 @@ func _check_attack_hit() -> void:
 	combat_component.activate_hitbox_check(0.1)
 
 func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool = false, silent: bool = false) -> void:
+	if is_rolling and not silent:
+		_try_perfect_dodge()
 	if ground_slam_ability.is_slamming or is_invincible: return
 	
 	if health_component: health_component.take_damage(amount)
@@ -906,3 +921,56 @@ func can_restore_collider() -> bool:
 	if not shape_cast: return true
 	shape_cast.force_shapecast_update()
 	return not shape_cast.is_colliding()
+
+
+# --- PERFECT DODGE ---
+# Удар врага попал в игрока в начале Roll (i-frames) — идеальное уклонение.
+func _try_perfect_dodge() -> void:
+	if perfect_dodge_used:
+		return
+	if (Time.get_ticks_msec() - roll_start_msec) / 1000.0 > perfect_dodge_window:
+		return
+	perfect_dodge_used = true
+	GameManager.hit_stop_smooth(perfect_dodge_slowmo_scale, perfect_dodge_slowmo_time, 0.0, 0.25)
+	GameEvents.camera_shake_requested.emit(0.35, 0.2)
+	VfxPool.spawn_effect(4, global_position + Vector3(0, 1.0, 0))
+	sfx_dash.play_random()
+	if roll_ability.current_roll_charges < roll_ability.roll_max_charges and not roll_ability.is_roll_recharging:
+		roll_ability.current_roll_charges += 1
+		roll_ability.roll_charges_changed.emit(roll_ability.current_roll_charges, roll_ability.roll_max_charges, false)
+	_set_perfect_charge(true)
+
+
+func consume_perfect_charge() -> bool:
+	if not has_perfect_charge:
+		return false
+	_set_perfect_charge(false)
+	return true
+
+
+func _set_perfect_charge(value: bool) -> void:
+	has_perfect_charge = value
+	for light in _charge_lights:
+		if is_instance_valid(light):
+			light.queue_free()
+	_charge_lights.clear()
+	if not value:
+		return
+	for hand: Area3D in [combat_component.punch_hand_r, combat_component.punch_hand_l]:
+		if not hand:
+			continue
+		var light := OmniLight3D.new()
+		light.light_color = perfect_charge_color
+		light.light_energy = 3.0
+		light.omni_range = 1.2
+		hand.add_child(light)
+		_charge_lights.append(light)
+		var pulse := light.create_tween().set_loops()
+		pulse.tween_property(light, "light_energy", 1.5, 0.25)
+		pulse.tween_property(light, "light_energy", 3.0, 0.25)
+	var timer := get_tree().create_timer(perfect_charge_lifetime)
+	_charge_expire_timer = timer
+	timer.timeout.connect(func():
+		if _charge_expire_timer == timer:
+			_set_perfect_charge(false)
+	)

@@ -13,6 +13,7 @@ var enemy: Enemy
 func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.set_velocity(Vector3.ZERO)
+	enemy.set_combat_music(false)
 	
 	# --- ANIMATION TREE ---
 	# Переключаем дерево в состояние Alive -> Normal Movement
@@ -27,7 +28,7 @@ func enter() -> void:
 func physics_update(delta: float) -> void:
 	timer -= delta
 	
-	if enemy.vision_component.can_see_target(enemy.player):
+	if enemy.frustrated_cooldown <= 0 and enemy.vision_component.can_see_target(enemy.player):
 		transitioned.emit(self, GameConstants.STATE_CHASE)
 		return
 	

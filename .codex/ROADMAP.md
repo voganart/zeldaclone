@@ -66,6 +66,51 @@ Design:
 - Validate the ability-gated traversal sequence.
 - Reach a complete playable loop before broad UI or environment polish.
 
+### Vertical Slice Iterations (agreed 2026-10-28)
+
+Design source: `docs/design/GDD.md`. One iteration per chat, verified in Godot
+before the next one.
+
+1. Done: free 3D camera by default; F4 camera toggle disabled through
+   `GameConstants.CAMERA_TOGGLE_ENABLED` (code kept).
+2. Level_01 flow: arena waves and reward chest, enemies along Zone02-05,
+   fill empty Zone04-06 breakables, remove the duplicate `_setup_*` calls.
+3. In progress: Level_01 finale "Сбой" — after the arena, fragile stones
+   rise from the void (`CollapseRun`), crumbling path to `LevelExit`
+   (demo complete -> main menu). Next: richer platforming Zone05 -> Zone06
+   (Jump -> Double Jump -> Dash -> Slam chain). Later: separate prologue
+   level with the Great Failure escape on Hearth Isle.
+4. Zone dressing via an editor `@tool` script (deterministic, re-runnable):
+   grass -> ruins -> sand rocks -> lava teaser near the arena, using the
+   existing `Mat_*_1k` materials and rock meshes.
+5. Second enemy: Ancient Guardian mini-boss (scaled Monstr.glb, stone
+   material, slow slam + spinning laser that requires Roll).
+6. Main menu: 3D floating-island background with clouds, animated title,
+   working Settings (volume, sensitivity, invert Y).
+7. Done (prototype): Perfect Dodge — enemy hit lands in the first 0.3 s of
+   Roll -> slow-mo, Vabo flash, roll charge refund, red-charged fists (x2
+   damage, lethal-level hit stop, finisher knockback, 5 s lifetime).
+8. Cleanup: `UI/` vs `res://ui/` case mismatch, tracked `*.tmp`/`.blend1`
+   files, Level_01 dependency on `levels/test_level/enemy_spawner.tscn`.
+9. Ability reveal through Vabita's spirit instead of chest drops: a ghostly
+   low-poly variant of the player mesh with a glowing ghost shader,
+   particles, short memory line; also used at key story beats.
+10. Pause menu (resume, settings, restart from checkpoint, main menu) and a
+    richer main menu.
+11. Enemy AI bug pass and more interesting behaviour; animation polish for
+    the player and enemies; general balance tuning.
+
+### Save and Collectibles Rules (agreed 2026-10-28)
+
+- Autosave on entering key places through `AutosaveZone`; Memory Nodes stay
+  as manual heal + save points.
+- Hand-placed Vabo is collected once per level visit: it does not come back
+  after death, checkpoint reload, or Continue. It respawns when the level is
+  entered again from another level (hub revisit). Collected IDs follow the
+  same banking as Vabo: lost together if the player quits before a save.
+- Enemies, crates, and their drops respawn after death (farmable).
+- Abilities, opened chests, and cleared arenas are permanent.
+
 ### Progression and Hub
 
 - Spend Vabo through the Keeper of Memory.

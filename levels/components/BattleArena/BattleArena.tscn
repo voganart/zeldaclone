@@ -4,7 +4,7 @@
 [ext_resource type="Shader" uid="uid://km73ncd4kuqo" path="res://levels/components/BattleArena/battle_arena_wall.gdshader" id="2_umlgf"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_umlgf"]
-radius = 10.561544
+radius = 6.5
 
 [sub_resource type="Curve3D" id="Curve3D_4jhgk"]
 closed = true

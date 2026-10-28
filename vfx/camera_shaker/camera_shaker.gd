@@ -26,6 +26,7 @@ func _ready() -> void:
 				print("- ", prop.name)
 
 	add_to_group("camera_shaker")
+	GameEvents.camera_shake_requested.connect(func(strength: float, _duration: float): add_trauma(strength))
 	print("DEBUG: CameraShaker инициализирован и добавлен в группу.")
 
 func _process(delta: float) -> void:
@@ -35,7 +36,6 @@ func _process(delta: float) -> void:
 	_apply_shake_to_pcam()
 
 func add_trauma(amount: float) -> void:
-	print("DEBUG: add_trauma вызван! Было: ", trauma, " Стало: ", trauma + amount)
 	trauma = clamp(trauma + amount, 0.0, 1.0)
 
 func _apply_shake_to_pcam() -> void:

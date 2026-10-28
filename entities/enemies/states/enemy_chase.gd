@@ -13,7 +13,7 @@ func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.max_speed = enemy.run_speed
 	unreachable_timer = 0.0
-	MusicBrain.set_combat_state(true)
+	enemy.set_combat_music(true)
 	enemy.set_move_mode("chase")
 
 	# --- ОПТИМИЗАЦИЯ: Немедленное обновление пути при входе в состояние ---
@@ -77,5 +77,4 @@ func physics_update(delta: float) -> void:
 	enemy.update_movement_animation(delta)
 
 func exit() -> void:
-	MusicBrain.set_combat_state(false)
 	# При выходе можно не сбрасывать, следующий стейт (Patrol или CombatStance) сам поставит нужный режим.

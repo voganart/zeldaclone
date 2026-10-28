@@ -69,7 +69,7 @@ func resolve_player_spawn_transform() -> Transform3D:
 		for node: Node in get_tree().get_nodes_in_group("memory_nodes"):
 			if (
 				is_ancestor_of(node)
-				and node is MemoryNode
+				and (node is MemoryNode or node is AutosaveZone)
 				and String(node.checkpoint_id) == checkpoint_id
 			):
 				return node.get_spawn_transform()

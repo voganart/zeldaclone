@@ -41,7 +41,10 @@ func _process(delta: float) -> void:
 				step_timer += delta
 				if step_timer > 1.5:
 					_complete_step()
-					_start_camera_toggle_step()
+					if GameConstants.CAMERA_TOGGLE_ENABLED:
+						_start_camera_toggle_step()
+					else:
+						_start_camera_look_step()
 
 		# 2. СМЕНА КАМЕРЫ (F4 / Select)
 		Step.CAMERA_TOGGLE:

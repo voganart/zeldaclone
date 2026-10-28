@@ -10,6 +10,7 @@ var enemy: Enemy
 func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.max_speed = enemy.walk_speed
+	enemy.set_combat_music(false)
 	time_stuck = 0.0
 	_set_random_patrol_target()
 	

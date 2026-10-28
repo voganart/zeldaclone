@@ -27,6 +27,8 @@ tutorial_roll_prompt,"Roll to pass under","Кувырок чтобы проле�
 ui_toggle_camera,"Camera Mode","Режим камеры"
 ui_continue,"Continue","Продолжить"
 save_memory_anchored,"Memory anchored","Память закреплена"
+save_autosaved,"Progress saved","Прогресс сохранён"
+level_demo_complete,"Demo complete. Thanks for playing!","Демо пройдено. Спасибо за игру!"
 save_data_invalid,"Save data was reset","Данные сохранения были сброшены"
 ui_vabo,"Vabo","Вабо"
 debug_panel_title,"Debug Tools","Инструменты отладки"

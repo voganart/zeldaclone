@@ -35,12 +35,12 @@ func _ready() -> void:
 	print("CameraInput: Saved SpringArm Mask = ", active_spring_arm_mask)
 
 	# 3. Старт
-	set_camera_mode(true) 
+	set_camera_mode(GameConstants.CAMERA_TOGGLE_ENABLED)
 
 func _input(event: InputEvent) -> void:
 	if DebugTools.is_gameplay_input_blocked():
 		return
-	if event.is_action_pressed(GameConstants.INPUT_TOGGLE_CAMERA):
+	if GameConstants.CAMERA_TOGGLE_ENABLED and event.is_action_pressed(GameConstants.INPUT_TOGGLE_CAMERA):
 		set_camera_mode(!is_camera_locked)
 		return
 

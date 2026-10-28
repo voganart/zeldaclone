@@ -242,6 +242,13 @@ func _apply_hit(body: Node3D, is_prop: bool) -> void:
 	
 	if body.has_method("take_damage"):
 		var is_finisher = (current_attack_damage > 1.5) 
+		var damage := current_attack_damage
+		var empowered := false
+		if not is_prop and faction == Faction.PLAYER and actor.has_method("consume_perfect_charge"):
+			empowered = actor.call("consume_perfect_charge")
+			if empowered:
+				damage *= float(actor.get("perfect_charge_damage_multiplier"))
+				is_finisher = true
 		
 		var knockback_vec = Vector3.ZERO
 		if current_attack_knockback_enabled:
@@ -255,10 +262,10 @@ func _apply_hit(body: Node3D, is_prop: bool) -> void:
 
 			var is_lethal = false
 			if target_hp_comp:
-				is_lethal = (target_hp_comp.current_health - current_attack_damage) <= 0
+				is_lethal = (target_hp_comp.current_health - damage) <= 0
 			
 			if faction == Faction.PLAYER:
-				if is_lethal:
+				if is_lethal or empowered:
 					GameManager.hit_stop_smooth(hs_lethal_time_scale, hs_lethal_duration, 0.0, 0.1) 
 					GameEvents.camera_shake_requested.emit(0.6, 0.2)
 				elif is_finisher:
@@ -273,7 +280,10 @@ func _apply_hit(body: Node3D, is_prop: bool) -> void:
 			GameManager.hit_stop_smooth(hs_prop_time_scale, hs_prop_duration, 0.0, 0.0) 
 			GameEvents.camera_shake_requested.emit(0.1, 0.05)
 		
-		body.take_damage(current_attack_damage, knockback_vec, is_finisher)
+		if empowered:
+			knockback_vec = dir * kb_strength_finisher
+			knockback_vec.y = kb_height_finisher
+		body.take_damage(damage, knockback_vec, is_finisher)
 		
 		if self_recoil_strength > 0:
 			actor.velocity -= dir * self_recoil_strength

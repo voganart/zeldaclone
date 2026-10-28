@@ -3,6 +3,7 @@
 ## Быстрый старт
 
 - Главный handoff для нового чата: `.codex/HANDOFF.md`
+- Дизайн-документ игры (лор, сюжет, уровни, vertical slice): `docs/design/GDD.md`
 - Конфигурация: `project.godot`
 - Главная сцена: `res://ui/menus/main_menu.tscn`
 - Основной игровой уровень: `res://levels/Level_01.tscn`

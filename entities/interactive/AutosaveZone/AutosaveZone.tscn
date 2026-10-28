@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://entities/interactive/AutosaveZone/autosave_zone.gd" id="1_autosave"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_autosave"]
+size = Vector3(6, 4, 6)
+
+[node name="AutosaveZone" type="Area3D"]
+monitorable = false
+script = ExtResource("1_autosave")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("BoxShape3D_autosave")
+
+[node name="SpawnPoint" type="Marker3D" parent="."]

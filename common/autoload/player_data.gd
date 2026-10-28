@@ -13,6 +13,7 @@ var current_vabo: int = 0
 var max_health: float = DEFAULT_MAX_HEALTH
 var abilities: Dictionary = DEFAULT_ABILITIES.duplicate(true)
 var completed_persistent_ids: Array[String] = []
+var collected_pickup_ids: Array[String] = []
 var current_level_path: String = ""
 var active_checkpoint_id: String = ""
 
@@ -45,6 +46,7 @@ func reset_progress() -> void:
 	max_health = DEFAULT_MAX_HEALTH
 	abilities = DEFAULT_ABILITIES.duplicate(true)
 	completed_persistent_ids.clear()
+	collected_pickup_ids.clear()
 	current_level_path = ""
 	active_checkpoint_id = ""
 	vabo_changed.emit(current_vabo)
@@ -86,12 +88,29 @@ func is_persistent_id_complete(id: StringName) -> bool:
 	return completed_persistent_ids.has(String(id))
 
 
+# Подобранные на уровне предметы возвращаются только при новом заходе
+# на уровень из другого уровня (не после смерти и не после Continue).
+func begin_level_visit(level_path: String) -> void:
+	if level_path != current_level_path:
+		collected_pickup_ids.clear()
+
+
+func mark_pickup_collected(id: String) -> void:
+	if not id.is_empty() and not collected_pickup_ids.has(id):
+		collected_pickup_ids.append(id)
+
+
+func is_pickup_collected(id: String) -> bool:
+	return collected_pickup_ids.has(id)
+
+
 func create_snapshot() -> Dictionary:
 	return {
 		"current_vabo": current_vabo,
 		"max_health": max_health,
 		"abilities": abilities.duplicate(true),
 		"completed_persistent_ids": completed_persistent_ids.duplicate(),
+		"collected_pickup_ids": collected_pickup_ids.duplicate(),
 		"current_level_path": current_level_path,
 		"active_checkpoint_id": active_checkpoint_id,
 	}
@@ -118,6 +137,12 @@ func apply_snapshot(snapshot: Dictionary) -> void:
 			var id := String(value)
 			if not id.is_empty() and not completed_persistent_ids.has(id):
 				completed_persistent_ids.append(id)
+
+	collected_pickup_ids.clear()
+	var saved_pickups: Variant = snapshot.get("collected_pickup_ids", [])
+	if saved_pickups is Array:
+		for value: Variant in saved_pickups:
+			mark_pickup_collected(String(value))
 
 	current_level_path = String(snapshot.get("current_level_path", ""))
 	active_checkpoint_id = String(snapshot.get("active_checkpoint_id", ""))

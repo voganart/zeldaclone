@@ -18,6 +18,15 @@ extends CharacterBody3D
 @export var help_radius: float = 15.0 
 @export var fallback_patrol_radius: float = 5.0
 
+@export_group("Elite")
+@export_range(0.0, 1.0) var elite_chance: float = 0.15
+@export var elite_health_multiplier: float = 2.0
+@export var elite_speed_multiplier: float = 1.15
+@export var elite_cooldown_multiplier: float = 0.7
+@export var elite_scale: float = 1.2
+@export var elite_vabo_drop: int = 3
+@export var elite_color: Color = Color(1.0, 0.3, 0.1)
+
 @export_group("Navigation Avoidance")
 @export var enable_avoidance: bool = true 
 @export var agent_radius: float = 0.6 
@@ -88,6 +97,8 @@ var vfx_pull: Node3D
 # SHARED DATA
 # ============================================================================
 var last_known_player_pos: Vector3 = Vector3.ZERO
+var is_elite: bool = false
+var _in_combat_music: bool = false
 var patrol_origin: Vector3 = Vector3.ZERO
 var frustrated_cooldown: float = 0.0
 var hurt_lock_timer: float = 0.0
@@ -131,6 +142,9 @@ func _ready() -> void:
 	
 	state_machine.init(self)
 	
+	if randf() < elite_chance:
+		_make_elite()
+	
 	GraphicsManager.quality_changed.connect(_on_quality_changed)
 	
 	await get_tree().process_frame
@@ -161,6 +175,7 @@ func _on_quality_changed(settings: Dictionary):
 	print("Enemy %s: Physics LODs updated." % name)
 
 func _exit_tree() -> void:
+	set_combat_music(false)
 	AIDirector.unregister_enemy(self)
 
 func _physics_process(delta: float) -> void:
@@ -487,7 +502,7 @@ func _on_died() -> void:
 func _finalize_death() -> void:
 	pending_death = false
 	AIDirector.return_attack_token(self)
-	MusicBrain.set_combat_state(false)
+	set_combat_music(false)
 	emit_signal("died")
 	if health_bar: health_bar.visible = false
 	if combat_component: combat_component._stop_hitbox_monitoring()
@@ -496,12 +511,13 @@ func _finalize_death() -> void:
 	# Спавним Вабо (индекс 1)
 	# Шанс дропа 100% для теста, потом можно сделать рандом
 	if ItemPool.has_method("spawn_item"):
-		var pickup = ItemPool.spawn_item(1, global_position + Vector3(0, 0.5, 0))
-		
-		# Делаем красивый вылет (если предмет заспавнился)
-		if pickup:
-			var rng_dir = Vector3(randf_range(-1, 1), 5.0, randf_range(-1, 1)).normalized()
-			pickup.apply_impulse(rng_dir * 5.0)
+		for i in (elite_vabo_drop if is_elite else 1):
+			var pickup = ItemPool.spawn_item(1, global_position + Vector3(0, 0.5, 0))
+			
+			# Делаем красивый вылет (если предмет заспавнился)
+			if pickup:
+				var rng_dir = Vector3(randf_range(-1, 1), 5.0, randf_range(-1, 1)).normalized()
+				pickup.apply_impulse(rng_dir * 5.0)
 	# -------------------------
 	
 	state_machine.change_state(GameConstants.STATE_DEAD)
@@ -587,3 +603,29 @@ func activate_ragdoll(force_vector: Vector3) -> void:
 				first_bone.apply_central_impulse(force_vector * 30.0)
 	else:
 		printerr("ERROR: PhysicalBoneSimulator3D не найден! Проверь путь в скрипте!")
+
+
+# Элита: заряжена Ткакамчей — крупнее, крепче, быстрее, щедрее на Вабо.
+func _make_elite() -> void:
+	is_elite = true
+	$Monstr.scale *= elite_scale
+	health_component.max_health *= elite_health_multiplier
+	health_component.current_health = health_component.max_health
+	movement_component.run_speed *= elite_speed_multiplier
+	movement_component.walk_speed *= elite_speed_multiplier
+	attack_component.attack_cooldown *= elite_cooldown_multiplier
+	var glow := OmniLight3D.new()
+	glow.light_color = elite_color
+	glow.light_energy = 2.0
+	glow.omni_range = 3.0
+	glow.position = Vector3(0, 1.2, 0)
+	add_child(glow)
+
+
+# Каждый враг добавляет/убирает себя из боевой музыки ровно один раз.
+func set_combat_music(value: bool) -> void:
+	if _in_combat_music == value:
+		return
+	_in_combat_music = value
+	MusicBrain.set_combat_state(value)
+

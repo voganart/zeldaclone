@@ -2,6 +2,8 @@ extends State
 
 var player: Player
 var prev_velocity_y: float = 0.0
+var coyote_time: float = 0.12
+var _coyote_timer: float = 0.0
 
 func enter() -> void:
 	player = entity as Player
@@ -15,9 +17,13 @@ func enter() -> void:
 		player.set_jump_state("Start")
 	else:
 		player.set_jump_state("Mid")
+	
+	_coyote_timer = coyote_time if player.current_jump_count == 0 else 0.0
 
 func physics_update(delta: float) -> void:
 	player.apply_gravity(delta)
+	if _coyote_timer > 0.0:
+		_coyote_timer -= delta
 	
 	# Обновление фаз анимации прыжка (Start -> Mid)
 	if player.velocity.y < 0 and prev_velocity_y >= 0:
@@ -41,7 +47,14 @@ func physics_update(delta: float) -> void:
 	# Двойной прыжок
 	if player.input_handler.check_jump():
 		var can_jump = false
-		if player.current_jump_count > 0 and player.current_jump_count < 2:
+		if player.current_jump_count == 0:
+			if _coyote_timer > 0.0:
+				can_jump = true
+			elif player.movement_component.max_jump_count >= 2:
+				# Сорвался с уступа: остаётся только второй прыжок
+				player.current_jump_count = 1
+				can_jump = true
+		elif player.current_jump_count > 0 and player.current_jump_count < 2:
 			can_jump = true
 		elif player.current_jump_count == 2 and player.air_dash_ability.bonus_jump_granted:
 			can_jump = true

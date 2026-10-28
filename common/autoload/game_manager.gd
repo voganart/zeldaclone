@@ -37,7 +37,8 @@ func hit_stop_smooth(target_scale: float, duration_hold: float, fade_in_time: fl
 	if active_tween and active_tween.is_valid():
 		active_tween.kill()
 	
-	active_tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_IDLE)
+	# Длительности hit stop — в реальных секундах, независимо от замедления
+	active_tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_IDLE).set_ignore_time_scale(true)
 	
 	# 1. Замедление (Fade In)
 	# Замедляем относительно ТЕКУЩЕЙ базы. 

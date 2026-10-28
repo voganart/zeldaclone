@@ -32,7 +32,8 @@ const STATE_CHASE = "chase"
 const STATE_FRUSTRATED = "frustrated"
 const STATE_DEAD = "dead"
 const STATE_COMBAT_STANCE = "combatstance"
-const INPUT_TOGGLE_CAMERA = "toggle_camera" 
+const INPUT_TOGGLE_CAMERA = "toggle_camera"
+const CAMERA_TOGGLE_ENABLED = false
 const INPUT_DEBUG_FLIGHT_TOGGLE = "debug_flight_toggle"
 const INPUT_DEBUG_PANEL_TOGGLE = "debug_panel_toggle"
 # --- АНИМАЦИИ (Resource Names) ---

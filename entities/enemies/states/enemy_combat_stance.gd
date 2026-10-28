@@ -23,7 +23,7 @@ func enter() -> void:
 	# Это даст время анимации плавно перейти из Бега в Стойку.
 	attack_delay_timer = initial_attack_delay
 	
-	MusicBrain.set_combat_state(true)
+	enemy.set_combat_music(true)
 	enemy.set_move_mode("strafe")
 
 func physics_update(delta: float) -> void:
@@ -62,12 +62,16 @@ func _handle_strafing(delta: float) -> void:
 	var move_dir = right_vector * strafe_dir
 	
 	var optimal_dist = enemy.attack_component.attack_range * 0.8
+	var approach_weight = 0.5
+	if enemy.attack_component.is_attack_ready():
+		optimal_dist = enemy.attack_component.attack_range * 0.6
+		approach_weight = 1.2
 	var current_dist = enemy.global_position.distance_to(enemy.player.global_position)
 	
 	if current_dist < optimal_dist - 0.5:
 		move_dir -= dir_to_player * 0.5
 	elif current_dist > optimal_dist + 0.5:
-		move_dir += dir_to_player * 0.5
+		move_dir += dir_to_player * approach_weight
 		
 	enemy.nav_agent.set_velocity(move_dir * strafe_speed)
 	
@@ -75,5 +79,4 @@ func _handle_strafing(delta: float) -> void:
 	enemy.update_movement_animation(delta)
 
 func exit() -> void:
-	MusicBrain.set_combat_state(false)
 	enemy.set_move_mode("normal")

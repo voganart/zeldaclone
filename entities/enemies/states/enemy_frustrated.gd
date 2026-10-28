@@ -1,7 +1,10 @@
 extends State
 
 @export var frustration_duration: float = 4.0
+@export var min_frustrated_time: float = 1.0
+@export var reach_check_interval: float = 0.5
 var timer: float = 0.0
+var _recheck_timer: float = 0.0
 var target_pos: Vector3
 var enemy: Enemy
 
@@ -12,6 +15,8 @@ func enter() -> void:
 	
 	if is_instance_valid(enemy.player):
 		target_pos = enemy.player.global_position
+		enemy.nav_agent.target_position = target_pos
+	_recheck_timer = reach_check_interval
 	
 	# 1. Переключаем состояние дерева
 	enemy.set_tree_state("angry")
@@ -31,11 +36,14 @@ func physics_update(delta: float) -> void:
 	timer -= delta
 	enemy.handle_rotation(delta, target_pos, 3.0)
 
-	if is_instance_valid(enemy.player):
-		enemy.nav_agent.target_position = enemy.player.global_position
-		if enemy.nav_agent.is_target_reachable():
+	_recheck_timer -= delta
+	if _recheck_timer <= 0 and is_instance_valid(enemy.player):
+		_recheck_timer = reach_check_interval
+		# Путь к цели, заданной на прошлой проверке, уже посчитан навигацией
+		if frustration_duration - timer >= min_frustrated_time and enemy.nav_agent.is_target_reachable():
 			transitioned.emit(self, GameConstants.STATE_CHASE)
 			return
+		enemy.nav_agent.target_position = enemy.player.global_position
 
 	if timer <= 0:
 		_give_up()
@@ -45,7 +53,7 @@ func _give_up():
 	# Теперь враг просто сбрасывает агрессию, а лечиться будет в Patrol
 	
 	enemy.frustrated_cooldown = 10.0
-	MusicBrain.set_combat_state(false)
+	enemy.set_combat_music(false)
 	transitioned.emit(self, GameConstants.STATE_PATROL)
 
 func exit() -> void:

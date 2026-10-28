@@ -322,6 +322,7 @@ collision_mask = 476
 floor_constant_speed = true
 safe_margin = 0.05
 script = ExtResource("1_1hmtu")
+rm_run_anim_speed = 1.45
 safe_ground_margin = 2.0
 enable_idle_dance = false
 idle_dance_time = 3.0
@@ -338,23 +339,23 @@ script = ExtResource("4_yqrof")
 [node name="AirDashAbility" type="Node" parent="Abilities" unique_id=617886632]
 script = ExtResource("6_qiwj3")
 air_dash_speed = 10.0
-air_dash_distance = 2.5
-air_dash_cooldown = 3.0
+air_dash_distance = 3.5
+air_dash_cooldown = 1.5
 
 [node name="GroundSlamAbility" type="Node" parent="Abilities" unique_id=1144292838]
 script = ExtResource("7_26q78")
 slam_descent_speed = 50.0
-slam_cooldown = 5.0
+slam_cooldown = 3.5
 slam_windup_delay = 0.2
 slam_acceleration = 150.0
-hs_time_scale = 0.4
-hs_duration = 0.01
+hs_time_scale = 0.05
+hs_duration = 0.09
 
 [node name="RollAbility" type="Node" parent="Abilities" unique_id=1271733319]
 script = ExtResource("6_2soq1")
 roll_jump_cancel_threshold = 0.6
-roll_cooldown = 2.0
-roll_recharge_time = 4.0
+roll_cooldown = 1.2
+roll_recharge_time = 3.0
 
 [node name="Components" type="Node" parent="." unique_id=964891447]
 
@@ -365,7 +366,7 @@ anim_tree = NodePath("../../character/AnimationTree")
 [node name="MovementComponent" type="Node" parent="Components" unique_id=920347765]
 script = ExtResource("7_bwdx1")
 rotation_speed = 5.0
-acceleration = 5.0
+acceleration = 14.0
 air_acceleration = 10.0
 air_friction = 15.0
 push_force = 500.0
@@ -377,21 +378,22 @@ second_jump_multiplier = 1.4
 
 [node name="CombatComponent" type="Node" parent="Components" unique_id=1322485517 node_paths=PackedStringArray("punch_hand_r", "punch_hand_l", "attack_area")]
 script = ExtResource("8_vewsg")
+combo_cooldown_after_combo = 0.3
 self_recoil_strength = 2.5
 primary_attack_speed = 0.6
-attack_cooldown = 0.35
-combo_window_time = 0.5
+attack_cooldown = 0.22
+combo_window_time = 0.6
 attack_roll_cancel_threshold = 0.5
 kb_strength_finisher = 8.0
 kb_height_finisher = 4.0
-hs_prop_time_scale = 0.5
-hs_prop_duration = 0.01
-hs_normal_time_scale = 0.4
-hs_normal_duration = 0.01
-hs_finisher_time_scale = 0.3
-hs_finisher_duration = 0.01
-hs_lethal_time_scale = 0.2
-hs_lethal_duration = 0.02
+hs_prop_time_scale = 0.2
+hs_prop_duration = 0.02
+hs_normal_time_scale = 0.05
+hs_normal_duration = 0.045
+hs_finisher_time_scale = 0.03
+hs_finisher_duration = 0.08
+hs_lethal_time_scale = 0.02
+hs_lethal_duration = 0.13
 punch_hand_r = NodePath("../../character/HitboxesContainer/punch_hand_r")
 punch_hand_l = NodePath("../../character/HitboxesContainer/punch_hand_l")
 attack_area = NodePath("../../FirstAttackArea")
