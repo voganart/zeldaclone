@@ -24,7 +24,7 @@ var is_cleared: bool = false
 var current_wave: int = 0
 
 @onready var barriers = $Barriers
-@onready var dressing: ArenaDressing = get_node_or_null("Dressing")
+@onready var dressing: Node3D = get_node_or_null("Dressing")
 @onready var spawn_positions = $SpawnPositions.get_children()
 
 func _ready():
