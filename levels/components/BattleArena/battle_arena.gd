@@ -10,6 +10,7 @@ signal cleared
 @export_group("Waves")
 @export var waves: Array[int] = [] # Количество врагов в каждой волне
 @export var wave_delay: float = 1.5
+@export var wave_enemy_scenes: Array[PackedScene] = [] # Враг для каждой волны (иначе enemy_scene_to_spawn)
 
 @export_group("Reward")
 @export var reward_node: Node3D # Скрыт до победы (например, сундук)
@@ -23,6 +24,7 @@ var is_cleared: bool = false
 var current_wave: int = 0
 
 @onready var barriers = $Barriers
+@onready var dressing: ArenaDressing = get_node_or_null("Dressing")
 @onready var spawn_positions = $SpawnPositions.get_children()
 
 func _ready():
@@ -49,6 +51,7 @@ func start_battle():
 	# Включаем барьеры
 	if barriers: barriers.visible = true
 	_set_barriers_collision(true)
+	if dressing: dressing.set_active(true)
 
 	_start_wave(0)
 
@@ -68,6 +71,7 @@ func _try_spawn_next():
 	while active_enemies < max_active_enemies and enemies_spawned_total < _get_wave_size():
 		_spawn_one_enemy()
 		await get_tree().create_timer(0.5).timeout # Небольшая пауза между спавнами
+		if not is_inside_tree(): return
 
 func _spawn_one_enemy():
 	if not portal_scene: return
@@ -81,6 +85,8 @@ func _spawn_one_enemy():
 	# Создаем ПОРТАЛ
 	var portal = portal_scene.instantiate()
 	portal.enemy_scene = enemy_scene_to_spawn
+	if current_wave < wave_enemy_scenes.size() and wave_enemy_scenes[current_wave]:
+		portal.enemy_scene = wave_enemy_scenes[current_wave]
 	add_child(portal)
 	portal.global_position = pos_node.global_position
 
@@ -103,6 +109,7 @@ func _on_enemy_died():
 		_try_spawn_next()
 	elif current_wave + 1 < waves.size():
 		await get_tree().create_timer(wave_delay).timeout
+		if not is_inside_tree(): return
 		_start_wave(current_wave + 1)
 	else:
 		end_battle()
@@ -115,6 +122,7 @@ func end_battle():
 	# Убираем барьеры
 	if barriers: barriers.visible = false
 	_set_barriers_collision(false)
+	if dressing: dressing.set_active(false)
 
 	_set_reward_visible(true)
 	if not persistent_id.is_empty():

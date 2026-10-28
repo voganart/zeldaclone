@@ -26,6 +26,7 @@ tutorial_attack_prompt,"Break the obstacle","Разбейте препятств
 tutorial_roll_prompt,"Roll to pass under","Кувырок чтобы пролезть"
 ui_toggle_camera,"Camera Mode","Режим камеры"
 ui_continue,"Continue","Продолжить"
+ui_new_game_confirm,"Erase progress?","Стереть прогресс?"
 save_memory_anchored,"Memory anchored","Память закреплена"
 save_autosaved,"Progress saved","Прогресс сохранён"
 level_demo_complete,"Demo complete. Thanks for playing!","Демо пройдено. Спасибо за игру!"

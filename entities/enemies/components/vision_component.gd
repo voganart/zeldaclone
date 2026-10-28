@@ -97,11 +97,19 @@ func _check_vision_logic(target: Node3D) -> bool:
 	var target_pos = target.global_position + Vector3(0, player_height_offset, 0)
 	
 	var query = PhysicsRayQueryParameters3D.create(origin_pos, target_pos)
-	query.exclude = [self, actor]
+	var excluded: Array[RID] = [actor.get_rid()]
 	
-	var result = space_state.intersect_ray(query)
-	if result: return result.collider == target
-	
+	# Ящики, лут и другие враги не закрывают обзор — пропускаем их
+	for i in 4:
+		query.exclude = excluded
+		var result = space_state.intersect_ray(query)
+		if not result: return false
+		var collider = result.collider
+		if collider == target: return true
+		if collider is RigidBody3D or (collider is Node and collider.is_in_group(GameConstants.GROUP_ENEMIES)):
+			excluded.append(result.rid)
+			continue
+		return false
 	return false
 
 # --- ДЕБАГ ВИЗУАЛИЗАЦИЯ ---

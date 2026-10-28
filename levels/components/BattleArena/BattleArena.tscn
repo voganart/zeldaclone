@@ -1,7 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://vklbwyebk8e6"]
+[gd_scene load_steps=13 format=3 uid="uid://vklbwyebk8e6"]
 
 [ext_resource type="Script" uid="uid://dk12hsfbh7e6y" path="res://levels/components/BattleArena/battle_arena.gd" id="1_umlgf"]
 [ext_resource type="Shader" uid="uid://km73ncd4kuqo" path="res://levels/components/BattleArena/battle_arena_wall.gdshader" id="2_umlgf"]
+[ext_resource type="Script" path="res://levels/components/BattleArena/arena_dressing.gd" id="10_dress"]
+[ext_resource type="Mesh" path="res://assets/models/environment/rocks-meshes/rocks_Cube_002.res" id="11_rock"]
+[ext_resource type="Mesh" path="res://assets/models/environment/rocks-meshes/rocks_Cube_005.res" id="12_rock"]
+[ext_resource type="Mesh" path="res://assets/models/environment/rocks-meshes/rocks_Cube_010.res" id="13_rock"]
+[ext_resource type="Material" path="res://assets/_master/Master_mat_rocks.tres" id="14_rockmat"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_umlgf"]
 radius = 6.5
@@ -68,6 +73,11 @@ path_continuous_u = true
 path_u_distance = 1.0
 path_joined = false
 material = SubResource("ShaderMaterial_4jhgk")
+
+[node name="Dressing" type="Node3D" parent="."]
+script = ExtResource("10_dress")
+pillar_meshes = Array[Mesh]([ExtResource("11_rock"), ExtResource("12_rock"), ExtResource("13_rock")])
+pillar_material = ExtResource("14_rockmat")
 
 [node name="SpawnPositions" type="Node3D" parent="."]
 

@@ -42,6 +42,7 @@ func start() -> void:
 		tween.tween_property(stone, "position", _rest_positions[i], rise_time)\
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		await get_tree().create_timer(rise_interval).timeout
+		if not is_inside_tree(): return
 
 
 func _rumble() -> void:
@@ -49,6 +50,7 @@ func _rumble() -> void:
 	while elapsed < rumble_duration:
 		get_tree().call_group("camera_shaker", "add_trauma", rumble_strength * 0.3)
 		await get_tree().create_timer(0.2).timeout
+		if not is_inside_tree(): return
 		elapsed += 0.2
 
 

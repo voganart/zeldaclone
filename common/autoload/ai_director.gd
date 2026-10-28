@@ -133,7 +133,6 @@ func request_attack_token(enemy: Enemy) -> bool:
 	if current_attackers.size() < MAX_ATTACKERS:
 		current_attackers.append(enemy)
 		next_attack_time_msec = time_now + int(ATTACK_HANDOFF_DELAY * 1000.0)
-		print("[AI] Token GRANTED: ", enemy.name)
 		return true
 		
 	return false
@@ -142,4 +141,3 @@ func return_attack_token(enemy: Enemy) -> void:
 	if enemy in current_attackers:
 		current_attackers.erase(enemy)
 		next_attack_time_msec = Time.get_ticks_msec() + int(ATTACK_HANDOFF_DELAY * 1000.0)
-		print("[AI] Token RETURNED: ", enemy.name)

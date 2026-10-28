@@ -78,3 +78,4 @@ func physics_update(delta: float) -> void:
 
 func exit() -> void:
 	# При выходе можно не сбрасывать, следующий стейт (Patrol или CombatStance) сам поставит нужный режим.
+	pass

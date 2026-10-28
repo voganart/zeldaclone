@@ -56,6 +56,10 @@ func continue_or_start_game() -> void:
 	SaveManager.start_new_game()
 	change_scene_with_loading(LEVEL_1_PATH)
 
+func start_new_game() -> void:
+	SaveManager.start_new_game()
+	change_scene_with_loading(LEVEL_1_PATH)
+
 func _process(_delta):
 	if not _loading: return
 	

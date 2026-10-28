@@ -49,6 +49,7 @@
 [ext_resource type="PackedScene" path="res://entities/interactive/AutosaveZone/AutosaveZone.tscn" id="50_autosave"]
 [ext_resource type="Script" uid="uid://buucw8jystxgc" path="res://levels/components/CollapseRun/collapse_run.gd" id="51_collapse"]
 [ext_resource type="PackedScene" path="res://entities/interactive/LevelExit/LevelExit.tscn" id="52_exit"]
+[ext_resource type="PackedScene" path="res://entities/enemies/enemy_weak.tscn" id="53_weak"]
 
 [sub_resource type="Gradient" id="Gradient_c0er0"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)
@@ -1582,6 +1583,7 @@ transform = Transform3D(0.7858715, 0, 0.14968556, 0, 0.8000001, 0, -0.14968556, 
 transform = Transform3D(0.95930237, 0, 0.2823823, 0, 1, 0, -0.2823823, 0, 0.95930237, 0.5958023, 3.8146973e-06, 0.64356995)
 enemy_scene_to_spawn = ExtResource("43_r8j8t")
 portal_scene = ExtResource("44_ykjdn")
+wave_enemy_scenes = Array[PackedScene]([ExtResource("53_weak"), ExtResource("53_weak"), ExtResource("43_r8j8t")])
 waves = Array[int]([2, 3, 4])
 reward_node = NodePath("../../../../Chests/Chest7")
 persistent_id = &"level_01_arena"
@@ -1605,16 +1607,16 @@ preview_progress = 0.735
 
 [node name="Enemies" type="Node3D" parent="." unique_id=1655985895]
 
-[node name="Enemy_Zone02_A" parent="Enemies" unique_id=1353421049 instance=ExtResource("43_r8j8t")]
+[node name="Enemy_Zone02_A" parent="Enemies" unique_id=1353421049 instance=ExtResource("53_weak")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.5, -2.9, -3.5)
 
-[node name="Enemy_Zone02_B" parent="Enemies" unique_id=197563382 instance=ExtResource("43_r8j8t")]
+[node name="Enemy_Zone02_B" parent="Enemies" unique_id=197563382 instance=ExtResource("53_weak")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, -2.9, 0.5)
 
-[node name="Enemy_Zone03_A" parent="Enemies" unique_id=1341774771 instance=ExtResource("43_r8j8t")]
+[node name="Enemy_Zone03_A" parent="Enemies" unique_id=1341774771 instance=ExtResource("53_weak")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.35789, -2.9, -21.5)
 
-[node name="Enemy_Zone03_B" parent="Enemies" unique_id=1568188360 instance=ExtResource("43_r8j8t")]
+[node name="Enemy_Zone03_B" parent="Enemies" unique_id=1568188360 instance=ExtResource("53_weak")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.704285, -2.900001, -21.130867)
 
 [node name="Enemy_Zone04_A" parent="Enemies" unique_id=555561257 instance=ExtResource("43_r8j8t")]

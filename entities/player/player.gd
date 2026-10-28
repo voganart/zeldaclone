@@ -970,7 +970,9 @@ func _set_perfect_charge(value: bool) -> void:
 		pulse.tween_property(light, "light_energy", 3.0, 0.25)
 	var timer := get_tree().create_timer(perfect_charge_lifetime)
 	_charge_expire_timer = timer
-	timer.timeout.connect(func():
-		if _charge_expire_timer == timer:
-			_set_perfect_charge(false)
-	)
+	timer.timeout.connect(_on_perfect_charge_expired.bind(timer))
+
+
+func _on_perfect_charge_expired(timer: SceneTreeTimer) -> void:
+	if _charge_expire_timer == timer:
+		_set_perfect_charge(false)

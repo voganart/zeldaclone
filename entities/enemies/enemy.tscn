@@ -322,9 +322,10 @@ retreat_interrupt_range = 2.0
 
 [node name="VisionComponent" type="Node3D" parent="Components" unique_id=1500280612]
 script = ExtResource("7_56i32")
-sight_range = 11.0
+sight_range = 12.0
 lost_sight_range = 8.0
-proximity_detection_range = 4.0
+sight_angle = 160.0
+proximity_detection_range = 5.0
 scan_interval = 0.2
 
 [node name="StateMachine" type="Node" parent="." unique_id=1217199318 node_paths=PackedStringArray("initial_state")]

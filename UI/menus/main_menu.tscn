@@ -72,6 +72,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 26
 text = "ui_new_game"
 
+[node name="BtnStartOver" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox" unique_id=1816087198]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "ui_new_game"
+
 [node name="BtnSettings" type="Button" parent="UI_Layer/Margin/VBox/ButtonsVBox" unique_id=1074500772]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
