@@ -18,6 +18,13 @@ extends CharacterBody3D
 @export var help_radius: float = 15.0 
 @export var fallback_patrol_radius: float = 5.0
 
+@export_group("Attack Timing")
+## Время удара (сек) для анимаций без Call Method трека `_check_attack_hit`
+@export var fallback_attack_hit_times: Dictionary = {
+	"Monstr_attack_1": 0.55,
+	"Monstr_attack_2": 0.45,
+}
+
 @export_group("Elite")
 @export_range(0.0, 1.0) var elite_chance: float = 0.15
 @export var elite_health_multiplier: float = 2.0
@@ -176,6 +183,7 @@ func _on_quality_changed(settings: Dictionary):
 
 func _exit_tree() -> void:
 	set_combat_music(false)
+	AIDirector.release_slot(self)
 	AIDirector.unregister_enemy(self)
 
 func _physics_process(delta: float) -> void:
@@ -286,16 +294,6 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 	var target_vel = safe_velocity
 	target_vel.y = velocity.y
 	
-	var current_state = state_machine.current_state.name.to_lower()
-	
-	# Агрессивное преследование сквозь препятствия
-	if current_state == "chase":
-		if safe_velocity.length() < 0.5:
-			var next_pos = nav_agent.get_next_path_position()
-			var raw_dir = (next_pos - global_position).normalized()
-			raw_dir.y = 0
-			target_vel = raw_dir * (walk_speed * 0.8)
-			target_vel.y = velocity.y
 	
 	# ИСПОЛЬЗУЕМ ACCELERATION ИЗ КОМПОНЕНТА!
 	# Это обеспечивает плавный разгон и остановку согласно настройкам.
@@ -502,6 +500,7 @@ func _on_died() -> void:
 func _finalize_death() -> void:
 	pending_death = false
 	AIDirector.return_attack_token(self)
+	AIDirector.release_slot(self)
 	set_combat_music(false)
 	emit_signal("died")
 	if health_bar: health_bar.visible = false
@@ -629,3 +628,14 @@ func set_combat_music(value: bool) -> void:
 	_in_combat_music = value
 	MusicBrain.set_combat_state(value)
 
+
+
+# DEBUG: заморозка ИИ из панели F10
+func set_debug_frozen(frozen: bool) -> void:
+	state_machine.set_process(not frozen)
+	state_machine.set_physics_process(not frozen)
+	if frozen:
+		nav_agent.set_velocity(Vector3.ZERO)
+		velocity = Vector3.ZERO
+		AIDirector.return_attack_token(self)
+		AIDirector.release_slot(self)

@@ -39,6 +39,9 @@ func is_attack_ready() -> bool:
 
 func get_next_attack_animation() -> String:
 	last_attack_index = (last_attack_index + 1) % monster_attacks.size()
+	# Не повторяем один и тот же удар больше двух раз подряд, но иногда ломаем ритм
+	if monster_attacks.size() > 1 and randf() < 0.35:
+		last_attack_index = randi() % monster_attacks.size()
 	return monster_attacks[last_attack_index]
 
 # Вызывается из EnemyAttack State перед началом удара
@@ -73,7 +76,9 @@ func calculate_retreat_target(target: Node3D) -> Vector3:
 		
 	if is_instance_valid(target):
 		var retreat_dir = (actor.global_position - target.global_position).normalized()
-		tactical_retreat_target = actor.global_position + retreat_dir * tactical_retreat_distance
+		var wanted = actor.global_position + retreat_dir * tactical_retreat_distance
+		var map = actor.get_world_3d().navigation_map
+		tactical_retreat_target = NavigationServer3D.map_get_closest_point(map, wanted)
 	else:
 		tactical_retreat_target = actor.global_position
 	return tactical_retreat_target

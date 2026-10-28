@@ -75,7 +75,13 @@ func _perform_attack() -> void:
 	# 2. === АВТО-РАСЧЕТ ТАЙМИНГА ===
 	# Ищем, на какой секунде стоит вызов _check_attack_hit
 	var attack_speed = max(enemy.attack_component.attack_speed, 0.01)
-	hit_time = _get_hit_time_from_animation(anim_name_full) / attack_speed
+	var raw_hit_time = _get_hit_time_from_animation(anim_name_full)
+	var needs_scripted_hit = raw_hit_time < 0.0
+	if needs_scripted_hit:
+		raw_hit_time = enemy.fallback_attack_hit_times.get(anim_name_full, 0.5)
+	hit_time = raw_hit_time / attack_speed
+	if needs_scripted_hit:
+		_scripted_hit(hit_time)
 	active_end_time = hit_time + 0.1
 	direction_lock_time = max(hit_time - direction_lock_lead_time, 0.0)
 	
@@ -109,7 +115,7 @@ func _perform_attack() -> void:
 ## Функция-ищейка: находит время удара внутри анимации
 func _get_hit_time_from_animation(anim_name: String) -> float:
 	if not enemy.anim_player.has_animation(anim_name):
-		return 0.5 # Запасной вариант
+		return -1.0 # Анимации нет — удар по таблице врага
 		
 	var anim = enemy.anim_player.get_animation(anim_name)
 	
@@ -126,8 +132,8 @@ func _get_hit_time_from_animation(anim_name: String) -> float:
 			if key_data["method"] == "_check_attack_hit":
 				return anim.track_get_key_time(track_idx, key_idx)
 	
-	# Если ключа нет, возвращаем начало анимации (сразу предупреждаем)
-	return 0.0
+	# Ключа нет — удар нужно вызвать кодом (см. fallback_attack_hit_times)
+	return -1.0
 
 ## Асинхронный спавн иконки
 func _spawn_warning_icon(delay: float) -> void:
@@ -212,3 +218,9 @@ func _delayed_lunge(delay: float, impulse: float) -> void:
 		return
 	var forward = enemy.global_transform.basis.z.normalized()
 	enemy.receive_push(forward * impulse)
+
+func _scripted_hit(delay: float) -> void:
+	await get_tree().create_timer(delay).timeout
+	if state_machine.current_state != self or not is_instance_valid(enemy):
+		return
+	enemy._check_attack_hit()

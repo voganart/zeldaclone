@@ -130,3 +130,17 @@ before the next one.
 
 - Experimental distant-cloud streaming and impostor LOD remain on the
   `codex/cloud-lod` branch and are not part of the current roadmap.
+
+### Enemy AI and Tooling (2026-10-28)
+
+- Tier-1 enemy Gogo Runt: `tools/blender/gen_gogo_runt.py` -> `GogoRunt.glb`
+  (own mesh, 20-bone rig, 12 actions named like Monstr for the shared
+  AnimationTree), `entities/enemies/enemy_gogo_runt.tscn`. Hits scripted via
+  `Enemy.fallback_attack_hit_times` (glTF has no method tracks).
+- AI: slot ring around the player (AIDirector, rotating, flank-aware,
+  navmesh/wall-validated), CombatStance waits on its slot and engages only
+  with an attack token, chase loses track after 4 s, navmesh-projected
+  retreats, no wall ramming.
+- F10 panel: god mode, infinite HP/abilities, fly speed, time scale, enemy
+  spawn/kill/freeze, AI/nav/collision debug, checkpoints teleport, stats.
+  Hotkeys Alt+1..6. AI test arena: `levels/test_level/ai_test_arena.tscn`.

@@ -7,12 +7,17 @@ var unreachable_timer: float = 0.0
 # Как часто враг будет пересчитывать путь до игрока (в секундах)
 @export var path_update_interval: float = 0.15 
 var update_path_timer: float = 0.0
+@export var lose_track_time: float = 4.0 ## Сколько ищет игрока, потеряв его из виду
+var lost_sight_timer: float = 0.0
 # -----------------------------------------------
 
 func enter() -> void:
 	enemy = entity as Enemy
 	enemy.nav_agent.max_speed = enemy.run_speed
 	unreachable_timer = 0.0
+	lost_sight_timer = 0.0
+	if is_instance_valid(enemy.player):
+		enemy.last_known_player_pos = enemy.player.global_position
 	enemy.set_combat_music(true)
 	enemy.set_move_mode("chase")
 
@@ -41,11 +46,22 @@ func physics_update(delta: float) -> void:
 		transitioned.emit(self, GameConstants.STATE_PATROL)
 		return
 
+	# Видим игрока — идём к нему; потеряли — идём к последней известной точке и ищем
+	var dist_now = enemy.global_position.distance_to(enemy.player.global_position)
+	if dist_now <= enemy.vision_component.proximity_detection_range or enemy.vision_component.can_see_target(enemy.player):
+		lost_sight_timer = 0.0
+		enemy.last_known_player_pos = enemy.player.global_position
+	else:
+		lost_sight_timer += delta
+		if lost_sight_timer > lose_track_time:
+			transitioned.emit(self, GameConstants.STATE_PATROL)
+			return
+
 	# --- ОПТИМИЗАЦИЯ: Обновление пути по таймеру ---
 	update_path_timer -= delta
 	if update_path_timer <= 0.0:
 		update_path_timer = path_update_interval + randf_range(-0.05, 0.05) # Добавляем "дрожание"
-		enemy.nav_agent.target_position = enemy.player.global_position
+		enemy.nav_agent.target_position = enemy.last_known_player_pos
 	# -----------------------------------------------
 
 	if not enemy.nav_agent.is_target_reachable():
@@ -57,7 +73,7 @@ func physics_update(delta: float) -> void:
 		unreachable_timer = 0.0
 
 	var dist = enemy.global_position.distance_to(enemy.player.global_position)
-	if dist <= enemy.attack_component.attack_range + 0.5:
+	if dist <= AIDirector.SLOT_DISTANCE + 1.5:
 		transitioned.emit(self, GameConstants.STATE_COMBAT_STANCE)
 		return
 

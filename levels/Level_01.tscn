@@ -49,7 +49,7 @@
 [ext_resource type="PackedScene" path="res://entities/interactive/AutosaveZone/AutosaveZone.tscn" id="50_autosave"]
 [ext_resource type="Script" uid="uid://buucw8jystxgc" path="res://levels/components/CollapseRun/collapse_run.gd" id="51_collapse"]
 [ext_resource type="PackedScene" path="res://entities/interactive/LevelExit/LevelExit.tscn" id="52_exit"]
-[ext_resource type="PackedScene" path="res://entities/enemies/enemy_weak.tscn" id="53_weak"]
+[ext_resource type="PackedScene" path="res://entities/enemies/enemy_gogo_runt.tscn" id="53_weak"]
 
 [sub_resource type="Gradient" id="Gradient_c0er0"]
 offsets = PackedFloat32Array(0, 0.22, 0.26, 0.5, 0.74, 0.78, 1)

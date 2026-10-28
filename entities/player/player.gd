@@ -852,6 +852,10 @@ func take_damage(amount: float, knockback_force: Vector3, _is_heavy_attack: bool
 	if is_rolling and not silent:
 		_try_perfect_dodge()
 	if ground_slam_ability.is_slamming or is_invincible: return
+	# DEBUG HOOK (F10-панель): режим бога / HP не опускается ниже 1
+	if DebugTools.god_mode: return
+	if DebugTools.infinite_health and health_component:
+		amount = minf(amount, health_component.current_health - 1.0)
 	
 	if health_component: health_component.take_damage(amount)
 	
